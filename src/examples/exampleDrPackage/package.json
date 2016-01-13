@@ -1,0 +1,14 @@
+{
+  "name": "@dr/example-node",
+  "version": "1.0.1",
+  "description": "sample node package",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "jing.liu.fe@d.com",
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "^3.10.1"
+  }
+}

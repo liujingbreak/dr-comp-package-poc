@@ -1,0 +1,102 @@
+{
+	// JSCS settings for v4 apps
+	// ---------------------------
+	// The file in the Apps-server repository is the one used by the Grunt.
+	// However editors usually expect it to be in the root of a project, so there is a copy in each repo with apps.
+	// Do NOT edit these copies, instead edit the original file in Apps-server and copy it to ALL repositories.
+	"disallowEmptyBlocks": true,
+	"disallowKeywordsOnNewLine": [
+		"else"
+	],
+	"disallowMixedSpacesAndTabs": true,
+	"disallowMultipleLineStrings": true,
+	"disallowNewlineBeforeBlockStatements": true,
+	"disallowOperatorBeforeLineBreak": [
+		"."
+	],
+	"disallowPaddingNewlinesInBlocks": true,
+	"disallowQuotedKeysInObjects": "allButReserved",
+	"requireSpaceBeforeBinaryOperators": true,
+	"disallowSpaceAfterObjectKeys": true,
+	"disallowSpaceAfterPrefixUnaryOperators": true,
+	"disallowSpaceBeforePostfixUnaryOperators": [
+		"++",
+		"--"
+	],
+	"disallowSpacesInAnonymousFunctionExpression": {
+		"beforeOpeningRoundBrace": true
+	},
+	"disallowSpacesInCallExpression": true,
+	"disallowSpacesInFunctionDeclaration": {
+		"beforeOpeningRoundBrace": true
+	},
+	"disallowSpacesInFunctionExpression": {
+		"beforeOpeningRoundBrace": true
+	},
+	"disallowSpacesInNamedFunctionExpression": {
+		"beforeOpeningRoundBrace": true
+	},
+	"disallowSpacesInsideObjectBrackets": "all",
+	"disallowSpacesInsideArrayBrackets": "nested",
+	"disallowTrailingWhitespace": true,
+	"disallowYodaConditions": true,
+	"requireBlocksOnNewline": 1,
+	"requireCamelCaseOrUpperCaseIdentifiers": true,
+	"requireCapitalizedConstructors": true,
+	"requireCommaBeforeLineBreak": true,
+	"requireCurlyBraces": [
+		"if",
+		"else",
+		"for",
+		"while",
+		"do",
+		"try",
+		"catch"
+	],
+	"requireDotNotation": true,
+	"requireLineBreakAfterVariableAssignment": true,
+	"requireLineFeedAtFileEnd": true,
+	"disallowMultipleVarDecl": "exceptUndefined",
+	"requireOperatorBeforeLineBreak": [
+		"+",
+		"-",
+		"||",
+		"&&"
+	],
+	"requireSpaceAfterBinaryOperators": true,
+	"requireSpaceAfterKeywords": [
+		"do",
+		"for",
+		"if",
+		"else",
+		"switch",
+		"case",
+		"try",
+		"catch",
+		"void",
+		"while",
+		"with",
+		"return",
+		"typeof"
+	],
+	"requireSpaceBeforeKeywords": [
+		"else",
+		"while",
+		"catch"
+	],
+	"requireSpaceBeforeObjectValues": true,
+	"requireSpaceBetweenArguments": true,
+	"requireSpacesInConditionalExpression": true,
+	"requireSpacesInFunctionDeclaration": {
+		"beforeOpeningCurlyBrace": true
+	},
+	"requireSpacesInFunctionExpression": {
+		"beforeOpeningCurlyBrace": true
+	},
+	"requireSpacesInNamedFunctionExpression": {
+		"beforeOpeningCurlyBrace": true
+	},
+	"validateIndentation": "\t",
+	"validateParameterSeparator": ", ",
+	"validateQuoteMarks": "'"
+}

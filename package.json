@@ -1,0 +1,43 @@
+{
+  "name": "package-home-poc",
+  "version": "1.0.1",
+  "description": "This is a PoC for company's frontend platform",
+  "main": "app.js",
+  "scripts": {
+    "start": "node lib/packageMgr",
+    "check": "gulp js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liujingbreak/dr-package-home-PoC.git"
+  },
+  "author": "liujing.break@gmail.com",
+  "license": "",
+  "bugs": {
+    "url": "https://github.com/liujingbreak/dr-package-home-PoC/issues"
+  },
+  "homepage": "https://github.com/liujingbreak/dr-package-home-PoC#readme",
+  "devDependencies": {
+    "browserify": "^13.0.0",
+    "del": "^2.2.0",
+    "event-stream": "^3.3.2",
+    "glob": "^6.0.4",
+    "gulp": "^3.9.0",
+    "gulp-bump": "^1.0.0",
+    "gulp-jscs": "^3.0.2",
+    "gulp-jshint": "^2.0.0",
+    "gulp-util": "^3.0.7",
+    "jshint": "^2.8.0",
+    "jshint-stylish": "^2.1.0",
+    "main-bower-files": "^2.11.0",
+    "vinyl-paths": "^2.1.0"
+  },
+  "engines": {
+    "node": "^5.4.0"
+  },
+  "dependencies": {
+    "q": "^1.4.1",
+    "lodash": "^4.0.0",
+    "log4js": "^0.6.29"
+  }
+}
