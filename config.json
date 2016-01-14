@@ -1,3 +1,4 @@
 {
-	"srcDir": "src"
+	"srcDir": "src",
+	"port": 14321
 }
