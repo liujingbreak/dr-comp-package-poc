@@ -1,9 +1,4 @@
 {
-	// JSCS settings for v4 apps
-	// ---------------------------
-	// The file in the Apps-server repository is the one used by the Grunt.
-	// However editors usually expect it to be in the root of a project, so there is a copy in each repo with apps.
-	// Do NOT edit these copies, instead edit the original file in Apps-server and copy it to ALL repositories.
 	"disallowEmptyBlocks": true,
 	"disallowKeywordsOnNewLine": [
 		"else"
@@ -56,7 +51,7 @@
 	"requireDotNotation": true,
 	"requireLineBreakAfterVariableAssignment": true,
 	"requireLineFeedAtFileEnd": true,
-	"disallowMultipleVarDecl": "exceptUndefined",
+	"disallowMultipleVarDecl": { "allExcept": ["undefined", "require"] },
 	"requireOperatorBeforeLineBreak": [
 		"+",
 		"-",

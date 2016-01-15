@@ -2,3 +2,5 @@ node_modules
 /npm-debug.log
 .DS_Store
 /bower_components
+config.local.json
+
