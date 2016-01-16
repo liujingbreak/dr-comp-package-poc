@@ -1,5 +1,5 @@
 {
-  "name": "@dr/example-node",
+  "name": "@dr/example-dr",
   "version": "1.0.1",
   "description": "sample node package",
   "scripts": {
