@@ -4,17 +4,18 @@ var gutil = require('gulp-util');
 var jshint = require('gulp-jshint');
 var jscs = require('gulp-jscs');
 var bump = require('gulp-bump');
+var changed = require('gulp-changed');
 // var watchify = require('watchify');
 //var browserify = require('browserify');
 var es = require('event-stream');
 var vp = require('vinyl-paths');
 var del = require('del');
 var jscs = require('gulp-jscs');
-var fs = require('fs');
-var log = require('log4js').getLogger('gulpfile');
+var vps = require('vinyl-paths');
 var Q = require('q');
-var mkdirs = require('mkdirs');
-var pkutil = require('./lib/packageMgr/packageUtils');
+var linkPackage = require('./lib/gulp/linkPackage');
+var findPackageJson = require('./lib/gulp/findPackageJson');
+var rwPackageJson = require('./lib/gulp/rwPackageJson');
 
 var SCOPE_NAME = 'dr';
 
@@ -41,51 +42,21 @@ gulp.task('jscs', function() {
 	.pipe(jscs.reporter('fail'));
 });
 
-gulp.task('lp', function() {
-	return Q.all(linkPackageJson('src'));
+gulp.task('link', function() {
+	gulp.src('src')
+	.pipe(findPackageJson())
+	.on('error', gutil.log)
+	.pipe(changed('node_modules'))
+	.pipe(vps(function(paths) {
+		gutil.log('changed: ' + paths);
+		return Promise.resolve();
+	}))
+	.pipe(rwPackageJson.linkPkJson('node_modules'))
+	.on('error', gutil.log)
+	.pipe(gulp.dest('node_modules'))
+	.on('error', gutil.log)
+	.pipe(rwPackageJson.addDependeny('package.json'));
 });
-
-function linkPackageJson(parentDir) {
-	var folders = fs.readdirSync(parentDir);
-	var qs = [];
-	folders.forEach(function(name) {
-		var dir = Path.join(parentDir, name);
-		if (fs.statSync(dir).isDirectory()) {
-			var pkJsonPath = Path.join(dir, 'package.json');
-			if (fs.existsSync(pkJsonPath)) {
-				qs.push(replicatePackageJson(pkJsonPath));
-			} else {
-				qs = qs.concat(linkPackageJson(dir));
-			}
-		}
-	});
-	return qs;
-}
-
-function replicatePackageJson(oldPath) {
-	log.debug('found ' + oldPath);
-	return Q.nfcall(fs.readFile, oldPath, {encoding: 'utf-8'})
-	.then(function(content) {
-		var json = JSON.parse(content);
-		if (json.main) {
-			var relativePath = Path.relative(
-				Path.join('node_modules', '@dr', 'someguy'),
-				Path.join(Path.dirname(oldPath), json.main));
-			log.debug('link "main" to ' + relativePath);
-			json.main = relativePath;
-		}
-
-		var packageNameObj = pkutil.parseName(json.name);
-		var newDir = Path.join('node_modules',
-			'@' + packageNameObj.scope,
-			packageNameObj.name);
-		mkdirs(newDir);
-		var newPackageJson = Path.join(newDir, 'package.json');
-		log.debug('write to ' + newPackageJson);
-		return Q.nfcall(fs.writeFile, newPackageJson,
-			JSON.stringify(json, null, '\t'));
-	});
-}
 
 gulp.task('bump-version', function() {
 	return es.merge(
