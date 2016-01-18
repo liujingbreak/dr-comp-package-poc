@@ -8,15 +8,16 @@ var engines = require('consolidate');
 var swig = require('swig');
 
 module.exports = {
-	init: function(api) {
-		api.eventBus.on('loadEnd', function(packages) {
-			console.log('XXX '+ packages);
-		})
-	},
-	createApp: createApp,
+	activate: function(Api) {
+		var app = createApp(Api.prototype.config());
+		require('./setupApi')(Api, app);
+		Api.prototype.eventBus.on('afterActivate', function() {
+			setupErrorHandling(app);
+		});
+	}
 };
 
-function createApp(setupRoutes) {
+function createApp(setting, setupRoutesAndViews) {
 	var app = express();
 
 	// view engine setup
@@ -38,12 +39,14 @@ function createApp(setupRoutes) {
 	}));
 	app.use(cookieParser());
 	app.get('/', function(req, res) {
-		var config = require('../config');
-		res.render('index', {quote: config().mafia ? config().mafia : 'Hey bro'});
+		console.log('......');
+		res.render('index', {quote: 'Hellow packages'});
 	});
 	app.use(express.static(path.join(__dirname, 'public')));
+	return app;
+}
 
-	setupRoutes(app);
+function setupErrorHandling(app) {
 	// error handlers
 	// catch 404 and forward to error handler
 	app.use(function(req, res, next) {

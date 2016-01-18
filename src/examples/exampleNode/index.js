@@ -3,12 +3,12 @@ var Path = require('path');
 var mafia = require('./gangsta');
 var Q = require('q');
 
-module.exports = {
-	init: init,
-	haveFun: haveFun
-};
+module.exports = mafia;
+module.exports.activate = activate;
 
-function init(api) {
+var mafiaPromis = mafia();
+
+function activate(api) {
 	log.debug('Greeting from node package v%s !', require('./package.json').version);
 	var quote;
 
@@ -26,7 +26,7 @@ function init(api) {
 
 function haveFun(api) {
 	var def = Q.defer();
-	var mafiaPromis = mafia();
+
 	api.eventBus.on('serverStarted', function() {
 		mafiaPromis.then(function(res) {
 			log.info('   "' + res + '"  ');
