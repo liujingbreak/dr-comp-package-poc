@@ -1,5 +1,6 @@
 {
 	"srcDir": "src",
 	"port": 14321,
-	"packageScopes": ["dr"]
+	"packageScopes": ["dr", "basement"],
+	"nodeRoutePath": "/"
 }

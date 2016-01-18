@@ -38,13 +38,13 @@
 		"node": "^5.4.0"
 	},
 	"dependencies": {
-		"@basement/express-server": "./lib/http",
 		"lodash": "^4.0.0",
 		"log4js": "^0.6.29",
 		"q": "^1.4.1",
 		"swig": "^1.4.2",
 		"@dr/example-bower": "1.0.1",
 		"@dr/example-dr": "1.0.1",
-		"@dr/example-node": "1.0.1"
+		"@dr/example-node": "1.0.1",
+		"@dr/express-server": "0.0.0"
 	}
 }
