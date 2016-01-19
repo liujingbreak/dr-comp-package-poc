@@ -1,11 +1,15 @@
 {
   "name": "@dr/example-dr",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "sample node package",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "browser": "browser/js/index.js",
   "main": "server/main.js",
+  "dr": {
+	  "entry": true
+  },
   "author": "jing.liu.fe@d.com",
   "license": "ISC",
   "dependencies": {
