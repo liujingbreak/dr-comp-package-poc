@@ -6,7 +6,7 @@ var jscs = require('gulp-jscs');
 var bump = require('gulp-bump');
 var changed = require('gulp-changed');
 // var watchify = require('watchify');
-//var browserify = require('browserify');
+var browserify = require('browserify');
 var es = require('event-stream');
 var vp = require('vinyl-paths');
 var del = require('del');
@@ -58,9 +58,14 @@ gulp.task('link', function() {
 	.pipe(rwPackageJson.addDependeny('package.json'));
 });
 
+gulp.task('browserify', function() {
+
+});
+
 gulp.task('bump-version', function() {
 	return es.merge(
-		gulp.src('./src/**/package.json')
+		gulp.src('src')
+			.pipe(findPackageJson())
 			.pipe(vp(function(path) {
 				return new Promise(function(resolve, reject) {
 					gulp.src(path).pipe(bumpVersion())
