@@ -1,6 +1,7 @@
 var express = require('express');
 var log = require('log4js').getLogger('core.server.setApi');
 var _ = require('lodash');
+var Path = require('path');
 
 module.exports = function setupApi(Api, app) {
 	var api = Api.prototype;
@@ -17,12 +18,16 @@ module.exports = function setupApi(Api, app) {
 		return this._router;
 	};
 
-	api.templateFolder = function(absFolderPath) {
+	api.templateFolder = function(folder) {
+		if (!Path.isAbsolute(folder)) {
+			folder = Path.join(this.packageInstance.path, folder)
+			log.debug('add view folder: ' + folder);
+		}
 		var views = app.get('views');
-		if (_.includes(views, absFolderPath)) {
+		if (_.includes(views, folder)) {
 			return;
 		}
-		views.push(absFolderPath);
+		views.push(folder);
 		app.set('views', views);
 	};
 };

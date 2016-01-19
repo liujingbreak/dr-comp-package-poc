@@ -9,15 +9,14 @@ module.exports.activate = activate;
 var mafiaPromis = mafia();
 
 function activate(api) {
-	log.debug('Greeting from node package v%s !', require('./package.json').version);
 	var quote;
 
+	// browser access http://localhost:14333/example-node to see result
 	api.router().get('/', function(req, res) {
-		log.debug('serving GET');
 		res.render('template', {name: quote});
 	});
 
-	api.templateFolder(Path.join(__dirname, 'views'));
+	api.templateFolder('views');
 
 	haveFun(api).then(function(qu) {
 		quote = qu;
