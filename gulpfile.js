@@ -18,8 +18,9 @@ var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
+var size = require('gulp-size');
+var cli = require('shelljs-nodecli');
 
-var linkPackage = require('./lib/gulp/linkPackage');
 var findPackageJson = require('./lib/gulp/findPackageJson');
 var rwPackageJson = require('./lib/gulp/rwPackageJson');
 
@@ -79,48 +80,45 @@ gulp.task('browserify', function() {
 
 	gulp.src('src')
 		.pipe(findPackageJson())
-		.pipe(rwPackageJson.readAsJson(function(json, file) {
-			gutil.log('looking for entry file ' + file.path);
-			if (json.browser && json.dr && json.dr.entry === true) {
-				var entry = Path.join(Path.dirname(file.path), json.browser);
-				entries.push(entry);
-			}
-			return file;
-		})).on('end', function() {
-			try {
-				//gutil.log('here')
-				if (entries.length === 0) {
-					gutil.log('No entry found!');
-				}
-				gutil.log(entries);
-				finish.resolve();
-				// b = browserify({
-				// 	entries: entries,
-				// 	debug: true
-				// });
-				//
-				// b.bundle()
-				// 	.pipe(source('app.js'))
-				// 	.pipe(buffer())
-				// 	.pipe(sourcemaps.init({
-				// 		loadMaps: true
-				// 	}))
-				// 	// Add transformation tasks to the pipeline here.
-				// 	.pipe(uglify())
-				// 	.on('error', gutil.log)
-				// 	.pipe(sourcemaps.write('./'))
-				// 	.pipe(gulp.dest('./dist/js/'))
-				// 	.on('end', function() {
-				// 		finish.resolve();
-				// 	});
-			} catch (er) {
-				gutil.log(er);
-			}
-		}).on('error', gutil.log);
+		.pipe(rwPackageJson.readAsJson(lookforPkJson, flush))
+		.on('error', gutil.log);
 
-		setTimeout(function() {
-			finish.resolve();
-		}, 1100);
+	function lookforPkJson(json, file) {
+		gutil.log('looking for entry file ' + file.path);
+		if (json.browser && json.dr && json.dr.entry === true) {
+			var entry = Path.join(Path.dirname(file.path), json.browser);
+			entries.push(entry);
+		}
+		return file;
+	}
+
+	function flush() {
+		if (entries.length === 0) {
+			gutil.log('No entry found!');
+		}
+		gutil.log(entries);
+		b = browserify({
+			entries: entries,
+			debug: true
+		});
+
+		b.bundle()
+			.pipe(source('bundle.js'))
+			.pipe(buffer())
+			.pipe(sourcemaps.init({
+				loadMaps: true
+			}))
+			// Add transformation tasks to the pipeline here.
+			.pipe(uglify())
+			.on('error', gutil.log)
+			.pipe(sourcemaps.write('./'))
+			.pipe(size())
+			.pipe(gulp.dest('./dist/js/'))
+			.on('end', function() {
+				gutil.log('end');
+				finish.resolve();
+			});
+	}
 	return finish.promise;
 });
 
@@ -142,6 +140,18 @@ gulp.task('bump-version', function() {
 		.pipe(gulp.dest('.'))
 	);
 	//todo bump dependencies' version
+});
+
+gulp.task('publish', function() {
+	return gulp.src('src')
+		.pipe(findPackageJson())
+		.on('error', gutil.log)
+		.pipe(vps(function(paths) {
+			gutil.log(paths);
+			//packages.push(Path.dirname(paths));
+			cli.exec('npm', 'publish', Path.dirname(paths));
+			return Promise.resolve();
+		}));
 });
 
 function bumpVersion() {

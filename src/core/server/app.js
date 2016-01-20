@@ -39,10 +39,9 @@ function createApp(setting, setupRoutesAndViews) {
 	}));
 	app.use(cookieParser());
 	app.get('/', function(req, res) {
-		console.log('......');
 		res.render('index', {quote: 'Hellow packages'});
 	});
-	app.use(express.static(path.join(__dirname, 'public')));
+	app.use('/static', express.static(path.join(setting.rootPath, 'dist')));
 	return app;
 }
 

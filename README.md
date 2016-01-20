@@ -2,6 +2,48 @@ Frontend platform PoC
 ================
 Deadline, Jan 23th
 
+Quick Start
+-------------------------
+
+1. We will need a Sinopia server
+```
+npm install -g sinopia
+```
+Start it!
+```
+sinopia
+```
+2. modify your `~/.npmrc` or use command
+```
+npm set registry http://localhost:4873/
+```
+Another cool way is to use `nrm` to switch your NPM registry endpoint.
+
+3. At root folder of this PoC run commands
+```
+npm install
+gulp link
+npm start
+```
+The demo server is started.
+
+Now open browser for URL
+http://localhost:14333/example-dr/route1
+http://localhost:14333/example-dr/route2
+
+If you are able to see a `normal` page, then that means it work.
+
+A Glance at this PoC
+-------------------------
+> Ask LJ for oral explanation, at this moment he really too busy to write down more words in this part
+
+- **The infrastructure overview**
+![structure digram](doc/20160120_180346_mh1453284328478.jpg)
+	- Every single separated rectangle box in above figure represents an NPM module package. They can be published to *Sinopia* individually.
+
+
+
+
 Concept
 ----------
 ### Plateform
