@@ -1,6 +1,6 @@
 {
   "name": "@dr/example-dr",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "sample node package",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

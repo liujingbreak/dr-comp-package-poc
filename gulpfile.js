@@ -20,6 +20,7 @@ var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
 var size = require('gulp-size');
 var cli = require('shelljs-nodecli');
+var shasum = require('shasum');
 
 var findPackageJson = require('./lib/gulp/findPackageJson');
 var rwPackageJson = require('./lib/gulp/rwPackageJson');
@@ -73,6 +74,10 @@ gulp.task('xxx', function() {
 	return deferred.promise;
 });
 
+/**
+ * Need refactor
+ * TODO: partition-bundle, deAMDify, Parcelify
+ */
 gulp.task('browserify', function() {
 	var entries = [];
 	var b;
@@ -122,6 +127,9 @@ gulp.task('browserify', function() {
 	return finish.promise;
 });
 
+/**
+ * TODO: bump dependencies version
+ */
 gulp.task('bump-version', function() {
 	return es.merge(
 		gulp.src('src')
@@ -151,7 +159,9 @@ gulp.task('publish', function() {
 			//packages.push(Path.dirname(paths));
 			cli.exec('npm', 'publish', Path.dirname(paths));
 			return Promise.resolve();
-		}));
+		})).on('end', function() {
+			cli.exec('npm', 'publish', '.');
+		});
 });
 
 function bumpVersion() {
