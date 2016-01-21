@@ -3,6 +3,9 @@
   "version": "1.0.3",
   "description": "wrapper of angularjs v1.4.5",
   "browser": "main.js",
+  "dr": {
+	  "entry": true
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

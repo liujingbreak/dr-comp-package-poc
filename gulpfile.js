@@ -20,10 +20,14 @@ var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
 var size = require('gulp-size');
 var cli = require('shelljs-nodecli');
+var pBundle = require('partition-bundle');
 var shasum = require('shasum');
+var rename = require('gulp-rename');
 
 var findPackageJson = require('./lib/gulp/findPackageJson');
 var rwPackageJson = require('./lib/gulp/rwPackageJson');
+var depScanner = require('./lib/gulp/dependencyScanner');
+var packageUtils = require('./lib/packageMgr/packageUtils');
 
 var SCOPE_NAME = 'dr';
 
@@ -50,6 +54,9 @@ gulp.task('jscs', function() {
 		.pipe(jscs.reporter('fail'));
 });
 
+/**
+ * TODO: changed() seems not working
+ */
 gulp.task('link', function() {
 	gulp.src('src')
 		.pipe(findPackageJson())
@@ -66,65 +73,39 @@ gulp.task('link', function() {
 		.pipe(rwPackageJson.addDependeny('package.json'));
 });
 
-gulp.task('xxx', function() {
-	var deferred = Q.defer();
-	setTimeout(function() {
-		deferred.resolve();
-	}, 100);
-	return deferred.promise;
-});
-
 /**
  * Need refactor
  * TODO: partition-bundle, deAMDify, Parcelify
  */
 gulp.task('browserify', function() {
-	var entries = [];
-	var b;
-	var finish = Q.defer();
-
-	gulp.src('src')
-		.pipe(findPackageJson())
-		.pipe(rwPackageJson.readAsJson(lookforPkJson, flush))
-		.on('error', gutil.log);
-
-	function lookforPkJson(json, file) {
-		gutil.log('looking for entry file ' + file.path);
-		if (json.browser && json.dr && json.dr.entry === true) {
-			var entry = Path.join(Path.dirname(file.path), json.browser);
-			entries.push(entry);
-		}
-		return file;
-	}
-
-	function flush() {
-		if (entries.length === 0) {
-			gutil.log('No entry found!');
-		}
-		gutil.log(entries);
-		b = browserify({
-			entries: entries,
+	var browserifyTask = [];
+	packageUtils.findBrowserEntryFiles('package.json', function(moduleName, entryPath, parsedName) {
+		gutil.log('entry: ' + parsedName.name);
+		var def = Q.defer();
+		browserifyTask.push(def.promise);
+		var b = browserify({
 			debug: true
 		});
-
+		b.add(entryPath);
 		b.bundle()
-			.pipe(source('bundle.js'))
-			.pipe(buffer())
-			.pipe(sourcemaps.init({
-				loadMaps: true
-			}))
-			// Add transformation tasks to the pipeline here.
-			.pipe(uglify())
-			.on('error', gutil.log)
-			.pipe(sourcemaps.write('./'))
-			.pipe(size())
-			.pipe(gulp.dest('./dist/js/'))
-			.on('end', function() {
-				gutil.log('end');
-				finish.resolve();
-			});
-	}
-	return finish.promise;
+		.pipe(source(parsedName.name + '.js'))
+		.pipe(buffer())
+		.pipe(gulp.dest('./dist/js/'))
+		.pipe(rename(parsedName.name + '.min.js'))
+		.pipe(sourcemaps.init({
+			loadMaps: true
+		}))
+		// Add transformation tasks to the pipeline here.
+		.pipe(uglify())
+		.on('error', gutil.log)
+		.pipe(sourcemaps.write('./'))
+		.pipe(size())
+		.pipe(gulp.dest('./dist/js/'))
+		.on('end', function() {
+			def.resolve();
+		});
+	});
+	return Q.allSettled(browserifyTask);
 });
 
 /**

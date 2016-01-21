@@ -8,59 +8,56 @@ Quick Start
 
 1.	We will need a Sinopia server
 
-```
-npm install -g sinopia
-```
+	```
+	npm install -g sinopia
+	```
 
-Start it!
+	Start it!
 
-```
-sinopia
-```
+	```
+	sinopia
+	```
 
 2. After download this PoC, go to root folder make sure you can find a hidden file `.npmrc` in there, run command
-```
-npm install
-gulp link
-gulp browserify
-npm start
+	```
+	npm install
+	gulp link
+	gulp browserify
+	npm start
 
-```
-The demo server is started.
-Now open browser for URL:
-[http://localhost:14333/example-dr/route1](http://localhost:14333/example-dr/route1)
-[http://localhost:14333/example-dr/route2](http://localhost:14333/example-dr/route2)
+	```
+	The demo server is started.
+	Now open browser for URL:
+	[http://localhost:14333/example-dr/route1](http://localhost:14333/example-dr/route1)
+	[http://localhost:14333/example-dr/route2](http://localhost:14333/example-dr/route2)
 
-If you are able to see a "normal" page, then that means it worked.
+	If you are able to see a "normal" page, then that means it worked.
 
-> You may also manage your profile level npmrc by
-> ```
-> npm set registry http://localhost:4873/
-> ```
-> Another cool way is to use `nrm` to switch your NPM registry endpoint.
+	> You may also manage your profile level npmrc by
+	> ```
+	> npm set registry http://localhost:4873/
+	> ```
+	> Another cool way is to use `nrm` to switch your NPM registry endpoint.
 
 3. Publish them
-```
-npm set registry http://localhost:4873/
-npm adduser <your user name>
-gulp publish
-```
-Now open you browser and surf to [http://localhost:4873/](http://localhost:4873/).
+	```
+	npm set registry http://localhost:4873/
+	npm adduser <your user name>
+	gulp publish
+	```
+	Now open you browser and surf to [http://localhost:4873/](http://localhost:4873/).
 
-Check them out, all packages with name prefixed "@dr/" are on Sinopia registry. Now you can create a new empty folder and try
-```
-npm install @dr/fe-house-poc
-cd node_modules/@dr/fe-house-poc
-npm start
-```
-This PoC now is running in another folder!
+	Check them out, all packages with name prefixed "@dr/" are on Sinopia registry. Now you can create a new empty folder and try
+	```
+	npm install @dr/fe-house-poc
+	cd node_modules/@dr/fe-house-poc
+	npm start
+	```
+	This PoC now is running in another folder!
 
 
 A Glance at this PoC
 --------------------
-
-> Ask LJ for oral explanation, at this moment he really too busy to write down more words in this part
-
 -	**The infrastructure overview** > Everything is NPM package!
 
 ![overview digram](doc/overview.jpg) - Every single separated rectangle box in above figure represents an NPM module package. They can be published to *Sinopia* individually.
@@ -70,6 +67,7 @@ A Glance at this PoC
 Sometimes, we need browser-side to work with Node-side as a complete feature unit, they should be organized in single package.
 
 -	**API is hybrids too**
+
 ![API](doc/api-view.jpg)
 
 A runtime object. Provides basic functions which helps different packages work together. (e.g. event bus, package lookup tool, universal configuration...)
