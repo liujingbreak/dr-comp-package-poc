@@ -23,6 +23,7 @@ var cli = require('shelljs-nodecli');
 var pBundle = require('partition-bundle');
 var shasum = require('shasum');
 var rename = require('gulp-rename');
+var Jasmine = require('jasmine');
 
 var findPackageJson = require('./lib/gulp/findPackageJson');
 var rwPackageJson = require('./lib/gulp/rwPackageJson');
@@ -55,15 +56,17 @@ gulp.task('jscs', function() {
 });
 
 /**
- * TODO: changed() seems not working
+ * link src/ ** /package.json from node_modules folder
  */
 gulp.task('link', function() {
 	gulp.src('src')
 		.pipe(findPackageJson())
 		.on('error', gutil.log)
-		.pipe(changed('node_modules'))
+		// .pipe(changed('.', {
+		// 	hasChanged: packageJsonChangeCompFactor('.')
+		// }))
 		.pipe(vps(function(paths) {
-			gutil.log('changed: ' + paths);
+			gutil.log('found: ' + paths);
 			return Promise.resolve();
 		}))
 		.pipe(rwPackageJson.linkPkJson('node_modules'))
@@ -129,6 +132,12 @@ gulp.task('bump-version', function() {
 		.pipe(gulp.dest('.'))
 	);
 	//todo bump dependencies' version
+});
+
+gulp.task('test-house', function() {
+	var jasmine = new Jasmine();
+	jasmine.loadConfigFile('spec/support/jasmine.json');
+	jasmine.execute();
 });
 
 gulp.task('publish', function() {

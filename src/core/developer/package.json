@@ -1,0 +1,12 @@
+{
+  "name": "@dr-core/developer",
+  "version": "1.0.0",
+  "description": "enable some dev environment helper tool and settings",
+  "main": "developer.js",
+  "browser": "developer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "liujing.break@gmail.com",
+  "license": "ISC"
+}

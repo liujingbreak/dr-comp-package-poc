@@ -2,5 +2,6 @@
 	"srcDir": "src",
 	"port": 14333,
 	"packageScopes": ["dr", "dr-core"],
-	"nodeRoutePath": "/"
+	"nodeRoutePath": "/",
+	"devMode": false
 }
