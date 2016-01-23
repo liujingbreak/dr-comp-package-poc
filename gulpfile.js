@@ -29,6 +29,7 @@ var findPackageJson = require('./lib/gulp/findPackageJson');
 var rwPackageJson = require('./lib/gulp/rwPackageJson');
 var depScanner = require('./lib/gulp/dependencyScanner');
 var packageUtils = require('./lib/packageMgr/packageUtils');
+var rev = require('gulp-rev');
 
 var SCOPE_NAME = 'dr';
 
@@ -65,10 +66,7 @@ gulp.task('link', function() {
 		// .pipe(changed('.', {
 		// 	hasChanged: packageJsonChangeCompFactor('.')
 		// }))
-		.pipe(vps(function(paths) {
-			gutil.log('found: ' + paths);
-			return Promise.resolve();
-		}))
+
 		.pipe(rwPackageJson.linkPkJson('node_modules'))
 		.on('error', gutil.log)
 		.pipe(gulp.dest('node_modules'))
@@ -95,6 +93,7 @@ gulp.task('browserify', function() {
 		.pipe(buffer())
 		.pipe(gulp.dest('./dist/js/'))
 		.pipe(rename(parsedName.name + '.min.js'))
+		.pipe(rev())
 		.pipe(sourcemaps.init({
 			loadMaps: true
 		}))

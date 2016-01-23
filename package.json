@@ -30,6 +30,7 @@
     "gulp-jscs": "^3.0.2",
     "gulp-jshint": "^2.0.0",
     "gulp-rename": "^1.2.2",
+    "gulp-rev": "^6.0.1",
     "gulp-size": "^2.0.0",
     "gulp-sourcemaps": "^1.6.0",
     "gulp-uglify": "^1.5.1",
@@ -56,8 +57,9 @@
     "q": "^1.4.1",
     "swig": "^1.4.2",
     "@dr/angularjs": "1.0.3",
-    "@dr/example-dr": "1.0.7",
+    "@dr-core/developer": "1.0.0",
     "@dr-core/express-server": "0.0.6",
+    "@dr/example-dr": "1.0.7",
     "@dr/example-node": "1.0.7"
   }
 }
