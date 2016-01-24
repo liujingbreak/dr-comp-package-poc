@@ -13,6 +13,8 @@ var del = require('del');
 var jscs = require('gulp-jscs');
 var vps = require('vinyl-paths');
 var Q = require('q');
+Q.longStackSupport = true;
+var _ = require('lodash');
 
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
@@ -31,21 +33,31 @@ var depScanner = require('./lib/gulp/dependencyScanner');
 var packageUtils = require('./lib/packageMgr/packageUtils');
 var rev = require('gulp-rev');
 
-var SCOPE_NAME = 'dr';
+var config = require('./lib/config');
+
 
 gulp.task('default', function() {
 	// place code for your default task here
 });
 
-gulp.task('clean:dr', function() {
-	return del(['node_modules/@' + SCOPE_NAME,
-		'bower_components/@' + SCOPE_NAME
-	]);
+gulp.task('clean:dependency', function() {
+	var dirs = [];
+	_.each(config().packageScopes, function(packageScope) {
+		var npmFolder = Path.resolve('node_modules', '@', packageScope);
+		var bowerFolder = Path.resolve('node_modules', '@', packageScope);
+		gutil.log('delete ' + npmFolder);
+		gutil.log('delete ' + bowerFolder);
+		dirs.push(npmFolder);
+		dirs.push(bowerFolder);
+	});
+	return del(dirs);
 });
 
-gulp.task('clean', ['clean:dr']);
+gulp.task('clean:dist', function() {
+	return del('dist');
+});
 
-gulp.task('jscs', function() {
+gulp.task('lint', function() {
 	gulp.src(['*.js',
 			'lib/**/*.js'
 		]).pipe(jshint())
@@ -63,10 +75,6 @@ gulp.task('link', function() {
 	gulp.src('src')
 		.pipe(findPackageJson())
 		.on('error', gutil.log)
-		// .pipe(changed('.', {
-		// 	hasChanged: packageJsonChangeCompFactor('.')
-		// }))
-
 		.pipe(rwPackageJson.linkPkJson('node_modules'))
 		.on('error', gutil.log)
 		.pipe(gulp.dest('node_modules'))
@@ -80,6 +88,13 @@ gulp.task('link', function() {
  */
 gulp.task('browserify', function() {
 	var browserifyTask = [];
+	var moduleNames = [];
+	packageUtils.findBrowserEntryFiles('package.json', function(moduleName) {
+		moduleNames.push(moduleName);
+	});
+
+
+
 	packageUtils.findBrowserEntryFiles('package.json', function(moduleName, entryPath, parsedName) {
 		gutil.log('entry: ' + parsedName.name);
 		var def = Q.defer();
@@ -88,6 +103,8 @@ gulp.task('browserify', function() {
 			debug: true
 		});
 		b.add(entryPath);
+		externalModules(b, moduleName);
+		b.require(entryPath, {expose: moduleName});
 		b.bundle()
 		.pipe(source(parsedName.name + '.js'))
 		.pipe(buffer())
@@ -103,10 +120,21 @@ gulp.task('browserify', function() {
 		.pipe(sourcemaps.write('./'))
 		.pipe(size())
 		.pipe(gulp.dest('./dist/js/'))
+		.pipe(rev.manifest({merge: true}))
+		.pipe(gulp.dest('./dist/js/'))
 		.on('end', function() {
 			def.resolve();
 		});
 	});
+
+	function externalModules(b, currentModule) {
+		moduleNames.forEach(function(moduleName) {
+			if (moduleName !== currentModule) {
+				b.exclude(moduleName);
+			}
+		});
+	}
+
 	return Q.allSettled(browserifyTask);
 });
 
@@ -130,7 +158,6 @@ gulp.task('bump-version', function() {
 		.on('error', gutil.log)
 		.pipe(gulp.dest('.'))
 	);
-	//todo bump dependencies' version
 });
 
 gulp.task('test-house', function() {

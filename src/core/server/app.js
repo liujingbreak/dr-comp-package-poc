@@ -8,10 +8,10 @@ var engines = require('consolidate');
 var swig = require('swig');
 
 module.exports = {
-	activate: function(Api) {
-		var app = createApp(Api.prototype.config());
-		require('./setupApi')(Api, app);
-		Api.prototype.eventBus.on('afterActivate', function() {
+	activate: function(api) {
+		var app = createApp(api.config());
+		require('./setupApi')(api, app);
+		api.eventBus.on('afterActivate', function() {
 			setupErrorHandling(app);
 		});
 	}

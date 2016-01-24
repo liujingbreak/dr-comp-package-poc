@@ -1,0 +1,15 @@
+{
+  "name": "@dr/example-common",
+  "version": "1.0.1",
+  "description": "",
+  "browser": "browser.js",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dr": {
+	  "entry": true
+  }
+}

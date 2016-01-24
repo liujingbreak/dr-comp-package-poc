@@ -1,65 +1,65 @@
 {
-  "name": "@dr/fe-house-poc",
-  "version": "1.0.13",
-  "description": "This is a PoC for company's frontend platform",
-  "main": "app.js",
-  "scripts": {
-    "start": "node lib/server.js",
-    "check": "gulp js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/liujingbreak/dr-package-home-PoC.git"
-  },
-  "author": "liujing.break@gmail.com",
-  "license": "",
-  "bugs": {
-    "url": "https://github.com/liujingbreak/dr-package-home-PoC/issues"
-  },
-  "homepage": "https://github.com/liujingbreak/dr-package-home-PoC#readme",
-  "devDependencies": {
-    "angular": "^1.4.8",
-    "browser-resolve": "^1.11.0",
-    "browserify": "^13.0.0",
-    "del": "^2.2.0",
-    "event-stream": "^3.3.2",
-    "glob": "^6.0.4",
-    "gulp": "^3.9.0",
-    "gulp-bump": "^1.0.0",
-    "gulp-changed": "^1.3.0",
-    "gulp-jscs": "^3.0.2",
-    "gulp-jshint": "^2.0.0",
-    "gulp-rename": "^1.2.2",
-    "gulp-rev": "^6.0.1",
-    "gulp-size": "^2.0.0",
-    "gulp-sourcemaps": "^1.6.0",
-    "gulp-uglify": "^1.5.1",
-    "gulp-util": "^3.0.7",
-    "jasmine": "^2.4.1",
-    "jasmine-core": "^2.4.1",
-    "jasmine-reporters": "^2.1.1",
-    "jshint": "^2.8.0",
-    "jshint-stylish": "^2.1.0",
-    "main-bower-files": "^2.11.0",
-    "mkdirs": "0.0.2",
-    "partition-bundle": "^2.3.0",
-    "shelljs-nodecli": "^0.1.1",
-    "vinyl-buffer": "^1.0.0",
-    "vinyl-paths": "^2.1.0",
-    "vinyl-source-stream": "^1.1.0"
-  },
-  "engines": {
-    "node": "^5.3.0"
-  },
-  "dependencies": {
-    "lodash": "^4.0.0",
-    "log4js": "^0.6.29",
-    "q": "^1.4.1",
-    "swig": "^1.4.2",
-    "@dr/angularjs": "1.0.3",
-    "@dr-core/developer": "1.0.0",
-    "@dr-core/express-server": "0.0.6",
-    "@dr/example-dr": "1.0.7",
-    "@dr/example-node": "1.0.7"
-  }
+	"name": "@dr/fe-house-poc",
+	"version": "1.0.15",
+	"description": "This is a PoC for company's frontend platform",
+	"main": "app.js",
+	"scripts": {
+		"start": "node lib/server.js",
+		"check": "gulp js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/liujingbreak/dr-package-home-PoC.git"
+	},
+	"author": "liujing.break@gmail.com",
+	"license": "",
+	"bugs": {
+		"url": "https://github.com/liujingbreak/dr-package-home-PoC/issues"
+	},
+	"homepage": "https://github.com/liujingbreak/dr-package-home-PoC#readme",
+	"devDependencies": {
+		"browser-resolve": "^1.11.0",
+		"browserify": "^13.0.0",
+		"del": "^2.2.0",
+		"event-stream": "^3.3.2",
+		"glob": "^6.0.4",
+		"gulp": "^3.9.0",
+		"gulp-bump": "^1.0.0",
+		"gulp-changed": "^1.3.0",
+		"gulp-jscs": "^3.0.2",
+		"gulp-jshint": "^2.0.0",
+		"gulp-rename": "^1.2.2",
+		"gulp-rev": "^6.0.1",
+		"gulp-size": "^2.0.0",
+		"gulp-sourcemaps": "^1.6.0",
+		"gulp-uglify": "^1.5.1",
+		"gulp-util": "^3.0.7",
+		"jasmine": "^2.4.1",
+		"jasmine-core": "^2.4.1",
+		"jasmine-reporters": "^2.1.1",
+		"jshint": "^2.8.0",
+		"jshint-stylish": "^2.1.0",
+		"main-bower-files": "^2.11.0",
+		"mkdirs": "0.0.2",
+		"partition-bundle": "^2.3.0",
+		"shelljs-nodecli": "^0.1.1",
+		"vinyl-buffer": "^1.0.0",
+		"vinyl-paths": "^2.1.0",
+		"vinyl-source-stream": "^1.1.0"
+	},
+	"engines": {
+		"node": "^5.3.0"
+	},
+	"dependencies": {
+		"lodash": "^4.0.0",
+		"log4js": "^0.6.29",
+		"q": "^1.4.1",
+		"swig": "^1.4.2",
+		"@dr/angularjs": "1.0.3",
+		"@dr-core/developer": "1.0.0",
+		"@dr-core/express-server": "0.0.6",
+		"@dr/example-dr": "1.0.7",
+		"@dr/example-node": "1.0.7",
+		"@dr/example-common": "1.0.1"
+	}
 }
