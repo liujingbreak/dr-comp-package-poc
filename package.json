@@ -60,6 +60,8 @@
 		"@dr-core/express-server": "0.0.6",
 		"@dr/example-dr": "1.0.7",
 		"@dr/example-node": "1.0.7",
-		"@dr/example-common": "1.0.1"
+		"@dr/example-common": "1.0.1",
+		"@dr/logger": "0.0.0",
+		"@dr/example-browserify": "0.0.0"
 	}
 }

@@ -1,5 +1,5 @@
 
-module.exports.activate = function(api) {
+exports.activate = function(api) {
 	if (!api.config().devMode) {
 		return;
 	}

@@ -1,0 +1,22 @@
+{
+  "name": "@dr/logger",
+  "version": "0.0.0",
+  "description": "A log4js logger wrapper for both node and browser side ",
+  "main": "logger.server.js",
+  "browser": "logger.browser.js",
+  "dr": {
+	  "bundle": "core"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "logger"
+  ],
+  "author": "LJ",
+  "license": "ISC",
+  "devDependencies": {
+	  "log4js": "^0.6.29",
+	  "lodash": "^4.0.0"
+  }
+}
