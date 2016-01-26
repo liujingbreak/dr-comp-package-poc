@@ -34,21 +34,28 @@ Quick Start
 
 	If you are able to see a "normal" page, that means it worked.
 
-	> You may also manage your profile level npmrc by`
-	> npm set registry http://localhost:4873/
-	> ` Another cool way is to use `nrm` to switch your NPM registry endpoint.
+	> You may also manage your profile level npmrc by
+	 `npm set registry http://localhost:4873/`
+	>
+	> Another cool way is to use `nrm` to switch your NPM registry endpoint.
 
-3.	Publish them`
+3.	Publish them
+	```
 	npm set registry http://localhost:4873/
 	npm adduser <your user name>
 	gulp publish
-	` Now open you browser and surf to [http://localhost:4873/](http://localhost:4873/).
+	```
+	Now open you browser and surf to [http://localhost:4873/](http://localhost:4873/).
 
-	Check them out, all packages with name prefixed "@dr/" are on Sinopia registry. Now you can create a new empty folder and try`
+	Check them out, all packages with name prefixed "@dr/" are on Sinopia registry. Now you can create a new empty folder and try
+
+	```
 	npm install @dr/fe-house-poc
 	cd node_modules/@dr/fe-house-poc
 	npm start
-	` This PoC now is running in another folder!
+	```
+
+	This PoC now is running in another folder!
 
 A Glance at this PoC
 --------------------
@@ -140,7 +147,7 @@ Javascript uses `require()` and `module.exports`.
 
 LESS uses `@import`
 
-> Browserify: **bundling commonjs server-side**
+> Why Browserify? **bundling commonjs server-side**
 >
 > ... With tooling you can resolve modules to address order-sensitivity and your development and production environments will be much more similar and less fragile. The CJS syntax is nicer and the ecosystem is exploding because of node and npm.
 >
@@ -162,6 +169,19 @@ api.route().get('/service', function(req, res) { ... })
 ```
 
 We can also build explicitly dependency between packages like: PackageA `require('PackageB')`
+
+### Dependency
+
+All private package is named with special *scope*
+	e.g. `@dr/example-node`
+
+A private package can also depends on another private package, code in this way,
+
+```
+var exampleNode = require('@dr/example-node');
+```
+Just like how we do it for any 3rd-party public NPM module. And with the power of Browserify (or Webpack), it works in both Node and browser side.
+
 
 ##Test
 
