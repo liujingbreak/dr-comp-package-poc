@@ -18,49 +18,48 @@ Quick Start
 	sinopia
 	```
 
-2. After download this PoC, go to root folder make sure you can find a hidden file `.npmrc` in there, run command
+2.	After download this PoC, go to root folder make sure you can find a hidden file `.npmrc` in there, run command
+
 	```
-	npm install
+	npm install --only=dev
 	gulp link
+	npm install
 	gulp browserify
 	npm start
 
+
 	```
-	The demo server is started.
-	Now open browser for URL:
-	[http://localhost:14333/example-dr/route1](http://localhost:14333/example-dr/route1)
-	[http://localhost:14333/example-dr/route2](http://localhost:14333/example-dr/route2)
 
-	If you are able to see a "normal" page, then that means it worked.
+	The demo server is started. Now open browser for URL:[http://localhost:14333/example-dr/route1](http://localhost:14333/example-dr/route1)[http://localhost:14333/example-dr/route2](http://localhost:14333/example-dr/route2)
 
-	> You may also manage your profile level npmrc by
-	> ```
+	If you are able to see a "normal" page, that means it worked.
+
+	> You may also manage your profile level npmrc by`
 	> npm set registry http://localhost:4873/
-	> ```
-	> Another cool way is to use `nrm` to switch your NPM registry endpoint.
+	> ` Another cool way is to use `nrm` to switch your NPM registry endpoint.
 
-3. Publish them
-	```
+3.	Publish them`
 	npm set registry http://localhost:4873/
 	npm adduser <your user name>
 	gulp publish
-	```
-	Now open you browser and surf to [http://localhost:4873/](http://localhost:4873/).
+	` Now open you browser and surf to [http://localhost:4873/](http://localhost:4873/).
 
-	Check them out, all packages with name prefixed "@dr/" are on Sinopia registry. Now you can create a new empty folder and try
-	```
+	Check them out, all packages with name prefixed "@dr/" are on Sinopia registry. Now you can create a new empty folder and try`
 	npm install @dr/fe-house-poc
 	cd node_modules/@dr/fe-house-poc
 	npm start
-	```
-	This PoC now is running in another folder!
-
+	` This PoC now is running in another folder!
 
 A Glance at this PoC
 --------------------
--	**The infrastructure overview** > Everything is NPM package!
 
-![overview digram](doc/overview.jpg) - Every single separated rectangle box in above figure represents an NPM module package. They can be published to *Sinopia* individually.
+-	**The infrastructure overview**
+
+> Everything is NPM package!
+
+![overview digram](doc/overview.jpg)
+
+Every single separated rectangle box in above figure represents an NPM module package. They can be published to *Sinopia* individually.
 
 -	**Packge may contain both browser side stuff and Node side stuff** ![package overview](doc/packageview.jpg)
 
@@ -121,7 +120,9 @@ The dependencies sitting in our main package.json, which we get from *Sinopia* b
 External package could be things that owned by another team.
 
 ### Dependency
+
 The browser-side code will be packed by Browserify(or Webpack), thus dependency management will be same as node side module, check out *package.json*
+
 ```
 "dependencies": {
 	"lodash": "^4.0.0",
@@ -141,26 +142,26 @@ LESS uses `@import`
 
 > Browserify: **bundling commonjs server-side**
 >
-> ... With tooling you can resolve modules to address order-sensitivity and your development and production environments will be much more similar and less fragile.
-The CJS syntax is nicer and the ecosystem is exploding because of node and npm.
+> ... With tooling you can resolve modules to address order-sensitivity and your development and production environments will be much more similar and less fragile. The CJS syntax is nicer and the ecosystem is exploding because of node and npm.
 >
->You can seamlessly share code between node and the browser. You just need a build step and some tooling for source maps and auto-rebuilding.
+> You can seamlessly share code between node and the browser. You just need a build step and some tooling for source maps and auto-rebuilding.
 
-###API is sweet for decoupling stuff
-Core packages like express-server, they provide APIs on to API object,
-e.g.
+### API is sweet for decoupling stuff
+
+Core packages like express-server, they provide APIs on to API object, e.g.
+
 ```
 Api.prototype.route()
 Api.prototype.templateFolder()
 ```
+
 Other packages consume APIs.
+
 ```
 api.route().get('/service', function(req, res) { ... })
 ```
 
-We can also build explicitly dependency between packages like:
-PackageA `require('PackageB')`
-
+We can also build explicitly dependency between packages like: PackageA `require('PackageB')`
 
 ##Test
 
