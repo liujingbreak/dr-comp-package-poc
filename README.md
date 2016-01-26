@@ -46,8 +46,9 @@ Quick Start
 	gulp publish
 	```
 	Now open you browser and surf to [http://localhost:4873/](http://localhost:4873/).
-
+	![sinopia screen snap shot](doc/sinopia.png)
 	Check them out, all packages with name prefixed "@dr/" are on Sinopia registry. Now you can create a new empty folder and try
+
 
 	```
 	npm install @dr/fe-house-poc
@@ -175,7 +176,7 @@ We can also build explicitly dependency between packages like: PackageA `require
 All private package is named with special *scope*
 	e.g. `@dr/example-node`
 
-A private package can also depends on another private package, code in this way,
+A private package can also depend on another private package, code in this way,
 
 ```
 var exampleNode = require('@dr/example-node');
