@@ -1,3 +1,4 @@
+var util = require('util');
 var gulp = require('gulp');
 var Path = require('path');
 var gutil = require('gulp-util');
@@ -22,15 +23,16 @@ var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
 var size = require('gulp-size');
 var cli = require('shelljs-nodecli');
-var pBundle = require('partition-bundle');
 var shasum = require('shasum');
 var rename = require('gulp-rename');
 var Jasmine = require('jasmine');
+var resolve = require('browser-resolve');
 
 var findPackageJson = require('./lib/gulp/findPackageJson');
 var rwPackageJson = require('./lib/gulp/rwPackageJson');
 var depScanner = require('./lib/gulp/dependencyScanner');
 var packageUtils = require('./lib/packageMgr/packageUtils');
+var textHtmlTranform = require('./lib/gulp/browserifyTransforms').textHtml;
 var rev = require('gulp-rev');
 
 var config = require('./lib/config');
@@ -88,48 +90,102 @@ gulp.task('link', function() {
  */
 gulp.task('browserify', function() {
 	var browserifyTask = [];
-	var moduleNames = [];
+	var allModules = [];
 	packageUtils.findBrowserEntryFiles('package.json', function(moduleName) {
-		moduleNames.push(moduleName);
+		allModules.push(moduleName);
 	});
+	var bundleMap = packageUtils.bundleModuleMap(Path.resolve(__dirname, 'package.json'));
+	gutil.log('bundles: ' + util.inspect(_.keys(bundleMap)));
 
-
-
-	packageUtils.findBrowserEntryFiles('package.json', function(moduleName, entryPath, parsedName) {
-		gutil.log('entry: ' + parsedName.name);
+	_.forOwn(bundleMap, function(modules, bundle) {
+		gutil.log('builing bundle: ' + bundle);
 		var def = Q.defer();
 		browserifyTask.push(def.promise);
 		var b = browserify({
 			debug: true
 		});
-		b.add(entryPath);
-		externalModules(b, moduleName);
-		b.require(entryPath, {expose: moduleName});
+		modules.forEach(function(module) {
+			gutil.log('\t' + util.inspect(module));
+			var file = module.file;
+			gutil.log('\t' + file);
+			b.add(file);
+
+			b.require(file, {expose: module.longName});
+		});
+		b.transform(textHtmlTranform);
+		excludeModules(b, modules);
+
 		b.bundle()
-		.pipe(source(parsedName.name + '.js'))
+		.on('error', gutil.log)
+		.pipe(source(bundle + '.js'))
 		.pipe(buffer())
-		.pipe(gulp.dest('./dist/js/'))
-		.pipe(rename(parsedName.name + '.min.js'))
-		.pipe(rev())
+		// .pipe(gulp.dest('./dist/js/'))
+		// .on('error', gutil.log)
+		// .pipe(rename(bundle + '.min.js'))
+		// .pipe(rev())
+		.on('error', gutil.log)
 		.pipe(sourcemaps.init({
 			loadMaps: true
 		}))
 		// Add transformation tasks to the pipeline here.
-		.pipe(uglify())
+		//.pipe(uglify())
 		.on('error', gutil.log)
 		.pipe(sourcemaps.write('./'))
 		.pipe(size())
 		.pipe(gulp.dest('./dist/js/'))
 		.pipe(rev.manifest({merge: true}))
 		.pipe(gulp.dest('./dist/js/'))
+		.on('error', gutil.log)
 		.on('end', function() {
 			def.resolve();
 		});
 	});
 
-	function externalModules(b, currentModule) {
-		moduleNames.forEach(function(moduleName) {
-			if (moduleName !== currentModule) {
+	// packageUtils.findBrowserEntryFiles('package.json', function(moduleName, entryPath, parsedName) {
+	// 	gutil.log('entry: ' + parsedName.name);
+	// 	var def = Q.defer();
+	// 	browserifyTask.push(def.promise);
+	// 	var b = browserify({
+	// 		debug: true
+	// 	});
+	// 	b.add(entryPath);
+	// 	b.transform(textHtmlTranform);
+	// 	// b.plugin('partition-bundle', {
+	// 	// 	map:
+	// 	// });
+	// 	excludeModules(b, moduleName);
+	// 	b.require(entryPath, {expose: moduleName});
+	//
+	// 	b.bundle()
+	// 	.on('error', gutil.log)
+	// 	.pipe(source(parsedName.name + '.js'))
+	// 	.pipe(buffer())
+	// 	.pipe(gulp.dest('./dist/js/'))
+	// 	.on('error', gutil.log)
+	// 	.pipe(rename(parsedName.name + '.min.js'))
+	// 	.pipe(rev())
+	// 	.on('error', gutil.log)
+	// 	.pipe(sourcemaps.init({
+	// 		loadMaps: true
+	// 	}))
+	// 	// Add transformation tasks to the pipeline here.
+	// 	.pipe(uglify())
+	// 	.on('error', gutil.log)
+	// 	.pipe(sourcemaps.write('./'))
+	// 	.pipe(size())
+	// 	.pipe(gulp.dest('./dist/js/'))
+	// 	.pipe(rev.manifest({merge: true}))
+	// 	.pipe(gulp.dest('./dist/js/'))
+	// 	.on('error', gutil.log)
+	// 	.on('end', function() {
+	// 		def.resolve();
+	// 	});
+	// });
+
+	function excludeModules(b, entryModules) {
+		allModules.forEach(function(moduleName) {
+			if (!_.includes(entryModules, moduleName)) {
+				gutil.log('\t\texclude ' + moduleName);
 				b.exclude(moduleName);
 			}
 		});

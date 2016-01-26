@@ -2,12 +2,14 @@
   "name": "@dr/example-browserify",
   "version": "0.0.0",
   "description": "Test browserify",
-  "browser": "example-browserify.browser.js",
+  "browser": "exampleBrowserify.browser.js",
+  "main": "exampleBrowserify.server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "LJ",
   "dr":{
+	  "entry": true
   },
   "license": "ISC"
 }

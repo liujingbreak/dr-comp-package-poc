@@ -3,5 +3,8 @@
 	"port": 14333,
 	"packageScopes": ["dr", "dr-core"],
 	"nodeRoutePath": "/",
-	"devMode": false
+	"devMode": false,
+	"vendorBundleMap": {
+		"core": ["lodash"]
+	}
 }
