@@ -5,6 +5,6 @@
 	"nodeRoutePath": "/",
 	"devMode": false,
 	"vendorBundleMap": {
-		"core": ["lodash"]
+		"core": ["lodash", "q"]
 	}
 }

@@ -8,8 +8,11 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "LJ",
-  "dr":{
-	  "entry": true
+  "dr": {
+    "bundle": "example"
   },
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "q": "^1.4.1"
+  }
 }
