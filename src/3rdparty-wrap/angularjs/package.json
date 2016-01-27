@@ -4,7 +4,7 @@
   "description": "wrapper of angularjs v1.4.5",
   "browser": "main.js",
   "dr": {
-	  "entry": true,
+	  "active": true,
 	  "bundle": "core"
   },
   "scripts": {

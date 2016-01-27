@@ -8,7 +8,8 @@
   "browser": "browser/js/index.js",
   "main": "server/main.js",
   "dr": {
-    "bundle": "example"
+    "bundle": "example",
+	"active": true
   },
   "author": "jing.liu.fe@d.com",
   "license": "ISC",

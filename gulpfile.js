@@ -40,7 +40,8 @@ var config = require('./lib/config');
 
 
 gulp.task('default', function() {
-	// place code for your default task here
+	gutil.log('please individually execute gulp [task]');
+	gutil.log('\tclean, link, browserify');
 });
 
 gulp.task('clean:dependency', function() {
@@ -59,6 +60,8 @@ gulp.task('clean:dependency', function() {
 gulp.task('clean:dist', function() {
 	return del('dist');
 });
+
+gulp.task('clean', ['clean:dist', 'clean:dependency']);
 
 gulp.task('lint', function() {
 	gulp.src(['*.js',
@@ -89,20 +92,25 @@ gulp.task('link', function() {
  * Need refactor
  * TODO: partition-bundle, deAMDify, Parcelify
  */
-gulp.task('browserify', function() {
+gulp.task('compile', function() {
 	var browserifyTask = [];
 	var info = packageUtils.bundleMapInfo(Path.resolve(__dirname, 'package.json'));
 	gutil.log('bundles: ' + util.inspect(_.keys(info.bundleMap)));
 
 	_.forOwn(info.bundleMap, function(modules, bundle) {
 		gutil.log('build bundle: ' + bundle);
+		var mIdx = 1;
+		var moduleCount = _.size(modules);
 		_.each(modules, function(moduleInfo) {
-			gutil.log('\t' + moduleInfo.longName);
+			if (mIdx === moduleCount) {
+				gutil.log('\t└─ ' + moduleInfo.longName);
+				return;
+			}
+			gutil.log('\t├─ ' + moduleInfo.longName);
+			mIdx++;
 		});
 
-		var entryStream = bundleBootstrap.createBundleEntryFile(bundle, _.map(modules, function(moduleInfo) {
-			return moduleInfo.longName;
-		}));
+		var entryStream = bundleBootstrap.createBundleEntryFile(bundle, modules);
 		var def = Q.defer();
 		browserifyTask.push(def.promise);
 		var b = browserify({
@@ -110,9 +118,6 @@ gulp.task('browserify', function() {
 		});
 		b.add(entryStream, {file: bundle + '.js'});
 		modules.forEach(function(module) {
-			var file = module.file;
-			//b.add(file);
-			//b.require(file, {expose: module.longName});
 			b.require(module.longName);
 		});
 		b.transform(textHtmlTranform);
