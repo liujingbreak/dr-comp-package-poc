@@ -3,6 +3,8 @@ Frontend platform PoC
 
 Deadline, Jan 23th
 
+> **Go like a community** !
+
 Quick Start
 -----------
 

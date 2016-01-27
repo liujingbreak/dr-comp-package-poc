@@ -29,3 +29,7 @@ _.each(['error', 'warn', 'info', 'debug', 'trace'], function(level) {
 		console[level].apply(console, arg);
 	};
 });
+
+if (window.console) {
+	console.log('@dr/logger is started');
+}

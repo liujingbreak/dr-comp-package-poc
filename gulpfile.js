@@ -31,7 +31,9 @@ var findPackageJson = require('./lib/gulp/findPackageJson');
 var rwPackageJson = require('./lib/gulp/rwPackageJson');
 var depScanner = require('./lib/gulp/dependencyScanner');
 var packageUtils = require('./lib/packageMgr/packageUtils');
-var textHtmlTranform = require('./lib/gulp/browserifyTransforms').textHtml;
+var textHtmlTranform = require('./lib/gulp/browserifyHelper').textHtml;
+var bundleBootstrap = require('./lib/gulp/browserifyHelper').BrowserSideBootstrap();
+
 var rev = require('gulp-rev');
 
 var config = require('./lib/config');
@@ -97,16 +99,21 @@ gulp.task('browserify', function() {
 		_.each(modules, function(moduleInfo) {
 			gutil.log('\t' + moduleInfo.longName);
 		});
+
+		var entryStream = bundleBootstrap.createBundleEntryFile(bundle, _.map(modules, function(moduleInfo) {
+			return moduleInfo.longName;
+		}));
 		var def = Q.defer();
 		browserifyTask.push(def.promise);
 		var b = browserify({
 			debug: true
 		});
+		b.add(entryStream, {file: bundle + '.js'});
 		modules.forEach(function(module) {
 			var file = module.file;
-			b.add(file);
-
-			b.require(file, {expose: module.longName});
+			//b.add(file);
+			//b.require(file, {expose: module.longName});
+			b.require(module.longName);
 		});
 		b.transform(textHtmlTranform);
 		excludeModules(b, modules);
