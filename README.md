@@ -23,10 +23,10 @@ Quick Start
 2.	After download this PoC, go to root folder make sure you can find a hidden file `.npmrc` in there, run command
 
 	```
-	npm install --only=dev
-	gulp link
 	npm install
-	gulp browserify
+	gulp link
+	npm install ./package-recipe
+	gulp compile
 	npm start
 
 
@@ -36,24 +36,19 @@ Quick Start
 
 	If you are able to see a "normal" page, that means it worked.
 
-	> You may also manage your profile level npmrc by
-	 `npm set registry http://localhost:4873/`
+	> You may also manage your profile level npmrc by `npm set registry http://localhost:4873/`
 	>
 	> Another cool way is to use `nrm` to switch your NPM registry endpoint.
 
-3.	Publish them
-	```
+3.	Publish them`
 	npm set registry http://localhost:4873/
 	npm adduser <your user name>
 	gulp publish
-	```
-	Now open you browser and surf to [http://localhost:4873/](http://localhost:4873/).
-	![sinopia screen snap shot](doc/sinopia.png)
-	Check them out, all packages with name prefixed "@dr/" are on Sinopia registry. Now you can create a new empty folder and try
-
+	` Now open you browser and surf to [http://localhost:4873/](http://localhost:4873/). ![sinopia screen snap shot](doc/sinopia.png) Check them out, all packages with name prefixed "@dr/" are on Sinopia registry. Now you can create a new empty folder and try
 
 	```
 	npm install @dr/fe-house-poc
+	npm install ./node_modules/@dr/fe-house-poc/package-recipe
 	cd node_modules/@dr/fe-house-poc
 	npm start
 	```
@@ -175,16 +170,15 @@ We can also build explicitly dependency between packages like: PackageA `require
 
 ### Dependency
 
-All private package is named with special *scope*
-	e.g. `@dr/example-node`
+All private package is named with special *scope* e.g. `@dr/example-node`
 
 A private package can also depend on another private package, code in this way,
 
 ```
 var exampleNode = require('@dr/example-node');
 ```
-Just like how we do it for any 3rd-party public NPM module. And with the power of Browserify (or Webpack), it works in both Node and browser side.
 
+Just like how we do it for any 3rd-party public NPM module. And with the power of Browserify (or Webpack), it works in both Node and browser side.
 
 ##Test
 

@@ -41,7 +41,6 @@
 		"jshint-stylish": "^2.1.0",
 		"main-bower-files": "^2.11.0",
 		"mkdirs": "0.0.2",
-		"partition-bundle": "^2.3.0",
 		"shelljs-nodecli": "^0.1.1",
 		"vinyl-buffer": "^1.0.0",
 		"vinyl-paths": "^2.1.0",
@@ -54,14 +53,6 @@
 		"lodash": "^4.0.0",
 		"log4js": "^0.6.29",
 		"q": "^1.4.1",
-		"swig": "^1.4.2",
-		"@dr/angularjs": "1.0.3",
-		"@dr-core/developer": "1.0.0",
-		"@dr-core/express-server": "0.0.6",
-		"@dr/example-dr": "1.0.7",
-		"@dr/example-node": "1.0.7",
-		"@dr/example-common": "1.0.1",
-		"@dr/logger": "0.0.0",
-		"@dr/example-browserify": "0.0.0"
+		"swig": "^1.4.2"
 	}
 }

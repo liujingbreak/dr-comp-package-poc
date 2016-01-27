@@ -2,6 +2,7 @@
 	"srcDir": "src",
 	"port": 14333,
 	"packageScopes": ["dr", "dr-core"],
+	"recipeFolder": "package-recipe",
 	"nodeRoutePath": "/",
 	"devMode": false,
 	"vendorBundleMap": {

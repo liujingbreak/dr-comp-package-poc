@@ -41,20 +41,17 @@ var config = require('./lib/config');
 
 gulp.task('default', function() {
 	gutil.log('please individually execute gulp [task]');
-	gutil.log('\tclean, link, browserify');
+	gutil.log('\tclean, link, compile');
 });
 
 gulp.task('clean:dependency', function() {
 	var dirs = [];
 	_.each(config().packageScopes, function(packageScope) {
-		var npmFolder = Path.resolve('node_modules', '@', packageScope);
-		var bowerFolder = Path.resolve('node_modules', '@', packageScope);
+		var npmFolder = Path.resolve('node_modules', '@' + packageScope);
 		gutil.log('delete ' + npmFolder);
-		gutil.log('delete ' + bowerFolder);
 		dirs.push(npmFolder);
-		dirs.push(bowerFolder);
 	});
-	return del(dirs);
+	return del(dirs).then(gutil.log, gutil.log);
 });
 
 gulp.task('clean:dist', function() {
@@ -85,7 +82,7 @@ gulp.task('link', function() {
 		.on('error', gutil.log)
 		.pipe(gulp.dest('node_modules'))
 		.on('error', gutil.log)
-		.pipe(rwPackageJson.addDependeny('package.json'));
+		.pipe(rwPackageJson.addDependeny(Path.resolve(__dirname, config().recipeFolder, 'package.json')));
 });
 
 /**
@@ -94,7 +91,7 @@ gulp.task('link', function() {
  */
 gulp.task('compile', function() {
 	var browserifyTask = [];
-	var info = packageUtils.bundleMapInfo(Path.resolve(__dirname, 'package.json'));
+	var info = packageUtils.bundleMapInfo(Path.resolve(__dirname, config().recipeFolder, 'package.json'));
 	gutil.log('bundles: ' + util.inspect(_.keys(info.bundleMap)));
 
 	_.forOwn(info.bundleMap, function(modules, bundle) {

@@ -1,0 +1,20 @@
+{
+	"name": "@dr/recipe",
+	"version": "1.0.0",
+	"description": "Only as dependencies list",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "LJ",
+	"license": "ISC",
+	"dependencies": {
+		"@dr/example-browserify": "0.0.0",
+		"@dr/example-common": "1.0.1",
+		"@dr/example-dr": "1.0.7",
+		"@dr/angularjs": "1.0.3",
+		"@dr-core/developer": "1.0.0",
+		"@dr-core/express-server": "0.0.6",
+		"@dr/example-node": "1.0.7",
+		"@dr/logger": "0.0.0"
+	}
+}
