@@ -95,6 +95,15 @@ gulp.task('compile', function() {
 
 	_.forOwn(info.bundleMap, function(modules, bundle) {
 		gutil.log('build bundle: ' + bundle);
+		var def = Q.defer();
+		browserifyTask.push(def.promise);
+		buildBundle(modules, bundle)
+		.on('end', function() {
+			def.resolve();
+		});
+	});
+
+	function buildBundle(modules, bundle) {
 		var mIdx = 1;
 		var moduleCount = _.size(modules);
 		_.each(modules, function(moduleInfo) {
@@ -105,10 +114,7 @@ gulp.task('compile', function() {
 			gutil.log('\t├─ ' + moduleInfo.longName);
 			mIdx++;
 		});
-
 		var entryStream = bundleBootstrap.createBundleEntryFile(bundle, modules);
-		var def = Q.defer();
-		browserifyTask.push(def.promise);
 		var b = browserify({
 			debug: true
 		});
@@ -119,7 +125,7 @@ gulp.task('compile', function() {
 		b.transform(textHtmlTranform);
 		excludeModules(b, modules);
 
-		b.bundle()
+		return b.bundle()
 		.on('error', gutil.log)
 		.pipe(source(bundle + '.js'))
 		.pipe(buffer())
@@ -139,11 +145,8 @@ gulp.task('compile', function() {
 		.pipe(gulp.dest('./dist/js/'))
 		.pipe(rev.manifest({merge: true}))
 		.pipe(gulp.dest('./dist/js/'))
-		.on('error', gutil.log)
-		.on('end', function() {
-			def.resolve();
-		});
-	});
+		.on('error', gutil.log);
+	}
 
 	function excludeModules(b, entryModules) {
 		info.allModules.forEach(function(moduleName) {

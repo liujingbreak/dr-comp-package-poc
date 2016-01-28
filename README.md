@@ -102,6 +102,7 @@ e.g.
 ├─ gulpfile.js
 ├─ .npmrc, .jscsrc .jshintrc...
 ├─ config.json, config.local.json
+├─ package-recipe
 ├─ ...
 └─ src
 	 ├─ core/
@@ -124,7 +125,7 @@ e.g.
 
 #### External Package
 
-The dependencies sitting in our main package.json, which we get from *Sinopia* by `npm install`.
+The dependencies sitting in package-recipe/package.json, which we get from *Sinopia* by `npm install`.
 
 External package could be things that owned by another team.
 
@@ -170,7 +171,7 @@ Other packages consume APIs.
 api.route().get('/service', function(req, res) { ... })
 ```
 
-We can also build explicitly dependency between packages like: PackageA `require('PackageB')`
+We can also have explicit dependency relationship between packages: PackageA `require('PackageB')`
 
 ### Dependency
 
