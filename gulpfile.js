@@ -29,7 +29,6 @@ var Jasmine = require('jasmine');
 
 var findPackageJson = require('./lib/gulp/findPackageJson');
 var rwPackageJson = require('./lib/gulp/rwPackageJson');
-var depScanner = require('./lib/gulp/dependencyScanner');
 var packageUtils = require('./lib/packageMgr/packageUtils');
 var textHtmlTranform = require('./lib/gulp/browserifyHelper').textHtml;
 var bundleBootstrap = require('./lib/gulp/browserifyHelper').BrowserSideBootstrap();
@@ -41,7 +40,7 @@ var config = require('./lib/config');
 
 gulp.task('default', function() {
 	gutil.log('please individually execute gulp [task]');
-	gutil.log('\tclean, link, compile');
+	gutil.log('\tclean, link, compile, bump-version, publish');
 });
 
 gulp.task('clean:dependency', function() {

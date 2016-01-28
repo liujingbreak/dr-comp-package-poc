@@ -1,6 +1,6 @@
 {
 	"name": "@dr/fe-house-poc",
-	"version": "1.0.15",
+	"version": "1.0.17",
 	"description": "This is a PoC for company's frontend platform",
 	"main": "app.js",
 	"scripts": {
@@ -18,7 +18,6 @@
 	},
 	"homepage": "https://github.com/liujingbreak/dr-package-home-PoC#readme",
 	"devDependencies": {
-		"browser-resolve": "^1.11.0",
 		"browserify": "^13.0.0",
 		"del": "^2.2.0",
 		"event-stream": "^3.3.2",
@@ -53,6 +52,7 @@
 		"lodash": "^4.0.0",
 		"log4js": "^0.6.29",
 		"q": "^1.4.1",
-		"swig": "^1.4.2"
+		"swig": "^1.4.2",
+		"browser-resolve": "^1.11.0"
 	}
 }

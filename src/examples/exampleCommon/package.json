@@ -1,6 +1,6 @@
 {
   "name": "@dr/example-common",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "",
   "browser": "browser.js",
   "main": "server.js",
@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "dr": {
-	  "bundle": "example"
+    "bundle": "example"
   }
 }

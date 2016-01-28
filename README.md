@@ -40,11 +40,15 @@ Quick Start
 	>
 	> Another cool way is to use `nrm` to switch your NPM registry endpoint.
 
-3.	Publish them`
+3.	Publish them
+	```
 	npm set registry http://localhost:4873/
 	npm adduser <your user name>
+	# If you modified anything, bump version before publish 
+	gulp bump-version
 	gulp publish
-	` Now open you browser and surf to [http://localhost:4873/](http://localhost:4873/). ![sinopia screen snap shot](doc/sinopia.png) Check them out, all packages with name prefixed "@dr/" are on Sinopia registry. Now you can create a new empty folder and try
+	```
+	Now open you browser and surf to [http://localhost:4873/](http://localhost:4873/). ![sinopia screen snap shot](doc/sinopia.png) Check them out, all packages with name prefixed "@dr/" are on Sinopia registry. Now you can create a new empty folder and try
 
 	```
 	npm install @dr/fe-house-poc
