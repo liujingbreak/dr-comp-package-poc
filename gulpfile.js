@@ -34,9 +34,10 @@ var textHtmlTranform = require('./lib/gulp/browserifyHelper').textHtml;
 var bundleBootstrap = require('./lib/gulp/browserifyHelper').BrowserSideBootstrap();
 
 var rev = require('gulp-rev');
-
 var config = require('./lib/config');
 
+var DEST = Path.resolve(__dirname, 'dist');
+var JS_DEST = Path.resolve(__dirname, 'dist', 'js')
 
 gulp.task('default', function() {
 	gutil.log('please individually execute gulp [task]');
@@ -106,13 +107,13 @@ gulp.task('compile', function() {
 			mIdx++;
 		});
 
-		var entryStream = bundleBootstrap.createBundleEntryFile(bundle, modules);
+		var listStream = bundleBootstrap.createPackageListFile(bundle, modules);
 		var def = Q.defer();
 		browserifyTask.push(def.promise);
 		var b = browserify({
 			debug: true
 		});
-		b.add(entryStream, {file: bundle + '.js'});
+		b.add(listStream, {file: bundle + '-activate.js'});
 		modules.forEach(function(module) {
 			b.require(module.longName);
 		});
@@ -136,15 +137,16 @@ gulp.task('compile', function() {
 		.on('error', gutil.log)
 		.pipe(sourcemaps.write('./'))
 		.pipe(size())
-		.pipe(gulp.dest('./dist/js/'))
+		.pipe(gulp.dest(JS_DEST))
 		.pipe(rev.manifest({merge: true}))
-		.pipe(gulp.dest('./dist/js/'))
+		.pipe(gulp.dest(JS_DEST))
 		.on('error', gutil.log)
 		.on('end', function() {
 			def.resolve();
 		});
 	});
 
+	//TODO: algorithm here can be optmized
 	function excludeModules(b, entryModules) {
 		info.allModules.forEach(function(moduleName) {
 			if (!_.includes(entryModules, moduleName)) {
