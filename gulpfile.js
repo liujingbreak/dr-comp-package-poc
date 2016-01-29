@@ -17,13 +17,8 @@ var Q = require('q');
 Q.longStackSupport = true;
 var _ = require('lodash');
 
-var source = require('vinyl-source-stream');
-var buffer = require('vinyl-buffer');
-var uglify = require('gulp-uglify');
-var sourcemaps = require('gulp-sourcemaps');
-var size = require('gulp-size');
+
 var cli = require('shelljs-nodecli');
-var shasum = require('shasum');
 var rename = require('gulp-rename');
 var Jasmine = require('jasmine');
 

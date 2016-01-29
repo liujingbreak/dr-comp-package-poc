@@ -46,6 +46,9 @@ function BrowserSideBootstrap() {
 BrowserSideBootstrap.prototype = {
 	BOOT_FUNCTION_PREFIX: BOOT_FUNCTION_PREFIX,
 
+	/**
+	 * TODO: use a template engine to generate js file stream
+	 */
 	createPackageListFile: function(bundleName, packageInstances) {
 		var self = this;
 		this.bundleScripts.push(bundleName);

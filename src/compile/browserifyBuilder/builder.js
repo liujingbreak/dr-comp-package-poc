@@ -61,13 +61,16 @@ function bundleMapInfo(packageJsonFile) {
 
 	packageUtils.findBrowserPackageByType(['core', null], function(name, entryPath, parsedName, pkJson) {
 		var bundle;
-		info.allModules.push(name);
 		if (!pkJson.dr) {
 			bundle = parsedName.name;
-		} else {
+		} else if (!pkJson.dr.builder || pkJson.dr.builder === 'browserify') {
 			bundle = pkJson.dr.bundle || pkJson.dr.chunk;
 			bundle = bundle ? bundle : parsedName.name;
+		} else {
+			return;
 		}
+		info.allModules.push(name);
+
 		if (!map.hasOwnProperty(bundle)) {
 			map[bundle] = [];
 		}
