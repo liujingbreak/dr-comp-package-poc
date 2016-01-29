@@ -1,14 +1,20 @@
 var through = require('through2');
 var Path = require('path');
 var stream = require('stream');
-var config = require('../config');
 var esprima = require('esprima');
 var estraverse = require('estraverse');
 var fs = require('fs');
 
-exports.textHtml = textHtmlTranform;
-exports.BrowserSideBootstrap = BrowserSideBootstrap;
-exports.dependencyTree = dependencyTree;
+var config;
+
+module.exports = function(_config) {
+	config = _config;
+	return {
+		textHtmlTranform: textHtmlTranform,
+		BrowserSideBootstrap: BrowserSideBootstrap
+	};
+};
+//exports.dependencyTree = dependencyTree;
 
 var BOOT_FUNCTION_PREFIX = 'bootBundle_';
 
@@ -78,20 +84,20 @@ function str2Stream(str) {
 	return output;
 }
 
-function dependencyTree(filePath) {
-	console.log('read ' + filePath);
-	var ast = esprima.parse(fs.readFileSync(filePath, 'utf-8'));
-	console.log(ast);
-	estraverse.traverse(ast, {
-		enter: function(node) {
-			if (node.type === 'CallExpression' && node.callee && node.callee.type === 'Identifier' &&
-				node.callee.name === 'require') {
-				console.log(node.arguments[0].value);
-			}
-		}
-	});
-}
-
-if (process.argv.length >= 3) {
-	dependencyTree(process.argv[2]);
-}
+// function dependencyTree(filePath) {
+// 	console.log('read ' + filePath);
+// 	var ast = esprima.parse(fs.readFileSync(filePath, 'utf-8'));
+// 	console.log(ast);
+// 	estraverse.traverse(ast, {
+// 		enter: function(node) {
+// 			if (node.type === 'CallExpression' && node.callee && node.callee.type === 'Identifier' &&
+// 				node.callee.name === 'require') {
+// 				console.log(node.arguments[0].value);
+// 			}
+// 		}
+// 	});
+// }
+//
+// if (process.argv.length >= 3) {
+// 	dependencyTree(process.argv[2]);
+// }

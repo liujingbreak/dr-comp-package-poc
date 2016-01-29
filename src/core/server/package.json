@@ -11,5 +11,8 @@
     "serve-favicon": "~2.3.0",
     "consolidate": "^0.13.1",
     "jade": "1.11.0"
-  }
+  },
+	"dr":{
+		"type": "core"
+	}
 }

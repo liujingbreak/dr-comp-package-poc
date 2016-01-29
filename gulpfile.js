@@ -30,14 +30,11 @@ var Jasmine = require('jasmine');
 var findPackageJson = require('./lib/gulp/findPackageJson');
 var rwPackageJson = require('./lib/gulp/rwPackageJson');
 var packageUtils = require('./lib/packageMgr/packageUtils');
-var textHtmlTranform = require('./lib/gulp/browserifyHelper').textHtml;
-var bundleBootstrap = require('./lib/gulp/browserifyHelper').BrowserSideBootstrap();
 
 var rev = require('gulp-rev');
 var config = require('./lib/config');
 
 var DEST = Path.resolve(__dirname, 'dist');
-var JS_DEST = Path.resolve(__dirname, 'dist', 'js')
 
 gulp.task('default', function() {
 	gutil.log('please individually execute gulp [task]');
@@ -85,78 +82,27 @@ gulp.task('link', function() {
 		.pipe(rwPackageJson.addDependeny(Path.resolve(__dirname, config().recipeFolder, 'package.json')));
 });
 
-/**
- * Need refactor
- * TODO: partition-bundle, deAMDify, Parcelify
- */
 gulp.task('compile', function() {
-	var browserifyTask = [];
-	var info = packageUtils.bundleMapInfo(Path.resolve(__dirname, config().recipeFolder, 'package.json'));
-	gutil.log('bundles: ' + util.inspect(_.keys(info.bundleMap)));
-
-	_.forOwn(info.bundleMap, function(modules, bundle) {
-		gutil.log('build bundle: ' + bundle);
-		var mIdx = 1;
-		var moduleCount = _.size(modules);
-		_.each(modules, function(moduleInfo) {
-			if (mIdx === moduleCount) {
-				gutil.log('\t└─ ' + moduleInfo.longName);
-				return;
-			}
-			gutil.log('\t├─ ' + moduleInfo.longName);
-			mIdx++;
-		});
-
-		var listStream = bundleBootstrap.createPackageListFile(bundle, modules);
-		var def = Q.defer();
-		browserifyTask.push(def.promise);
-		var b = browserify({
-			debug: true
-		});
-		b.add(listStream, {file: bundle + '-activate.js'});
-		modules.forEach(function(module) {
-			b.require(module.longName);
-		});
-		b.transform(textHtmlTranform);
-		excludeModules(b, modules);
-
-		b.bundle()
-		.on('error', gutil.log)
-		.pipe(source(bundle + '.js'))
-		.pipe(buffer())
-		// .pipe(gulp.dest('./dist/js/'))
-		// .on('error', gutil.log)
-		// .pipe(rename(bundle + '.min.js'))
-		// .pipe(rev())
-		.on('error', gutil.log)
-		.pipe(sourcemaps.init({
-			loadMaps: true
-		}))
-		// Add transformation tasks to the pipeline here.
-		//.pipe(uglify())
-		.on('error', gutil.log)
-		.pipe(sourcemaps.write('./'))
-		.pipe(size())
-		.pipe(gulp.dest(JS_DEST))
-		.pipe(rev.manifest({merge: true}))
-		.pipe(gulp.dest(JS_DEST))
-		.on('error', gutil.log)
-		.on('end', function() {
-			def.resolve();
-		});
+	var jobs = [];
+	packageUtils.findNodePackageByType('builder', function(name, entryPath, parsedName, pkJson) {
+		gutil.log('run builder: ' + name);
+		var res = require(name)(packageUtils, config, DEST);
+		if (res && _.isFunction(res.pipe)) {
+			// is stream
+			var job = Q.defer();
+			jobs.push(job.promise);
+			res.on('end', function() {
+				job.resolve();
+			}).on('error', function(er) {
+				gutil.log(er);
+				job.reject(er);
+			});
+		} else {
+			jobs.push(res);
+		}
 	});
 
-	//TODO: algorithm here can be optmized
-	function excludeModules(b, entryModules) {
-		info.allModules.forEach(function(moduleName) {
-			if (!_.includes(entryModules, moduleName)) {
-				//gutil.log('\t\texclude ' + moduleName);
-				b.exclude(moduleName);
-			}
-		});
-	}
-
-	return Q.allSettled(browserifyTask);
+	return Q.allSettled(jobs);
 });
 
 /**
