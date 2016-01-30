@@ -5,7 +5,7 @@
   "browser": "main.js",
   "dr": {
     "active": true,
-    "bundle": "core"
+    "bundle": "ui-core"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

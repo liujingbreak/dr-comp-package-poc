@@ -18,3 +18,7 @@ function PackageBrowserInstance(attrs, configSetting) {
 		this.active = true;
 	}
 }
+
+PackageBrowserInstance.prototype.toString = function() {
+	return 'Package: ' + this.longName;
+};

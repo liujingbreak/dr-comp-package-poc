@@ -1,22 +1,36 @@
 var through = require('through2');
 var Path = require('path');
 var stream = require('stream');
-var esprima = require('esprima');
-var estraverse = require('estraverse');
 var fs = require('fs');
+var log = require('log4js').getLogger('browserifyHelper');
 
 var config;
 
 module.exports = function(_config) {
 	config = _config;
+
+	var buildins = ['assert', 'buffer', 'child_process', 'cluster', 'console', 'constants', 'crypto', 'dgram', 'dns',
+	'domain', 'events', 'fs', 'http', 'https', 'module', 'net', 'os', 'path', 'punycode', 'querystring',
+	'readline', 'repl', 'stream', '_stream_duplex', '_stream_passthrough', '_stream_readable',
+	'_stream_transform', '_stream_writable', 'string_decoder', 'sys', 'timers', 'tls', 'tty', 'url',
+	'util', 'vm', 'zlib', '_process'];
+
+	var buildinSet = {};
+	buildins.forEach(function(name) {
+		buildinSet[name] = true;
+	});
 	return {
 		textHtmlTranform: textHtmlTranform,
-		BrowserSideBootstrap: BrowserSideBootstrap
+		jsTranform: jsTranform,
+		BrowserSideBootstrap: BrowserSideBootstrap,
+		buildins: buildins,
+		buildinSet: buildinSet
 	};
 };
 //exports.dependencyTree = dependencyTree;
 
-var BOOT_FUNCTION_PREFIX = 'bootBundle_';
+var BOOT_FUNCTION_PREFIX = '_bundle_';
+
 
 function textHtmlTranform(file) {
 	var ext = Path.extname(file).toLowerCase();
@@ -25,6 +39,17 @@ function textHtmlTranform(file) {
 			this.push('module.exports = ' + JSON.stringify(buf.toString('utf-8')));
 			next();
 		});
+	} else {
+		return through(doNothing);
+	}
+}
+
+function jsTranform(file) {
+	log.debug(file);
+	var ext = Path.extname(file).toLowerCase();
+	if (ext === '.js' || ext === '.json') {
+		//log.debug(file);
+		return through(doNothing);
 	} else {
 		return through(doNothing);
 	}
@@ -44,25 +69,26 @@ function BrowserSideBootstrap() {
 }
 
 BrowserSideBootstrap.prototype = {
+
 	BOOT_FUNCTION_PREFIX: BOOT_FUNCTION_PREFIX,
 
 	/**
 	 * TODO: use a template engine to generate js file stream
 	 */
 	createPackageListFile: function(bundleName, packageInstances) {
-		var self = this;
+		//var self = this;
 		this.bundleScripts.push(bundleName);
-		var bootstrap = 'function ' + BOOT_FUNCTION_PREFIX + bundleName + '(){\n';
+		var bootScriptFuncName = BOOT_FUNCTION_PREFIX + safeBundleNameOf(bundleName);
+		var bootstrap = 'function ' + bootScriptFuncName + '(){\n';
 		packageInstances.forEach(function(packageIns) {
-			bootstrap += '\trequire(\'' + packageIns.longName + '\')' +
-				(packageIns.active ? '.activate();\n' : ';\n');
-			if (packageIns.active) {
-				if (!self.activeModules[bundleName]) {
-					self.activeModules[bundleName] = [packageIns.longName];
-				} else {
-					self.activeModules[bundleName].push(packageIns.longName);
-				}
-			}
+			bootstrap += '\trequire(\'' + packageIns.longName + '\');\n';
+			// if (packageIns.active) {
+			// 	if (!self.activeModules[bundleName]) {
+			// 		self.activeModules[bundleName] = [packageIns.longName];
+			// 	} else {
+			// 		self.activeModules[bundleName].push(packageIns.longName);
+			// 	}
+			// }
 		});
 		if (config().devMode) {
 			bootstrap += '\tconsole && console.log("bundle ' + bundleName + ' is activated");\n';
@@ -71,6 +97,8 @@ BrowserSideBootstrap.prototype = {
 		if (config().devMode) {
 			bootstrap += 'console && console.log("bundle ' + bundleName + ' is loaded");\n';
 		}
+
+		log.debug('bundle "' + bundleName + '" bootstrap script:\n' + bootstrap);
 		var output = new stream.Readable();
 		output._read = function() {};
 		output.push(bootstrap);
@@ -79,6 +107,10 @@ BrowserSideBootstrap.prototype = {
 	}
 };
 
+function safeBundleNameOf(bundleName) {
+	return bundleName.replace('-', '_');
+}
+
 function str2Stream(str) {
 	var output = new stream.Readable();
 	output._read = function() {};
@@ -86,21 +118,3 @@ function str2Stream(str) {
 	output.push(null);
 	return output;
 }
-
-// function dependencyTree(filePath) {
-// 	console.log('read ' + filePath);
-// 	var ast = esprima.parse(fs.readFileSync(filePath, 'utf-8'));
-// 	console.log(ast);
-// 	estraverse.traverse(ast, {
-// 		enter: function(node) {
-// 			if (node.type === 'CallExpression' && node.callee && node.callee.type === 'Identifier' &&
-// 				node.callee.name === 'require') {
-// 				console.log(node.arguments[0].value);
-// 			}
-// 		}
-// 	});
-// }
-//
-// if (process.argv.length >= 3) {
-// 	dependencyTree(process.argv[2]);
-// }

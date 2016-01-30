@@ -9,7 +9,8 @@
   },
   "author": "LJ",
   "dr": {
-    "bundle": "example"
+    "bundle": "example",
+	"entryPage": "main.html"
   },
   "license": "ISC",
   "dependencies": {

@@ -97,7 +97,7 @@ gulp.task('compile', function() {
 		}
 	});
 
-	return Q.allSettled(jobs);
+	return Q.all(jobs);
 });
 
 /**
