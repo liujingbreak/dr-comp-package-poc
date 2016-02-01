@@ -1,7 +1,30 @@
+var mafia = require('@dr/example-node');
+var log = require('log4js').getLogger(__filename);
+var Path = require('path');
+
 module.exports = {
 	activate: function(api) {
-		require('./routes')(api);
+		api.router().get('/route1', function(req, res) {
+			mafia().then(function(text) {
+				res.send('Mafia words: "' + text + '"');
+			})
+			.catch(function(er) {
+				log.error('', er);
+				res.send(er);
+			});
+		});
 
-		api.templateFolder('server/views');
+		api.router().get('/route2', function(req, res) {
+			mafia().then(function(text) {
+				res.render('server/views/exampleDr-mafia', {
+					path: Path.join(api.packageInstance.path, 'server', 'views', 'exampleDr-mafia.html'),
+					words: text
+				});
+			})
+			.catch(function(er) {
+				log.error('', er);
+				res.send(er);
+			});
+		});
 	}
 };

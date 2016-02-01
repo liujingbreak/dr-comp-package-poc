@@ -16,8 +16,6 @@ function activate(api) {
 		res.render('template', {name: quote});
 	});
 
-	api.templateFolder('views');
-
 	haveFun(api).then(function(qu) {
 		quote = qu;
 	});

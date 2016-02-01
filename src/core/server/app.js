@@ -27,7 +27,7 @@ function createApp(setting, setupRoutesAndViews) {
 	app.engine('html', engines.swig);
 	app.engine('jade', engines.jade);
 	//TODO should be a list fetched from packages
-	app.set('views', [path.join(__dirname, 'views')]);
+	app.set('views', [path.join(__dirname, 'views'), setting.rootPath]);
 	app.set('view engine', 'html');
 
 	// uncomment after placing your favicon in /public
@@ -42,6 +42,13 @@ function createApp(setting, setupRoutesAndViews) {
 		res.render('index', {quote: 'Hellow packages'});
 	});
 	app.use('/static', express.static(path.join(setting.rootPath, 'dist')));
+
+	// var oldRender = app.render;
+	// // hacked response.render()
+	// app.render = function() {
+	// 	console.log('+++ hacked render() ');
+	// 	return oldRender.apply(this, arguments);
+	// };
 	return app;
 }
 

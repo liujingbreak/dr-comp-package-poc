@@ -4,39 +4,33 @@ var _ = require('lodash');
 var Path = require('path');
 
 module.exports = function setupApi(apiInstance, app) {
-	var api = apiInstance._constructor.prototype;
-	api.app = app;
+	var apiPrototype = apiInstance._constructor.prototype;
+	apiPrototype.app = app;
 
-	api.router = function() {
+	apiPrototype.router = function() {
 		if (this._router) {
 			return this._router;
 		}
 		this._router = express.Router();
-		var contextPath = api.config().nodeRoutePath + '/' + this.packageName;
+		var contextPath = apiInstance.config().nodeRoutePath + '/' + this.packageName;
+		var packageRelPath = Path.relative(this.config().rootPath, this.packageInstance.path);
+		log.debug('package relative path: ' + packageRelPath);
+		packageRelPath += '/';
+
+		app.use(contextPath, function(req, res, next) {
+			var oldRender = res.render;
+			// TODO: Maybe performanc can be improved here, a brand
+			// new res.render() function will be created againts every request handling
+			res.render = function() {
+				log.debug('in hacked res.render()');
+				var args = [].slice.call(arguments);
+				args[0] = packageRelPath + arguments[0];
+				return oldRender.apply(this, args);
+			};
+			next();
+		});
 		app.use(contextPath, this._router);
 		log.debug('setup router for ' + contextPath);
 		return this._router;
 	};
-
-	api.templateFolder = function(folder) {
-		if (!Path.isAbsolute(folder)) {
-			folder = Path.join(this.packageInstance.path, folder);
-			log.debug('add view folder: ' + folder);
-		}
-		var views = app.get('views');
-		if (_.includes(views, folder)) {
-			return;
-		}
-		views.push(folder);
-		app.set('views', views);
-	};
 };
-
-var httpMethods = ['get', 'post', 'put', 'delete', 'head', 'checkout', 'mkcol',
- 	'purge', 'connect', 'move', 'copy', 'm-search', 'report', 'notify', 'search',
-	'options', 'subscribe', 'patch', 'trace', 'lock', 'unlock', 'merge', 'propfind',
-	'unsubscribe', 'mkactivity', 'proppatch', 'all'];
-
-function delegateRouter(router) {
-	router;
-}
