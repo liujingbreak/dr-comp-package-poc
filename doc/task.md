@@ -1,5 +1,9 @@
 Task
 ========
+##### replace config.json with yaml format
+
+##### Express server route and template service seem to have performance issue
+
 ##### Watchify
 
 ##### Incremental build

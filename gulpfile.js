@@ -29,7 +29,7 @@ var packageUtils = require('./lib/packageMgr/packageUtils');
 var rev = require('gulp-rev');
 var config = require('./lib/config');
 
-var DEST = Path.resolve(__dirname, 'dist');
+var DEST = Path.resolve(__dirname, config().destDir);
 
 gulp.task('default', function() {
 	gutil.log('please individually execute gulp [task]');

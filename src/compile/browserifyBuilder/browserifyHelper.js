@@ -20,44 +20,26 @@ module.exports = function(_config) {
 		buildinSet[name] = true;
 	});
 	return {
-		textHtmlTranform: textHtmlTranform,
 		jsTranform: jsTranform,
 		BrowserSideBootstrap: BrowserSideBootstrap,
 		buildins: buildins,
-		buildinSet: buildinSet
+		buildinSet: buildinSet,
+		str2Stream: str2Stream
 	};
 };
 //exports.dependencyTree = dependencyTree;
 
 var BOOT_FUNCTION_PREFIX = '_bundle_';
 
-
-function textHtmlTranform(file) {
-	var ext = Path.extname(file).toLowerCase();
-	if (ext === '.html' || ext === '.txt') {
-		return through(function(buf, encoding, next) {
-			this.push('module.exports = ' + JSON.stringify(buf.toString('utf-8')));
-			next();
-		});
-	} else {
-		return through(doNothing);
-	}
-}
-
 function jsTranform(file) {
 	log.debug(file);
 	var ext = Path.extname(file).toLowerCase();
 	if (ext === '.js' || ext === '.json') {
 		//log.debug(file);
-		return through(doNothing);
+		return through();
 	} else {
-		return through(doNothing);
+		return through();
 	}
-}
-
-function doNothing(buf, encoding, next) {
-	this.push(buf);
-	next();
 }
 
 function BrowserSideBootstrap() {
@@ -90,15 +72,15 @@ BrowserSideBootstrap.prototype = {
 			// 	}
 			// }
 		});
-		if (config().devMode) {
-			bootstrap += '\tconsole && console.log("bundle ' + bundleName + ' is activated");\n';
-		}
+		// if (config().devMode) {
+		// 	bootstrap += '\tconsole && console.log("bundle ' + bundleName + ' is activated");\n';
+		// }
 		bootstrap += '}\n';
 		if (config().devMode) {
 			bootstrap += 'console && console.log("bundle ' + bundleName + ' is loaded");\n';
 		}
 
-		log.debug('bundle "' + bundleName + '" bootstrap script:\n' + bootstrap);
+		//log.debug('bundle "' + bundleName + '" bootstrap script:\n' + bootstrap);
 		var output = new stream.Readable();
 		output._read = function() {};
 		output.push(bootstrap);

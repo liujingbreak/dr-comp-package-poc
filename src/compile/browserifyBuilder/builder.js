@@ -11,13 +11,12 @@ var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
 var size = require('gulp-size');
 var gulp = require('gulp');
-var gutil = require('gulp-util');
 var rev = require('gulp-rev');
 var mdeps = require('module-deps');
 // var esprima = require('esprima');
 // var estraverse = require('estraverse');
 var through = require('through2');
-
+var htmlTranform = require('html-browserify');
 var log = require('@dr/logger').getLogger('browserifyBuilder.builder');
 var packageBrowserInstance = require('./packageBrowserInstance');
 var helperFactor = require('./browserifyHelper');
@@ -30,7 +29,6 @@ module.exports = function(_packageUtils, _config, destDir) {
 	config = _config;
 	jsDest = Path.resolve(destDir, 'js');
 	var helper = helperFactor(config);
-	var textHtmlTranform = helper.textHtmlTranform;
 	var buildinSet = helper.buildinSet;
 	//var jsTransform = helper.jsTransform;
 
@@ -41,10 +39,11 @@ module.exports = function(_packageUtils, _config, destDir) {
 	var packageInfo = walkPackages(Path.resolve(config().rootPath, config().recipeFolder, 'package.json'));
 	log.debug('bundles: ' + util.inspect(_.keys(packageInfo.bundleMap)));
 
+	// Build steps begin here
 	return depBundles(packageInfo.entryPageMap).then(function(packageDepsGraph) {
 		printModuleDependencyGraph(packageDepsGraph);
-		var bundleDepsGraph = createBundleDependencyGraph(packageDepsGraph, packageInfo.moduleMap);
-
+		return createBundleDependencyGraph(packageDepsGraph, packageInfo.moduleMap);
+	}).then(function(bundleDepsGraph) {
 		log.info('------- building bundles ---------');
 		_.forOwn(packageInfo.bundleMap, function(modules, bundle) {
 			log.info('build bundle: ' + bundle);
@@ -58,6 +57,12 @@ module.exports = function(_packageUtils, _config, destDir) {
 				def.reject(er);
 			});
 		});
+
+		return Promise.all(browserifyTask).then(function() {
+			return bundleDepsGraph;
+		});
+	}).then(function(bundleDepsGraph) {
+		return require('./pageCompiler')(packageInfo, bundleDepsGraph, config, destDir);
 	});
 
 	function createBundleDependencyGraph(packageDepsGraph, moduleMap) {
@@ -126,6 +131,10 @@ module.exports = function(_packageUtils, _config, destDir) {
 					var md = mdeps({
 						resolve: bResolve,
 						filter: function(id, file, pkg) {
+							var extname = Path.extname(id).toLowerCase();
+							if (extname !== '.js' || extname !== '.json') {
+								return false;
+							}
 							return !{}.hasOwnProperty.call(buildinSet, id);
 						}
 					});
@@ -188,28 +197,29 @@ module.exports = function(_packageUtils, _config, destDir) {
 
 		packageUtils.findBrowserPackageByType(['core', null], function(
 			name, entryPath, parsedName, pkJson, packagePath) {
-			var bundle;
+			var bundle, entryPage;
+			var instance = packageBrowserInstance(config());
 			if (!pkJson.dr) {
 				bundle = parsedName.name;
 			} else if (!pkJson.dr.builder || pkJson.dr.builder === 'browserify') {
 				bundle = pkJson.dr.bundle || pkJson.dr.chunk;
 				bundle = bundle ? bundle : parsedName.name;
 				if (pkJson.dr.entryPage) {
-					if (info.entryPageMap[name] == null) {
-						info.entryPageMap[name] = [];
-					}
-					info.entryPageMap[name].push(Path.resolve(packagePath, pkJson.dr.entryPage));
+					info.entryPageMap[name] = instance;
+					entryPage = Path.resolve(packagePath, pkJson.dr.entryPage);
 				}
 			} else {
 				return;
 			}
-			var instance = packageBrowserInstance({
+			instance.init({
 				bundle: bundle,
 				longName: name,
 				file: bResolve.sync(name),
 				parsedName: parsedName,
-				active: pkJson.dr ? pkJson.dr.active : false
-			}, config());
+				packagePath: packagePath,
+				active: pkJson.dr ? pkJson.dr.active : false,
+				entryPage: entryPage
+			});
 			info.allModules.push(instance);
 
 			if (!{}.hasOwnProperty.call(map, bundle)) {
@@ -219,6 +229,10 @@ module.exports = function(_packageUtils, _config, destDir) {
 		});
 
 		info.allModules.forEach(function(instance) {
+			if (!instance.longName) {
+				log.debug('no long name? ' + JSON.stringify(instance, null, '\t'));
+			}
+			//log.debug('instance.longName=' + instance.longName);
 			info.moduleMap[instance.longName] = instance;
 		});
 
@@ -237,12 +251,12 @@ module.exports = function(_packageUtils, _config, destDir) {
 		var map = info.bundleMap = {};
 		_.forOwn(vendorMap, function(moduleNames, bundle) {
 			var modules = _.map(moduleNames, function(moduleName) {
-				var instance = packageBrowserInstance({
+				var instance = packageBrowserInstance(config(), {
 					bundle: bundle,
 					longName: moduleName,
 					shortName: moduleName,
 					file: bResolve.sync(moduleName)
-				}, config());
+				});
 				info.allModules.push(instance);
 				return instance;
 			});
@@ -272,7 +286,7 @@ module.exports = function(_packageUtils, _config, destDir) {
 		modules.forEach(function(module) {
 			b.require(module.longName);
 		});
-		b.transform(textHtmlTranform);
+		b.transform(htmlTranform);
 		//b.transform(jsTransform);
 		excludeModules(packageInfo.allModules, b, modules);
 
