@@ -33,7 +33,7 @@ var DEST = Path.resolve(__dirname, config().destDir);
 
 gulp.task('default', function() {
 	gutil.log('please individually execute gulp [task]');
-	gutil.log('\tclean, link, compile, bump-version, publish');
+	gutil.log('\tbuild clean, link, compile, bump-version, publish');
 });
 
 gulp.task('clean:dependency', function() {
@@ -52,6 +52,14 @@ gulp.task('clean:dist', function() {
 
 gulp.task('clean', ['clean:dist', 'clean:dependency']);
 
+gulp.task('build', function() {
+	var gulpStart = _.bind(gulp.start, gulp);
+
+	cli.exec('npm', 'install', './package-recipe');
+	cli.exec('npm', 'install');
+	return Q.nfcall(gulpStart, 'compile');
+});
+
 gulp.task('lint', function() {
 	gulp.src(['*.js',
 			'lib/**/*.js'
@@ -67,7 +75,7 @@ gulp.task('lint', function() {
  * link src/ ** /package.json from node_modules folder
  */
 gulp.task('link', function() {
-	gulp.src('src')
+	return gulp.src('src')
 		.pipe(findPackageJson())
 		.on('error', gutil.log)
 		.pipe(rwPackageJson.linkPkJson('node_modules'))

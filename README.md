@@ -24,11 +24,8 @@ Quick Start
 
 	```
 	npm install
-	gulp link
-	npm install ./package-recipe
-	gulp compile
+	gulp build
 	npm start
-
 
 	```
 
@@ -44,7 +41,7 @@ Quick Start
 	```
 	npm set registry http://localhost:4873/
 	npm adduser <your user name>
-	# If you modified anything, bump version before publish 
+	# If you modified anything, bump version before publish
 	gulp bump-version
 	gulp publish
 	```

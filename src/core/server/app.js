@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var engines = require('consolidate');
 var swig = require('swig');
 var setupApi = require('./setupApi');
+var log = require('log4js').getLogger('server.app');
 
 module.exports = {
 	activate: function(api) {
@@ -42,7 +43,9 @@ function create(app, setting) {
 	setupApi.createPackageDefinedMiddleware(app);
 	setupApi.createPackageDefinedRouters(app);
 
-	app.use('/', express.static(path.join(setting.rootPath, 'dist')));
+	var assetsFolder = path.join(setting.rootPath, setting.destDir);
+	log.debug('express static path: ' + assetsFolder);
+	app.use('/', express.static(assetsFolder));
 
 	// error handlers
 	// catch 404 and forward to error handler

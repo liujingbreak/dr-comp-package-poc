@@ -9,8 +9,7 @@
   "main": "server/main.js",
   "dr": {
     "bundle": "example",
-	"entryView": "index.html",
-    "active": true
+	"entryView": "index.html"
   },
   "author": "jing.liu.fe@d.com",
   "license": "ISC",

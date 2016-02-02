@@ -1,6 +1,6 @@
 {
 	"srcDir": "src",
-	"destDir": "dist",
+	"destDir": "static",
 	"compiledDir": "compiled",
 	"port": 14333,
 	"packageScopes": ["dr", "dr-core"],
@@ -12,6 +12,5 @@
 		"core": ["lodash", "q"]
 	},
 	"packageContextPathMapping": {
-		"example-dr": "/"
 	}
 }
