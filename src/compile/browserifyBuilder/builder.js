@@ -197,7 +197,8 @@ module.exports = function(_packageUtils, _config, destDir) {
 
 		packageUtils.findBrowserPackageByType(['core', null], function(
 			name, entryPath, parsedName, pkJson, packagePath) {
-			var bundle, entryPage;
+			var bundle, entryHtml;
+			var isEntryServerTemplate = true;
 			var instance = packageBrowserInstance(config());
 			if (!pkJson.dr) {
 				bundle = parsedName.name;
@@ -205,8 +206,13 @@ module.exports = function(_packageUtils, _config, destDir) {
 				bundle = pkJson.dr.bundle || pkJson.dr.chunk;
 				bundle = bundle ? bundle : parsedName.name;
 				if (pkJson.dr.entryPage) {
+					isEntryServerTemplate = false;
+					entryHtml = Path.resolve(packagePath, pkJson.dr.entryPage);
 					info.entryPageMap[name] = instance;
-					entryPage = Path.resolve(packagePath, pkJson.dr.entryPage);
+				} else if (pkJson.dr.entryView){
+					isEntryServerTemplate = true;
+					entryHtml = Path.resolve(packagePath, pkJson.dr.entryView);
+					info.entryPageMap[name] = instance;
 				}
 			} else {
 				return;
@@ -218,7 +224,8 @@ module.exports = function(_packageUtils, _config, destDir) {
 				parsedName: parsedName,
 				packagePath: packagePath,
 				active: pkJson.dr ? pkJson.dr.active : false,
-				entryPage: entryPage
+				entryHtml: entryHtml,
+				isEntryServerTemplate: isEntryServerTemplate
 			});
 			info.allModules.push(instance);
 

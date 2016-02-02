@@ -9,7 +9,7 @@
   "main": "server/main.js",
   "dr": {
     "bundle": "example",
-	"entryPage": "index.html",
+	"entryView": "index.html",
     "active": true
   },
   "author": "jing.liu.fe@d.com",

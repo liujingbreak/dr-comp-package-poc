@@ -11,17 +11,22 @@ module.exports = function(packageInfo, bundleDepsGraph, config, dest) {
 	var promises = [];
 	_.forOwn(packageInfo.entryPageMap, function(instance, name) {
 		log.info('Package ' + name);
-		log.debug(instance.entryPage);
+		log.debug(instance.entryHtml);
 		var def = new Q.defer();
 		promises.push(def.promise);
 
-		var $ = cheerio.load(fs.readFileSync(instance.entryPage, 'utf-8'));
+		var $ = cheerio.load(fs.readFileSync(instance.entryHtml, 'utf-8'));
 		createScriptElements($, bundleDepsGraph[name], instance, config);
 		var hackedHtml = $.html();
 
-		var htmlName = Path.basename(instance.entryPage);
-		var pageRelFolder = Path.relative(instance.packagePath, Path.dirname(instance.entryPage));
-		var distFolder = Path.resolve(config().rootPath, config().destDir, instance.shortName, pageRelFolder);
+		var htmlName = Path.basename(instance.entryHtml);
+		var pageRelFolder = Path.relative(instance.packagePath, Path.dirname(instance.entryHtml));
+		var distFolder;
+		if (instance.isEntryServerTemplate) {
+			distFolder = Path.resolve(config().rootPath, config().compiledDir, instance.shortName, pageRelFolder);
+		} else {
+			distFolder = Path.resolve(config().rootPath, config().destDir, instance.shortName, pageRelFolder);
+		}
 		mkdirp.sync(distFolder);
 		var distFilePath = Path.resolve(distFolder, htmlName);
 		log.info('writing ' + distFilePath);

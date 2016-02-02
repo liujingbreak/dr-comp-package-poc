@@ -24,7 +24,8 @@ _.each(['error', 'warn', 'info', 'debug', 'trace'], function(level) {
 	Logger.prototype[level] = function(msg, error) {
 		var arg = [].slice.call(arguments);
 		if (_.isString(arg[0])) {
-			arg[0] = this.name + ' - ' + arg[0];
+			var file = new Error().stack.split(/\n\s*/)[2];
+			arg[0] = this.name + file + ' - ' + arg[0];
 		}
 		console[level].apply(console, arg);
 	};

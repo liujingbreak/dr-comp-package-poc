@@ -6,20 +6,20 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var engines = require('consolidate');
 var swig = require('swig');
+var setupApi = require('./setupApi');
 
 module.exports = {
 	activate: function(api) {
-		var app = createApp(api.config());
-		require('./setupApi')(api, app);
-		api.eventBus.on('afterActivate', function() {
-			setupErrorHandling(app);
+		var app = express();
+		setupApi(api);
+		api.eventBus.on('packagesActivated', function() {
+			create(app, api.config());
+			api.eventBus.emit('expressStarted', app);
 		});
 	}
 };
 
-function createApp(setting, setupRoutesAndViews) {
-	var app = express();
-
+function create(app, setting) {
 	// view engine setup
 	swig.setDefaults({
 		varControls: ['{=', '=}']
@@ -38,21 +38,12 @@ function createApp(setting, setupRoutesAndViews) {
 		extended: false
 	}));
 	app.use(cookieParser());
-	app.get('/', function(req, res) {
-		res.render('index', {quote: 'Hellow packages'});
-	});
-	app.use('/static', express.static(path.join(setting.rootPath, 'dist')));
 
-	// var oldRender = app.render;
-	// // hacked response.render()
-	// app.render = function() {
-	// 	console.log('+++ hacked render() ');
-	// 	return oldRender.apply(this, arguments);
-	// };
-	return app;
-}
+	setupApi.createPackageDefinedMiddleware(app);
+	setupApi.createPackageDefinedRouters(app);
 
-function setupErrorHandling(app) {
+	app.use('/', express.static(path.join(setting.rootPath, 'dist')));
+
 	// error handlers
 	// catch 404 and forward to error handler
 	app.use(function(req, res, next) {
@@ -81,6 +72,5 @@ function setupErrorHandling(app) {
 			error: {}
 		});
 	});
-
 	return app;
 }

@@ -16,6 +16,7 @@
 		"@dr-core/express-server": "0.0.8",
 		"@dr/example-node": "1.0.9",
 		"@dr/logger": "0.0.2",
-		"@dr-core/browserify-builder": "0.0.0"
+		"@dr-core/browserify-builder": "0.0.0",
+		"@dr-core/browserify-builder-api": "0.0.0"
 	}
 }

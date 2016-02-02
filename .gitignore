@@ -4,3 +4,4 @@ node_modules
 /bower_components
 config.local.json
 dist
+compiled

@@ -1,13 +1,17 @@
 {
 	"srcDir": "src",
 	"destDir": "dist",
+	"compiledDir": "compiled",
 	"port": 14333,
 	"packageScopes": ["dr", "dr-core"],
 	"recipeFolder": "package-recipe",
 	"nodeRoutePath": "/",
 	"devMode": false,
-	"staticAssetsURL": "/static",
+	"staticAssetsURL": "/",
 	"vendorBundleMap": {
 		"core": ["lodash", "q"]
+	},
+	"packageContextPathMapping": {
+		"example-dr": "/"
 	}
 }
