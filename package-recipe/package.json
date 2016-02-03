@@ -8,15 +8,16 @@
 	"author": "LJ",
 	"license": "ISC",
 	"dependencies": {
-		"@dr/example-browserify": "0.0.2",
-		"@dr/example-common": "1.0.3",
-		"@dr/example-dr": "1.0.9",
-		"@dr/angularjs": "1.0.5",
-		"@dr-core/developer": "1.0.2",
-		"@dr-core/express-server": "0.0.8",
-		"@dr/example-node": "1.0.9",
-		"@dr/logger": "0.0.2",
-		"@dr-core/browserify-builder": "0.0.0",
-		"@dr-core/browserify-builder-api": "0.0.0"
+		"@dr/example-browserify": "0.0.3",
+		"@dr/example-common": "1.0.4",
+		"@dr/example-dr": "1.0.10",
+		"@dr/angularjs": "1.0.6",
+		"@dr-core/developer": "1.0.3",
+		"@dr-core/express-server": "0.0.9",
+		"@dr/example-node": "1.0.10",
+		"@dr/logger": "0.0.3",
+		"@dr-core/browserify-builder": "0.0.1",
+		"@dr-core/browserify-builder-api": "0.0.1",
+		"@dr/poc-home": "0.0.0"
 	}
 }

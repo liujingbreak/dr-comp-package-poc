@@ -47,17 +47,19 @@ gulp.task('clean:dependency', function() {
 });
 
 gulp.task('clean:dist', function() {
-	return del('dist');
+	return del([config().destDir, config().compiledDir]);
 });
 
 gulp.task('clean', ['clean:dist', 'clean:dependency']);
 
-gulp.task('build', function() {
+gulp.task('build', ['install-recipe'], function() {
 	var gulpStart = _.bind(gulp.start, gulp);
-
-	cli.exec('npm', 'install', './package-recipe');
-	cli.exec('npm', 'install');
 	return Q.nfcall(gulpStart, 'compile');
+});
+
+gulp.task('install-recipe', ['link'], function() {
+	cli.exec('npm', 'install', './package-recipe');
+	return Promise.resolve();
 });
 
 gulp.task('lint', function() {
@@ -82,7 +84,8 @@ gulp.task('link', function() {
 		.on('error', gutil.log)
 		.pipe(gulp.dest('node_modules'))
 		.on('error', gutil.log)
-		.pipe(rwPackageJson.addDependeny(Path.resolve(__dirname, config().recipeFolder, 'package.json')));
+		.pipe(rwPackageJson.addDependeny(Path.resolve(__dirname, config().recipeFolder, 'package.json')))
+		.pipe(gulp.dest('.'));
 });
 
 gulp.task('compile', function() {
@@ -111,7 +114,7 @@ gulp.task('compile', function() {
 /**
  * TODO: bump dependencies version
  */
-gulp.task('bump-version', function() {
+gulp.task('bump', function() {
 	return es.merge(
 		gulp.src('src')
 		.pipe(findPackageJson())

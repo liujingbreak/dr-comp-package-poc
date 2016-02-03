@@ -1,6 +1,6 @@
 {
   "name": "@dr/example-dr",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "sample node package",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,7 +9,7 @@
   "main": "server/main.js",
   "dr": {
     "bundle": "example",
-	"entryView": "index.html"
+    "entryView": "index.html"
   },
   "author": "jing.liu.fe@d.com",
   "license": "ISC",

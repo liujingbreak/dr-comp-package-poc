@@ -1,6 +1,6 @@
 {
   "name": "@dr-core/developer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "enable some dev environment helper tool and settings",
   "main": "developer.js",
   "browser": "developer.js",
@@ -11,6 +11,6 @@
   "license": "ISC",
   "dr": {
     "bundle": "devmode",
-	"type": "core"
+    "type": "core"
   }
 }

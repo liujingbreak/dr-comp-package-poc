@@ -42,18 +42,23 @@ function createScriptElements($, bundleSet, pkInstance, config) {
 	var body = $('body');
 	if (bundleSet.core) {
 		// core is always the first bundle to be loaded
-		var scriptEl = $('<script>');
-		scriptEl.attr('src', config().staticAssetsURL + '/js/core' + '.js');
-		body.append(scriptEl);
+		body.append(createScriptElement($, 'core', config));
 	}
 
 	_.forOwn(bundleSet, function(v, bundleName) {
 		if (bundleName === 'core') {
 			return;
 		}
-		var scriptEl = $('<script>');
-		scriptEl.attr('src', config().staticAssetsURL + '/js/' + bundleName + '.js');
-		body.append(scriptEl);
+		body.append(createScriptElement($, bundleName, config));
 	});
 	body.append($('<script>').html('require("' + pkInstance.longName + '");'));
+}
+
+function createScriptElement($, bundleName, config) {
+	var scriptEl = $('<script>');
+	var src = config().staticAssetsURL + '/js/' + bundleName +
+		(config().devMode ? '' : '.min') + '.js';
+	src = src.replace(/\/\/+/g, '/');
+	scriptEl.attr('src', src);
+	return scriptEl;
 }

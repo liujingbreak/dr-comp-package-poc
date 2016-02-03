@@ -11,8 +11,10 @@ var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
 var size = require('gulp-size');
 var gulp = require('gulp');
+var gulpif = require('gulp-if');
 var rev = require('gulp-rev');
 var mdeps = require('module-deps');
+var rename = require('gulp-rename');
 // var esprima = require('esprima');
 // var estraverse = require('estraverse');
 var through = require('through2');
@@ -310,21 +312,20 @@ module.exports = function(_packageUtils, _config, destDir) {
 			.on('error', logError)
 			.pipe(source(bundle + '.js'))
 			.pipe(buffer())
-			// .pipe(gulp.dest('./dist/js/'))
-			// .on('error', logError)
-			// .pipe(rename(bundle + '.min.js'))
-			// .pipe(rev())
+			.pipe(gulp.dest(jsDest))
+			.pipe(rename(bundle + '.min.js'))
+			//.pipe(rev())
 			.on('error', logError)
 			.pipe(sourcemaps.init({
 				loadMaps: true
 			}))
 			// Add transformation tasks to the pipeline here.
-			//.pipe(uglify())
+			.pipe(gulpif(!config().devMode, uglify()))
 			.on('error', logError)
 			.pipe(sourcemaps.write('./'))
 			.pipe(size())
 			.pipe(gulp.dest(jsDest))
-			.pipe(rev.manifest({merge: true}))
+			//.pipe(rev.manifest({merge: true}))
 			.pipe(gulp.dest(jsDest))
 			.on('error', logError);
 	}

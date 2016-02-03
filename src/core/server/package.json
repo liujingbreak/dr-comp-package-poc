@@ -1,6 +1,6 @@
 {
   "name": "@dr-core/express-server",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "main": "app.js",
   "dependencies": {
     "body-parser": "~1.13.2",
@@ -12,7 +12,7 @@
     "consolidate": "^0.13.1",
     "jade": "1.11.0"
   },
-	"dr":{
-		"type": "core"
-	}
+  "dr": {
+    "type": "core"
+  }
 }

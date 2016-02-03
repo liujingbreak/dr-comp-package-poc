@@ -9,16 +9,17 @@ Firstly, make sure server can run.
 Go to root folder, run:
 ```
 npm install
-gulp link
 gulp build
 npm start
 
 ```
 Let me pray for no error message shown in your terminal.
 
-(Yes, I added a new gulp task called `build`, it does few tasks inside, I will also pack task `link` into it later on.
-I moved all private module dependencies to `/package-recipe` folder)
-...
+> To Terry,
+>
+> Yes, I added a new gulp task called `build`, it does few tasks inside, easier than before.
+And I moved all private module dependencies to `/package-recipe` folder, so that first time `npm install` won't be
+
 
 Let me assume everything above works successfully, then
 #### start to write a node package
@@ -26,12 +27,18 @@ Let me assume everything above works successfully, then
 Create an empty folder under `/src`, it could be a sub-folder of any level deep,
 as long as there is file `package.json` in that folder,
 like this one: [package.json](package.json),
-> you can also create package.json by command `npm init`
+>  command `npm init` can help to create a new `package.json` file
 
 **package.json properties**:
 - name -
 	must begin with a `scope` prefix "@dr/".
-	> During gulp build and server starting process, the platform scans for module with this scope name, it is configured in [config.json](../../../config.json)
+	> During gulp build and server starting process, the platform scans for module with this scope name, it is configured in [config.json](../../../config.json) property `packageScopes`
+
+	If name it with prefix `"@dr-core/"`, the platform will consider to load this kind of packages prior to `"@dr/"` packages, which makes it be able to do special things like adding more functions to API prototype object.
+
+	> e.g. express server package [src/core/server](../../core/server)
+
+
 - main - node side entry js file
 
 ~~- browser - browser side entry js file (optional)~~
@@ -64,6 +71,15 @@ Platform will pass a parameter `api` object to this function, we can define rout
 - .param()
 
 checkout out [setupApi.js](../../core/server/setupApi.js)
+
+By default, if package's name is **@dr/abc**, `.router()` will return an `express.Router()` which is bound under route path `/abc`, it's like calling
+```
+express.use('/abc', router)
+```
+
+Those middlewares registered by `.use()` and `.param()` are always executed before the routers created by `.router()`, so your middleware will process request prior to your routes.
+
+
 ##### other member functions and properties:
 - .packageName
 - .packageInstance
