@@ -13,31 +13,28 @@ var size = require('gulp-size');
 var gulp = require('gulp');
 var gulpif = require('gulp-if');
 var rev = require('gulp-rev');
+var es = require('event-stream')
 var mdeps = require('module-deps');
 var rename = require('gulp-rename');
-// var esprima = require('esprima');
-// var estraverse = require('estraverse');
 var through = require('through2');
 var htmlTranform = require('html-browserify');
 var log = require('@dr/logger').getLogger('browserifyBuilder.builder');
 var packageBrowserInstance = require('./packageBrowserInstance');
 var helperFactor = require('./browserifyHelper');
 
-var packageUtils, config, jsDest, bundleBootstrap;
+var packageUtils, config, bundleBootstrap;
 
 
 module.exports = function(_packageUtils, _config, destDir) {
 	packageUtils = _packageUtils;
 	config = _config;
-	jsDest = Path.resolve(destDir, 'js');
 	var helper = helperFactor(config);
 	var buildinSet = helper.buildinSet;
+	var bundleDepsGraph;
 	//var jsTransform = helper.jsTransform;
 
 	bundleBootstrap = helper.BrowserSideBootstrap();
 
-
-	var browserifyTask = [];
 	var packageInfo = walkPackages(Path.resolve(config().rootPath, config().recipeFolder, 'package.json'));
 	log.debug('bundles: ' + util.inspect(_.keys(packageInfo.bundleMap)));
 
@@ -45,25 +42,26 @@ module.exports = function(_packageUtils, _config, destDir) {
 	return depBundles(packageInfo.entryPageMap).then(function(packageDepsGraph) {
 		printModuleDependencyGraph(packageDepsGraph);
 		return createBundleDependencyGraph(packageDepsGraph, packageInfo.moduleMap);
-	}).then(function(bundleDepsGraph) {
+	}).then(function(_bundleDepsGraph) {
+		bundleDepsGraph = _bundleDepsGraph;
 		log.info('------- building bundles ---------');
+		var streams = [];
+		var def = Q.defer();
 		_.forOwn(packageInfo.bundleMap, function(modules, bundle) {
 			log.info('build bundle: ' + bundle);
-			var def = Q.defer();
-			browserifyTask.push(def.promise);
-			buildBundle(modules, bundle, jsDest)
-			.on('end', function() {
-				def.resolve();
-			}).on('error', function(er) {
-				log.info(er);
-				def.reject(er);
-			});
+			streams.push(
+				buildBundle(modules, bundle, destDir)
+			);
+		});
+		var bundleStream = es.merge(streams).on('error', function(er) {
+			log.error(er);
+		}).pipe(gulp.dest(destDir)).on('end', function() {
+			log.debug('all bundles compiled');
+			def.resolve(bundleStream);
 		});
 
-		return Promise.all(browserifyTask).then(function() {
-			return bundleDepsGraph;
-		});
-	}).then(function(bundleDepsGraph) {
+		return def.promise;
+	}).then(function(bundleStream) {
 		return require('./pageCompiler')(packageInfo, bundleDepsGraph, config, destDir);
 	});
 
@@ -274,7 +272,7 @@ module.exports = function(_packageUtils, _config, destDir) {
 		return info;
 	}
 
-	function buildBundle(modules, bundle, jsDest) {
+	function buildBundle(modules, bundle, destDir) {
 		var mIdx = 1;
 		var moduleCount = _.size(modules);
 		_.each(modules, function(moduleInfo) {
@@ -310,10 +308,9 @@ module.exports = function(_packageUtils, _config, destDir) {
 
 		return b.bundle()
 			.on('error', logError)
-			.pipe(source(bundle + '.js'))
+			.pipe(source('js/' + bundle + '.js'))
 			.pipe(buffer())
-			.pipe(gulp.dest(jsDest))
-			.pipe(rename(bundle + '.min.js'))
+			.pipe(gulp.dest(destDir))
 			//.pipe(rev())
 			.on('error', logError)
 			.pipe(sourcemaps.init({
@@ -322,11 +319,10 @@ module.exports = function(_packageUtils, _config, destDir) {
 			// Add transformation tasks to the pipeline here.
 			.pipe(gulpif(!config().devMode, uglify()))
 			.on('error', logError)
+			.pipe(rename('js/' + bundle + '.min.js'))
 			.pipe(sourcemaps.write('./'))
 			.pipe(size())
-			.pipe(gulp.dest(jsDest))
 			//.pipe(rev.manifest({merge: true}))
-			.pipe(gulp.dest(jsDest))
 			.on('error', logError);
 	}
 

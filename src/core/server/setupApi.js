@@ -33,7 +33,7 @@ module.exports.createPackageDefinedRouters = function(app) {
 };
 
 function setupApi(apiInstance) {
-	var apiPrototype = apiInstance._constructor.prototype;
+	var apiPrototype = apiInstance.constructor.prototype;
 
 	/**
 	 * setup a router under package context path

@@ -5,9 +5,7 @@ var gutil = require('gulp-util');
 var jshint = require('gulp-jshint');
 var jscs = require('gulp-jscs');
 var bump = require('gulp-bump');
-var changed = require('gulp-changed');
 // var watchify = require('watchify');
-var browserify = require('browserify');
 var es = require('event-stream');
 var vp = require('vinyl-paths');
 var del = require('del');
@@ -16,17 +14,15 @@ var vps = require('vinyl-paths');
 var Q = require('q');
 Q.longStackSupport = true;
 var _ = require('lodash');
-
+var RevAll = require('gulp-rev-all');
 
 var cli = require('shelljs-nodecli');
-var rename = require('gulp-rename');
 var Jasmine = require('jasmine');
 
 var findPackageJson = require('./lib/gulp/findPackageJson');
 var rwPackageJson = require('./lib/gulp/rwPackageJson');
 var packageUtils = require('./lib/packageMgr/packageUtils');
 
-var rev = require('gulp-rev');
 var config = require('./lib/config');
 
 var DEST = Path.resolve(__dirname, config().destDir);
@@ -109,6 +105,18 @@ gulp.task('compile', function() {
 	});
 
 	return Q.all(jobs);
+});
+
+gulp.task('rev', function() {
+	var revAll = new RevAll({
+		debug: true,
+		//dontRenameFile: [/\.html$/g]
+	});
+	gulp.src([config().destDir + '/js/**/*.min.js'])
+	.pipe(revAll.revision())
+	.pipe(gulp.dest(config().destDir) + '/js')
+	.pipe(revAll.manifestFile())
+	.pipe(gulp.dest(config().destDir));
 });
 
 /**

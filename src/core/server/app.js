@@ -27,7 +27,7 @@ function create(app, setting) {
 	});
 	app.engine('html', engines.swig);
 	app.engine('jade', engines.jade);
-	//TODO should be a list fetched from packages
+
 	app.set('views', [path.join(__dirname, 'views'), setting.rootPath]);
 	app.set('view engine', 'html');
 
@@ -45,8 +45,11 @@ function create(app, setting) {
 
 	var assetsFolder = path.join(setting.rootPath, setting.destDir);
 	log.debug('express static path: ' + assetsFolder);
-	app.use('/', express.static(assetsFolder));
 
+	app.use('/', express.static(assetsFolder));
+	app.get('/', function(req, res) {
+		res.render('index.html', {});
+	});
 	// error handlers
 	// catch 404 and forward to error handler
 	app.use(function(req, res, next) {
@@ -59,7 +62,8 @@ function create(app, setting) {
 	if (app.get('env') === 'development') {
 		app.use(function(err, req, res, next) {
 			res.status(err.status || 500);
-			res.render('error.jade', {
+			log.error(err);
+			res.render('error.html', {
 				message: err.message,
 				error: err
 			});

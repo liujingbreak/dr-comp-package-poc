@@ -57,7 +57,7 @@ sample [server/main.js](server/main.js)
 
 `module.exports` must be an object which has a function type property named `activate`
 
-```
+``` javascript
 module.exports = { activate: function(api) {} }
 ```
 Platform will pass a parameter `api` object to this function, we can define routers and middleware in that function.
@@ -73,7 +73,7 @@ Platform will pass a parameter `api` object to this function, we can define rout
 checkout out [setupApi.js](../../core/server/setupApi.js)
 
 By default, if package's name is **@dr/abc**, `.router()` will return an `express.Router()` which is bound under route path `/abc`, it's like calling
-```
+``` javascript
 express.use('/abc', router)
 ```
 

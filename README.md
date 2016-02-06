@@ -130,7 +130,7 @@ External package could be things that owned by another team.
 
 The browser-side code will be packed by Browserify(or Webpack), thus dependency management will be same as node side module, check out *package.json*
 
-```
+``` javascript
 "dependencies": {
 	"lodash": "^4.0.0",
 	"log4js": "^0.6.29",
@@ -157,14 +157,14 @@ LESS uses `@import`
 
 Core packages like express-server, they provide APIs on to API object, e.g.
 
-```
+``` javascript
 Api.prototype.route()
 Api.prototype.templateFolder()
 ```
 
 Other packages consume APIs.
 
-```
+``` javascript
 api.route().get('/service', function(req, res) { ... })
 ```
 
@@ -176,7 +176,7 @@ All private package is named with special *scope* e.g. `@dr/example-node`
 
 A private package can also depend on another private package, code in this way,
 
-```
+``` javascript
 var exampleNode = require('@dr/example-node');
 ```
 
@@ -237,7 +237,7 @@ sample [src/server/main.js](src/server/main.js)
 
 `module.exports` must be an object which has a function type property named `activate`
 
-```
+``` javascript
 module.exports = { activate: function(api) {} }
 ```
 Platform will pass a parameter `api` object to this function, we can define routers and middleware in that function.
@@ -253,7 +253,7 @@ Platform will pass a parameter `api` object to this function, we can define rout
 checkout out [setupApi.js](src/core/server/setupApi.js)
 
 By default, if package's name is **@dr/abc**, `.router()` will return an `express.Router()` which is bound under route path `/abc`, it's like calling
-```
+``` javascript
 express.use('/abc', router)
 ```
 
