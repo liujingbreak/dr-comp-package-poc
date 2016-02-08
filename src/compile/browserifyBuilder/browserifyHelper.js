@@ -79,12 +79,6 @@ BrowserSideBootstrap.prototype = {
 		if (config().devMode) {
 			bootstrap += 'console && console.log("bundle ' + bundleName + ' is loaded");\n';
 		}
-
-		//log.debug('bundle "' + bundleName + '" bootstrap script:\n' + bootstrap);
-		var output = new stream.Readable();
-		output._read = function() {};
-		output.push(bootstrap);
-		output.push(null);
 		return str2Stream(bootstrap);
 	}
 };

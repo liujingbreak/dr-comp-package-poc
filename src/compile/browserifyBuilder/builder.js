@@ -12,25 +12,25 @@ var sourcemaps = require('gulp-sourcemaps');
 var size = require('gulp-size');
 var gulp = require('gulp');
 var gulpif = require('gulp-if');
-var rev = require('gulp-rev');
-var es = require('event-stream')
-var mdeps = require('module-deps');
+var es = require('event-stream');
+var gulpFilter = require('gulp-filter');
 var rename = require('gulp-rename');
 var through = require('through2');
 var htmlTranform = require('html-browserify');
+var RevAll = require('gulp-rev-all');
+var browserifyInc = require('browserify-incremental');
+var xtend = require('xtend');
+
 var log = require('@dr/logger').getLogger('browserifyBuilder.builder');
 var packageBrowserInstance = require('./packageBrowserInstance');
 var helperFactor = require('./browserifyHelper');
 
 var packageUtils, config, bundleBootstrap;
 
-
 module.exports = function(_packageUtils, _config, destDir) {
 	packageUtils = _packageUtils;
 	config = _config;
 	var helper = helperFactor(config);
-	var buildinSet = helper.buildinSet;
-	var bundleDepsGraph;
 	//var jsTransform = helper.jsTransform;
 
 	bundleBootstrap = helper.BrowserSideBootstrap();
@@ -39,31 +39,70 @@ module.exports = function(_packageUtils, _config, destDir) {
 	log.debug('bundles: ' + util.inspect(_.keys(packageInfo.bundleMap)));
 
 	// Build steps begin here
-	return depBundles(packageInfo.entryPageMap).then(function(packageDepsGraph) {
-		printModuleDependencyGraph(packageDepsGraph);
-		return createBundleDependencyGraph(packageDepsGraph, packageInfo.moduleMap);
-	}).then(function(_bundleDepsGraph) {
-		bundleDepsGraph = _bundleDepsGraph;
-		log.info('------- building bundles ---------');
-		var streams = [];
-		var def = Q.defer();
-		_.forOwn(packageInfo.bundleMap, function(modules, bundle) {
-			log.info('build bundle: ' + bundle);
-			streams.push(
-				buildBundle(modules, bundle, destDir)
-			);
-		});
-		var bundleStream = es.merge(streams).on('error', function(er) {
-			log.error(er);
-		}).pipe(gulp.dest(destDir)).on('end', function() {
-			log.debug('all bundles compiled');
-			def.resolve(bundleStream);
+	// return depBundles(packageInfo.entryPageMap).then(function(packageDepsGraph) {
+	// 	// [ Entry page package A ]--depends on--> [ package B, C ]
+	// 	printModuleDependencyGraph(packageDepsGraph);
+	// 	// [ Entry page package A ]--depends on--> ( bundle X, Y )
+	// 	return createBundleDependencyGraph(packageDepsGraph, packageInfo.moduleMap);
+	// }).then(function(_bundleDepsGraph) {
+	// 	bundleDepsGraph = _bundleDepsGraph;
+	log.info('------- building bundles ---------');
+	var depsMap = {};
+	var streams = [];
+	var defEntryDeps = Q.defer();
+
+	_.forOwn(packageInfo.bundleMap, function(modules, bundle) {
+		log.info('build bundle: ' + bundle);
+		streams.push(buildBundle(modules, bundle, destDir, depsMap));
+	});
+	var bundleStream = es.merge(streams).on('error', function(er) {
+		log.error(er);
+	});
+	bundleStream.on('end', function() {
+		// [ Entry page package A ]--depends on--> [ package B, C ]
+		var depsGraph = createEntryDepsData(depsMap, packageInfo.entryPageMap);
+		printModuleDependencyGraph(depsGraph);
+		// [ Entry page package A ]--depends on--> ( bundle X, Y )
+		var bundleDepsGraph = createBundleDependencyGraph(depsGraph, packageInfo.moduleMap);
+		defEntryDeps.resolve(bundleDepsGraph);
+	});
+
+	return Q.all([defEntryDeps.promise, revisionBundle(bundleStream)])
+		.then(function(resolved) {
+			var bundleDepsGraph = resolved[0];
+			return require('./pageCompiler')(packageInfo, bundleDepsGraph, config, destDir);
 		});
 
-		return def.promise;
-	}).then(function(bundleStream) {
-		return require('./pageCompiler')(packageInfo, bundleDepsGraph, config, destDir);
-	});
+	function createEntryDepsData(depsMap, entryMap) {
+		//log.trace(JSON.stringify(depsMap, null, '  '));
+		var packageDeps = {};
+		_.forOwn(entryMap, function(pkInstance, moduleName) {
+			var entryDepsSet = packageDeps[moduleName] = {};
+			_walkDeps(moduleName, entryDepsSet, true);
+		});
+
+		function _walkDeps(target, entryDepsSet, isParentOurs, lastDirectDeps) {
+			var deps = depsMap[target];
+			_.forOwn(deps, function(module, id) {
+				var ref = module ? module : id;
+
+				if (!_.startsWith(id, '.')) {
+					// require id is a module name
+					var isOurs = isParentOurs && !packageUtils.is3rdParty(id);
+					entryDepsSet[id] = isParentOurs ? true : lastDirectDeps;
+					if (isOurs) {
+						_walkDeps(ref, entryDepsSet, true);
+					} else {
+						_walkDeps(ref, entryDepsSet, false, id);
+					}
+				} else {
+					// require id is a local file path
+					_walkDeps(ref, entryDepsSet, isParentOurs, lastDirectDeps);
+				}
+			});
+		}
+		return packageDeps;
+	}
 
 	function createBundleDependencyGraph(packageDepsGraph, moduleMap) {
 		log.info('------- Bundle dependency ---------');
@@ -73,13 +112,21 @@ module.exports = function(_packageUtils, _config, destDir) {
 			var currBundle = moduleMap[moduleName].bundle;
 			var depBundleSet = {};
 			bundleDepsGraph[moduleName] = depBundleSet;
-			_.forOwn(deps, function(file, dep) {
-				var bundle = moduleMap[dep].bundle;
-				if (!bundle) {
-					var msg = 'Module "' + dep + '" which is dependency of "' +
-						currBundle + '" has not be configured with any bundle';
-					log.error(msg);
-					throw new Error(msg);
+			_.forOwn(deps, function(isDirectDeps, dep) {
+				//log.debug('Is dep '+ dep +' our package ? ' + isVendor);
+				var bundle, msg;
+				if (!moduleMap[dep] || !(bundle = moduleMap[dep].bundle) ) {
+					if (isDirectDeps === true) {
+						msg = 'Entry bundle "' + currBundle + '", module "' + dep + '" which is dependency of bundle "' +
+							currBundle + '" has not be explicityly configured with any bundle';
+						log.error(msg);
+						throw new Error(msg);
+					} else {
+						msg = 'Entry bundle "' + currBundle + '", module "' + dep + '" which is dependency of "' +
+							isDirectDeps + '" has not be explicityly configured with any bundle';
+						log.warn(msg);
+						return;
+					}
 				}
 				depBundleSet[bundle] = true;
 			});
@@ -120,53 +167,6 @@ module.exports = function(_packageUtils, _config, destDir) {
 			});
 		});
 	}
-
-	function depBundles(pkgEntryPageMap) {
-		var packageDeps = {};
-		var proms = [];
-		_.forOwn(pkgEntryPageMap, function(pages, packageModule) {
-			proms.push(new Promise(function(resolve, reject) {
-					log.info('entry page: ' + pages);
-					var allDeps = {};
-					var md = mdeps({
-						resolve: bResolve,
-						filter: function(id, file, pkg) {
-							var extname = Path.extname(id).toLowerCase();
-							if (extname !== '.js' || extname !== '.json') {
-								return false;
-							}
-							return !{}.hasOwnProperty.call(buildinSet, id);
-						}
-					});
-					md.pipe(through.obj(function(chunk, encoding, callback) {
-						filterFileDeps(allDeps, chunk.deps);
-						this.push(chunk);
-						callback(null);
-					}))
-					.on('finish', function() {
-						packageDeps[packageModule] = allDeps;
-						resolve(allDeps);
-					}).on('error', function(er) {
-						reject(er);
-					});
-					md.end({id: packageModule});
-				})
-			);
-		});
-		return Promise.all(proms).then(function() {
-			return packageDeps;
-		});
-	}
-
-	function filterFileDeps(targetMap, depsMap) {
-		_.forOwn(depsMap, function(file, id) {
-			if (!_.startsWith(id, '.')) {
-				targetMap[id] = file;
-			}
-		});
-		return targetMap;
-	}
-
 	/**
 	 *
 	 * @param  {string} packageJsonFile path of package.json
@@ -179,7 +179,7 @@ module.exports = function(_packageUtils, _config, destDir) {
 		 * @property {packageModuleInstance[]} allModules
 		 * @property {Object.<string, packageModuleInstance>} moduleMap key is module name
 		 * @property {Object.<string, packageModuleInstance[]>} bundleMap key is bundle name
-		 * @property {Object.<string, string[]>} entryPageMap key is module name, value is array of page path
+		 * @property {Object.<string, packageModuleInstance[]>} entryPageMap key is module name
 		 */
 		var info = {
 			allModules: null,
@@ -272,7 +272,7 @@ module.exports = function(_packageUtils, _config, destDir) {
 		return info;
 	}
 
-	function buildBundle(modules, bundle, destDir) {
+	function buildBundle(modules, bundle, destDir, depsMap) {
 		var mIdx = 1;
 		var moduleCount = _.size(modules);
 		_.each(modules, function(moduleInfo) {
@@ -286,16 +286,19 @@ module.exports = function(_packageUtils, _config, destDir) {
 
 		var listStream = bundleBootstrap.createPackageListFile(bundle, modules);
 
-		var b = browserify({
+		// var b = browserify({
+		// 	debug: true
+		// });
+		var b = browserify(xtend(browserifyInc.args, {
 			debug: true
-		});
-		b.add(listStream, {file: bundle + '-activate.js'});
+		}));
+		b.add(listStream, {file: './' + bundle + '-activate.js'});
 		modules.forEach(function(module) {
 			b.require(module.longName);
 		});
 		b.transform(htmlTranform);
-		//b.transform(jsTransform);
 		excludeModules(packageInfo.allModules, b, modules);
+		browserifyInc(b, {cacheFile: Path.resolve(config().buildCacheDir, 'browserify-cache.json')});
 
 		//TODO: algorithm here can be optmized
 		function excludeModules(allModules, b, entryModules) {
@@ -305,6 +308,20 @@ module.exports = function(_packageUtils, _config, destDir) {
 				}
 			});
 		}
+
+		b.pipeline.get('deps').push(through.obj(function(chunk, encoding, callback) {
+			depsMap[chunk.id] = chunk.deps;
+			//var lm = fs.statSync(chunk.file).mtime;
+			//log.trace(bundle + ' deps: ' + chunk.id + ' -> ' + JSON.stringify(chunk.deps, null, '  '));
+			this.push(chunk);
+			callback(null);
+		}));
+
+		b.on('file', function(file, id) {
+			if (_.startsWith(id, '.')) {
+				log.debug('browserify file event: ' + ' id:' + id);
+			}
+		});
 
 		return b.bundle()
 			.on('error', logError)
@@ -326,19 +343,23 @@ module.exports = function(_packageUtils, _config, destDir) {
 			.on('error', logError);
 	}
 
-	// function calculateDependency(entryFilePath) {
-	// 	log.debug('read ' + entryFilePath);
-	// 	var ast = esprima.parse(fs.readFileSync(entryFilePath, 'utf-8'));
-	// 	estraverse.traverse(ast, {
-	// 		enter: function(node) {
-	// 			if (node.type === 'CallExpression' && node.callee && node.callee.type === 'Identifier' &&
-	// 				node.callee.name === 'require') {
-	// 				log.debug(node.arguments[0].value);
-	// 			}
-	// 		}
-	// 	});
-	// }
-	//return Q.all(browserifyTask);
+	function revisionBundle(bundleStream) {
+		var def = Q.defer();
+		var revAll = new RevAll();
+		var revFilter = gulpFilter('**/*.js', {restore: true});
+
+		bundleStream.pipe(revFilter)
+		.pipe(revAll.revision())
+		.pipe(revFilter.restore)
+		.pipe(gulp.dest(destDir))
+		.pipe(revAll.manifestFile())
+		.pipe(gulp.dest(destDir))
+		.on('end', function() {
+			log.debug('all bundles compiled');
+			def.resolve(bundleStream);
+		});
+		return def.promise;
+	}
 };
 
 function logError(er) {

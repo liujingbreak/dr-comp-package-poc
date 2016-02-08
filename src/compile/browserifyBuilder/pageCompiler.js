@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var fs = require('fs');
-var cheerio = require('cheerio')
+var cheerio = require('cheerio');
 var Path = require('path');
 var Q = require('q');
 var mkdirp = require('mkdirp');

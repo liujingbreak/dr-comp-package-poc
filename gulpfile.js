@@ -24,6 +24,8 @@ var rwPackageJson = require('./lib/gulp/rwPackageJson');
 var packageUtils = require('./lib/packageMgr/packageUtils');
 
 var config = require('./lib/config');
+require('log4js').configure(Path.join(__dirname, 'log4js.json'));
+require('log4js').getLogger('test').trace('trace...');
 
 var DEST = Path.resolve(__dirname, config().destDir);
 
@@ -43,7 +45,7 @@ gulp.task('clean:dependency', function() {
 });
 
 gulp.task('clean:dist', function() {
-	return del([config().destDir, config().compiledDir]);
+	return del([config().destDir, config().compiledDir, config().buildCacheDir]);
 });
 
 gulp.task('clean', ['clean:dist', 'clean:dependency']);
