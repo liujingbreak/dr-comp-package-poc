@@ -1,4 +1,3 @@
-var util = require('util');
 var gulp = require('gulp');
 var Path = require('path');
 var gutil = require('gulp-util');
@@ -45,7 +44,7 @@ gulp.task('clean:dependency', function() {
 });
 
 gulp.task('clean:dist', function() {
-	return del([config().destDir, config().compiledDir, config().buildCacheDir]);
+	return del([config().destDir]);
 });
 
 gulp.task('clean', ['clean:dist', 'clean:dependency']);
@@ -90,7 +89,7 @@ gulp.task('compile', function() {
 	var jobs = [];
 	packageUtils.findNodePackageByType('builder', function(name, entryPath, parsedName, pkJson) {
 		gutil.log('run builder: ' + name);
-		var res = require(name)(packageUtils, config, DEST);
+		var res = require(name)(packageUtils, config);
 		if (res && _.isFunction(res.pipe)) {
 			// is stream
 			var job = Q.defer();

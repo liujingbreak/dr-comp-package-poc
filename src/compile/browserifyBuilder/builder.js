@@ -2,7 +2,6 @@ var _ = require('lodash');
 var fs = require('fs');
 var Path = require('path');
 var util = require('util');
-var Q = require('q');
 var bResolve = require('browser-resolve');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
@@ -27,7 +26,7 @@ var helperFactor = require('./browserifyHelper');
 
 var packageUtils, config, bundleBootstrap;
 
-module.exports = function(_packageUtils, _config, destDir) {
+module.exports = function(_packageUtils, _config) {
 	packageUtils = _packageUtils;
 	config = _config;
 	var helper = helperFactor(config);
@@ -49,29 +48,41 @@ module.exports = function(_packageUtils, _config, destDir) {
 	log.info('------- building bundles ---------');
 	var depsMap = {};
 	var streams = [];
-	var defEntryDeps = Q.defer();
 
 	_.forOwn(packageInfo.bundleMap, function(modules, bundle) {
 		log.info('build bundle: ' + bundle);
-		streams.push(buildBundle(modules, bundle, destDir, depsMap));
+		streams.push(buildBundle(modules, bundle, Path.join(config().destDir, 'static'), depsMap));
 	});
 	var bundleStream = es.merge(streams).on('error', function(er) {
 		log.error(er);
 	});
-	bundleStream.on('end', function() {
-		// [ Entry page package A ]--depends on--> [ package B, C ]
-		var depsGraph = createEntryDepsData(depsMap, packageInfo.entryPageMap);
-		printModuleDependencyGraph(depsGraph);
-		// [ Entry page package A ]--depends on--> ( bundle X, Y )
-		var bundleDepsGraph = createBundleDependencyGraph(depsGraph, packageInfo.moduleMap);
-		defEntryDeps.resolve(bundleDepsGraph);
-	});
 
-	return Q.all([defEntryDeps.promise, revisionBundle(bundleStream)])
-		.then(function(resolved) {
-			var bundleDepsGraph = resolved[0];
-			return require('./pageCompiler')(packageInfo, bundleDepsGraph, config, destDir);
-		});
+	var pageCompilerParam = {};
+	return revisionBundle(bundleStream)
+	.pipe(
+
+		through.obj(function transform(file, encoding, cb) {
+			var revisionMeta = JSON.parse(file.contents.toString('utf-8'));
+			pageCompilerParam.revisionMeta = revisionMeta;
+			cb();
+		}, function flush(callback) {
+			// [ Entry page package A ]--depends on--> [ package B, C ]
+			var depsGraph = createEntryDepsData(depsMap, packageInfo.entryPageMap);
+			printModuleDependencyGraph(depsGraph);
+			// [ Entry page package A ]--depends on--> ( bundle X, Y )
+			var bundleDepsGraph = createBundleDependencyGraph(depsGraph, packageInfo.moduleMap);
+			pageCompilerParam.bundleDepsGraph = bundleDepsGraph;
+			pageCompilerParam.config = config;
+			pageCompilerParam.packageInfo = packageInfo;
+			this.push(pageCompilerParam);
+			callback();
+		}))
+	.pipe(require('./pageCompiler').stream())
+	.pipe(gulp.dest(config().destDir));
+
+	// return defEntryDeps.promise.then(function(bundleDepsGraph) {
+	// 		return require('./pageCompiler')(packageInfo, bundleDepsGraph, config, revisionMetaStream, destDir);
+	// 	});
 
 	function createEntryDepsData(depsMap, entryMap) {
 		//log.trace(JSON.stringify(depsMap, null, '  '));
@@ -298,7 +309,7 @@ module.exports = function(_packageUtils, _config, destDir) {
 		});
 		b.transform(htmlTranform);
 		excludeModules(packageInfo.allModules, b, modules);
-		browserifyInc(b, {cacheFile: Path.resolve(config().buildCacheDir, 'browserify-cache.json')});
+		browserifyInc(b, {cacheFile: Path.resolve(config().destDir, 'browserify-cache.json')});
 
 		//TODO: algorithm here can be optmized
 		function excludeModules(allModules, b, entryModules) {
@@ -319,16 +330,15 @@ module.exports = function(_packageUtils, _config, destDir) {
 
 		b.on('file', function(file, id) {
 			if (_.startsWith(id, '.')) {
-				log.debug('browserify file event: ' + ' id:' + id);
+				log.debug('watchify file:' + id);
 			}
 		});
 
-		return b.bundle()
+		var stm = b.bundle()
 			.on('error', logError)
 			.pipe(source('js/' + bundle + '.js'))
 			.pipe(buffer())
 			.pipe(gulp.dest(destDir))
-			//.pipe(rev())
 			.on('error', logError)
 			.pipe(sourcemaps.init({
 				loadMaps: true
@@ -336,29 +346,26 @@ module.exports = function(_packageUtils, _config, destDir) {
 			// Add transformation tasks to the pipeline here.
 			.pipe(gulpif(!config().devMode, uglify()))
 			.on('error', logError)
-			.pipe(rename('js/' + bundle + '.min.js'))
+			.pipe(gulpif(!config().devMode, rename('js/' + bundle + '.min.js')))
 			.pipe(sourcemaps.write('./'))
-			.pipe(size())
-			//.pipe(rev.manifest({merge: true}))
+			.pipe(size({title: bundle}))
 			.on('error', logError);
+		return stm;
 	}
 
 	function revisionBundle(bundleStream) {
-		var def = Q.defer();
+		//var def = Q.defer();
 		var revAll = new RevAll();
 		var revFilter = gulpFilter('**/*.js', {restore: true});
-
-		bundleStream.pipe(revFilter)
-		.pipe(revAll.revision())
-		.pipe(revFilter.restore)
-		.pipe(gulp.dest(destDir))
-		.pipe(revAll.manifestFile())
-		.pipe(gulp.dest(destDir))
-		.on('end', function() {
-			log.debug('all bundles compiled');
-			def.resolve(bundleStream);
-		});
-		return def.promise;
+		return bundleStream.pipe(revFilter)
+			.pipe(revAll.revision())
+			.pipe(revFilter.restore)
+			.pipe(gulp.dest(Path.join(config().destDir, 'static')))
+			.pipe(revAll.manifestFile())
+			.pipe(gulp.dest(config().destDir))
+			.on('finish', function() {
+				log.debug('all bundles compiled');
+			});
 	}
 };
 

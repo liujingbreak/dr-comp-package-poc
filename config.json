@@ -1,8 +1,6 @@
 {
 	"srcDir": "src",
-	"destDir": "static",
-	"compiledDir": "compiled",
-	"buildCacheDir": "build-cache",
+	"destDir": "dist",
 	"port": 14333,
 	"packageScopes": ["dr", "dr-core"],
 	"recipeFolder": "package-recipe",

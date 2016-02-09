@@ -43,7 +43,7 @@ function create(app, setting) {
 	setupApi.createPackageDefinedMiddleware(app);
 	setupApi.createPackageDefinedRouters(app);
 
-	var assetsFolder = path.join(setting.rootPath, setting.destDir);
+	var assetsFolder = path.resolve(setting.rootPath, setting.destDir, 'static');
 	log.debug('express static path: ' + assetsFolder);
 
 	app.use('/', express.static(assetsFolder));
