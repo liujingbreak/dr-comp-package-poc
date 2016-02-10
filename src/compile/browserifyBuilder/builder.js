@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var Q = require('q');
 var fs = require('fs');
 var Path = require('path');
 var util = require('util');
@@ -17,8 +18,10 @@ var rename = require('gulp-rename');
 var through = require('through2');
 var htmlTranform = require('html-browserify');
 var RevAll = require('gulp-rev-all');
-var browserifyInc = require('browserify-incremental');
-var xtend = require('xtend');
+// var browserifyInc = require('browserify-incremental');
+// var xtend = require('xtend');
+var parcelify = require('parcelify');
+var mkdirp = require('mkdirp');
 
 var log = require('@dr/logger').getLogger('browserifyBuilder.builder');
 var packageBrowserInstance = require('./packageBrowserInstance');
@@ -47,52 +50,65 @@ module.exports = function(_packageUtils, _config) {
 	// 	bundleDepsGraph = _bundleDepsGraph;
 	log.info('------- building bundles ---------');
 	var depsMap = {};
-	var streams = [];
+	var proms = [];
+	var bundleStream;
 
 	_.forOwn(packageInfo.bundleMap, function(modules, bundle) {
 		log.info('build bundle: ' + bundle);
-		streams.push(buildBundle(modules, bundle, Path.join(config().destDir, 'static'), depsMap));
-	});
-	var bundleStream = es.merge(streams).on('error', function(er) {
-		log.error(er);
+		var prom = buildBundle(modules, bundle, Path.join(config().destDir, 'static'), depsMap);
+		proms.push(prom);
 	});
 
-	var pageCompilerParam = {};
-	return revisionBundle(bundleStream)
-	.pipe(
+	return Q.all(proms).then(function(streams) {
+		log.debug('bundles stream created');
+		var finishDef = Q.defer();
+		bundleStream = es.merge(streams).on('error', function(er) {
+			log.error(er);
+		});
+		var pageCompilerParam = {};
+		revisionJsBundle(bundleStream)
+		.pipe(
+			through.obj(function transform(file, encoding, cb) {
+				var revisionMeta = JSON.parse(file.contents.toString('utf-8'));
+				pageCompilerParam.revisionMeta = revisionMeta;
+				cb();
+			}, function flush(callback) {
+				// [ Entry page package A ]--depends on--> [ package B, C ]
+				var depsGraph = createEntryDepsData(depsMap, packageInfo.entryPageMap);
+				printModuleDependencyGraph(depsGraph);
+				// [ Entry page package A ]--depends on--> ( bundle X, Y )
+				var bundleDepsGraph = createBundleDependencyGraph(depsGraph, packageInfo.moduleMap);
+				pageCompilerParam.bundleDepsGraph = bundleDepsGraph;
+				pageCompilerParam.config = config;
+				pageCompilerParam.packageInfo = packageInfo;
+				this.push(pageCompilerParam);
+				callback();
+			}))
+		.pipe(require('./pageCompiler').stream())
+		.pipe(gulp.dest(config().destDir))
+		.on('finish', finishDef.resolve);
 
-		through.obj(function transform(file, encoding, cb) {
-			var revisionMeta = JSON.parse(file.contents.toString('utf-8'));
-			pageCompilerParam.revisionMeta = revisionMeta;
-			cb();
-		}, function flush(callback) {
-			// [ Entry page package A ]--depends on--> [ package B, C ]
-			var depsGraph = createEntryDepsData(depsMap, packageInfo.entryPageMap);
-			printModuleDependencyGraph(depsGraph);
-			// [ Entry page package A ]--depends on--> ( bundle X, Y )
-			var bundleDepsGraph = createBundleDependencyGraph(depsGraph, packageInfo.moduleMap);
-			pageCompilerParam.bundleDepsGraph = bundleDepsGraph;
-			pageCompilerParam.config = config;
-			pageCompilerParam.packageInfo = packageInfo;
-			this.push(pageCompilerParam);
-			callback();
-		}))
-	.pipe(require('./pageCompiler').stream())
-	.pipe(gulp.dest(config().destDir));
+		return finishDef.promise;
+	});
 
 	// return defEntryDeps.promise.then(function(bundleDepsGraph) {
 	// 		return require('./pageCompiler')(packageInfo, bundleDepsGraph, config, revisionMetaStream, destDir);
 	// 	});
 
 	function createEntryDepsData(depsMap, entryMap) {
-		//log.trace(JSON.stringify(depsMap, null, '  '));
+		//log.trace('createEntryDepsData: ' + JSON.stringify(depsMap, null, '  '));
 		var packageDeps = {};
+		var walkedModules = {}; // to avoid visiting a circle dependency relationship
 		_.forOwn(entryMap, function(pkInstance, moduleName) {
 			var entryDepsSet = packageDeps[moduleName] = {};
 			_walkDeps(moduleName, entryDepsSet, true);
 		});
 
 		function _walkDeps(target, entryDepsSet, isParentOurs, lastDirectDeps) {
+			if (walkedModules[target]) {
+				return;
+			}
+			walkedModules[target] = true;
 			var deps = depsMap[target];
 			_.forOwn(deps, function(module, id) {
 				var ref = module ? module : id;
@@ -295,21 +311,28 @@ module.exports = function(_packageUtils, _config) {
 			mIdx++;
 		});
 
-		var listStream = bundleBootstrap.createPackageListFile(bundle, modules);
+		var listFile = bundleBootstrap.createPackageListFile(bundle, modules);
+		mkdirp.sync(destDir);
+		var entryFile = Path.join(destDir, bundle + '-activate.js');
+		// if (!fs.existsSync(entryFile)) {
+		// 	fs.writeFileSync(entryFile, '//the exact file content is in build stream');
+		// }
+		fs.writeFileSync(entryFile, listFile);
 
-		// var b = browserify({
+		var b = browserify({debug: true});
+		// I commented out this block because Parcelify doesn't seems to work with browserify-incremental properly.
+		// var b = browserify(xtend(browserifyInc.args, {
 		// 	debug: true
-		// });
-		var b = browserify(xtend(browserifyInc.args, {
-			debug: true
-		}));
-		b.add(listStream, {file: './' + bundle + '-activate.js'});
+		// }));
+		//b.add(listStream, {file: entryFile});
+		b.add(Path.join(destDir, bundle + '-activate.js'));
+
 		modules.forEach(function(module) {
 			b.require(module.longName);
 		});
 		b.transform(htmlTranform);
-		excludeModules(packageInfo.allModules, b, modules);
-		browserifyInc(b, {cacheFile: Path.resolve(config().destDir, 'browserify-cache.json')});
+		excludeModules(packageInfo.allModules, b, _.map(modules, function(module) {return module.longName;}));
+		//browserifyInc(b, {cacheFile: Path.resolve(config().destDir, 'browserify-cache.json')});
 
 		//TODO: algorithm here can be optmized
 		function excludeModules(allModules, b, entryModules) {
@@ -320,12 +343,14 @@ module.exports = function(_packageUtils, _config) {
 			});
 		}
 
+		buildCssBundle(b, bundle, destDir);
+
+		// draw a cross bundles dependency map
 		b.pipeline.get('deps').push(through.obj(function(chunk, encoding, callback) {
 			depsMap[chunk.id] = chunk.deps;
-			//var lm = fs.statSync(chunk.file).mtime;
-			//log.trace(bundle + ' deps: ' + chunk.id + ' -> ' + JSON.stringify(chunk.deps, null, '  '));
-			this.push(chunk);
-			callback(null);
+			// log.debug('dep ' + chunk.file + ' | ' + chunk.id);
+			// log.debug('\tdeps:' + JSON.stringify(chunk.deps, null, '  '));
+			callback(null, chunk);
 		}));
 
 		b.on('file', function(file, id) {
@@ -333,27 +358,25 @@ module.exports = function(_packageUtils, _config) {
 				log.debug('watchify file:' + id);
 			}
 		});
-
-		var stm = b.bundle()
-			.on('error', logError)
+		return b.bundle()
+				.on('error', logError)
 			.pipe(source('js/' + bundle + '.js'))
 			.pipe(buffer())
 			.pipe(gulp.dest(destDir))
-			.on('error', logError)
-			.pipe(sourcemaps.init({
-				loadMaps: true
+				//.on('error', logError)
+				.pipe(sourcemaps.init({
+					loadMaps: true
 			}))
-			// Add transformation tasks to the pipeline here.
-			.pipe(gulpif(!config().devMode, uglify()))
-			.on('error', logError)
+				// Add transformation tasks to the pipeline here.
+				.pipe(gulpif(!config().devMode, uglify()))
+			//.on('error', logError)
 			.pipe(gulpif(!config().devMode, rename('js/' + bundle + '.min.js')))
-			.pipe(sourcemaps.write('./'))
+				.pipe(sourcemaps.write('./'))
 			.pipe(size({title: bundle}))
 			.on('error', logError);
-		return stm;
 	}
 
-	function revisionBundle(bundleStream) {
+	function revisionJsBundle(bundleStream) {
 		//var def = Q.defer();
 		var revAll = new RevAll();
 		var revFilter = gulpFilter('**/*.js', {restore: true});
@@ -364,11 +387,41 @@ module.exports = function(_packageUtils, _config) {
 			.pipe(revAll.manifestFile())
 			.pipe(gulp.dest(config().destDir))
 			.on('finish', function() {
-				log.debug('all bundles compiled');
+				log.debug('all JS bundles compiled');
 			});
+	}
+
+	function buildCssBundle(b, bundle, destDir) {
+		var def = Q.defer();
+		var fileName = Path.resolve(destDir, bundle + '.css');
+		var parce = parcelify(b, {
+			bundles: {
+				style: fileName
+			},
+			appTransforms: ['less-css-stream']
+		});
+
+		parce.on('done', function() {
+			log.debug('parcelify bundle done: ' + bundle);
+			def.resolve(fileName);
+		});
+
+		// this is a work around for a bug introduced in Parcelify
+		// check this out, https://github.com/rotundasoftware/parcelify/issues/30
+		b.pipeline.get('dedupe').push( through.obj( function( row, enc, next ) {
+			if (!fs.existsSync(row.file)) {
+				var resolved = packageInfo.moduleMap[row.id].file;
+				row.file = resolved ? resolved : bResolve.sync(row.file);
+			}
+			this.push(row);
+			next();
+		}));
+
+		return def.promise;
 	}
 };
 
+var bundleLog = require('@dr/logger').getLogger('browserifyBuilder.buildBundle');
 function logError(er) {
-	log.error(er.message, er);
+	bundleLog.error(er.message, er);
 }

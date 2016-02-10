@@ -19,6 +19,7 @@
   "homepage": "https://github.com/liujingbreak/dr-package-home-PoC#readme",
   "devDependencies": {
     "browserify": "^13.0.0",
+    "browserify-incremental": "^3.0.1",
     "cheerio": "^0.19.0",
     "del": "^2.2.0",
     "domhandler": "^2.3.0",
@@ -46,15 +47,16 @@
     "jasmine-reporters": "^2.1.1",
     "jshint": "^2.8.0",
     "jshint-stylish": "^2.1.0",
+    "less-css-stream": "^1.0.0",
     "main-bower-files": "^2.11.0",
+    "mkdirp": "^0.5.1",
     "mkdirs": "0.0.2",
+    "parcelify": "^2.1.0",
     "shelljs-nodecli": "^0.1.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-paths": "^2.1.0",
     "vinyl-source-stream": "^1.1.0",
-    "xtend": "^4.0.1",
-    "browserify-incremental": "^3.0.1",
-	"mkdirp": "^0.5.1"
+    "xtend": "^4.0.1"
   },
   "engines": {
     "node": "^5.3.0"

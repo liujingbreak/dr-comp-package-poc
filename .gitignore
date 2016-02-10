@@ -3,6 +3,4 @@ node_modules
 .DS_Store
 /bower_components
 config.local.json
-/static
-/compiled
-/build-cache
+/dist

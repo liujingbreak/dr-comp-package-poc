@@ -79,7 +79,12 @@ BrowserSideBootstrap.prototype = {
 		if (config().devMode) {
 			bootstrap += 'console && console.log("bundle ' + bundleName + ' is loaded");\n';
 		}
-		return str2Stream(bootstrap);
+		return bootstrap;
+		//return str2Stream(bootstrap);
+	},
+
+	createPackageListFileStream: function(bundleName, packageInstances) {
+		return str2Stream(this.createPackageListFile.apply(this, arguments));
 	}
 };
 
