@@ -1,5 +1,5 @@
 var _ = require('lodash');
-var Q = require('q');
+var Promise = require('bluebird');
 var fs = require('fs');
 var Path = require('path');
 var util = require('util');
@@ -38,57 +38,58 @@ module.exports = function(_packageUtils, _config) {
 	bundleBootstrap = helper.BrowserSideBootstrap();
 
 	var packageInfo = walkPackages(Path.resolve(config().rootPath, config().recipeFolder, 'package.json'));
-	log.debug('bundles: ' + util.inspect(_.keys(packageInfo.bundleMap)));
-
-	// Build steps begin here
-	// return depBundles(packageInfo.entryPageMap).then(function(packageDepsGraph) {
-	// 	// [ Entry page package A ]--depends on--> [ package B, C ]
-	// 	printModuleDependencyGraph(packageDepsGraph);
-	// 	// [ Entry page package A ]--depends on--> ( bundle X, Y )
-	// 	return createBundleDependencyGraph(packageDepsGraph, packageInfo.moduleMap);
-	// }).then(function(_bundleDepsGraph) {
-	// 	bundleDepsGraph = _bundleDepsGraph;
 	log.info('------- building bundles ---------');
 	var depsMap = {};
 	var proms = [];
 	var bundleStream;
+	var bundleNames = _.keys(packageInfo.bundleMap);
+	log.debug('bundles: ' + bundleNames);
 
-	_.forOwn(packageInfo.bundleMap, function(modules, bundle) {
+	bundleNames.forEach(function(bundle) {
 		log.info('build bundle: ' + bundle);
-		var prom = buildBundle(modules, bundle, Path.join(config().destDir, 'static'), depsMap);
+		var prom = buildBundle(packageInfo.bundleMap[bundle],
+			bundle, Path.join(config().destDir, 'static'), depsMap);
 		proms.push(prom);
 	});
 
-	return Q.all(proms).then(function(streams) {
-		log.debug('bundles stream created');
-		var finishDef = Q.defer();
-		bundleStream = es.merge(streams).on('error', function(er) {
-			log.error(er);
-		});
-		var pageCompilerParam = {};
-		revisionJsBundle(bundleStream)
-		.pipe(
-			through.obj(function transform(file, encoding, cb) {
-				var revisionMeta = JSON.parse(file.contents.toString('utf-8'));
-				pageCompilerParam.revisionMeta = revisionMeta;
-				cb();
-			}, function flush(callback) {
-				// [ Entry page package A ]--depends on--> [ package B, C ]
-				var depsGraph = createEntryDepsData(depsMap, packageInfo.entryPageMap);
-				printModuleDependencyGraph(depsGraph);
-				// [ Entry page package A ]--depends on--> ( bundle X, Y )
-				var bundleDepsGraph = createBundleDependencyGraph(depsGraph, packageInfo.moduleMap);
-				pageCompilerParam.bundleDepsGraph = bundleDepsGraph;
-				pageCompilerParam.config = config;
-				pageCompilerParam.packageInfo = packageInfo;
-				this.push(pageCompilerParam);
-				callback();
-			}))
-		.pipe(require('./pageCompiler').stream())
-		.pipe(gulp.dest(config().destDir))
-		.on('finish', finishDef.resolve);
+	return Promise.all(proms).then(function(resolveds) {
+		return new Promise(function(resolve, reject) {
+			log.debug('bundles stream created');
 
-		return finishDef.promise;
+			var cssBundlePaths = _.map(resolveds, function(resolved) {
+				return resolved[1];
+			});
+			log.debug('css bundles: ' + cssBundlePaths);
+
+			bundleStream = es.merge(_.map(resolveds, function(resolved) {
+				return resolved[0];
+			}).concat(gulp.src(cssBundlePaths, {base: Path.resolve('dist/static')})))
+			.on('error', function(er) {
+				log.error(er);
+			});
+			var pageCompilerParam = {};
+			revisionJsBundle(bundleStream)
+			.pipe(
+				through.obj(function transform(file, encoding, cb) {
+					var revisionMeta = JSON.parse(file.contents.toString('utf-8'));
+					pageCompilerParam.revisionMeta = revisionMeta;
+					cb();
+				}, function flush(callback) {
+					// [ Entry page package A ]--depends on--> [ package B, C ]
+					var depsGraph = createEntryDepsData(depsMap, packageInfo.entryPageMap);
+					printModuleDependencyGraph(depsGraph);
+					// [ Entry page package A ]--depends on--> ( bundle X, Y )
+					var bundleDepsGraph = createBundleDependencyGraph(depsGraph, packageInfo.moduleMap);
+					pageCompilerParam.bundleDepsGraph = bundleDepsGraph;
+					pageCompilerParam.config = config;
+					pageCompilerParam.packageInfo = packageInfo;
+					this.push(pageCompilerParam);
+					callback();
+				}))
+			.pipe(require('./pageCompiler').stream())
+			.pipe(gulp.dest(config().destDir))
+			.on('finish', resolve);
+		});
 	});
 
 	// return defEntryDeps.promise.then(function(bundleDepsGraph) {
@@ -343,7 +344,7 @@ module.exports = function(_packageUtils, _config) {
 			});
 		}
 
-		buildCssBundle(b, bundle, destDir);
+		var cssPromise = buildCssBundle(b, bundle, destDir);
 
 		// draw a cross bundles dependency map
 		b.pipeline.get('deps').push(through.obj(function(chunk, encoding, callback) {
@@ -358,28 +359,30 @@ module.exports = function(_packageUtils, _config) {
 				log.debug('watchify file:' + id);
 			}
 		});
-		return b.bundle()
+		var jsStream = b.bundle()
 				.on('error', logError)
 			.pipe(source('js/' + bundle + '.js'))
 			.pipe(buffer())
 			.pipe(gulp.dest(destDir))
-				//.on('error', logError)
-				.pipe(sourcemaps.init({
-					loadMaps: true
+			//.on('error', logError)
+			.pipe(sourcemaps.init({
+				loadMaps: true
 			}))
-				// Add transformation tasks to the pipeline here.
-				.pipe(gulpif(!config().devMode, uglify()))
+			.pipe(gulpif(!config().devMode, uglify()))
 			//.on('error', logError)
 			.pipe(gulpif(!config().devMode, rename('js/' + bundle + '.min.js')))
 				.pipe(sourcemaps.write('./'))
 			.pipe(size({title: bundle}))
 			.on('error', logError);
+		return Promise.all([
+			jsStream, cssPromise
+		]);
 	}
 
 	function revisionJsBundle(bundleStream) {
 		//var def = Q.defer();
 		var revAll = new RevAll();
-		var revFilter = gulpFilter('**/*.js', {restore: true});
+		var revFilter = gulpFilter(['**/*.js', '**/*.css'], {restore: true});
 		return bundleStream.pipe(revFilter)
 			.pipe(revAll.revision())
 			.pipe(revFilter.restore)
@@ -387,12 +390,11 @@ module.exports = function(_packageUtils, _config) {
 			.pipe(revAll.manifestFile())
 			.pipe(gulp.dest(config().destDir))
 			.on('finish', function() {
-				log.debug('all JS bundles compiled');
+				log.debug('all JS bundles revisioned');
 			});
 	}
 
-	function buildCssBundle(b, bundle, destDir) {
-		var def = Q.defer();
+	function buildCssBundle(b, bundle, destDir) { return new Promise(function(resolve, reject) {
 		var fileName = Path.resolve(destDir, bundle + '.css');
 		var parce = parcelify(b, {
 			bundles: {
@@ -403,9 +405,8 @@ module.exports = function(_packageUtils, _config) {
 
 		parce.on('done', function() {
 			log.debug('parcelify bundle done: ' + bundle);
-			def.resolve(fileName);
+			resolve(fileName);
 		});
-
 		// this is a work around for a bug introduced in Parcelify
 		// check this out, https://github.com/rotundasoftware/parcelify/issues/30
 		b.pipeline.get('dedupe').push( through.obj( function( row, enc, next ) {
@@ -416,8 +417,7 @@ module.exports = function(_packageUtils, _config) {
 			this.push(row);
 			next();
 		}));
-
-		return def.promise;
+	});
 	}
 };
 

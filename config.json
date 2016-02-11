@@ -6,7 +6,7 @@
 	"recipeFolder": "package-recipe",
 	"nodeRoutePath": "/",
 	"devMode": false,
-	"staticAssetsURL": "/",
+	"staticAssetsURL": "http://localhost:14333",
 	"vendorBundleMap": {
 		"core": ["lodash", "q"]
 	},

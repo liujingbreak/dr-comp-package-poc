@@ -30,7 +30,7 @@ exports.stream = function() {
 			var prom = Q.nfcall(fs.readFile, instance.entryHtml, 'utf-8')
 			.then(function(content) {
 				var $ = cheerio.load(content);
-				createScriptElements($, bundleDepsGraph[name], instance, config, revisionMeta);
+				injectElements($, bundleDepsGraph[name], instance, config, revisionMeta);
 				var hackedHtml = $.html();
 
 				var htmlName = Path.basename(instance.entryHtml);
@@ -58,28 +58,63 @@ exports.stream = function() {
 	});
 };
 
-function createScriptElements($, bundleSet, pkInstance, config, revisionMeta) {
+function injectElements($, bundleSet, pkInstance, config, revisionMeta) {
 	var body = $('body');
+	var head = $('head');
 	if (bundleSet.core) {
 		// core is always the first bundle to be loaded
-		body.append(createScriptElement($, 'core', config, revisionMeta));
+		_injectElementsByBundle($, head, body, 'core', config, revisionMeta);
 	}
 
 	_.forOwn(bundleSet, function(v, bundleName) {
 		if (bundleName === 'core') {
 			return;
 		}
-		body.append(createScriptElement($, bundleName, config, revisionMeta));
+		_injectElementsByBundle($, head, body, bundleName, config, revisionMeta);
 	});
 	body.append($('<script>').html('require("' + pkInstance.longName + '");'));
 }
 
+function _injectElementsByBundle($, head, body, bundleName, config, revisionMeta) {
+	var bundleScript = createScriptElement($, bundleName, config, revisionMeta);
+	var bundleCss = createCssLinkElement($, bundleName, config, revisionMeta);
+	if (bundleScript) {
+		body.append(bundleScript);
+	}
+	if (bundleCss) {
+		head.append(bundleCss);
+	}
+}
+
+var URL_PAT = /^((?:[^:\/]+:)?\/)?(.*)$/;
+
 function createScriptElement($, bundleName, config, revisionMeta) {
 	var scriptEl = $('<script>');
 	var file = 'js/' + bundleName + (config().devMode ? '' : '.min') + '.js';
+	if (!revisionMeta[file]) {
+		return null;
+	}
 	log.trace(file + ' -> ' + revisionMeta[file]);
 	var src = config().staticAssetsURL + '/' + revisionMeta[file];
-	src = src.replace(/\/\/+/g, '/');
+	var rs = URL_PAT.exec(src);
+	src = (rs[1] ? rs[1] : '') + rs[2].replace(/\/\/+/g, '/');
 	scriptEl.attr('src', src);
 	return scriptEl;
+}
+
+function createCssLinkElement($, bundleName, config, revisionMeta) {
+	var element = $('<link/>');
+	var file = bundleName + '.css';
+	if (!revisionMeta[file]) {
+		return null;
+	}
+	log.trace(file + ' -> ' + revisionMeta[file]);
+	var src = config().staticAssetsURL + '/' + revisionMeta[file];
+	var rs = URL_PAT.exec(src);
+	src = (rs[1] ? rs[1] : '') + rs[2].replace(/\/\/+/g, '/');
+	element.attr('rel', 'stylesheet');
+	element.attr('href', src);
+	element.attr('type', 'text/css');
+
+	return element;
 }
