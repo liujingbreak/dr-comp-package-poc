@@ -242,8 +242,12 @@ module.exports = function(_packageUtils, _config, options) {
 			if (!pkJson.dr) {
 				bundle = parsedName.name;
 			} else if (!pkJson.dr.builder || pkJson.dr.builder === 'browserify') {
-				bundle = pkJson.dr.bundle || pkJson.dr.chunk;
-				bundle = bundle ? bundle : parsedName.name;
+				if (config().bundlePerPackage === true) {
+					bundle = parsedName.name;
+				} else {
+					bundle = pkJson.dr.bundle || pkJson.dr.chunk;
+					bundle = bundle ? bundle : parsedName.name;
+				}
 				if (pkJson.dr.entryPage) {
 					isEntryServerTemplate = false;
 					entryHtml = Path.resolve(packagePath, pkJson.dr.entryPage);
