@@ -104,7 +104,7 @@ function createScriptElement($, bundleName, config, revisionMeta) {
 
 function createCssLinkElement($, bundleName, config, revisionMeta) {
 	var element = $('<link/>');
-	var file = bundleName + '.css';
+	var file = 'css/' + bundleName + '.css';
 	if (!revisionMeta[file]) {
 		return null;
 	}

@@ -1,8 +1,8 @@
+/* global -Promise */
 var _ = require('lodash');
 var Promise = require('bluebird');
 var fs = require('fs');
 var Path = require('path');
-var util = require('util');
 var bResolve = require('browser-resolve');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
@@ -22,6 +22,7 @@ var RevAll = require('gulp-rev-all');
 // var xtend = require('xtend');
 var parcelify = require('parcelify');
 var mkdirp = require('mkdirp');
+var gutil = require('gulp-util');
 
 var log = require('@dr/logger').getLogger('browserifyBuilder.builder');
 var packageBrowserInstance = require('./packageBrowserInstance');
@@ -29,7 +30,7 @@ var helperFactor = require('./browserifyHelper');
 
 var packageUtils, config, bundleBootstrap;
 
-module.exports = function(_packageUtils, _config) {
+module.exports = function(_packageUtils, _config, options) {
 	packageUtils = _packageUtils;
 	config = _config;
 	var helper = helperFactor(config);
@@ -37,12 +38,22 @@ module.exports = function(_packageUtils, _config) {
 
 	bundleBootstrap = helper.BrowserSideBootstrap();
 
+	gutil.log('Usage: gulp compile [-b <bundle name>]');
+	gutil.log('\tbuild all JS and CSS bundles, if parameter <bundle name> is supplied, only that specific bundle will be rebuilt.');
+
 	var packageInfo = walkPackages(Path.resolve(config().rootPath, config().recipeFolder, 'package.json'));
 	log.info('------- building bundles ---------');
 	var depsMap = {};
 	var proms = [];
 	var bundleStream;
 	var bundleNames = _.keys(packageInfo.bundleMap);
+	if (options.b) {
+		if (!{}.hasOwnProperty.call(packageInfo.bundleMap, options.b)) {
+			gutil.log('bundle ' + options.b + ' doesn\'t exist, existing bundles are:\n\t' + bundleNames.join('\n\t'));
+			return;
+		}
+		bundleNames = [options.b];
+	}
 	log.debug('bundles: ' + bundleNames);
 
 	bundleNames.forEach(function(bundle) {
@@ -388,6 +399,21 @@ module.exports = function(_packageUtils, _config) {
 			.pipe(revFilter.restore)
 			.pipe(gulp.dest(Path.join(config().destDir, 'static')))
 			.pipe(revAll.manifestFile())
+			.pipe(through.obj(function(row, encode, next) {
+				var file = Path.join(config().destDir, Path.basename(row.path));
+				if (fs.existsSync(file)) {
+					Promise.promisify(fs.readFile)(file).then(function(data) {
+						log.trace('existing revision rev-manifest.json:\n' + data);
+						var meta = JSON.parse(row.contents.toString('utf-8'));
+						var newMeta = JSON.stringify(_.assign(JSON.parse(data), meta), null, '\t');
+						log.trace('merge with existing rev-manifest.json:\n' + newMeta);
+						row.contents = new Buffer(newMeta);
+						next(null, row);
+					});
+				} else {
+					next(null, row);
+				}
+			}))
 			.pipe(gulp.dest(config().destDir))
 			.on('finish', function() {
 				log.debug('all JS bundles revisioned');
@@ -395,7 +421,8 @@ module.exports = function(_packageUtils, _config) {
 	}
 
 	function buildCssBundle(b, bundle, destDir) { return new Promise(function(resolve, reject) {
-		var fileName = Path.resolve(destDir, bundle + '.css');
+		mkdirp.sync(Path.resolve(destDir, 'css'));
+		var fileName = Path.resolve(destDir, 'css', bundle + '.css');
 		var parce = parcelify(b, {
 			bundles: {
 				style: fileName

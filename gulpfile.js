@@ -21,10 +21,10 @@ var Jasmine = require('jasmine');
 var findPackageJson = require('./lib/gulp/findPackageJson');
 var rwPackageJson = require('./lib/gulp/rwPackageJson');
 var packageUtils = require('./lib/packageMgr/packageUtils');
+var argv = require('yargs').argv;
 
 var config = require('./lib/config');
 require('log4js').configure(Path.join(__dirname, 'log4js.json'));
-require('log4js').getLogger('test').trace('trace...');
 
 var DEST = Path.resolve(__dirname, config().destDir);
 
@@ -89,7 +89,7 @@ gulp.task('compile', function() {
 	var jobs = [];
 	packageUtils.findNodePackageByType('builder', function(name, entryPath, parsedName, pkJson) {
 		gutil.log('run builder: ' + name);
-		var res = require(name)(packageUtils, config);
+		var res = require(name)(packageUtils, config, argv);
 		if (res && _.isFunction(res.pipe)) {
 			// is stream
 			var job = Q.defer();

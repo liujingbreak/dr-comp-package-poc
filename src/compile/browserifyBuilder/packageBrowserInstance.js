@@ -1,5 +1,5 @@
 var _ = require('lodash');
-var log = require('log4js').getLogger('packageMgr.packageNodeInstance');
+var log = require('log4js').getLogger('browserifyBuilder.PackageBrowserInstance');
 
 module.exports = PackageBrowserInstance;
 
@@ -32,7 +32,7 @@ PackageBrowserInstance.prototype = {
 			this.scopeName = parsedName.scope;
 		}
 		if (!_.includes(this.configSetting.packageScopes, this.scopeName)) {
-			log.debug('3rd-party package ' + this.longName);
+			//log.debug('3rd-party package ' + this.longName);
 			this.active = true;
 		}
 	},

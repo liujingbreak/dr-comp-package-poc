@@ -67,6 +67,5 @@
 	    "spyOn": true,
 	    "xit": true,
 	    "xdescribe": true
-    },
-	"predef": [ "-Promise" ]
+    }
 }
