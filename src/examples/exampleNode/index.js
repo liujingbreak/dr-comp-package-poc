@@ -1,5 +1,4 @@
 var log = require('log4js').getLogger('exampleNodePackage');
-var Path = require('path');
 var mafia = require('./gangsta');
 var Q = require('q');
 

@@ -27,18 +27,28 @@ var gutil = require('gulp-util');
 var log = require('@dr/logger').getLogger('browserifyBuilder.builder');
 var packageBrowserInstance = require('./packageBrowserInstance');
 var helperFactor = require('./browserifyHelper');
+var FileCache = require('./fileCache');
+var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
 
 var packageUtils, config, bundleBootstrap;
 
-module.exports = function(_packageUtils, _config, options) {
+/**
+ * JS and CSS file Build process based on browserify and parcelify
+ * @param  {packageUtils} _packageUtils [description]
+ * @param  {config} _config       [description]
+ * @param  {yargs.argv} argv       command line arguments encapuslated by `yargs`
+ * @return {Promise}               [description]
+ */
+module.exports = function(_packageUtils, _config, argv) {
 	packageUtils = _packageUtils;
 	config = _config;
 	var helper = helperFactor(config);
 	//var jsTransform = helper.jsTransform;
 
 	bundleBootstrap = helper.BrowserSideBootstrap();
+	var fileCache = new FileCache(config().destDir);
 
-	gutil.log('Usage: gulp compile [-b <bundle name>]');
+	gutil.log('Usage: gulp compile [-b <bundle name> -b <bunle name> ...]');
 	gutil.log('\tbuild all JS and CSS bundles, if parameter <bundle name> is supplied, only that specific bundle will be rebuilt.');
 
 	var packageInfo = walkPackages(Path.resolve(config().rootPath, config().recipeFolder, 'package.json'));
@@ -47,12 +57,16 @@ module.exports = function(_packageUtils, _config, options) {
 	var proms = [];
 	var bundleStream;
 	var bundleNames = _.keys(packageInfo.bundleMap);
-	if (options.b) {
-		if (!{}.hasOwnProperty.call(packageInfo.bundleMap, options.b)) {
-			gutil.log('bundle ' + options.b + ' doesn\'t exist, existing bundles are:\n\t' + bundleNames.join('\n\t'));
+	if (argv.b) {
+		var bundlesTobuild = argv.b;
+		if (!_.isArray(argv.b)) {
+			bundlesTobuild = [argv.b];
+		}
+		if (_.intersection(bundleNames, bundlesTobuild).length < bundlesTobuild.length) {
+			gutil.log('bundle ' + bundlesTobuild + ' doesn\'t exist, existing bundles are:\n\t' + bundleNames.join('\n\t'));
 			return;
 		}
-		bundleNames = [options.b];
+		bundleNames = bundlesTobuild;
 	}
 	log.debug('bundles: ' + bundleNames);
 
@@ -63,8 +77,8 @@ module.exports = function(_packageUtils, _config, options) {
 		proms.push(prom);
 	});
 
-	return Promise.all(proms).then(function(resolveds) {
-		return new Promise(function(resolve, reject) {
+	return Promise.all(proms)
+	.then(function(resolveds) { return new Promise(function(resolve, reject) {
 			log.debug('bundles stream created');
 
 			var cssBundlePaths = _.map(resolveds, function(resolved) {
@@ -101,42 +115,52 @@ module.exports = function(_packageUtils, _config, options) {
 			.pipe(gulp.dest(config().destDir))
 			.on('finish', resolve);
 		});
-	});
+	}).then(_.bind(fileCache.tailDown, fileCache));
 
-	// return defEntryDeps.promise.then(function(bundleDepsGraph) {
-	// 		return require('./pageCompiler')(packageInfo, bundleDepsGraph, config, revisionMetaStream, destDir);
-	// 	});
-
+	/**
+	 * create a map of entry module and depended modules
+	 * @param  {[type]} depsMap  [description]
+	 * @param  {[type]} entryMap [description]
+	 * @return {object<string, object<string, (boolean | string)>>} a map
+	 */
 	function createEntryDepsData(depsMap, entryMap) {
 		//log.trace('createEntryDepsData: ' + JSON.stringify(depsMap, null, '  '));
 		var packageDeps = {};
-		var walkedModules = {}; // to avoid visiting a circle dependency relationship
 		_.forOwn(entryMap, function(pkInstance, moduleName) {
 			var entryDepsSet = packageDeps[moduleName] = {};
-			_walkDeps(moduleName, entryDepsSet, true);
+			_walkDeps(moduleName, moduleName, entryDepsSet, true);
 		});
 
-		function _walkDeps(target, entryDepsSet, isParentOurs, lastDirectDeps) {
-			if (walkedModules[target]) {
-				return;
+		function _walkDeps(id, file, entryDepsSet, isParentOurs, lastDirectDeps) {
+			var deps;
+			if (!file) { // since for external module, the `file` is always `false`
+				deps = depsMap[id];
+			} else {
+				deps = depsMap[file];
+				deps = deps ? deps : depsMap[id];
 			}
-			walkedModules[target] = true;
-			var deps = depsMap[target];
-			_.forOwn(deps, function(module, id) {
-				var ref = module ? module : id;
+			if (!deps) {
+				log.error('Can not walk dependency tree for: ' + id +
+				', missing depended module or you may try rebuild all bundles');
+			}
+			_.forOwn(deps, function(depsValue, depsKey) {
+				var isRelativePath = _.startsWith(depsKey, '.');
 
-				if (!_.startsWith(id, '.')) {
+				if (!isRelativePath) {
 					// require id is a module name
-					var isOurs = isParentOurs && !packageUtils.is3rdParty(id);
-					entryDepsSet[id] = isParentOurs ? true : lastDirectDeps;
+					var isOurs = isParentOurs && !packageUtils.is3rdParty(depsKey);
+					if ({}.hasOwnProperty.call(entryDepsSet, depsKey)) {
+						return;
+					}
+					entryDepsSet[depsKey] = isParentOurs ? true : lastDirectDeps;
 					if (isOurs) {
-						_walkDeps(ref, entryDepsSet, true);
+						_walkDeps(depsKey, depsValue, entryDepsSet, true);
 					} else {
-						_walkDeps(ref, entryDepsSet, false, id);
+						_walkDeps(depsKey, depsValue, entryDepsSet, false, depsKey);
 					}
 				} else {
 					// require id is a local file path
-					_walkDeps(ref, entryDepsSet, isParentOurs, lastDirectDeps);
+					_walkDeps(depsKey, depsValue, entryDepsSet, isParentOurs, lastDirectDeps);
 				}
 			});
 		}
@@ -184,6 +208,9 @@ module.exports = function(_packageUtils, _config, options) {
 				}
 				i++;
 			});
+			if (size === 0) {
+				log.info('\t└─ <empty>');
+			}
 		});
 
 		return bundleDepsGraph;
@@ -204,6 +231,9 @@ module.exports = function(_packageUtils, _config, options) {
 				}
 				i++;
 			});
+			if (size === 0) {
+				log.info('\t└─ <empty>');
+			}
 		});
 	}
 	/**
@@ -330,9 +360,7 @@ module.exports = function(_packageUtils, _config, options) {
 		var listFile = bundleBootstrap.createPackageListFile(bundle, modules);
 		mkdirp.sync(destDir);
 		var entryFile = Path.join(destDir, bundle + '-activate.js');
-		// if (!fs.existsSync(entryFile)) {
-		// 	fs.writeFileSync(entryFile, '//the exact file content is in build stream');
-		// }
+
 		fs.writeFileSync(entryFile, listFile);
 
 		var b = browserify({debug: true});
@@ -361,13 +389,28 @@ module.exports = function(_packageUtils, _config, options) {
 
 		var cssPromise = buildCssBundle(b, bundle, destDir);
 
+		//var deps = [];
 		// draw a cross bundles dependency map
 		b.pipeline.get('deps').push(through.obj(function(chunk, encoding, callback) {
-			depsMap[chunk.id] = chunk.deps;
-			// log.debug('dep ' + chunk.file + ' | ' + chunk.id);
-			// log.debug('\tdeps:' + JSON.stringify(chunk.deps, null, '  '));
+			depsMap[chunk.file] = chunk.deps;
+			// var cloned = _.clone(chunk);
+			// delete cloned.source;
+			// deps.push(cloned);
 			callback(null, chunk);
+		}, function(next) {
+			fileCache.mergeWithJsonCache(Path.join(config().destDir, 'depsMap.json'), depsMap)
+			.then(function(newDepsMap) {
+				_.assign(depsMap, newDepsMap);
+				next();
+			});
+			next();
 		}));
+
+		// var deps = [];
+		// b.on('dep', function(row) {
+		// 	var obj = {id: row.id, file: row.file, index: row.index, indexDeps: row.indexDeps, deps: row.deps};
+		// 	deps.push(obj);
+		// });
 
 		b.on('file', function(file, id) {
 			if (_.startsWith(id, '.')) {
@@ -379,12 +422,13 @@ module.exports = function(_packageUtils, _config, options) {
 			.pipe(source('js/' + bundle + '.js'))
 			.pipe(buffer())
 			.pipe(gulp.dest(destDir))
-			//.on('error', logError)
+			// .on('end', function() {
+			// 	log.trace(bundle + '\'s deps: ' + JSON.stringify(deps, null, '  '));
+			// })
 			.pipe(sourcemaps.init({
 				loadMaps: true
 			}))
 			.pipe(gulpif(!config().devMode, uglify()))
-			//.on('error', logError)
 			.pipe(gulpif(!config().devMode, rename('js/' + bundle + '.min.js')))
 				.pipe(sourcemaps.write('./'))
 			.pipe(size({title: bundle}))
@@ -406,7 +450,7 @@ module.exports = function(_packageUtils, _config, options) {
 			.pipe(through.obj(function(row, encode, next) {
 				var file = Path.join(config().destDir, Path.basename(row.path));
 				if (fs.existsSync(file)) {
-					Promise.promisify(fs.readFile)(file).then(function(data) {
+					readFileAsync(file).then(function(data) {
 						log.trace('existing revision rev-manifest.json:\n' + data);
 						var meta = JSON.parse(row.contents.toString('utf-8'));
 						var newMeta = JSON.stringify(_.assign(JSON.parse(data), meta), null, '\t');
@@ -437,6 +481,11 @@ module.exports = function(_packageUtils, _config, options) {
 		parce.on('done', function() {
 			log.debug('parcelify bundle done: ' + bundle);
 			resolve(fileName);
+		});
+
+		parce.on('error', function(err) {
+			log.error('parcelify bundle error: ', err);
+			reject(fileName);
 		});
 		// this is a work around for a bug introduced in Parcelify
 		// check this out, https://github.com/rotundasoftware/parcelify/issues/30

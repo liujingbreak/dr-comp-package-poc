@@ -26,8 +26,6 @@ var argv = require('yargs').argv;
 var config = require('./lib/config');
 require('log4js').configure(Path.join(__dirname, 'log4js.json'));
 
-var DEST = Path.resolve(__dirname, config().destDir);
-
 gulp.task('default', function() {
 	gutil.log('please individually execute gulp [task]');
 	gutil.log('\tbuild clean, link, compile, bump-version, publish');
