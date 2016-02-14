@@ -47,7 +47,8 @@ gulp.task('clean:dist', function() {
 
 gulp.task('clean', ['clean:dist', 'clean:dependency']);
 
-gulp.task('build', ['install-recipe'], function() {
+gulp.task('build', ['link'], function() {
+	cli.exec('npm', 'install');
 	var gulpStart = _.bind(gulp.start, gulp);
 	return Q.nfcall(gulpStart, 'compile');
 });

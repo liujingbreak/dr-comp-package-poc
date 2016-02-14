@@ -1,2 +1,2 @@
 devMode: true
-# bundlePerPackage: true
+bundlePerPackage: true

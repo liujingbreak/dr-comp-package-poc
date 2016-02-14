@@ -30,6 +30,7 @@ vendorBundleMap:
       - lodash
       - q
       - jquery
+      - eventemitter3
 
 # Global `browserify.bundle()` `noParse` option, there is also a package specific `dr.browserifyNoParse`
 # available option in individual package.json file
@@ -37,6 +38,7 @@ browserifyNoParse:
     - q
     - lodash
     - jquery
+    - gsap
 
 packageContextPathMapping:
     # Package short name - route path map, used by express server.

@@ -1,6 +1,6 @@
-@import "ts-variables.less";
+@import "dr-variables.less";
 
-.ts-menu {
+.dr-menu {
 	list-style: none;
 	li {
 		display: block;
@@ -9,18 +9,18 @@
 		padding: 0;
 		> button,
 		> a {
-			.ts-mixin-button ();
-			.ts-mixin-button-max ();
-			.ts-mixin-noround ();
+			.dr-mixin-button ();
+			.dr-mixin-button-max ();
+			.dr-mixin-noround ();
 			display: block;
 			position: relative;
 			width: 100%;
-			padding: @ts-unit-half;
-			padding-bottom: @ts-unit-half - 1px;
-			border-bottom: 1px solid @ts-white;
-			background-color: @ts-liteblue;
+			padding: @dr-unit-half;
+			padding-bottom: @dr-unit-half - 1px;
+			border-bottom: 1px solid @dr-white;
+			background-color: @dr-liteblue;
 			&:before {
-				.ts-mixin-maximize();
+				.dr-mixin-maximize();
 				content: "";
 				right: auto;
 				width: 5px;
@@ -28,12 +28,12 @@
 			&:focus:not(:active) {
 				outline: none;
 				&:before {
-					background-color: @ts-blue;
+					background-color: @dr-blue;
 				}
 			}
 			&:hover,
 			&:focus {
-				background-color: @ts-liteblue-dark;
+				background-color: @dr-liteblue-dark;
 			}
 			&:hover {
 				span,
@@ -45,38 +45,38 @@
 		&:first-child {
 			> button,
 			> a {
-				.ts-mixin-rounded-t ();
+				.dr-mixin-rounded-t ();
 				&:focus:before {
-					.ts-mixin-rounded-tl ();
+					.dr-mixin-rounded-tl ();
 				}
 			}
 		}
 		&:last-child {
 			> button,
 			> a {
-				padding-bottom: @ts-unit-half;
-				.ts-mixin-rounded-b ();
+				padding-bottom: @dr-unit-half;
+				.dr-mixin-rounded-b ();
 				&:focus:before {
-					.ts-mixin-rounded-bl ();
+					.dr-mixin-rounded-bl ();
 				}
 			}
 		}
 		&:only-child {
 			> button,
 			> a {
-				.ts-mixin-rounded ();
+				.dr-mixin-rounded ();
 				&:focus:before {
-					.ts-mixin-rounded-l ( );
+					.dr-mixin-rounded-l ( );
 				}
 			}
 		}
-		&.ts-checked {
+		&.dr-checked {
 			> button,
 			> a {
-				background-color: @ts-blue;
-				color: @ts-white;
+				background-color: @dr-blue;
+				color: @dr-white;
 				&:focus:before {
-					background-color: @ts-blue-dark;
+					background-color: @dr-blue-dark;
 				}
 			}
 		}

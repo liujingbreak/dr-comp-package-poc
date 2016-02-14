@@ -1,0 +1,24 @@
+.dr-cover {
+	.dr-mixin-unselectable();
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	&.dr-transition {
+		.dr-mixin-maybeoptimze-gpu ();
+		.dr-mixin-transition ( opacity, @dr-transition-fast, none );
+		opacity: 0;
+		&.dr-visible {
+			opacity: 1;
+		}
+	}
+	&.dr-asidecover {
+		z-index: @dr-zindex-aside-cover;
+		background-color: rgba(0,0,0,0.6);
+	}
+	&.dr-dialogcover {
+		z-index: @dr-zindex-dialog-cover;
+		background-color: rgba(0,0,0,0.8);
+	}
+}

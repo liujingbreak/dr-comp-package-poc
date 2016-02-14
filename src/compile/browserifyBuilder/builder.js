@@ -388,6 +388,7 @@ module.exports = function(_packageUtils, _config, argv) {
 			b.require(module.longName);
 		});
 		b.transform(htmlTranform);
+		b.transform(helper.jsTranform);
 		excludeModules(packageInfo.allModules, b, _.map(modules, function(module) {return module.longName;}));
 		//browserifyInc(b, {cacheFile: Path.resolve(config().destDir, 'browserify-cache.json')});
 

@@ -6,16 +6,16 @@
  * refactor to use standard units...
  */
 
-@ts-calendar-unit: 20px;
-@ts-calendar-unit-half: 10px;
-@ts-calendar-unit-quarter: 5px;
-@ts-calendar-magic-unit: 41px;
+@dr-calendar-unit: 20px;
+@dr-calendar-unit-half: 10px;
+@dr-calendar-unit-quarter: 5px;
+@dr-calendar-magic-unit: 41px;
 
-.ts-calendar {
-	line-height: @ts-calendar-unit;
-	margin-bottom: @ts-unit;
+.dr-calendar {
+	line-height: @dr-calendar-unit;
+	margin-bottom: @dr-unit;
 	button, {
-		.ts-mixin-button();
+		.dr-mixin-button();
 	}
 	table {
 		margin: 0;
@@ -23,11 +23,11 @@
 	caption,
 	td,
 	th {
-		height: @ts-calendar-magic-unit;
+		height: @dr-calendar-magic-unit;
 		overflow: hidden;
 	}
 	caption {
-		.ts-mixin-rounded-t();
+		.dr-mixin-rounded-t();
 		padding: 0;
 		border: none;
 		text-align: right;
@@ -37,19 +37,19 @@
 		button {
 			padding: 0;
 			span, i {
-				padding: @ts-calendar-unit-half @ts-calendar-unit-quarter;
-				line-height: @ts-calendar-unit;
+				padding: @dr-calendar-unit-half @dr-calendar-unit-quarter;
+				line-height: @dr-calendar-unit;
 			}
 			&[disabled] {
 				span {
 					min-width: 36px;
-					padding: @ts-calendar-unit-half 0;
+					padding: @dr-calendar-unit-half 0;
 					text-align: center;
-					color: @ts-black;
+					color: @dr-black;
 				}
 			}
 			span {
-				//color: @ts-lite-darker;
+				//color: @dr-lite-darker;
 			}
 			i {
 				font-size: 21px;
@@ -64,43 +64,43 @@
 		padding: 0;
 	}
 	th {
-		padding: @ts-unit-half 0;
+		padding: @dr-unit-half 0;
 		font-weight: normal;
 		text-align: center;
-		background-color: @ts-medium-lite;
-		color: @ts-white;
+		background-color: @dr-medium-lite;
+		color: @dr-white;
 		//height: auto;
 	}
 	td {
 		button {
 			display: block;
-			background-color: @ts-liteblue;
+			background-color: @dr-liteblue;
 			text-align: center;
 			padding: 0;
 			span {
-				width: @ts-calendar-magic-unit;
-				height: @ts-calendar-magic-unit;
+				width: @dr-calendar-magic-unit;
+				height: @dr-calendar-magic-unit;
 				overflow: hidden;
 			}
 			&:hover {
-				background-color: @ts-liteblue-dark;
+				background-color: @dr-liteblue-dark;
 			}
 		}
-		&.ts-calendar-other {
+		&.dr-calendar-other {
 			button {
-				background-color: @ts-lite-lite;
-				color: @ts-medium-lite;
+				background-color: @dr-lite-lite;
+				color: @dr-medium-lite;
 				&:hover {
-					background-color: @ts-lite;
+					background-color: @dr-lite;
 				}
 			}
 		}
-		&.ts-selected {
+		&.dr-selected {
 			button,
 			button:hover {
-				background-color: @ts-blue;
-				font-weight: @ts-fontweight-bold;
-				color: @ts-white;
+				background-color: @dr-blue;
+				font-weight: @dr-fontweight-bold;
+				color: @dr-white;
 			}
 		}
 	}
@@ -109,17 +109,17 @@
 		tr:last-of-type {
 			td:first-child {
 				button {
-					border-radius: 0 0 0 @ts-radius;
+					border-radius: 0 0 0 @dr-radius;
 				}
 			}
 			td:last-child {
 				button {
-					border-radius: 0 0 @ts-radius 0;
+					border-radius: 0 0 @dr-radius 0;
 				}
 			}
 		}
 	}
 	p.todo:first-of-type {
-		margin-top: @ts-unit;
+		margin-top: @dr-unit;
 	}
 }

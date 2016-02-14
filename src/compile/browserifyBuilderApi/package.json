@@ -2,9 +2,16 @@
   "name": "@dr-core/browserify-builder-api",
   "version": "0.0.1",
   "description": "Add some useful API to work with browserify-builder",
+  "browser": "browserifyBuilderApi.browser.js",
   "main": "browserifyBuilderApi.server.js",
+  "dr": {
+	  "bundle": "core"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+	"eventemitter3": "^1.1.1"
   },
   "author": "LJ",
   "license": "ISC"

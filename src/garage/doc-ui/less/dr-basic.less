@@ -1,5 +1,5 @@
-@import "ts-variables.less";
-@import "ts-mixins.less";
+@import "dr-variables.less";
+@import "dr-mixins.less";
 
 * {
 	margin: 0;
@@ -10,7 +10,7 @@
 *,
 *:before,
 *:after {
-	.ts-mixin-border-box ();
+	.dr-mixin-border-box ();
 	cursor: inherit;
 }
 *:focus {
@@ -25,8 +25,8 @@
 ::-moz-selection,
 ::-webkit-selection,
 ::selection {
-	background: @ts-blue;
-	color: @ts-white;
+	background: @dr-blue;
+	color: @dr-white;
 }
 html,
 body {
@@ -40,11 +40,11 @@ body {
 	background-color: transparent !important;
 	-webkit-font-smoothing: subpixel-antialiased;
 	-moz-osx-font-smoothing: auto;
-	font-family: @ts-fontstack;
-	font-weight: @ts-fontweight;
-	color: @ts-black;
-	font-size: @ts-fontsize;
-	line-height: @ts-unit;
+	font-family: @dr-fontstack;
+	font-weight: @dr-fontweight;
+	color: @dr-black;
+	font-size: @dr-fontsize;
+	line-height: @dr-unit;
 	position: relative;
 	cursor: default;
 }

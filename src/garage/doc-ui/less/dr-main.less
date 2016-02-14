@@ -1,0 +1,18 @@
+.dr-main {
+	.dr-mixin-maximize();
+	z-index: @dr-zindex-main;
+	background-color: @dr-lite-liter;
+	overflow-x: auto;
+	overflow-y: scroll;
+}
+.xxx,
+.yyy {
+	.dr-main {
+		top: @dr-unit-triple;
+	}
+}
+.zzz {
+	.dr-topbar {
+		z-index: 0;
+	}
+}

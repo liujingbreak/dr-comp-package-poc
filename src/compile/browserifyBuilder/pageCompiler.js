@@ -7,6 +7,7 @@ var through = require('through2');
 var gutil = require('gulp-util');
 var PluginError = gutil.PluginError;
 var File = require('vinyl');
+var swig = require('swig');
 var log = require('@dr/logger').getLogger('browserifyBuilder.pageCompiller');
 
 exports.stream = function() {
@@ -58,6 +59,8 @@ exports.stream = function() {
 	});
 };
 
+var apiBootstrapTpl = swig.compileFile(Path.join(__dirname, 'browserApi.swig'));
+
 function injectElements($, bundleSet, pkInstance, config, revisionMeta) {
 	var body = $('body');
 	var head = $('head');
@@ -72,7 +75,10 @@ function injectElements($, bundleSet, pkInstance, config, revisionMeta) {
 		}
 		_injectElementsByBundle($, head, body, bundleName, config, revisionMeta);
 	});
-	body.append($('<script>').html('require("' + pkInstance.longName + '");'));
+	body.append($('<script>').html('\n' +
+	apiBootstrapTpl() +
+	//'var __Api = require("@dr-core/browserify-builder-api");' +
+	'require("' + pkInstance.longName + '");'));
 }
 
 function _injectElementsByBundle($, head, body, bundleName, config, revisionMeta) {
@@ -117,4 +123,12 @@ function createCssLinkElement($, bundleName, config, revisionMeta) {
 	element.attr('type', 'text/css');
 
 	return element;
+}
+
+function stringifyProperties(obj) {
+	var result = {};
+	_.forOwn(obj, function(value, name) {
+		result[name] = JSON.stringify(value);
+	});
+	return result;
 }

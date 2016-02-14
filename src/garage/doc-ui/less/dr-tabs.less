@@ -1,0 +1,146 @@
+/*
+ * This classname is now reserved for use in the "dr-topbar.less"
+ */
+.dr-tabs {
+	position: relative;
+	white-space: nowrap;
+	margin: 0;
+	z-index: 2;
+	float: left;
+	font-size: 0;
+	> * {
+		font-size: @dr-fontsize;
+	}
+	.dr-link {
+		.dr-mixin-button ();
+		.dr-mixin-noround ();
+		padding: @dr-unit;
+		color: @dr-lite-darker;
+		position: relative;
+		margin: 0;
+		em {
+			background-color: @dr-medium-litest;
+			color: @dr-black;
+			min-width: 22px;
+			text-align: center;
+			border-radius: @dr-radius;
+			font-size: @dr-fontsize-small;
+			font-weight: bold;
+			position: absolute;
+			right: @dr-unit-half;
+			top: 50%;
+			z-index: 1;
+			margin-top: 0 - 10px;
+		}
+		&:after {
+			content: "";
+			border-bottom: 6px solid transparent;
+			position: absolute;
+			right: 0;
+			left: 0;
+			bottom: 0;
+		}
+		&:hover {
+			span {
+				text-decoration: none;
+			}
+		}
+	}
+	li {
+		display: inline-block;
+		&.dr-counter {
+			.dr-link {
+				padding-right: @dr-unit-double;
+			}
+		}
+		&.dr-selected {
+			.dr-link {
+				background-color: @dr-darkblue;
+				cursor: default;
+				color: @dr-white;
+				em {
+					background-color: @dr-red;
+					color: @dr-white;
+				}
+				&:after {
+					border-color: @dr-blue;
+				}
+			}
+		}
+		&:not(.dr-selected) {
+			.dr-link:hover {
+				background-color: @dr-dark-lite;
+				&:after {
+					border-color: @dr-medium-dark;
+				}
+			}
+		}
+	}
+}
+
+
+// Breakpoints .................................................................
+
+.dr-mobile-only {
+	.dr-tabs {
+		position: absolute;
+		z-index: 0;
+		top: 100%;
+		left: 0;
+		right: 0;
+		text-align: left;
+		height: @dr-unit-double;
+		li {
+			position: absolute;
+			background-color: @dr-dark;
+			.dr-mixin-transition(background-color, @dr-transition-now);
+			width: 100%;
+			overflow: hidden;
+			display: block;
+			.dr-link {
+				span {
+					display: inline;
+				}
+				&:after {
+					display: none;
+				}
+			}
+			&.dr-selected {
+				z-index: 1;
+				.dr-link {
+					background-color: transparent;
+					color: @dr-white;
+					cursor: pointer;
+				}
+			}
+		}
+		.dr-link {
+			padding: @dr-unit-half;
+			.dr-mixin-transition(color, @dr-transition-now);
+			color: transparent;
+			width: 100%;
+			height: @dr-unit-double;
+			span {
+				vertical-align: baseline;
+			}
+		}
+		&.dr-open {
+			.dr-link {
+				color: @dr-white;
+			}
+			.dr-selected {
+				background-color: @dr-blue;
+				.dr-button {
+					cursor: default;
+				}
+			}
+		}
+		&:not(.dr-open) {
+			li.dr-selected {
+				.dr-link:hover {
+					background-color: @dr-dark-lite;
+				}
+			}
+		}
+	}
+}

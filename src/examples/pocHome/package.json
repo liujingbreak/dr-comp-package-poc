@@ -3,8 +3,16 @@
   "version": "0.0.0",
   "description": "Home page",
   "main": "browser/js/index.js",
+  "style": "style/main.less",
+  "transforms": [ "parcelify-import-resolver", "less-css-stream" ],
+  "dr": {
+	  "bundle": "home"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+	"gsap": "1.18.2"
   },
   "author": "LJ",
   "license": "ISC"

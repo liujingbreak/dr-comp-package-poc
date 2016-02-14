@@ -1,4 +1,4 @@
-@import "ts-variables.less";
+@import "dr-variables.less";
 
 body {
 	word-wrap: break-word;
@@ -14,7 +14,7 @@ code,
 form,
 table,
 figure {
-	margin: 0 0 @ts-unit 0;
+	margin: 0 0 @dr-unit 0;
 	&:last-child {
 		margin-bottom: 0;
 	}
@@ -35,19 +35,19 @@ hr {
 	border: none;
 	background-color: transparent;
 	color: transparent;
-	border-bottom: 4px dotted @ts-lite-dark;
-  margin: @ts-unit 0 (@ts-unit - 4px) 0;
+	border-bottom: 4px dotted @dr-lite-dark;
+  margin: @dr-unit 0 (@dr-unit - 4px) 0;
 }
 samp,
 code,
 kbd,
 var {
-	font-family: @ts-fontstack-mono;
+	font-family: @dr-fontstack-mono;
 	font-size: 16px;
 }
 button,
 a {
-	color: @ts-blue;
+	color: @dr-blue;
 }
 button:not([disabled]),
 a {
@@ -78,18 +78,18 @@ input:not([type=checkbox]):not([type=radio]),
 button,
 select,
 textarea {
-	.ts-mixin-border-box;
+	.dr-mixin-border-box;
 	font-family: inherit;
 	font-weight: inherit;
 	font-size: inherit;
 	line-height: inherit;
 }
 ::-webkit-input-placeholder {
-	color: @ts-medium-litest;
+	color: @dr-medium-litest;
 	font-style: italic;
 }
 input:-moz-placeholder {
-	color: @ts-medium-litest;
+	color: @dr-medium-litest;
 	font-style: italic;
 }
 input::-webkit-outer-spin-button,
@@ -102,7 +102,7 @@ textarea {
 	&[disabled],
 	&[readonly] {
 		cursor: default;
-		color: @ts-black; // TODO: foks on iOS
+		color: @dr-black; // TODO: foks on iOS
 	}
 }
 a,

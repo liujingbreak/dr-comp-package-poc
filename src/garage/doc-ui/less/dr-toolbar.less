@@ -1,7 +1,7 @@
 /*
- * This classname is now reserved for use in the "ts-topbar.less"
+ * This classname is now reserved for use in the "dr-topbar.less"
  */
-.ts-toolbar {
+.dr-toolbar {
 	position: relative;
 	z-index: 1;
 	background-color: transparent;
@@ -12,16 +12,16 @@
 	font-size: 0;
 	margin: 0;
 	> * {
-		font-size: @ts-fontsize;
+		font-size: @dr-fontsize;
 	}
 	li, a {
 		display: inline-block;
 	}
 	a {
-		padding: @ts-unit-half;
+		padding: @dr-unit-half;
 	}
 	li {
-		padding: @ts-unit-half;
+		padding: @dr-unit-half;
 		+ li {
 			padding-left: 0;
 		}
@@ -31,18 +31,18 @@
 
 // Breakpoints .................................................................
 
-.ts-mobile-only {
-	.ts-toolbar {
+.dr-mobile-only {
+	.dr-toolbar {
 		li {
-			padding: @ts-unit-quarter;
+			padding: @dr-unit-quarter;
 			+ li {
 				padding-left: 0;
 			}
 		}
-		.ts-button,
-		.ts-link {
-			padding: @ts-unit-quarter;
-			padding-bottom: @ts-unit-quarter - 2px;
+		.dr-button,
+		.dr-link {
+			padding: @dr-unit-quarter;
+			padding-bottom: @dr-unit-quarter - 2px;
 		}
 	}
 }

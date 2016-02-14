@@ -2,7 +2,7 @@ var through = require('through2');
 var Path = require('path');
 var stream = require('stream');
 var log = require('log4js').getLogger('browserifyHelper');
-
+var _ = require('lodash');
 var config;
 
 module.exports = function(_config) {
@@ -31,12 +31,17 @@ module.exports = function(_config) {
 var BOOT_FUNCTION_PREFIX = '_bundle_';
 
 function jsTranform(file) {
-	log.debug(file);
+	var source = '';
 	var ext = Path.extname(file).toLowerCase();
-	if (ext === '.js') {
-		return through.obj(function(row, enc, next) {
-			//var source = row.contents.toString();
-			next(row);
+	if (ext === '.js' && Path.basename(file) !== 'browserifyBuilderApi.browser.js') {
+		return through(function(chunk, enc, next) {
+			source += chunk;
+			next();
+		}, function(cb) {
+			//log.debug(Path.basename(file));
+			//source = 'var __api = new __Api();' + source;
+			this.push(source);
+			cb();
 		});
 	} else {
 		return through();
@@ -73,10 +78,17 @@ BrowserSideBootstrap.prototype = {
 			// 	}
 			// }
 		});
+
 		// if (config().devMode) {
 		// 	bootstrap += '\tconsole && console.log("bundle ' + bundleName + ' is activated");\n';
 		// }
 		bootstrap += '}\n';
+
+		// var apiFile = Path.resolve(__dirname, 'browserApi.js');
+		// var relativePath = Path.relative(Path.join(config().destDir, 'static'), apiFile);
+		// relativePath.replace('\\', '/');
+		// bootstrap += 'var __api = require("./' + relativePath + '");\n';
+
 		if (config().devMode) {
 			bootstrap += 'console && console.log("bundle ' + bundleName + ' is loaded");\n';
 		}
@@ -90,7 +102,7 @@ BrowserSideBootstrap.prototype = {
 };
 
 function safeBundleNameOf(bundleName) {
-	return bundleName.replace('-', '_');
+	return bundleName.replace(/-/g, '_');
 }
 
 function str2Stream(str) {

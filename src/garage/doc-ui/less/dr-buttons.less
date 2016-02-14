@@ -1,0 +1,110 @@
+@import "dr-variables.less";
+@import "dr-mixins.less";
+
+.mixin-button-light () {
+	color: @dr-white;
+	background-color: rgba(255,255,255,0.3);
+	border-color: rgba(255,255,255,0.3);
+}
+.dr-button,
+.dr-link {
+	.dr-mixin-unselectable();
+	&.dr-basic,
+	&.dr-primary,
+	&.dr-secondary,
+	&.dr-tertiary,
+	&.dr-danger {
+		.dr-mixin-button ();
+	}
+	&.dr-primary,
+	&.dr-secondary,
+	&.dr-tertiary,
+	&.dr-danger {
+		border-radius: @dr-radius; // in base mixin?
+	}
+	&.dr-primary,
+	&.dr-secondary,
+	&.dr-danger {
+		span {
+			font-weight: bold;
+		}
+	}
+	&.dr-primary {
+ 		background-color: @dr-green;
+		color: @dr-green-text;
+	}
+	&.dr-secondary {
+		background-color: @dr-blue;
+		color: @dr-blue-text;
+	}
+	&.dr-tertiary {
+		background-color: rgba(225,225,225,0.5);
+		border: 1px solid rgba(215,215,215,0.75);
+		padding: @dr-unit-half - 1px;
+		color: @dr-black;
+	}
+	&.dr-danger {
+		background-color: @dr-red;
+		color: @dr-red-text;	
+	}
+	&.dr-reverse { // maximized button (goes with right aligned icon)
+		width: 100%;
+		span {
+			width: 100%;
+		}
+	}
+}
+
+// Background variations .......................................................
+
+.dr-bg-blue,
+.dr-bg-dark {
+	.dr-button,
+	.dr-link {
+		&.dr-tertiary {
+			.mixin-button-light ();
+		}
+	}
+}
+.dr-bg-blue {
+	.dr-button,
+	.dr-link {
+		&.dr-primary {
+			background-color: @dr-white;
+			color: @dr-blue;
+		}
+	}
+}
+.dr-bg-red {
+	.dr-button,
+	.dr-link {
+		&.dr-primary {
+			background-color: @dr-red;
+			border: 1px solid @dr-white; // TODO: somehow not using border+paddings!!!
+			padding: @dr-unit-half - 1px;
+			color: @dr-white;
+		}
+	}
+}
+.dr-bg-yellow {
+	.dr-button,
+	.dr-link {
+		&.dr-primary {
+			background-color: @dr-yellow;
+			border: 1px solid @dr-black; // TODO: somehow not using border+paddings!!!
+			padding: @dr-unit-half - 1px;
+			color: @dr-black;
+		}
+	}	
+}
+.dr-bg-blue,
+.dr-bg-red {
+	.dr-button,
+	.dr-link {
+		&.dr-secondary {
+			.mixin-button-light ();
+			border: 1px solid @dr-white; // TODO: somehow not using border+paddings!!!
+			padding: @dr-unit-half - 1px;
+		}
+	}
+}
