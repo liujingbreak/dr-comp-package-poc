@@ -1,0 +1,110 @@
+@import "ts-variables.less";
+@import "ts-mixins.less";
+
+.mixin-button-light () {
+	color: @ts-white;
+	background-color: rgba(255,255,255,0.3);
+	border-color: rgba(255,255,255,0.3);
+}
+.ts-button,
+.ts-link {
+	.ts-mixin-unselectable();
+	&.ts-basic,
+	&.ts-primary,
+	&.ts-secondary,
+	&.ts-tertiary,
+	&.ts-danger {
+		.ts-mixin-button ();
+	}
+	&.ts-primary,
+	&.ts-secondary,
+	&.ts-tertiary,
+	&.ts-danger {
+		border-radius: @ts-radius; // in base mixin?
+	}
+	&.ts-primary,
+	&.ts-secondary,
+	&.ts-danger {
+		span {
+			font-weight: bold;
+		}
+	}
+	&.ts-primary {
+ 		background-color: @ts-green;
+		color: @ts-green-text;
+	}
+	&.ts-secondary {
+		background-color: @ts-blue;
+		color: @ts-blue-text;
+	}
+	&.ts-tertiary {
+		background-color: rgba(225,225,225,0.5);
+		border: 1px solid rgba(215,215,215,0.75);
+		padding: @ts-unit-half - 1px;
+		color: @ts-black;
+	}
+	&.ts-danger {
+		background-color: @ts-red;
+		color: @ts-red-text;	
+	}
+	&.ts-reverse { // maximized button (goes with right aligned icon)
+		width: 100%;
+		span {
+			width: 100%;
+		}
+	}
+}
+
+// Background variations .......................................................
+
+.ts-bg-blue,
+.ts-bg-dark {
+	.ts-button,
+	.ts-link {
+		&.ts-tertiary {
+			.mixin-button-light ();
+		}
+	}
+}
+.ts-bg-blue {
+	.ts-button,
+	.ts-link {
+		&.ts-primary {
+			background-color: @ts-white;
+			color: @ts-blue;
+		}
+	}
+}
+.ts-bg-red {
+	.ts-button,
+	.ts-link {
+		&.ts-primary {
+			background-color: @ts-red;
+			border: 1px solid @ts-white; // TODO: somehow not using border+paddings!!!
+			padding: @ts-unit-half - 1px;
+			color: @ts-white;
+		}
+	}
+}
+.ts-bg-yellow {
+	.ts-button,
+	.ts-link {
+		&.ts-primary {
+			background-color: @ts-yellow;
+			border: 1px solid @ts-black; // TODO: somehow not using border+paddings!!!
+			padding: @ts-unit-half - 1px;
+			color: @ts-black;
+		}
+	}	
+}
+.ts-bg-blue,
+.ts-bg-red {
+	.ts-button,
+	.ts-link {
+		&.ts-secondary {
+			.mixin-button-light ();
+			border: 1px solid @ts-white; // TODO: somehow not using border+paddings!!!
+			padding: @ts-unit-half - 1px;
+		}
+	}
+}

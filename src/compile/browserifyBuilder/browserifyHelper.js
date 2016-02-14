@@ -1,7 +1,6 @@
 var through = require('through2');
 var Path = require('path');
 var stream = require('stream');
-var fs = require('fs');
 var log = require('log4js').getLogger('browserifyHelper');
 
 var config;
@@ -34,9 +33,11 @@ var BOOT_FUNCTION_PREFIX = '_bundle_';
 function jsTranform(file) {
 	log.debug(file);
 	var ext = Path.extname(file).toLowerCase();
-	if (ext === '.js' || ext === '.json') {
-		//log.debug(file);
-		return through();
+	if (ext === '.js') {
+		return through.obj(function(row, enc, next) {
+			//var source = row.contents.toString();
+			next(row);
+		});
 	} else {
 		return through();
 	}

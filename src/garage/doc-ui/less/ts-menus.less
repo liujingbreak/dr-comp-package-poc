@@ -1,0 +1,84 @@
+@import "ts-variables.less";
+
+.ts-menu {
+	list-style: none;
+	li {
+		display: block;
+		overflow: hidden;
+		margin: 0;
+		padding: 0;
+		> button,
+		> a {
+			.ts-mixin-button ();
+			.ts-mixin-button-max ();
+			.ts-mixin-noround ();
+			display: block;
+			position: relative;
+			width: 100%;
+			padding: @ts-unit-half;
+			padding-bottom: @ts-unit-half - 1px;
+			border-bottom: 1px solid @ts-white;
+			background-color: @ts-liteblue;
+			&:before {
+				.ts-mixin-maximize();
+				content: "";
+				right: auto;
+				width: 5px;
+			}
+			&:focus:not(:active) {
+				outline: none;
+				&:before {
+					background-color: @ts-blue;
+				}
+			}
+			&:hover,
+			&:focus {
+				background-color: @ts-liteblue-dark;
+			}
+			&:hover {
+				span,
+				& {
+					text-decoration: none;
+				}
+			}
+		}
+		&:first-child {
+			> button,
+			> a {
+				.ts-mixin-rounded-t ();
+				&:focus:before {
+					.ts-mixin-rounded-tl ();
+				}
+			}
+		}
+		&:last-child {
+			> button,
+			> a {
+				padding-bottom: @ts-unit-half;
+				.ts-mixin-rounded-b ();
+				&:focus:before {
+					.ts-mixin-rounded-bl ();
+				}
+			}
+		}
+		&:only-child {
+			> button,
+			> a {
+				.ts-mixin-rounded ();
+				&:focus:before {
+					.ts-mixin-rounded-l ( );
+				}
+			}
+		}
+		&.ts-checked {
+			> button,
+			> a {
+				background-color: @ts-blue;
+				color: @ts-white;
+				&:focus:before {
+					background-color: @ts-blue-dark;
+				}
+			}
+		}
+	}
+}

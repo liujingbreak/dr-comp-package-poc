@@ -58,10 +58,7 @@ module.exports = function(_packageUtils, _config, argv) {
 	var bundleStream;
 	var bundleNames = _.keys(packageInfo.bundleMap);
 	if (argv.b) {
-		var bundlesTobuild = argv.b;
-		if (!_.isArray(argv.b)) {
-			bundlesTobuild = [argv.b];
-		}
+		var bundlesTobuild = [].concat(argv.b);
 		if (_.intersection(bundleNames, bundlesTobuild).length < bundlesTobuild.length) {
 			gutil.log('bundle ' + bundlesTobuild + ' doesn\'t exist, existing bundles are:\n\t' + bundleNames.join('\n\t'));
 			return;
@@ -268,6 +265,7 @@ module.exports = function(_packageUtils, _config, argv) {
 			name, entryPath, parsedName, pkJson, packagePath) {
 			var bundle, entryHtml;
 			var isEntryServerTemplate = true;
+			var noParseFiles;
 			var instance = packageBrowserInstance(config());
 			if (!pkJson.dr) {
 				bundle = parsedName.name;
@@ -287,6 +285,9 @@ module.exports = function(_packageUtils, _config, argv) {
 					entryHtml = Path.resolve(packagePath, pkJson.dr.entryView);
 					info.entryPageMap[name] = instance;
 				}
+				if (pkJson.dr.browserifyNoParse) {
+					noParseFiles = [].concat(pkJson.dr.browserifyNoParse);
+				}
 			} else {
 				return;
 			}
@@ -298,6 +299,7 @@ module.exports = function(_packageUtils, _config, argv) {
 				packagePath: packagePath,
 				active: pkJson.dr ? pkJson.dr.active : false,
 				entryHtml: entryHtml,
+				browserifyNoParse: noParseFiles,
 				isEntryServerTemplate: isEntryServerTemplate
 			});
 			info.allModules.push(instance);
@@ -312,7 +314,6 @@ module.exports = function(_packageUtils, _config, argv) {
 			if (!instance.longName) {
 				log.debug('no long name? ' + JSON.stringify(instance, null, '\t'));
 			}
-			//log.debug('instance.longName=' + instance.longName);
 			info.moduleMap[instance.longName] = instance;
 		});
 
@@ -346,9 +347,19 @@ module.exports = function(_packageUtils, _config, argv) {
 	}
 
 	function buildBundle(modules, bundle, destDir, depsMap) {
+		var browserifyOpt = {
+			debug: true,
+			noParse: config().browserifyNoParse ? config().browserifyNoParse : []
+		};
 		var mIdx = 1;
 		var moduleCount = _.size(modules);
 		_.each(modules, function(moduleInfo) {
+			if (moduleInfo.browserifyNoParse) {
+				moduleInfo.browserifyNoParse.forEach(function(noParseFile) {
+					var file = Path.resolve(moduleInfo.packagePath, noParseFile);
+					browserifyOpt.noParse.push(file);
+				});
+			}
 			if (mIdx === moduleCount) {
 				log.info('\t└─ ' + moduleInfo.longName);
 				return;
@@ -363,7 +374,9 @@ module.exports = function(_packageUtils, _config, argv) {
 
 		fs.writeFileSync(entryFile, listFile);
 
-		var b = browserify({debug: true});
+
+
+		var b = browserify(browserifyOpt);
 		// I commented out this block because Parcelify doesn't seems to work with browserify-incremental properly.
 		// var b = browserify(xtend(browserifyInc.args, {
 		// 	debug: true
@@ -391,11 +404,16 @@ module.exports = function(_packageUtils, _config, argv) {
 
 		//var deps = [];
 		// draw a cross bundles dependency map
+		var rootPath = config().rootPath;
 		b.pipeline.get('deps').push(through.obj(function(chunk, encoding, callback) {
-			depsMap[chunk.file] = chunk.deps;
-			// var cloned = _.clone(chunk);
-			// delete cloned.source;
-			// deps.push(cloned);
+			var shortFilePath = Path.isAbsolute(chunk.file) ? Path.relative(rootPath, chunk.file) : chunk.file;
+			var deps = _.clone(chunk.deps);
+			_.forOwn(chunk.deps, function(path, id) {
+				if (path && Path.isAbsolute(path)) {
+					deps[id] = Path.relative(rootPath, path);
+				}
+			});
+			depsMap[shortFilePath] = deps;
 			callback(null, chunk);
 		}, function(next) {
 			fileCache.mergeWithJsonCache(Path.join(config().destDir, 'depsMap.json'), depsMap)
@@ -406,17 +424,11 @@ module.exports = function(_packageUtils, _config, argv) {
 			next();
 		}));
 
-		// var deps = [];
-		// b.on('dep', function(row) {
-		// 	var obj = {id: row.id, file: row.file, index: row.index, indexDeps: row.indexDeps, deps: row.deps};
-		// 	deps.push(obj);
+		// b.on('file', function(file, id) {
+		// 	if (_.startsWith(id, '.')) {
+		// 		log.debug('watchify file:' + id);
+		// 	}
 		// });
-
-		b.on('file', function(file, id) {
-			if (_.startsWith(id, '.')) {
-				log.debug('watchify file:' + id);
-			}
-		});
 		var jsStream = b.bundle()
 				.on('error', logError)
 			.pipe(source('js/' + bundle + '.js'))

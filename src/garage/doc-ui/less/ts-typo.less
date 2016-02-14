@@ -1,0 +1,52 @@
+@import "ts-variables.less";
+
+h1,
+h2,
+h3, {
+	font-weight: normal;
+	> span { // baseline shift
+		position: relative;
+	}
+}
+h1 {
+	+ h2,
+	+ h3,
+	+ h4,
+	+ h5,
+	+ h6 {
+		margin-top: 0;
+	}
+}
+h1 {
+	font-size: @ts-fontsize-xxbig;
+	line-height: @ts-unit * 2;
+	margin-top: @ts-unit * 0.5;
+	margin-bottom: @ts-unit * 1.5;
+	> span,
+	> a {
+		top: 3px;
+	}
+}
+h2 {
+	font-size: @ts-fontsize-xbig;
+	line-height: @ts-unit * 1.5;
+	margin-top: @ts-unit * 1;
+	margin-bottom: @ts-unit* 0.5;
+	> span,
+	> a {
+		top: 1px;
+	}
+}
+h3,
+h4,
+h5,
+h6 {
+	font-size: @ts-fontsize-big;
+	line-height: @ts-unit * 1;
+	margin-top: @ts-unit * 1.5;
+	margin-bottom: @ts-unit * 0.5;
+	> span,
+	> a {
+		top: -1px;
+	}
+}

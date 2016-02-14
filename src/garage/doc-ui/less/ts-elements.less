@@ -1,0 +1,119 @@
+@import "ts-variables.less";
+
+body {
+	word-wrap: break-word;
+}
+p,
+ul,
+ol,
+dl,
+hr,
+nav,
+menu,
+code,
+form,
+table,
+figure {
+	margin: 0 0 @ts-unit 0;
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+nav,
+menu {
+	list-style: none;
+}
+ul,
+ol {
+	list-style: none;
+}
+a {
+	/* see buttons section */
+	text-decoration: none;
+}
+hr {
+	border: none;
+	background-color: transparent;
+	color: transparent;
+	border-bottom: 4px dotted @ts-lite-dark;
+  margin: @ts-unit 0 (@ts-unit - 4px) 0;
+}
+samp,
+code,
+kbd,
+var {
+	font-family: @ts-fontstack-mono;
+	font-size: 16px;
+}
+button,
+a {
+	color: @ts-blue;
+}
+button:not([disabled]),
+a {
+	cursor: pointer;
+	* {
+		cursor: inherit;
+	}
+}
+/*
+a:hover { // what???
+	&:not([class]),
+	span {
+		text-decoration: underline;
+	}
+}
+*/
+p a:hover {
+	text-decoration: underline;
+}
+button {
+	background-color: transparent;
+	border: none;
+}
+em {
+	font-style: normal;
+}
+input:not([type=checkbox]):not([type=radio]),
+button,
+select,
+textarea {
+	.ts-mixin-border-box;
+	font-family: inherit;
+	font-weight: inherit;
+	font-size: inherit;
+	line-height: inherit;
+}
+::-webkit-input-placeholder {
+	color: @ts-medium-litest;
+	font-style: italic;
+}
+input:-moz-placeholder {
+	color: @ts-medium-litest;
+	font-style: italic;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+input:not([type=checkbox]):not([type=radio]), // TODO
+textarea {
+	&[disabled],
+	&[readonly] {
+		cursor: default;
+		color: @ts-black; // TODO: foks on iOS
+	}
+}
+a,
+input,
+button {
+	-ms-touch-action: none !important;
+}
+table {
+	border-collapse: collapse;
+}
+th,
+td {
+	vertical-align: top;
+}

@@ -1,0 +1,125 @@
+/*
+ * Custom units to make table and cells 
+ * appear perfectly square in the aside. 
+ * If calendar is needed outside the 
+ * aside, where there is more space, 
+ * refactor to use standard units...
+ */
+
+@ts-calendar-unit: 20px;
+@ts-calendar-unit-half: 10px;
+@ts-calendar-unit-quarter: 5px;
+@ts-calendar-magic-unit: 41px;
+
+.ts-calendar {
+	line-height: @ts-calendar-unit;
+	margin-bottom: @ts-unit;
+	button, {
+		.ts-mixin-button();
+	}
+	table {
+		margin: 0;
+	}
+	caption,
+	td,
+	th {
+		height: @ts-calendar-magic-unit;
+		overflow: hidden;
+	}
+	caption {
+		.ts-mixin-rounded-t();
+		padding: 0;
+		border: none;
+		text-align: right;
+		> span:first-child {
+			float: left;
+		}
+		button {
+			padding: 0;
+			span, i {
+				padding: @ts-calendar-unit-half @ts-calendar-unit-quarter;
+				line-height: @ts-calendar-unit;
+			}
+			&[disabled] {
+				span {
+					min-width: 36px;
+					padding: @ts-calendar-unit-half 0;
+					text-align: center;
+					color: @ts-black;
+				}
+			}
+			span {
+				//color: @ts-lite-darker;
+			}
+			i {
+				font-size: 21px;
+				position: relative; 
+				top: 1px; // damn;
+			}
+		}
+	}
+	th,
+	td {
+		border: none;
+		padding: 0;
+	}
+	th {
+		padding: @ts-unit-half 0;
+		font-weight: normal;
+		text-align: center;
+		background-color: @ts-medium-lite;
+		color: @ts-white;
+		//height: auto;
+	}
+	td {
+		button {
+			display: block;
+			background-color: @ts-liteblue;
+			text-align: center;
+			padding: 0;
+			span {
+				width: @ts-calendar-magic-unit;
+				height: @ts-calendar-magic-unit;
+				overflow: hidden;
+			}
+			&:hover {
+				background-color: @ts-liteblue-dark;
+			}
+		}
+		&.ts-calendar-other {
+			button {
+				background-color: @ts-lite-lite;
+				color: @ts-medium-lite;
+				&:hover {
+					background-color: @ts-lite;
+				}
+			}
+		}
+		&.ts-selected {
+			button,
+			button:hover {
+				background-color: @ts-blue;
+				font-weight: @ts-fontweight-bold;
+				color: @ts-white;
+			}
+		}
+	}
+	tbody {
+		cursor: pointer;
+		tr:last-of-type {
+			td:first-child {
+				button {
+					border-radius: 0 0 0 @ts-radius;
+				}
+			}
+			td:last-child {
+				button {
+					border-radius: 0 0 @ts-radius 0;
+				}
+			}
+		}
+	}
+	p.todo:first-of-type {
+		margin-top: @ts-unit;
+	}
+}

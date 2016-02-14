@@ -18,6 +18,7 @@
 		"@dr/logger": "0.0.3",
 		"@dr-core/browserify-builder": "0.0.1",
 		"@dr-core/browserify-builder-api": "0.0.1",
-		"@dr/poc-home": "0.0.0"
+		"@dr/poc-home": "0.0.0",
+		"@dr/doc-ui": "0.0.0"
 	}
 }

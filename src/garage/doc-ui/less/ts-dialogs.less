@@ -1,0 +1,92 @@
+.ts-dialog {
+	position: absolute;
+	border-radius: @ts-radius;
+	z-index: @ts-zindex-dialog;
+	top: 20%;
+	left: 50%;
+	width: @ts-width-aside + (@ts-unit-double * 2) - @ts-unit; // equal aside body
+	margin-left: -240px;
+	color: @ts-white;
+	.ts-dialog-head,
+	.ts-dialog-body,
+	.ts-dialog-buttons {
+		text-align: center;
+		position: relative;
+		padding: @ts-unit @ts-unit-double;
+	}
+	.ts-dialog-head {
+		padding-top: @ts-unit-double;
+		+ .ts-dialog-body {
+			padding-top: 0;
+		}
+	}
+	.ts-dialog-body {
+		+ .ts-dialog-buttons {
+			padding-top: 0;	
+		}
+	}
+	.ts-dialog-icon {
+		font-size: 48px;
+		line-height: 0;
+		vertical-align: middle;
+	}
+	.ts-dialog-body {
+		:last-child {
+			margin-bottom: 0;
+		}
+		/*
+		.ts-menu,
+		.ts-form,
+		.ts-calendar {
+			.ts-mixin-expand ();
+			&:first-child {
+				.ts-mixin-liftup ();
+			}
+		}
+		*/
+		.ts-form {
+			background-color: transparent;
+			> p,
+			> p label {
+				border-radius: @ts-radius;
+			}
+			> p {
+				background-color: @ts-dark-liter;
+				&:not(:last-child) {
+					margin-bottom: @ts-unit-half;
+				}	
+				.ts-textlabel:not(.ts-focus) {
+					> span,
+					.ts-field {
+						color: @ts-white;
+					}
+					&:after {
+						border-bottom-color: @ts-white;
+					}
+				}
+			}
+		}
+	}
+	&.ts-transition {
+		.ts-mixin-maybeoptimze-gpu();
+		.ts-mixin-transition(all, @ts-transition-now);
+		.ts-mixin-transform-origin(50%, 50%);
+		.ts-mixin-scale(1.075);
+		opacity: 0;
+		&.ts-opening,
+		&.ts-open {
+			.ts-mixin-transition-timing(ease-out);
+			.ts-mixin-scale(1);
+			opacity: 1;
+		}
+		&.ts-closing {
+			.ts-mixin-transition-timing(ease-in);
+			.ts-mixin-scale(0.925);
+			opacity: 0;
+		}
+		&.ts-opening,
+		&.ts-closing {
+			pointer-events: none;
+		}
+	}
+}
