@@ -13,11 +13,11 @@ function BrowserApi(packageName) {
 
 BrowserApi.prototype = {
 	isBrowser: function() {
-		return true;
+		return !!process.browser;
 	},
 
 	isNode: function() {
-		return false;
+		return !process.browser;
 	},
 	eventBus: new Emitter()
 };

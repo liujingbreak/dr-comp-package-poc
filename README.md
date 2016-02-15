@@ -77,6 +77,8 @@ Sometimes, we need browser-side to work with Node-side as a complete feature uni
 
 A runtime object. Provides basic functions which helps different packages work together. (e.g. event bus, package lookup tool, universal configuration...)
 
+> I am thinking about leveraging `process` object instead, browserify provide a browser version of `process` object which can be a nice place to monkey patch API method on it, then it works on both browser and node side.
+
 #### What is package
 
 -	Web framework (express, koa)

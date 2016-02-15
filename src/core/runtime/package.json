@@ -1,0 +1,11 @@
+{
+  "name": "@dr/runtime",
+  "version": "0.0.0",
+  "description": "Runtime object holds api and config object",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "LJ",
+  "license": "ISC"
+}
