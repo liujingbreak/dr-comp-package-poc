@@ -4,6 +4,8 @@
 srcDir: src
 destDir: dist
 port: 14333
+# set max-age property of the Cache-Control header in `ms` format, see https://github.com/expressjs/serve-static
+cacheControlMaxAge: "365 days"
 packageScopes:
   - dr
   # dr-core is considered as special packages which will be loaded before other packages

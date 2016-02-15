@@ -3,6 +3,8 @@ var Path = require('path');
 var stream = require('stream');
 var log = require('log4js').getLogger('browserifyHelper');
 var _ = require('lodash');
+var swig = require('swig');
+swig.setDefaults({autoescape: false});
 var config;
 
 module.exports = function(_config) {
@@ -20,7 +22,7 @@ module.exports = function(_config) {
 	});
 	return {
 		jsTranform: jsTranform,
-		BrowserSideBootstrap: BrowserSideBootstrap,
+		JsBundleEntryMaker: JsBundleEntryMaker,
 		buildins: buildins,
 		buildinSet: buildinSet,
 		str2Stream: str2Stream
@@ -29,6 +31,8 @@ module.exports = function(_config) {
 //exports.dependencyTree = dependencyTree;
 
 var BOOT_FUNCTION_PREFIX = '_bundle_';
+var apiVariableTpl = swig.compileFile(Path.join(__dirname, 'templates', 'apiVariable.js.swig'),
+	{autoescape: false});
 
 function jsTranform(file) {
 	var source = '';
@@ -38,8 +42,7 @@ function jsTranform(file) {
 			source += chunk;
 			next();
 		}, function(cb) {
-			//log.debug(Path.basename(file));
-			//source = 'var __api = new __Api();' + source;
+			source = apiVariableTpl({name: file, source: source});
 			this.push(source);
 			cb();
 		});
@@ -48,52 +51,56 @@ function jsTranform(file) {
 	}
 }
 
-function BrowserSideBootstrap() {
-	if (!(this instanceof BrowserSideBootstrap)) {
-		return new BrowserSideBootstrap();
+function JsBundleEntryMaker(bundleName) {
+	if (!(this instanceof JsBundleEntryMaker)) {
+		return new JsBundleEntryMaker(bundleName);
 	}
-	this.bundleScripts = [];
+	this.bundleName = bundleName;
+	this.bundleFileName = bundleName + '_dr_bundle.js';
+	this.bundleFileNameSet = {};
 	this.activeModules = {}; //key: bundle name, value: array of active module name
 }
 
-BrowserSideBootstrap.prototype = {
+JsBundleEntryMaker.prototype = {
 
 	BOOT_FUNCTION_PREFIX: BOOT_FUNCTION_PREFIX,
+
+	entryBundleFileTpl: swig.compileFile(Path.join(__dirname, 'templates', 'bundle.js.swig'), {autoescape: false}),
 
 	/**
 	 * TODO: use a template engine to generate js file stream
 	 */
-	createPackageListFile: function(bundleName, packageInstances) {
-		//var self = this;
-		this.bundleScripts.push(bundleName);
-		var bootScriptFuncName = BOOT_FUNCTION_PREFIX + safeBundleNameOf(bundleName);
-		var bootstrap = 'function ' + bootScriptFuncName + '(){\n';
-		packageInstances.forEach(function(packageIns) {
-			bootstrap += '\trequire(\'' + packageIns.longName + '\');\n';
-			// if (packageIns.active) {
-			// 	if (!self.activeModules[bundleName]) {
-			// 		self.activeModules[bundleName] = [packageIns.longName];
-			// 	} else {
-			// 		self.activeModules[bundleName].push(packageIns.longName);
-			// 	}
-			// }
+	createPackageListFile: function(packageInstances) {
+		log.debug('create pacakge list for ' + this.bundleName);
+		var bundleFileListFunction = this.entryBundleFileTpl({
+			requireFilesFuncName: BOOT_FUNCTION_PREFIX + safeBundleNameOf(this.bundleName),
+			packageInstances: packageInstances
 		});
+		this.bundleFileNameSet[this.bundleFileName] = true;
+		return bundleFileListFunction;
+	},
 
-		// if (config().devMode) {
-		// 	bootstrap += '\tconsole && console.log("bundle ' + bundleName + ' is activated");\n';
-		// }
-		bootstrap += '}\n';
-
-		// var apiFile = Path.resolve(__dirname, 'browserApi.js');
-		// var relativePath = Path.relative(Path.join(config().destDir, 'static'), apiFile);
-		// relativePath.replace('\\', '/');
-		// bootstrap += 'var __api = require("./' + relativePath + '");\n';
-
-		if (config().devMode) {
-			bootstrap += 'console && console.log("bundle ' + bundleName + ' is loaded");\n';
-		}
-		return bootstrap;
-		//return str2Stream(bootstrap);
+	jsTranformFactory: function() {
+		var self = this;
+		return function(file) {
+			var source = '';
+			var ext = Path.extname(file).toLowerCase();
+			var basename = Path.basename(file);
+			if (ext === '.js' && basename !== 'browserifyBuilderApi.browser.js' &&
+				basename !== self.bundleFileName) {
+				return through(function(chunk, enc, next) {
+					source += chunk;
+					next();
+				}, function(cb) {
+					log.trace(basename + ' is injected with API variable');
+					source = apiVariableTpl({name: file, source: source});
+					this.push(source);
+					cb();
+				});
+			} else {
+				return through();
+			}
+		};
 	},
 
 	createPackageListFileStream: function(bundleName, packageInstances) {

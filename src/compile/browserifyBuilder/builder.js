@@ -30,7 +30,7 @@ var helperFactor = require('./browserifyHelper');
 var FileCache = require('./fileCache');
 var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
 
-var packageUtils, config, bundleBootstrap;
+var packageUtils, config, jsBundleEntryMaker;
 
 /**
  * JS and CSS file Build process based on browserify and parcelify
@@ -44,8 +44,6 @@ module.exports = function(_packageUtils, _config, argv) {
 	config = _config;
 	var helper = helperFactor(config);
 	//var jsTransform = helper.jsTransform;
-
-	bundleBootstrap = helper.BrowserSideBootstrap();
 	var fileCache = new FileCache(config().destDir);
 
 	gutil.log('Usage: gulp compile [-b <bundle name> -b <bunle name> ...]');
@@ -270,7 +268,7 @@ module.exports = function(_packageUtils, _config, argv) {
 			if (!pkJson.dr) {
 				bundle = parsedName.name;
 			} else if (!pkJson.dr.builder || pkJson.dr.builder === 'browserify') {
-				if (config().bundlePerPackage === true) {
+				if (config().bundlePerPackage === true && parsedName.name !== 'browserify-builder-api') {
 					bundle = parsedName.name;
 				} else {
 					bundle = pkJson.dr.bundle || pkJson.dr.chunk;
@@ -367,10 +365,10 @@ module.exports = function(_packageUtils, _config, argv) {
 			log.info('\t├─ ' + moduleInfo.longName);
 			mIdx++;
 		});
-
-		var listFile = bundleBootstrap.createPackageListFile(bundle, modules);
+		jsBundleEntryMaker = helper.JsBundleEntryMaker(bundle);
+		var listFile = jsBundleEntryMaker.createPackageListFile(modules);
 		mkdirp.sync(destDir);
-		var entryFile = Path.join(destDir, bundle + '-activate.js');
+		var entryFile = Path.join(destDir, jsBundleEntryMaker.bundleFileName);
 
 		fs.writeFileSync(entryFile, listFile);
 
@@ -382,13 +380,13 @@ module.exports = function(_packageUtils, _config, argv) {
 		// 	debug: true
 		// }));
 		//b.add(listStream, {file: entryFile});
-		b.add(Path.join(destDir, bundle + '-activate.js'));
+		b.add(Path.join(destDir, jsBundleEntryMaker.bundleFileName));
 
 		modules.forEach(function(module) {
 			b.require(module.longName);
 		});
 		b.transform(htmlTranform);
-		b.transform(helper.jsTranform);
+		b.transform(jsBundleEntryMaker.jsTranformFactory());
 		excludeModules(packageInfo.allModules, b, _.map(modules, function(module) {return module.longName;}));
 		//browserifyInc(b, {cacheFile: Path.resolve(config().destDir, 'browserify-cache.json')});
 

@@ -59,7 +59,7 @@ exports.stream = function() {
 	});
 };
 
-var apiBootstrapTpl = swig.compileFile(Path.join(__dirname, 'browserApi.swig'));
+var apiBootstrapTpl = swig.compileFile(Path.join(__dirname, 'templates', 'entryPageBootstrap.js.swig'), {autoescape: false});
 
 function injectElements($, bundleSet, pkInstance, config, revisionMeta) {
 	var body = $('body');
@@ -68,17 +68,15 @@ function injectElements($, bundleSet, pkInstance, config, revisionMeta) {
 		// core is always the first bundle to be loaded
 		_injectElementsByBundle($, head, body, 'core', config, revisionMeta);
 	}
-
 	_.forOwn(bundleSet, function(v, bundleName) {
 		if (bundleName === 'core') {
 			return;
 		}
 		_injectElementsByBundle($, head, body, bundleName, config, revisionMeta);
 	});
-	body.append($('<script>').html('\n' +
-	apiBootstrapTpl() +
-	//'var __Api = require("@dr-core/browserify-builder-api");' +
-	'require("' + pkInstance.longName + '");'));
+	body.append($('<script>').html(apiBootstrapTpl({
+		entryPackage: pkInstance.longName
+	})));
 }
 
 function _injectElementsByBundle($, head, body, bundleName, config, revisionMeta) {

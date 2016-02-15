@@ -6,6 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var engines = require('consolidate');
 var swig = require('swig');
+var ms = require('ms');
 var setupApi = require('./setupApi');
 var log = require('log4js').getLogger('server.app');
 
@@ -46,7 +47,10 @@ function create(app, setting) {
 	var assetsFolder = path.resolve(setting.rootPath, setting.destDir, 'static');
 	log.debug('express static path: ' + assetsFolder);
 
-	app.use('/', express.static(assetsFolder));
+	app.use('/', express.static(assetsFolder, {
+		maxAge: ms(setting.cacheControlMaxAge),
+		setHeaders: setCORSHeader
+	}));
 	app.get('/', function(req, res) {
 		res.render('index.html', {});
 	});
@@ -80,4 +84,8 @@ function create(app, setting) {
 		});
 	});
 	return app;
+}
+
+function setCORSHeader(res) {
+	res.setHeader('Access-Control-Allow-Origin', '*');
 }

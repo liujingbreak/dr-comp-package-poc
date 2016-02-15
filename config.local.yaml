@@ -1,2 +1,3 @@
 devMode: true
 bundlePerPackage: true
+cacheControlMaxAge: 0

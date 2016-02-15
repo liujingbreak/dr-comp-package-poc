@@ -2,11 +2,11 @@ var Emitter = require('eventemitter3');
 
 module.exports = BrowserApi;
 
-function BrowserApi(name) {
+function BrowserApi(packageName) {
 	if (!(this instanceof BrowserApi)) {
-		return new BrowserApi(name);
+		return new BrowserApi(packageName);
 	}
-	this.packageName = name;
+	this.packageName = packageName;
 	// this.packageInstance = attrs.packageInstance;
 	// this.contextPath = attrs.contextPath;
 }
