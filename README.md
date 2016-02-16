@@ -1,9 +1,17 @@
-Frontend platform PoC
+Frontend platform ~~PoC~~ Prototype
 =====================
 
-Deadline, Jan 23th
+The problem
+------------
+Business is booming, we don't want to create a separated "web site" every time for a new partner or business. We want things to be able to shared between team and products.
 
+The solution
+------------
 > **Go like a community** !
+
+NPM world is awesome, it unshackles individual creativity,
+
+The purpose of project is to create a web platform which can support
 
 Quick Start
 -----------

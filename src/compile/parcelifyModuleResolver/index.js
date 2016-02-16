@@ -1,15 +1,28 @@
 var through = require('through');
-var path = require('path');
+var resolve = require('browser-resolve');
+var less = require('less');
+var Path = require('path');
+var fs = require('fs');
+var _ = require('lodash');
+
+
+var lookupPackagejsonFolder = _.memoize(_recursiveLookupPackagejsonFolder);
 
 module.exports = function(file, options) {
-
+	var buf = '';
 	var transform = function(buffer) {
-		var self = this;
-		var content = buffer.toString('utf8');
+		buf += buffer;
+	};
 
-		content = content.replace(/!resolve\((.*?)\)/g, function(match, path) {
+	var flush = function() {
+		var self = this;
+
+		buf = buf.replace(/!package\((.*?)\)/g, function(match, path) {
 			try {
-				return resolve.sync(path);
+				var resolved = lookupPackagejsonFolder(resolve.sync(path, {
+					browser: 'style'
+				}));
+				return resolved;
 			} catch (e) {
 				console.log(e);
 				return self.emit(
@@ -21,13 +34,51 @@ module.exports = function(file, options) {
 			}
 		});
 
-		this.push(new Buffer(content, 'utf8'));
+		var fileConfig = {
+			compress: true,
+			paths: []
+		};
+
+		// Injects the path of the current file.
+		fileConfig.filename = file;
+
+		less.render(buf, fileConfig, function(err, output) {
+			if (err) {
+				self.emit('error', new Error(getErrorMessage(err), file, err.line));
+			} else {
+				self.push(output.css);
+			}
+			self.push(null);
+		});
 	};
 
-	var flush = function() {
-		this.push(null);
-	};
+	function getErrorMessage(err) {
+		var msg = err.message;
+		if (err.line) {
+			msg += ', line ' + err.line;
+		}
+		if (err.column) {
+			msg += ', column ' + err.column;
+		}
+		if (err.extract) {
+			msg += ': "' + err.extract + '"';
+		}
 
+		return msg;
+	}
 	return through(transform, flush);
-
 };
+
+function _recursiveLookupPackagejsonFolder(targetPath) {
+	var path = targetPath;
+	var folder = Path.dirname(path);
+	while (!fs.existsSync(Path.join(folder, 'package.json'))) {
+		var parentFolder = Path.dirname(folder);
+		if (folder === parentFolder) {
+			// root directory is reached
+			throw new Error('package.json is not found for ' + targetPath);
+		}
+		folder = parentFolder;
+	}
+	return folder;
+}

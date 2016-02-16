@@ -5,7 +5,7 @@
   "browser": "browser.js",
   "main": "server.js",
   "style": "main.less",
-  "transforms": [ "less-css-stream" ],
+  "transforms": [ "@dr/parcelify-module-resolver" ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

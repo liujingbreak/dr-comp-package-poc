@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "",
   "browser": "index.js",
-  "style": "build.less",
+  "style": "less/build.less",
   "transforms": [ "parcelify-import-resolver", "less-css-stream" ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

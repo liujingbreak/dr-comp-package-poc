@@ -23,7 +23,6 @@ exports.stream = function() {
 	}, function(cb) {
 		var promises = [];
 		var self = this;
-		log.debug(revisionMeta);
 		_.forOwn(packageInfo.entryPageMap, function(instance, name) {
 			log.info('Entry package ' + name);
 			log.debug(instance.entryHtml);
@@ -84,7 +83,14 @@ function injectElements($, bundleSet, pkInstance, config, revisionMeta) {
 		}
 		log.trace(file + ' -> ' + revisionMeta[file]);
 		var src = config().staticAssetsURL + '/' + revisionMeta[file];
+		var rs = URL_PAT.exec(src);
+		src = (rs[1] ? rs[1] : '') + rs[2].replace(/\/\/+/g, '/');
 		jsLinks.push(src);
+
+		var bundleCss = createCssLinkElement($, bundleName, config, revisionMeta);
+		if (bundleCss) {
+			head.append(bundleCss);
+		}
 	});
 	body.append($('<script>').html(apiBootstrapTpl({
 		jsLinks: jsLinks,
@@ -134,12 +140,4 @@ function createCssLinkElement($, bundleName, config, revisionMeta) {
 	element.attr('type', 'text/css');
 
 	return element;
-}
-
-function stringifyProperties(obj) {
-	var result = {};
-	_.forOwn(obj, function(value, name) {
-		result[name] = JSON.stringify(value);
-	});
-	return result;
 }

@@ -5,7 +5,7 @@
   "browser": "browser/js/index.js",
   "main": "server/server.js",
   "style": "browser/style/main.less",
-  "transforms": [ "@dr/parcelify-module-resolver", "less-css-stream" ],
+  "transforms": [ "@dr/parcelify-module-resolver"],
   "dr": {
 	  "bundle": "home",
 	  "entryPage": "index.html"

@@ -8,7 +8,7 @@
   "browser": "browser/js/index.js",
   "main": "server/main.js",
   "style": "less/main.less",
-  "transforms": [ "less-css-stream", "parcelify-import-resolver"],
+  "transforms": [ "@dr/parcelify-module-resolver"],
   "dr": {
     "bundle": "example",
     "entryView": "index.html"

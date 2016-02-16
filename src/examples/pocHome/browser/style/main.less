@@ -1,6 +1,11 @@
-@import "!resolve(@dr/doc-ui)";
+@import "!package(@dr/doc-ui)/less/include.less";
 
 .poc-home {
+	background-color: @dr-lite-liter;
+	overflow-x: auto;
+	overflow-y: scroll;
+
+	@import "!package(@dr/doc-ui)/less/dr-bgrounds.less";
 	@import "aside.less";
 	@import "mainSection.less";
 }
