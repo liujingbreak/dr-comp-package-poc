@@ -92,7 +92,7 @@ JsBundleEntryMaker.prototype = {
 					source += chunk;
 					next();
 				}, function(cb) {
-					log.trace(basename + ' is injected with API variable');
+					//log.trace(basename + ' is injected with API variable');
 					source = apiVariableTpl({name: file, source: source});
 					this.push(source);
 					cb();

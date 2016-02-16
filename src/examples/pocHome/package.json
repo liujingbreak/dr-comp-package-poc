@@ -2,11 +2,13 @@
   "name": "@dr/poc-home",
   "version": "0.0.0",
   "description": "Home page",
-  "main": "browser/js/index.js",
-  "style": "style/main.less",
-  "transforms": [ "parcelify-import-resolver", "less-css-stream" ],
+  "browser": "browser/js/index.js",
+  "main": "server/server.js",
+  "style": "browser/style/main.less",
+  "transforms": [ "@dr/parcelify-module-resolver", "less-css-stream" ],
   "dr": {
-	  "bundle": "home"
+	  "bundle": "home",
+	  "entryPage": "index.html"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

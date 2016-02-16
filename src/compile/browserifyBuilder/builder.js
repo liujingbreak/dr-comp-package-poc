@@ -63,7 +63,6 @@ module.exports = function(_packageUtils, _config, argv) {
 		}
 		bundleNames = bundlesTobuild;
 	}
-	log.debug('bundles: ' + bundleNames);
 
 	bundleNames.forEach(function(bundle) {
 		log.info('build bundle: ' + bundle);
@@ -172,6 +171,10 @@ module.exports = function(_packageUtils, _config, argv) {
 			bundleDepsGraph[moduleName] = depBundleSet;
 			_.forOwn(deps, function(isDirectDeps, dep) {
 				//log.debug('Is dep '+ dep +' our package ? ' + isVendor);
+				if (dep.substring(0, 1) === '_') {
+					// skip some browerify internal module like `_process`
+					return;
+				}
 				var bundle, msg;
 				if (!moduleMap[dep] || !(bundle = moduleMap[dep].bundle) ) {
 					if (isDirectDeps === true) {
@@ -490,7 +493,6 @@ module.exports = function(_packageUtils, _config, argv) {
 		});
 
 		parce.on('done', function() {
-			log.debug('parcelify bundle done: ' + bundle);
 			resolve(fileName);
 		});
 

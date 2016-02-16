@@ -1,11 +1,10 @@
 {
-  "name": "@dr/runtime",
+  "name": "@dr/parcelify-module-resolver",
   "version": "0.0.0",
-  "description": "Runtime object holds api and config object",
+  "description": "parcelify import transformer",
   "main": "index.js",
-  "browser": "index.js",
   "dr": {
-	  "bundle": "core"
+	  "type": "transformer"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

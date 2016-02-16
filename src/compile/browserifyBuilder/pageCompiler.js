@@ -64,17 +64,30 @@ var apiBootstrapTpl = swig.compileFile(Path.join(__dirname, 'templates', 'entryP
 function injectElements($, bundleSet, pkInstance, config, revisionMeta) {
 	var body = $('body');
 	var head = $('head');
-	if (bundleSet.core) {
-		// core is always the first bundle to be loaded
-		_injectElementsByBundle($, head, body, 'core', config, revisionMeta);
-	}
+	_injectElementsByBundle($, head, body, 'labjs', config, revisionMeta);
+	// if (bundleSet.core) {
+	// 	// core is always the first bundle to be loaded
+	// 	_injectElementsByBundle($, head, body, 'core', config, revisionMeta);
+	// }
+	// _.forOwn(bundleSet, function(v, bundleName) {
+	// 	if (bundleName === 'core') {
+	// 		return;
+	// 	}
+	// 	_injectElementsByBundle($, head, body, bundleName, config, revisionMeta);
+	// });
+	delete bundleSet.labjs; // make sure there is no duplicate labjs bundle
+	var jsLinks = [];
 	_.forOwn(bundleSet, function(v, bundleName) {
-		if (bundleName === 'core') {
-			return;
+		var file = 'js/' + bundleName + (config().devMode ? '' : '.min') + '.js';
+		if (!revisionMeta[file]) {
+			return null;
 		}
-		_injectElementsByBundle($, head, body, bundleName, config, revisionMeta);
+		log.trace(file + ' -> ' + revisionMeta[file]);
+		var src = config().staticAssetsURL + '/' + revisionMeta[file];
+		jsLinks.push(src);
 	});
 	body.append($('<script>').html(apiBootstrapTpl({
+		jsLinks: jsLinks,
 		entryPackage: pkInstance.longName
 	})));
 }
