@@ -2,9 +2,9 @@
   "name": "@dr/doc-ui",
   "version": "0.0.0",
   "description": "",
-  "browser": "index.js",
   "style": "less/build.less",
-  "transforms": [ "parcelify-import-resolver", "less-css-stream" ],
+  "browser": "index.js",
+  "transforms": [ "@dr/parcelify-module-resolver"],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

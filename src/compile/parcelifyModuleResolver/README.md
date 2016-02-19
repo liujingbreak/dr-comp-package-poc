@@ -1,30 +1,28 @@
 # parcelify-module-resolver
 
-A parcelify transform, which is sort of combined the functionality of `parcelify-import-resolver` and `less-css-stream`.
+A parcelify transform
 
-# example
+#### Include less file variable and mixins definition file from another packaage into current file
+```css
+@import "npm://@dr/doc-less-var";
+```
 
-You have a parent module with a `_settings.scss` file and want to use those settings in a plugin for said module:
+In package `@dr/doc-less-var`, the package.json must contains a "style" property
 
-``` scss
-@import "!resolve(@dr/module)/less/include.less)";
-
-body {
-  background: @main-color;
+```json
+{
+  "name": "@dr/doc-less-var",
+  "version": "0.0.0",
+  "description": "less variables and mixins",
+  "style": "less/include.less",
+  "dr": {
+	  "bundle": "core"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "LJ",
+  "license": "ISC"
 }
 ```
-
-Without the resolver, this would fail, because sass cannot import the file. The resolver replaces the path with an absolute path in order to allow sass to load the file without issues.
-
-# how to use
-
-Just add the transformer to your `transforms` property in your `package.json`:
-
-```
-"transforms" : [ "@dr/parcelify-module-resolver"]
-```
-
-
-# license
-
-MIT
+> This is done by **less-plugin-npm-import**

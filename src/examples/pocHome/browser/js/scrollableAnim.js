@@ -1,5 +1,7 @@
 var _ = require('lodash');
 var $ = require('jquery');
+
+module.exports = ScrollableAnim;
 /**
 attrs: object contains properties like
 	- duration : number
@@ -116,15 +118,6 @@ function ScrollableAnim(el) {
 	this.panel = el;
 	this.scenes = [];
 	var self = this;
-	//el.on('scroll', createIntervalEventChecker(16,
-	//	function(e){
-	//		var scrolled = el.scrollTop();
-	//		if(scrolled < 0)
-	//			return;
-	//		self.scenes.forEach(function(sc){
-	//			sc.beat(scrolled);
-	//		});
-	//}));
 	el.on('scroll', function(e) {
 		setTimeout(function() {
 			var scrolled = el.scrollTop();
@@ -139,16 +132,17 @@ function ScrollableAnim(el) {
 }
 
 ScrollableAnim.prototype = {
-	addScene: function(scene) {
-		this.scenes.push(scene);
-		scene.scrollPanel = this.panel;
-	},
-
 	scene: function(attrs) {
 		var scene = new AnimScene(attrs);
 		this.addScene(scene);
 		return scene;
 	},
+
+	addScene: function(scene) {
+		this.scenes.push(scene);
+		scene.scrollPanel = this.panel;
+	},
+
 
 	pin: function(el) {
 		if (typeof (el) === 'string') {

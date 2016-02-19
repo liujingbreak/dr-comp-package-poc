@@ -86,6 +86,7 @@ gulp.task('link', function() {
 
 gulp.task('compile', function() {
 	var jobs = [];
+	require('@dr/environment')._setup(config, packageUtils); // monkey patch some useful object
 	packageUtils.findNodePackageByType('builder', function(name, entryPath, parsedName, pkJson) {
 		gutil.log('run builder: ' + name);
 		var res = require(name)(packageUtils, config, argv);

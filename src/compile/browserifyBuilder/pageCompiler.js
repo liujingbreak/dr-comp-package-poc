@@ -24,7 +24,7 @@ exports.stream = function() {
 		var promises = [];
 		var self = this;
 		_.forOwn(packageInfo.entryPageMap, function(instance, name) {
-			log.info('Entry package ' + name);
+			log.info('Entry page package ' + name);
 			log.debug(instance.entryHtml);
 
 			var prom = Q.nfcall(fs.readFile, instance.entryHtml, 'utf-8')
@@ -94,7 +94,8 @@ function injectElements($, bundleSet, pkInstance, config, revisionMeta) {
 	});
 	body.append($('<script>').html(apiBootstrapTpl({
 		jsLinks: jsLinks,
-		entryPackage: pkInstance.longName
+		entryPackage: pkInstance.longName,
+		debug: !!config().devMode
 	})));
 }
 

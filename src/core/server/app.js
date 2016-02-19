@@ -1,3 +1,4 @@
+/* global Promise */
 var express = require('express');
 var path = require('path');
 //var favicon = require('serve-favicon');
@@ -9,19 +10,22 @@ var swig = require('swig');
 var ms = require('ms');
 var setupApi = require('./setupApi');
 var log = require('log4js').getLogger('server.app');
+var _ = require('lodash');
+var fs = require('fs');
+var Path = require('path');
 
 module.exports = {
 	activate: function(api) {
 		var app = express();
 		setupApi(api);
-		api.eventBus.on('packagesActivated', function() {
-			create(app, api.config());
+		api.eventBus.on('packagesActivated', function(packageCache) {
+			create(app, api.config(), packageCache);
 			api.eventBus.emit('expressStarted', app);
 		});
 	}
 };
 
-function create(app, setting) {
+function create(app, setting, packageCache) {
 	// view engine setup
 	swig.setDefaults({
 		varControls: ['{=', '=}']
@@ -46,7 +50,6 @@ function create(app, setting) {
 
 	var assetsFolder = path.resolve(setting.rootPath, setting.destDir, 'static');
 	log.debug('express static path: ' + assetsFolder);
-
 	app.use('/', express.static(assetsFolder, {
 		maxAge: ms(setting.cacheControlMaxAge),
 		setHeaders: setCORSHeader
@@ -54,6 +57,20 @@ function create(app, setting) {
 	app.get('/', function(req, res) {
 		res.render('index.html', {});
 	});
+
+	app.use('/abc/' + 'poc-home', express.static('/Users/liujing/dr/fe-house-poc/src/examples/pocHome/assets'));
+	// package level assets folder router
+	_.forOwn(packageCache, function(packageInstance, name) {
+		var assetsDir = Path.resolve(setting.rootPath, packageInstance.path, 'assets');
+		if (fs.existsSync(assetsDir)) {
+			log.debug('/assets/' + name + ' -> ' + assetsDir);
+			app.use('/assets/' + name, express.static(assetsDir, {
+				maxAge: ms(setting.cacheControlMaxAge),
+				setHeaders: setCORSHeader
+			}));
+		}
+	});
+
 	// error handlers
 	// catch 404 and forward to error handler
 	app.use(function(req, res, next) {

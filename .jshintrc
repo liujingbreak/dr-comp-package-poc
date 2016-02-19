@@ -66,6 +66,11 @@
 	    "expect": true,
 	    "spyOn": true,
 	    "xit": true,
-	    "xdescribe": true
+	    "xdescribe": true,
+		"TweenMax": false,
+		"Linear": false,
+		"Power2": false,
+		"TimelineLite": false,
+		"angular": true
     }
 }

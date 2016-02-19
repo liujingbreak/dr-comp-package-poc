@@ -1,12 +1,8 @@
 var through = require('through');
-var resolve = require('browser-resolve');
 var less = require('less');
-var Path = require('path');
-var fs = require('fs');
-var _ = require('lodash');
-
-
-var lookupPackagejsonFolder = _.memoize(_recursiveLookupPackagejsonFolder);
+var NpmImportPlugin = require('less-plugin-npm-import');
+var log = require('@dr/logger').getLogger('parcelifyModuleResolver');
+var env = require('@dr/environment');
 
 module.exports = function(file, options) {
 	var buf = '';
@@ -16,41 +12,36 @@ module.exports = function(file, options) {
 
 	var flush = function() {
 		var self = this;
-
-		buf = buf.replace(/!package\((.*?)\)/g, function(match, path) {
-			try {
-				var resolved = lookupPackagejsonFolder(resolve.sync(path, {
-					browser: 'style'
-				}));
-				return resolved;
-			} catch (e) {
-				console.log(e);
-				return self.emit(
-					'error',
-					new Error(
-						'Could not resolve "' + path + '" in file "' + file + '": '
-					)
-				);
-			}
-		});
-
 		var fileConfig = {
-			compress: true,
-			paths: []
+			compress: false,
+			paths: [],
+			plugins: [new NpmImportPlugin()]
 		};
 
 		// Injects the path of the current file.
 		fileConfig.filename = file;
 
-		less.render(buf, fileConfig, function(err, output) {
-			if (err) {
-				self.emit('error', new Error(getErrorMessage(err), file, err.line));
-			} else {
-				self.push(output.css);
-			}
+		less.render(buf, fileConfig)
+		.then(function(output) {
+			self.push(replaceUrl(output.css));
 			self.push(null);
+		}, function(err) {
+			log.error('parcelifyModuleResolver, error in parsing less ' + err.stack);
+			self.emit('error', new Error(getErrorMessage(err), file, err.line));
 		});
 	};
+
+
+	function replaceUrl(css) {
+		return css.replace(/(\W)url\(['"]?assets:\/\/((?:@[^\/]+\/)?[^\/]+)(\/.*?)['"]?\)/g,
+		function(match, preChar, packageName, path) {
+			if (packageName) {
+				log.debug('resolve assets: ' + match.substring(1));
+			}
+			return preChar + 'url(' + env.config().staticAssetsURL + '/assets/' +
+			env.packageUtils.parseName(packageName).name + path + ')';
+		});
+	}
 
 	function getErrorMessage(err) {
 		var msg = err.message;
@@ -63,22 +54,10 @@ module.exports = function(file, options) {
 		if (err.extract) {
 			msg += ': "' + err.extract + '"';
 		}
-
+		if (err.stack) {
+			msg += '\n' + err.stack;
+		}
 		return msg;
 	}
 	return through(transform, flush);
 };
-
-function _recursiveLookupPackagejsonFolder(targetPath) {
-	var path = targetPath;
-	var folder = Path.dirname(path);
-	while (!fs.existsSync(Path.join(folder, 'package.json'))) {
-		var parentFolder = Path.dirname(folder);
-		if (folder === parentFolder) {
-			// root directory is reached
-			throw new Error('package.json is not found for ' + targetPath);
-		}
-		folder = parentFolder;
-	}
-	return folder;
-}

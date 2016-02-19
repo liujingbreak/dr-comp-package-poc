@@ -23,6 +23,7 @@ var RevAll = require('gulp-rev-all');
 var parcelify = require('parcelify');
 var mkdirp = require('mkdirp');
 var gutil = require('gulp-util');
+var cycle = require('cycle');
 
 var log = require('@dr/logger').getLogger('browserifyBuilder.builder');
 var packageBrowserInstance = require('./packageBrowserInstance');
@@ -49,7 +50,7 @@ module.exports = function(_packageUtils, _config, argv) {
 	gutil.log('Usage: gulp compile [-b <bundle name> -b <bunle name> ...]');
 	gutil.log('\tbuild all JS and CSS bundles, if parameter <bundle name> is supplied, only that specific bundle will be rebuilt.');
 
-	var packageInfo = walkPackages(Path.resolve(config().rootPath, config().recipeFolder, 'package.json'));
+	var packageInfo = walkPackages();
 	log.info('------- building bundles ---------');
 	var depsMap = {};
 	var proms = [];
@@ -98,6 +99,7 @@ module.exports = function(_packageUtils, _config, argv) {
 					var depsGraph = createEntryDepsData(depsMap, packageInfo.entryPageMap);
 					printModuleDependencyGraph(depsGraph);
 					// [ Entry page package A ]--depends on--> ( bundle X, Y )
+					log.debug(_.keys(packageInfo.moduleMap));
 					var bundleDepsGraph = createBundleDependencyGraph(depsGraph, packageInfo.moduleMap);
 					pageCompilerParam.bundleDepsGraph = bundleDepsGraph;
 					pageCompilerParam.config = config;
@@ -179,12 +181,12 @@ module.exports = function(_packageUtils, _config, argv) {
 				if (!moduleMap[dep] || !(bundle = moduleMap[dep].bundle) ) {
 					if (isDirectDeps === true) {
 						msg = 'Entry bundle "' + currBundle + '", module "' + dep + '" which is dependency of bundle "' +
-							currBundle + '" has not be explicityly configured with any bundle';
+							currBundle + '" is not explicityly configured with any bundle';
 						log.error(msg);
 						throw new Error(msg);
 					} else {
 						msg = 'Entry bundle "' + currBundle + '", module "' + dep + '" which is dependency of "' +
-							isDirectDeps + '" has not be explicityly configured with any bundle';
+							isDirectDeps + '" is not explicityly configured with any bundle';
 						log.warn(msg);
 						return;
 					}
@@ -234,12 +236,27 @@ module.exports = function(_packageUtils, _config, argv) {
 			}
 		});
 	}
+
+	function walkPackages() {
+		var packageInfoCacheFile = Path.join(config().destDir, 'packageInfo.json');
+		var packageInfo;
+		if (!argv.b || argv.b.length === 0 || !!fs.existsSync(config().destDir) || !fs.existsSync(packageInfoCacheFile)) {
+			packageInfo = _walkPackages(Path.resolve(config().rootPath, config().recipeFolder, 'package.json'));
+			mkdirp.sync(config().destDir);
+			fs.writeFile(packageInfoCacheFile, JSON.stringify(cycle.decycle(packageInfo), null, '\t'));
+		} else {
+			log.info('Reading build info cache from ' + packageInfoCacheFile);
+			packageInfo = JSON.parse(fs.readFileSync(packageInfoCacheFile, {encoding: 'utf8'}));
+			packageInfo = cycle.retrocycle(packageInfo);
+		}
+		return packageInfo;
+	}
 	/**
 	 *
 	 * @param  {string} packageJsonFile path of package.json
 	 * @return {PackageInfo}
 	 */
-	function walkPackages(packageJsonFile) {
+	function _walkPackages(packageJsonFile) {
 		/**
 		 * @typedef PackageInfo
 		 * @type {Object}
@@ -300,6 +317,7 @@ module.exports = function(_packageUtils, _config, argv) {
 				packagePath: packagePath,
 				active: pkJson.dr ? pkJson.dr.active : false,
 				entryHtml: entryHtml,
+				isEntryJS: pkJson.dr && pkJson.dr.isEntryJS !== undefined ? (!!pkJson.dr.isEntryJS) : {}.hasOwnProperty.call(config().defaultEntrySet, name),
 				browserifyNoParse: noParseFiles,
 				isEntryServerTemplate: isEntryServerTemplate
 			});
@@ -337,7 +355,8 @@ module.exports = function(_packageUtils, _config, argv) {
 					bundle: bundle,
 					longName: moduleName,
 					shortName: moduleName,
-					file: bResolve.sync(moduleName)
+					file: bResolve.sync(moduleName),
+					isEntryJS: {}.hasOwnProperty.call(config().defaultEntrySet, moduleName)
 				});
 				info.allModules.push(instance);
 				return instance;
@@ -384,6 +403,12 @@ module.exports = function(_packageUtils, _config, argv) {
 		// }));
 		//b.add(listStream, {file: entryFile});
 		b.add(Path.join(destDir, jsBundleEntryMaker.bundleFileName));
+		// _.each(modules, function(moduleInfo) {
+		// 	if (moduleInfo.isEntryJS) {
+		// 		log.debug(moduleInfo.longName + ' is entry');
+		// 		b.add(moduleInfo.longName);
+		// 	}
+		// });
 
 		modules.forEach(function(module) {
 			b.require(module.longName);
@@ -465,10 +490,9 @@ module.exports = function(_packageUtils, _config, argv) {
 				var file = Path.join(config().destDir, Path.basename(row.path));
 				if (fs.existsSync(file)) {
 					readFileAsync(file).then(function(data) {
-						log.trace('existing revision rev-manifest.json:\n' + data);
 						var meta = JSON.parse(row.contents.toString('utf-8'));
 						var newMeta = JSON.stringify(_.assign(JSON.parse(data), meta), null, '\t');
-						log.trace('merge with existing rev-manifest.json:\n' + newMeta);
+						log.trace('merge with existing rev-manifest.json');
 						row.contents = new Buffer(newMeta);
 						next(null, row);
 					});

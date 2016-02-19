@@ -1,6 +1,6 @@
 {
 	"appenders": [{
 		"type": "console",
-		"level": "DEBUG"
+		"level": "INFO"
 	}]
 }

@@ -24,7 +24,7 @@ SimpleCache.prototype.mergeWithJsonCache = function(filePath, override) {
 
 	if (fs.existsSync(filePath)) {
 		prom = readFileAsync(filePath, 'utf8').then(function(data) {
-			log.debug(filePath + ' cache found');
+			log.info('Reading dependency info cache from ' + filePath);
 			var newJson = _.assign(JSON.parse(data), override);
 			return newJson;
 		});

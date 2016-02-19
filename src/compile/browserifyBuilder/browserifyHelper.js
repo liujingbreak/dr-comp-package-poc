@@ -71,7 +71,6 @@ JsBundleEntryMaker.prototype = {
 	 * TODO: use a template engine to generate js file stream
 	 */
 	createPackageListFile: function(packageInstances) {
-		log.debug('create pacakge list for ' + this.bundleName);
 		var bundleFileListFunction = this.entryBundleFileTpl({
 			requireFilesFuncName: BOOT_FUNCTION_PREFIX + safeBundleNameOf(this.bundleName),
 			packageInstances: packageInstances

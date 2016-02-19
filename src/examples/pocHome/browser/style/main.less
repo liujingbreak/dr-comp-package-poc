@@ -1,11 +1,18 @@
-@import "!package(@dr/doc-ui)/less/include.less";
+@import "npm://@dr/doc-less-var";
 
 .poc-home {
-	background-color: @dr-lite-liter;
+
 	overflow-x: auto;
 	overflow-y: scroll;
-
-	@import "!package(@dr/doc-ui)/less/dr-bgrounds.less";
+	.loading-hide {
+		opacity: 0;
+		visibility: hidden;
+		&.show {
+			opacity: 1;
+			visibility: visible;
+		}
+	}
 	@import "aside.less";
 	@import "mainSection.less";
+	@import "animate.less";
 }
