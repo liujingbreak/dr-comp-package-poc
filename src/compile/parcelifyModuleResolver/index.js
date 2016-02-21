@@ -12,8 +12,9 @@ module.exports = function(file, options) {
 
 	var flush = function() {
 		var self = this;
+		log.info('compress css ' + file + ': ' + !env.config().devMode);
 		var fileConfig = {
-			compress: false,
+			compress: !env.config().devMode,
 			paths: [],
 			plugins: [new NpmImportPlugin()]
 		};

@@ -18,14 +18,15 @@ pocHome.config(['$routeProvider', '$controllerProvider', '$compileProvider', '$f
 		pocHome.provide            = $provide;
 		textAnim.register(pocHome.compileProvider);
 	}]);
-
-pocHome.run(['$templateCache', function($templateCache) {
+pocHome
+.run(['$templateCache', function($templateCache) {
 		$templateCache.put('screens.html', require('../views/screens.html'));
 	}]);
 
-require('./controllers/mainController');
-require('./controllers/AsideController');
-require('./directives/animate.js');
+require('./controllers/mainController')(pocHome);
+require('./controllers/AsideController')(pocHome);
+require('./directives/animate.js')(pocHome);
+require('./service/scrollableAnim')(pocHome);
 
 angular.element(document).ready(function() {
 	angular.bootstrap(document, ['pocHome']);

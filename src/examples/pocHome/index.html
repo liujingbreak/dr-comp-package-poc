@@ -8,7 +8,8 @@
 </head>
 <body class="poc-home">
 	<div class="main-aside dr-bg-dark" ng-controller="AsideController as asideVm"></div>
-	<div class="main-section loading-hide" dr-class-anim="{{mainVm.loaded?'show':''}}" ng-include="'screens.html'">
+	<div class="main-section loading-hide" dr-scrollable-anim="mainVm.scrollableAnim"
+	dr-class-anim="{{mainVm.loaded?'show':''}}" ng-include="'screens.html'">
 	</div>
 </body>
 </html>

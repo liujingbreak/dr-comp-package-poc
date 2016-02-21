@@ -26,10 +26,11 @@ module.exports = {
 				scope: {
 					onSplitDone: '&',
 					onShow: '&',
-					drSplitTextShow: '=',
+					drSplitTextShow: '=', // if `true` anim starts
 					timeline: '=',
 					onComplete: '&',
-					timelinePos: '@'
+					timelinePos: '@',
+					duration: '@'
 				},
 				compile: function(tElement, tAttrs, transclude) {
 					return function(scope, iElement, iAttrs, controller) {
@@ -41,16 +42,20 @@ module.exports = {
 						} else {
 							timeline = new TimelineLite({paused: true});
 						}
-
-						timeline.staggerFromTo(iElement[0].children, 0.66,
-							{yPercent: 75, visibility: 'visible', autoAlpha: 0},
-							{autoAlpha: 1, yPercent: 0},
-							0.05,
-							scope.timelinePos ? scope.timelinePos : '+=0',
-							scope.onComplete ? scope.onComplete : function() {}
+						timeline.staggerFromTo(iElement[0].children, parseFloat(scope.duration),
+							{rotation: 30, yPercent: 90, visibility: 'visible', autoAlpha: 0},
+							{rotation: 0, autoAlpha: 1, yPercent: 0, ease: 'Back.easeOut',
+								onComplete: function() {
+									iElement.children().css('opacity', '');
+									if (scope.onComplete) {
+										scope.onComplete();
+									}
+								}},
+							0.06,
+							scope.timelinePos ? scope.timelinePos : '+=0'
 						);
 
-						if (tAttrs.drSplitTextShow) {
+						if (iAttrs.drSplitTextShow) {
 							scope.$watch('drSplitTextShow', function(newVal) {
 								if (newVal) {
 									timeline.restart();
@@ -69,7 +74,7 @@ function splitTextLink(scope, iElement, iAttrs, controller) {
 	var children = [];
 	_.each([].slice.call(iElement[0].childNodes), function(node) {
 		if (node.nodeName === '#text') {
-			_.each(node.textContent.split(''), function(chr) {
+			_.each(_.trim(node.textContent).split(''), function(chr) {
 				var span = angular.element('<span>');
 				span.html(chr === ' ' ? '&nbsp;' : chr).addClass('t');
 				children.push(span);

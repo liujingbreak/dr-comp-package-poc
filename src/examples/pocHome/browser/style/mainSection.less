@@ -28,9 +28,18 @@
 	}
 }
 
+.screen-2{
+	background: @dr-blue-liter;
+	color: @dr-white;
+	.big-text {
+		font-size: @dr-fontsize-xxbig;
+		padding: 0.5em;
+	}
+}
+
 .screen-bground {
 	z-index: -1;
-	opacity: 0.3;
+	//opacity: 0.3;
 	position: fixed;
 	background-image: url(assets://@dr/poc-home/bg-photo-ocean.jpg);
 	background-size: cover;
@@ -40,10 +49,26 @@
 	display: inline-block;
 	vertical-align: middle;
 	text-align: left;
+	> * {
+		white-space: nowrap;
+	}
+	.invisible {
+		opacity: 0;
+		visibility: hidden;
+	}
+	&.white {
+		color: @dr-white;
+		.keyword {
+			color: @dr-white;
+		}
+	}
 }
 
 // override dr less
 h1 > span {
 	top: 0;
 	position:static;
+}
+.invisible {
+	visibility: hidden;
 }

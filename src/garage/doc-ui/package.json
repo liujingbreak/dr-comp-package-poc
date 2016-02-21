@@ -5,6 +5,9 @@
   "style": "less/build.less",
   "browser": "index.js",
   "transforms": [ "@dr/parcelify-module-resolver"],
+  "dr": {
+	  "bundle": "home"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
