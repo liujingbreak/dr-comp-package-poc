@@ -17,8 +17,8 @@
 			width: 100%;
 			padding: @dr-unit-half;
 			padding-bottom: @dr-unit-half - 1px;
-			border-bottom: 1px solid @dr-white;
-			background-color: @dr-liteblue;
+			//border-bottom: 1px solid @dr-white;
+			background-color: @dr-litegreen;
 			&:before {
 				.dr-mixin-maximize();
 				content: "";
@@ -28,12 +28,12 @@
 			&:focus:not(:active) {
 				outline: none;
 				&:before {
-					background-color: @dr-blue;
+					background-color: @dr-green;
 				}
 			}
 			&:hover,
 			&:focus {
-				background-color: @dr-liteblue-dark;
+				background-color: @dr-litegreen-dark;
 			}
 			&:hover {
 				span,
@@ -73,12 +73,20 @@
 		&.dr-checked {
 			> button,
 			> a {
-				background-color: @dr-blue;
+				background-color: @dr-green;
 				color: @dr-white;
 				&:focus:before {
-					background-color: @dr-blue-dark;
+					background-color: @dr-green-dark;
 				}
 			}
+		}
+	}
+}
+
+.dr-aside {
+	.dr-menu {
+		button {
+			.dr-mixin-noround();
 		}
 	}
 }

@@ -1,3 +1,5 @@
+@fontsize-xxxbig: 48px;
+
 .main-section {
 	position: absolute;
 	left: @dr-unit-triple;
@@ -9,10 +11,15 @@
 }
 
 .screen {
-	height: 100%;
+	height: 95%;
 	width: 100%;
 	text-align: center;
+	h1 {
+		font-weight: @dr-fontweight-light;
+	}
 	.keyword {
+		font-size: @fontsize-xxxbig;
+		font-weight: @dr-fontweight-bold;
 		color: @dr-green;
 	}
 	.keyword-blue {
@@ -29,12 +36,25 @@
 }
 
 .screen-2{
-	background: @dr-blue-liter;
+	height: auto;
+	min-height: 90%;
+	background: radial-gradient(ellipse farthest-corner at 0% 0%, @dr-blue-dark -50%, @dr-blue-liter), @dr-blue-liter;
 	color: @dr-white;
 	.big-text {
-		font-size: @dr-fontsize-xxbig;
-		padding: 0.5em;
+		font-size: @dr-fontsize-xbig;
+		padding: 1em;
 	}
+	padding: @dr-unit-triple 0;
+}
+
+.screen-3{
+	background: radial-gradient(ellipse farthest-corner at 0% 0%, @dr-lite-dark -50%, @dr-lite-liter), @dr-lite-liter;
+	color: @dr-white;
+	.big-text {
+		font-size: @dr-fontsize-xbig;
+		padding: 1em;
+	}
+	padding: @dr-unit-triple 0;
 }
 
 .screen-bground {
@@ -49,6 +69,7 @@
 	display: inline-block;
 	vertical-align: middle;
 	text-align: left;
+	font-weight: @dr-fontweight-light;
 	> * {
 		white-space: nowrap;
 	}
@@ -64,11 +85,6 @@
 	}
 }
 
-// override dr less
-h1 > span {
-	top: 0;
-	position:static;
-}
 .invisible {
 	visibility: hidden;
 }

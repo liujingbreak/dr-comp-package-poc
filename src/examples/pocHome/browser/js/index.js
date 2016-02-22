@@ -4,7 +4,7 @@ require('@dr/doc-ui');
 
 var textAnim = require('@dr/text-anim-ng');
 
-var pocHome = angular.module('pocHome', ['ngAnimate', 'ngRoute']);
+var pocHome = angular.module('pocHome', ['ngAnimate', 'ngRoute', 'docUi']);
 module.exports = pocHome;
 
 pocHome.config(['$routeProvider', '$controllerProvider', '$compileProvider', '$filterProvider', '$provide',
@@ -25,8 +25,9 @@ pocHome
 
 require('./controllers/mainController')(pocHome);
 require('./controllers/AsideController')(pocHome);
-require('./directives/animate.js')(pocHome);
+require('./directives/animate')(pocHome);
 require('./service/scrollableAnim')(pocHome);
+require('./directives/showOnReady')(pocHome);
 
 angular.element(document).ready(function() {
 	angular.bootstrap(document, ['pocHome']);

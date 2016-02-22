@@ -1,3 +1,43 @@
+@dr-navi-aside-width: @dr-unit-triple;
+@dr-navi-menu-item-height: @dr-unit-triple;
+.dr-navi-aside {
+	width: 240px;
+	overflow-x: hidden;
+	overflow-y: auto;
+	height: 100%;
+	position:absolute;
+	min-width: @dr-navi-aside-width;
+	.dr-menu {
+		.dr-button {
+			color: @dr-white;
+			white-space: nowrap;
+			height: @dr-navi-menu-item-height;
+			background-color: transparent;
+			padding: 0;
+			i {
+				display: inline-block;
+				line-height: @dr-navi-menu-item-height;
+				width: @dr-navi-aside-width;
+			}
+			span {
+				display: inline-block;
+			}
+			.dr-mixin-noround();
+		}
+
+		li.dr-checked {
+			> button,
+			> a {
+				background-color: @dr-green;
+				&:focus:before {
+					background-color: @dr-green-dark;
+				}
+			}
+		}
+	}
+}
+
+/*
 .dr-aside {
 	z-index: @dr-zindex-aside;
 	position: absolute;
@@ -84,3 +124,4 @@
 		}
 	}
 }
+*/
