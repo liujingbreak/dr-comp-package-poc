@@ -59,7 +59,8 @@
     "vinyl-paths": "^2.1.0",
     "vinyl-source-stream": "^1.1.0",
     "xtend": "^4.0.1",
-    "yargs": "^3.32.0"
+    "yargs": "^3.32.0",
+    "json-lint": "^0.1.0"
   },
   "engines": {
     "node": "^5.3.0"

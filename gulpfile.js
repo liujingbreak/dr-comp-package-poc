@@ -41,11 +41,17 @@ gulp.task('clean:dependency', function() {
 	return del(dirs).then(gutil.log, gutil.log);
 });
 
+gulp.task('clean:recipe', function() {
+	gulp.src(config().recipeFolder + '/package.json', {base: __dirname})
+	.pipe(rwPackageJson.removeDependency())
+	.pipe(gulp.dest('.'));
+});
+
 gulp.task('clean:dist', function() {
 	return del([config().destDir]);
 });
 
-gulp.task('clean', ['clean:dist', 'clean:dependency']);
+gulp.task('clean', ['clean:dist', 'clean:dependency', 'clean:recipe']);
 
 gulp.task('build', ['link'], function() {
 	cli.exec('npm', 'install');
@@ -80,7 +86,7 @@ gulp.task('link', function() {
 		.on('error', gutil.log)
 		.pipe(gulp.dest('node_modules'))
 		.on('error', gutil.log)
-		.pipe(rwPackageJson.addDependeny(Path.resolve(__dirname, config().recipeFolder, 'package.json')))
+		.pipe(rwPackageJson.addDependency(Path.resolve(config().rootPath, config().recipeFolder, 'package.json')))
 		.pipe(gulp.dest('.'));
 });
 
