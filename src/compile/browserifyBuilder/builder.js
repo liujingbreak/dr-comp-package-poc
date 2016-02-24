@@ -41,11 +41,14 @@ var packageUtils, config, jsBundleEntryMaker;
  * @return {Promise}               [description]
  */
 module.exports = function(_packageUtils, _config, argv) {
+	uncaughtException();
 	packageUtils = _packageUtils;
 	config = _config;
 	var helper = helperFactor(config);
 	//var jsTransform = helper.jsTransform;
 	var fileCache = new FileCache(config().destDir);
+	var buildCss = true;
+	var buildJS = true;
 
 	gutil.log('Usage: gulp compile [-b <bundle name> -b <bunle name> ...]');
 	gutil.log('\tbuild all JS and CSS bundles, if parameter <bundle name> is supplied, only that specific bundle will be rebuilt.');
@@ -56,6 +59,7 @@ module.exports = function(_packageUtils, _config, argv) {
 	var proms = [];
 	var bundleStream;
 	var bundleNames = _.keys(packageInfo.bundleMap);
+
 	if (argv.b) {
 		var bundlesTobuild = [].concat(argv.b);
 		if (_.intersection(bundleNames, bundlesTobuild).length < bundlesTobuild.length) {
@@ -64,7 +68,12 @@ module.exports = function(_packageUtils, _config, argv) {
 		}
 		bundleNames = bundlesTobuild;
 	}
-
+	if (argv['only-js']) {
+		buildCss = false;
+	}
+	if (argv['only-css']) {
+		buildJS = false;
+	}
 	bundleNames.forEach(function(bundle) {
 		log.info('build bundle: ' + bundle);
 		var prom = buildBundle(packageInfo.bundleMap[bundle],
@@ -79,16 +88,18 @@ module.exports = function(_packageUtils, _config, argv) {
 			var cssBundlePaths = _.map(resolveds, function(resolved) {
 				return resolved[1];
 			});
-			log.debug('css bundles: ' + cssBundlePaths);
-
-			bundleStream = es.merge(_.map(resolveds, function(resolved) {
+			var outStreams = _.map(resolveds, function(resolved) {
 				return resolved[0];
-			}).concat(gulp.src(cssBundlePaths, {base: Path.resolve('dist/static')})))
-			.on('error', function(er) {
+			});
+			if (buildCss) {
+				outStreams = outStreams.concat(gulp.src(cssBundlePaths, {base: Path.resolve('dist/static')}));
+			}
+			bundleStream = es.merge(outStreams).on('error', function(er) {
 				log.error(er);
 			});
+
 			var pageCompilerParam = {};
-			revisionJsBundle(bundleStream)
+			revisionBundleFile(bundleStream)
 			.pipe(
 				through.obj(function transform(file, encoding, cb) {
 					var revisionMeta = JSON.parse(file.contents.toString('utf-8'));
@@ -477,7 +488,7 @@ module.exports = function(_packageUtils, _config, argv) {
 		]);
 	}
 
-	function revisionJsBundle(bundleStream) {
+	function revisionBundleFile(bundleStream) {
 		//var def = Q.defer();
 		var revAll = new RevAll();
 		var revFilter = gulpFilter(['**/*.js', '**/*.css'], {restore: true});
@@ -501,8 +512,9 @@ module.exports = function(_packageUtils, _config, argv) {
 				}
 			}))
 			.pipe(gulp.dest(config().destDir))
+			.on('error', function(err) { log.error(err);})
 			.on('finish', function() {
-				log.debug('all JS bundles revisioned');
+				log.debug('all bundles revisioned');
 			});
 	}
 
@@ -513,7 +525,7 @@ module.exports = function(_packageUtils, _config, argv) {
 			bundles: {
 				style: fileName
 			},
-			appTransforms: ['less-css-stream']
+			appTransforms: ['@dr/parcelify-module-resolver']
 		});
 
 		parce.on('done', function() {
@@ -541,4 +553,12 @@ module.exports = function(_packageUtils, _config, argv) {
 var bundleLog = require('@dr/logger').getLogger('browserifyBuilder.buildBundle');
 function logError(er) {
 	bundleLog.error(er.message, er);
+}
+
+function uncaughtException() {
+	process.removeAllListeners('uncaughtException');
+	process.on('uncaughtException', function(err) {
+		// handle the error safely
+		log.error('Uncaught exception: ', err, err.stack);
+	});
 }

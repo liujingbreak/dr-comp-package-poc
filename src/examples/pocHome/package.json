@@ -1,6 +1,6 @@
 {
   "name": "@dr/poc-home",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Home page",
   "browser": "browser/js/index.js",
   "main": "server/server.js",

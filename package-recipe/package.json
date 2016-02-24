@@ -1,7 +1,7 @@
 {
-	"name": "@dr/recipe",
+	"name": "@dr/fe-house-internal-recipe",
 	"version": "1.0.0",
-	"description": "Only as dependencies list",
+	"description": "Only as package components list",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
@@ -21,7 +21,7 @@
 		"@dr/example-common": "1.0.4",
 		"@dr/example-dr": "1.0.10",
 		"@dr/example-node": "1.0.10",
-		"@dr/poc-home": "0.0.0",
+		"@dr/poc-home": "0.0.1",
 		"@dr/doc-less-var": "0.0.0",
 		"@dr/doc-ui": "0.0.0",
 		"@dr/text-anim-ng": "0.0.0",

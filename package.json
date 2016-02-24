@@ -1,29 +1,35 @@
 {
-  "name": "@dr/fe-house-poc",
-  "version": "1.0.18",
+  "name": "@dr/fe-house",
+  "version": "1.1.0",
   "description": "This is a PoC for company's frontend platform",
-  "main": "app.js",
+  "main": "lib/server.js",
+  "bin": "bin/dr.js",
   "scripts": {
     "start": "node lib/server.js",
-    "check": "gulp js"
+    "check": "gulp lint"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/liujingbreak/dr-package-home-PoC.git"
+    "url": "git+https://github.com/liujingbreak/fe-house-poc.git"
   },
   "author": "liujing.break@gmail.com",
   "license": "",
   "bugs": {
-    "url": "https://github.com/liujingbreak/dr-package-home-PoC/issues"
+    "url": "https://github.com/liujingbreak/fe-house-poc/issues"
   },
-  "homepage": "https://github.com/liujingbreak/dr-package-home-PoC#readme",
-  "devDependencies": {
+  "homepage": "https://github.com/liujingbreak/fe-house-poc#readme",
+  "engines": {
+    "node": "^5.3.0"
+  },
+  "dependencies": {
+    "bluebird": "^3.3.1",
+    "browser-resolve": "^1.11.0",
     "browserify": "^13.0.0",
     "browserify-incremental": "^3.0.1",
     "cheerio": "^0.19.0",
+	"chalk": "^1.1.1",
     "cycle": "^1.0.3",
     "del": "^2.2.0",
-    "domhandler": "^2.3.0",
     "esprima": "^2.7.1",
     "estraverse": "^4.1.1",
     "event-stream": "^3.3.2",
@@ -46,32 +52,27 @@
     "jasmine": "^2.4.1",
     "jasmine-core": "^2.4.1",
     "jasmine-reporters": "^2.1.1",
+    "jquery": "^1.12.0",
     "jshint": "^2.8.0",
     "jshint-stylish": "^2.1.0",
+    "json-lint": "^0.1.0",
     "less-css-stream": "^1.0.0",
+    "lodash": "^4.0.0",
+    "log4js": "^0.6.29",
     "main-bower-files": "^2.11.0",
     "mkdirp": "^0.5.1",
     "mkdirs": "0.0.2",
     "parcelify": "^2.1.0",
+    "q": "^1.4.1",
     "resolve": "^1.1.7",
-    "shelljs-nodecli": "^0.1.1",
+    "shelljs": "^0.3.0",
+	"shelljs-nodecli": "^0.1.1",
+    "swig": "^1.4.2",
     "vinyl-buffer": "^1.0.0",
     "vinyl-paths": "^2.1.0",
     "vinyl-source-stream": "^1.1.0",
     "xtend": "^4.0.1",
-    "yargs": "^3.32.0",
-    "json-lint": "^0.1.0"
-  },
-  "engines": {
-    "node": "^5.3.0"
-  },
-  "dependencies": {
-    "browser-resolve": "^1.11.0",
-    "jquery": "^1.12.0",
-    "lodash": "^4.0.0",
-    "log4js": "^0.6.29",
-    "q": "^1.4.1",
-    "swig": "^1.4.2",
-    "yamljs": "^0.2.4"
+    "yamljs": "^0.2.4",
+    "yargs": "^3.32.0"
   }
 }

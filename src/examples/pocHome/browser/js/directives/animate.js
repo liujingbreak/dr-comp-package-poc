@@ -75,11 +75,11 @@ function buildScenes(scrollControl, iElement, scope) {
 			timeline.to(slogon.children().eq(0), 0.6, {height: 0, margin: 0, ease: 'Power2.easeOut'});
 		},
 		teardown: function(reverse, offset) {
-			if (!reverse) {
-				slogon.addClass('white');
-			} else {
-				slogon.removeClass('white');
-			}
+			// if (!reverse) {
+			// 	slogon.addClass('white');
+			// } else {
+			// 	slogon.removeClass('white');
+			// }
 		}
 	});
 

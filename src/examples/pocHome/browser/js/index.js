@@ -1,4 +1,3 @@
-window.jQuery = require('jquery');
 require('@dr/angularjs');
 require('@dr/doc-ui');
 

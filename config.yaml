@@ -11,12 +11,6 @@ packageScopes:
   # dr-core is considered as special packages which will be loaded before other packages
   - dr-core
 
-# default package recipe folder
-# we can change this to another folder for production environment
-recipeFolder: package-recipe
-
-# recipeFolder: developer
-
 nodeRoutePath: /
 
 # enable devMode to denote default builder tool do not uglify JS bundles
@@ -52,3 +46,18 @@ packageContextPathMapping:
 
 # During developing, you can set this to `true` to make every package to a single bundle
 bundlePerPackage: false
+
+
+# If you are not developer of this platform (like you are using this platform as
+# dependency in node_modules folder), please don't override this option, but
+# config `recipeFolder` instead.
+#
+# If you are about to read this property programatically, read `internalRecipeFolderPath`
+# instead, it will be resolved to relative path to this platform package folder,
+# even it is under node_modules folder loaded as dependency
+internalRecipeFolder: package-recipe
+
+# If you are about to read this property programatically, read `recipeFolderPath`
+# instead. It will be resolved to relative to process.cwd() folder, that what it
+# means to be.
+recipeFolder: package-recipe

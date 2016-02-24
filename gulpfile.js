@@ -1,4 +1,5 @@
 var gulp = require('gulp');
+var Promise = require('bluebird');
 var Path = require('path');
 var gutil = require('gulp-util');
 var jshint = require('gulp-jshint');
@@ -13,7 +14,6 @@ var vps = require('vinyl-paths');
 var Q = require('q');
 Q.longStackSupport = true;
 var _ = require('lodash');
-var RevAll = require('gulp-rev-all');
 
 var cli = require('shelljs-nodecli');
 var Jasmine = require('jasmine');
@@ -41,8 +41,23 @@ gulp.task('clean:dependency', function() {
 	return del(dirs).then(gutil.log, gutil.log);
 });
 
-gulp.task('clean:recipe', function() {
-	gulp.src(config().recipeFolder + '/package.json', {base: __dirname})
+gulp.task('clean:recipe', ['clean:recipe:internal'], function() {
+	if (!config().recipeFolderPath) {
+		return;
+	}
+	gulp.src(config().recipeFolderPath + '/package.json', {base: config().rootPath})
+	.pipe(rwPackageJson.removeDependency())
+	.pipe(gulp.dest('.'));
+});
+
+gulp.task('clean:recipe:internal', function() {
+	if (config().dependencyMode) {
+		return Promise.resolve();
+	}
+	if (config().internalRecipeFolderPath === config().recipeFolderPath) {
+		return;
+	}
+	gulp.src(config().internalRecipeFolderPath + '/package.json', {base: __dirname})
 	.pipe(rwPackageJson.removeDependency())
 	.pipe(gulp.dest('.'));
 });
@@ -53,20 +68,49 @@ gulp.task('clean:dist', function() {
 
 gulp.task('clean', ['clean:dist', 'clean:dependency', 'clean:recipe']);
 
-gulp.task('build', ['link'], function() {
-	cli.exec('npm', 'install');
-	var gulpStart = _.bind(gulp.start, gulp);
-	return Q.nfcall(gulpStart, 'compile');
+gulp.task('build', ['install-recipe', 'link'], function() {
+	new Promise(function(resolve, reject) {
+		// Use asynchronous `ShellJS.exec()` for long-lived process,
+		// due to ShellJS's high CPU usage issue
+		cli.exec('npm', 'install', function(code, output) {
+			if (code === 0) {
+				resolve();
+			} else {
+				reject(output);
+			}
+		});
+	}).then(function() {
+		var gulpStart = _.bind(gulp.start, gulp);
+		return Q.nfcall(gulpStart, 'compile');
+	});
 });
 
 gulp.task('install-recipe', ['link'], function() {
-	cli.exec('npm', 'install', './package-recipe');
-	return Promise.resolve();
+	var promises = [];
+	if (!config().dependencyMode && config().internalRecipeFolderPath !== config().recipeFolderPath) {
+		promises.push(installRecipe(config().internalRecipeFolderPath));
+	}
+	promises.push(installRecipe(config().recipeFolderPath));
+
+	return Promise.all(promises);
 });
+
+function installRecipe(recipeDir) {
+	return new Promise(function(resolve, reject) {
+		cli.exec('npm', 'install', recipeDir, function(code, output) {
+			if (code === 0) {
+				resolve(code);
+			} else {
+				reject(output);
+			}
+		});
+	});
+}
 
 gulp.task('lint', function() {
 	gulp.src(['*.js',
-			'lib/**/*.js'
+			'lib/**/*.js',
+			config().srcPath + '/**.js'
 		]).pipe(jshint())
 		.pipe(jshint.reporter('jshint-stylish'))
 		.pipe(jshint.reporter('fail'))
@@ -79,7 +123,7 @@ gulp.task('lint', function() {
  * link src/ ** /package.json from node_modules folder
  */
 gulp.task('link', function() {
-	return gulp.src('src')
+	return gulp.src(config().srcDir)
 		.pipe(findPackageJson())
 		.on('error', gutil.log)
 		.pipe(rwPackageJson.linkPkJson('node_modules'))
@@ -92,7 +136,7 @@ gulp.task('link', function() {
 
 gulp.task('compile', function() {
 	var jobs = [];
-	require('@dr/environment')._setup(config, packageUtils); // monkey patch some useful object
+	require('@dr/environment')._setup(config, packageUtils); // monkey patch some useful objects
 	packageUtils.findNodePackageByType('builder', function(name, entryPath, parsedName, pkJson) {
 		gutil.log('run builder: ' + name);
 		var res = require(name)(packageUtils, config, argv);
@@ -114,24 +158,12 @@ gulp.task('compile', function() {
 	return Q.all(jobs);
 });
 
-gulp.task('rev', function() {
-	var revAll = new RevAll({
-		debug: true,
-		//dontRenameFile: [/\.html$/g]
-	});
-	gulp.src([config().destDir + '/js/**/*.min.js'])
-	.pipe(revAll.revision())
-	.pipe(gulp.dest(config().destDir) + '/js')
-	.pipe(revAll.manifestFile())
-	.pipe(gulp.dest(config().destDir));
-});
-
 /**
  * TODO: bump dependencies version
  */
 gulp.task('bump', function() {
 	return es.merge(
-		gulp.src('src')
+		gulp.src(config().srcDir)
 		.pipe(findPackageJson())
 		.pipe(vp(function(path) {
 			return new Promise(function(resolve, reject) {
@@ -155,16 +187,25 @@ gulp.task('test-house', function() {
 });
 
 gulp.task('publish', function() {
-	return gulp.src('src')
+	return gulp.src(config().srcDir)
 		.pipe(findPackageJson())
 		.on('error', gutil.log)
 		.pipe(vps(function(paths) {
 			gutil.log(paths);
-			//packages.push(Path.dirname(paths));
-			cli.exec('npm', 'publish', Path.dirname(paths));
-			return Promise.resolve();
+			return new Promise(function(resolve, reject) {
+				cli.exec('npm', 'publish', Path.dirname(paths), {silent: false},
+					function(code, output) {
+						resolve(code);
+					});
+			});
 		})).on('end', function() {
-			cli.exec('npm', 'publish', '.');
+			if (config().dependencyMode) {
+				cli.exec('npm', 'publish', config().recipeFolder);
+			} else {
+				cli.exec('npm', 'publish', config().internalRecipeFolder);
+				cli.exec('npm', 'publish', config().recipeFolder);
+				cli.exec('npm', 'publish', '.');
+			}
 		});
 });
 
