@@ -1,5 +1,5 @@
 {
-  "name": "@dr/poc-home",
+  "name": "@dr/doc-home",
   "version": "0.0.1",
   "description": "Home page",
   "browser": "browser/js/index.js",

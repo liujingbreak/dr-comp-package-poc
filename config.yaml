@@ -34,7 +34,8 @@ browserifyNoParse:
     - q
     - lodash
     - jquery
-    - gsap
+    - @dr/gsap
+    - @dr/angularjs
 
 packageContextPathMapping:
     # Package short name - route path map, used by express server.
@@ -42,7 +43,7 @@ packageContextPathMapping:
     # e.g.
     #   if package name is "@dr/example-dr", default route root path will be `/example-dr`
     # If you want change this rule, config route path here.
-    poc-home: /
+    doc-home: /
 
 # During developing, you can set this to `true` to make every package to a single bundle
 bundlePerPackage: false

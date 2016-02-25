@@ -108,10 +108,15 @@ function installRecipe(recipeDir) {
 }
 
 gulp.task('lint', function() {
+	var through = require('through2');
 	gulp.src(['*.js',
 			'lib/**/*.js',
-			config().srcPath + '/**.js'
-		]).pipe(jshint())
+			config().srcDir + '/**/*.js'
+		]).pipe(through.obj(function(row, enc, next) {
+			gutil.log(row.path);
+			next(null, row);
+		}))
+		.pipe(jshint())
 		.pipe(jshint.reporter('jshint-stylish'))
 		.pipe(jshint.reporter('fail'))
 		.pipe(jscs())
@@ -202,8 +207,11 @@ gulp.task('publish', function() {
 			if (config().dependencyMode) {
 				cli.exec('npm', 'publish', config().recipeFolder);
 			} else {
-				cli.exec('npm', 'publish', config().internalRecipeFolder);
-				cli.exec('npm', 'publish', config().recipeFolder);
+				cli.exec('npm', 'publish', config().internalRecipeFolderPath);
+				if (config().recipeFolderPath &&
+				config().recipeFolderPath !== config().internalRecipeFolderPath) {
+					cli.exec('npm', 'publish', config().recipeFolderPath);
+				}
 				cli.exec('npm', 'publish', '.');
 			}
 		});

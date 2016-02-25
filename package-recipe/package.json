@@ -21,7 +21,7 @@
 		"@dr/example-common": "1.0.4",
 		"@dr/example-dr": "1.0.10",
 		"@dr/example-node": "1.0.10",
-		"@dr/poc-home": "0.0.1",
+		"@dr/doc-home": "0.0.1",
 		"@dr/doc-less-var": "0.0.0",
 		"@dr/doc-ui": "0.0.0",
 		"@dr/text-anim-ng": "0.0.0",

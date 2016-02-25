@@ -5,5 +5,3 @@ exports.activate = function(api) {
 	}
 	require('q').longStackSupport = true;
 };
-
-log.info(__filename + ' is running');
