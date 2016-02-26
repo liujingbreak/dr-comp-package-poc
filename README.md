@@ -1,5 +1,7 @@
 Frontend platform ~~PoC~~ Prototype
 =====================
+> This doc is outdated, please read [中文Readme](doc/readme-cn.md)
+
 
 The problem
 ------------

@@ -45,6 +45,7 @@
   "scripts": {},
   "version": "0.0.0",
   "dr": {
+	  "bundle": "ui-lib",
 	  "noLint": true
   }
 }
