@@ -43,5 +43,8 @@
     "url": "git+https://github.com/greensock/GreenSock-JS.git"
   },
   "scripts": {},
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "dr": {
+	  "noLint": true
+  }
 }

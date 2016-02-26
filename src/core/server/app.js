@@ -1,4 +1,3 @@
-/* global Promise */
 var express = require('express');
 var path = require('path');
 //var favicon = require('serve-favicon');
@@ -58,7 +57,6 @@ function create(app, setting, packageCache) {
 		res.render('index.html', {});
 	});
 
-	app.use('/abc/' + 'poc-home', express.static('/Users/liujing/dr/fe-house-poc/src/examples/pocHome/assets'));
 	// package level assets folder router
 	_.forOwn(packageCache, function(packageInstance, name) {
 		var assetsDir = Path.resolve(setting.rootPath, packageInstance.path, 'assets');

@@ -1,5 +1,4 @@
 var _ = require('lodash');
-var log = require('log4js').getLogger('browserifyBuilder.PackageBrowserInstance');
 
 module.exports = PackageBrowserInstance;
 

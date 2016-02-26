@@ -1,4 +1,4 @@
-var angular = require('@dr/angularjs');
+require('@dr/angularjs');
 
 module.exports = function(controllerProvider) {
 	controllerProvider.controller('MainController', MainController);

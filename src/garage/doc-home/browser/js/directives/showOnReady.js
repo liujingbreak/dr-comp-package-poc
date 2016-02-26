@@ -1,6 +1,6 @@
 module.exports = function(compileProvider) {
 	compileProvider.directive('drShowOnReady', showOnReady);
-}
+};
 
 /**
  * Before AnglarJS taking over rendering, there is a moment user can see

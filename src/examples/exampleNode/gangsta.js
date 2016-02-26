@@ -32,4 +32,4 @@ module.exports = function() {
 	request.end();
 
 	return f.promise;
-}
+};

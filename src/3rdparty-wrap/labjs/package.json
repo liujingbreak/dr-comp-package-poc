@@ -5,7 +5,8 @@
   "browser": "LAB.src.js",
   "dr": {
     "bundle": "labjs",
-	"browserifyNoParse": ["./LAB.src.js"]
+	"browserifyNoParse": ["./LAB.src.js"],
+	"noLint": true
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -1,8 +1,6 @@
 var through = require('through2');
 var Path = require('path');
 var stream = require('stream');
-var log = require('log4js').getLogger('browserifyHelper');
-var _ = require('lodash');
 var swig = require('swig');
 swig.setDefaults({autoescape: false});
 var config;

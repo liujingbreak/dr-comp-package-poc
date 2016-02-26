@@ -20,15 +20,27 @@ var Jasmine = require('jasmine');
 
 var findPackageJson = require('./lib/gulp/findPackageJson');
 var rwPackageJson = require('./lib/gulp/rwPackageJson');
+var packageLintableSrc = require('./lib/gulp/packageLintableSrc');
 var packageUtils = require('./lib/packageMgr/packageUtils');
-var argv = require('yargs').argv;
+var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package]')
+	.command('build', 'build everything from scratch, including install-recipe, link, npm install, compile')
+	.command('clean', 'cleanup build environment like dist folder, cache, recipe package.json, even those private modules in node_modules folder')
+	.command('compile', 'compile static stuff like JS, less file into bundles, build command calls this command, depends on `gulp link`')
+	.command('lint', 'source code style check')
+	.describe('b', '<bundle-name> if used with command `compile` or `build`, it will only compile specific bundle, which is more efficient')
+	.alias('b', 'bundle')
+	.describe('p', '<package-short-name> if used with command `lint`, it will only check specific package')
+	.alias('p', 'package')
+	.demand(1)
+	.help('h').alias('h', 'help')
+	.argv;
 
 var config = require('./lib/config');
 require('log4js').configure(Path.join(__dirname, 'log4js.json'));
 
 gulp.task('default', function() {
 	gutil.log('please individually execute gulp [task]');
-	gutil.log('\tbuild clean, link, compile, bump-version, publish');
+	gutil.log('\tbuild clean, link, compile [-b <bundle> ...], bump-version, publish');
 });
 
 gulp.task('clean:dependency', function() {
@@ -108,20 +120,14 @@ function installRecipe(recipeDir) {
 }
 
 gulp.task('lint', function() {
-	var through = require('through2');
-	gulp.src(['*.js',
-			'lib/**/*.js',
-			config().srcDir + '/**/*.js'
-		]).pipe(through.obj(function(row, enc, next) {
-			gutil.log(row.path);
-			next(null, row);
-		}))
-		.pipe(jshint())
-		.pipe(jshint.reporter('jshint-stylish'))
-		.pipe(jshint.reporter('fail'))
-		.pipe(jscs())
-		.pipe(jscs.reporter())
-		.pipe(jscs.reporter('fail'));
+	es.merge([gulp.src(['*.js', 'lib/**/*.js'])]
+		.concat(packageLintableSrc(packageUtils.findAllPackages, argv.p)))
+	.pipe(jshint())
+	.pipe(jshint.reporter('jshint-stylish'))
+	.pipe(jshint.reporter('fail'))
+	.pipe(jscs())
+	.pipe(jscs.reporter())
+	.pipe(jscs.reporter('fail'));
 });
 
 /**
