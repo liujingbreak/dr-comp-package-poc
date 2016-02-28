@@ -12,7 +12,6 @@ module.exports = function(file, options) {
 
 	var flush = function() {
 		var self = this;
-		log.info('compress css ' + file + ': ' + !env.config().devMode);
 		var fileConfig = {
 			compress: !env.config().devMode,
 			paths: [],
@@ -37,7 +36,7 @@ module.exports = function(file, options) {
 		return css.replace(/(\W)url\(['"]?assets:\/\/((?:@[^\/]+\/)?[^\/]+)(\/.*?)['"]?\)/g,
 		function(match, preChar, packageName, path) {
 			if (packageName) {
-				log.debug('resolve assets: ' + match.substring(1));
+				log.info('resolve assets: ' + match.substring(1));
 			}
 			return preChar + 'url(' + env.config().staticAssetsURL + '/assets/' +
 			env.packageUtils.parseName(packageName).name + path + ')';

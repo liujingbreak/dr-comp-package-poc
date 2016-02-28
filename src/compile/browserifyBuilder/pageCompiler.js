@@ -11,26 +11,26 @@ var swig = require('swig');
 var log = require('@dr/logger').getLogger('browserifyBuilder.pageCompiller');
 
 exports.stream = function() {
-	var packageInfo, bundleDepsGraph, config, revisionMeta;
+	var buildInfo;
 
 	return through.obj(function(param, encoding, cb) {
-		log.info('------- compiling entry pages ---------');
-		packageInfo = param.packageInfo;
-		bundleDepsGraph = param.bundleDepsGraph;
-		config = param.config;
-		revisionMeta = param.revisionMeta;
+		log.info('------- compiling changed entry pages ---------');
+		log.info('(Only the pages which depend on any changed bundles will be replaced)');
+		buildInfo = param;
 		cb();
 	}, function(cb) {
 		var promises = [];
 		var self = this;
-		_.forOwn(packageInfo.entryPageMap, function(instance, name) {
-			log.info('Entry page package ' + name);
-			log.debug(instance.entryHtml);
+		_.forOwn(buildInfo.packageInfo.entryPageMap, function(instance, name) {
+			if (!needUpdateEntryPage(buildInfo.builtBundles, buildInfo.bundleDepsGraph[name])) {
+				return;
+			}
+			log.info('Entry page replaced: ' + instance.entryHtml);
 
 			var prom = Q.nfcall(fs.readFile, instance.entryHtml, 'utf-8')
 			.then(function(content) {
 				var $ = cheerio.load(content);
-				injectElements($, bundleDepsGraph[name], instance, config, revisionMeta);
+				injectElements($, buildInfo.bundleDepsGraph[name], instance, buildInfo.config, buildInfo.revisionMeta);
 				var hackedHtml = $.html();
 
 				var htmlName = Path.basename(instance.entryHtml);
@@ -58,22 +58,18 @@ exports.stream = function() {
 	});
 };
 
+function needUpdateEntryPage(builtBundles, bundleSet) {
+	return builtBundles.some(function(bundleName) {
+		return {}.hasOwnProperty.call(bundleSet, bundleName);
+	});
+}
+
 var apiBootstrapTpl = swig.compileFile(Path.join(__dirname, 'templates', 'entryPageBootstrap.js.swig'), {autoescape: false});
 
 function injectElements($, bundleSet, pkInstance, config, revisionMeta) {
 	var body = $('body');
 	var head = $('head');
 	_injectElementsByBundle($, head, body, 'labjs', config, revisionMeta);
-	// if (bundleSet.core) {
-	// 	// core is always the first bundle to be loaded
-	// 	_injectElementsByBundle($, head, body, 'core', config, revisionMeta);
-	// }
-	// _.forOwn(bundleSet, function(v, bundleName) {
-	// 	if (bundleName === 'core') {
-	// 		return;
-	// 	}
-	// 	_injectElementsByBundle($, head, body, bundleName, config, revisionMeta);
-	// });
 	delete bundleSet.labjs; // make sure there is no duplicate labjs bundle
 	var jsLinks = [];
 	_.forOwn(bundleSet, function(v, bundleName) {

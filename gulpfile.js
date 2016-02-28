@@ -22,6 +22,7 @@ var findPackageJson = require('./lib/gulp/findPackageJson');
 var rwPackageJson = require('./lib/gulp/rwPackageJson');
 var packageLintableSrc = require('./lib/gulp/packageLintableSrc');
 var packageUtils = require('./lib/packageMgr/packageUtils');
+var watchPackages = require('./lib/gulp/watchPackages');
 var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package]')
 	.command('build', 'build everything from scratch, including install-recipe, link, npm install, compile')
 	.command('clean', 'cleanup build environment like dist folder, cache, recipe package.json, even those private modules in node_modules folder')
@@ -31,6 +32,8 @@ var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package
 	.alias('b', 'bundle')
 	.describe('p', '<package-short-name> if used with command `lint`, it will only check specific package')
 	.alias('p', 'package')
+	.describe('only-js', 'only rebuild JS bundles')
+	.describe('only-css', 'only rebuild CSS bundles')
 	.demand(1)
 	.help('h').alias('h', 'help')
 	.argv;
@@ -169,6 +172,9 @@ gulp.task('compile', function() {
 	return Q.all(jobs);
 });
 
+gulp.task('watch', function() {
+	watchPackages(argv.p);
+});
 /**
  * TODO: bump dependencies version
  */

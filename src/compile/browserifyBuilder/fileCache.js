@@ -1,5 +1,6 @@
 /* global -Promise */
 var fs = require('fs');
+var Path = require('path');
 var Promise = require('bluebird');
 var _ = require('lodash');
 var log = require('@dr/logger').getLogger('browserifyBuilder.fileCache');
@@ -8,42 +9,54 @@ var writeFileAsync = Promise.promisify(fs.writeFile, {context: fs});
 
 module.exports = SimpleCache;
 
+/**
+ * This module helps builder.js to incrementally analyse browserify dependency graph
+ */
 function SimpleCache(tempDir) {
+	this.dir = tempDir;
 	this.fileJsonCache = {};
 }
 
-SimpleCache.prototype.mergeWithJsonCache = function(filePath, override) {
-	var prom;
+SimpleCache.prototype.mergeWithJsonCache = function(fileName, override) {
 	var self = this;
-	var cache = this.fileJsonCache[filePath];
+	var cache = this.fileJsonCache[fileName];
 	if (cache) {
-		newJson = _.assign(cache, override);
-		this.fileJsonCache[filePath] = newJson;
+		var newJson = _.assign(cache, override);
+		this.fileJsonCache[fileName] = newJson;
 		return Promise.resolve(newJson);
-	}
-
-	if (fs.existsSync(filePath)) {
-		prom = readFileAsync(filePath, 'utf8').then(function(data) {
-			log.info('Reading dependency info cache from ' + filePath);
-			var newJson = _.assign(JSON.parse(data), override);
+	} else {
+		log.debug('no memory cache available');
+		return this.loadFromFile(fileName).then(function(cached) {
+			var newJson = _.assign(cached, override);
+			self.fileJsonCache[fileName] = newJson;
 			return newJson;
 		});
-	} else {
-		var newJson = override;
-		prom = Promise.resolve(override);
 	}
+};
 
-	return prom.then(function(newJson) {
-		self.fileJsonCache[filePath] = newJson;
-		return newJson;
-	});
+SimpleCache.prototype.loadFromFile = function(fileName) {
+	var filePath = Path.resolve(this.dir, fileName);
+	var self = this;
+	if (fs.existsSync(filePath)) {
+		return readFileAsync(filePath, 'utf8').then(function(data) {
+			log.debug('Read dependency information from cache file: ' + filePath);
+			var cached = JSON.parse(data);
+			self.fileJsonCache[fileName] = cached;
+			return cached;
+		});
+	} else {
+		log.debug('Dependency information cache file doesn\'t exist: ' + filePath);
+		var cached = this.fileJsonCache[fileName] = {};
+		return Promise.resolve(cached);
+	}
 };
 
 SimpleCache.prototype.tailDown = function() {
 	var proms = [];
+	var self = this;
 	_.forOwn(this.fileJsonCache, function(cache, file) {
+		file = Path.resolve(self.dir, file);
 		log.debug('writing to cache ' + file);
-		//log.debug(cache);
 		proms.push(
 			writeFileAsync(file, JSON.stringify(cache, null, '\t')));
 	});

@@ -56,7 +56,6 @@ module.exports = function(_packageUtils, _config, argv) {
 	var packageInfo = walkPackages();
 	log.info('------- building bundles ---------');
 	var depsMap = {};
-	var proms = [];
 	var bundleStream;
 	var bundleNames = _.keys(packageInfo.bundleMap);
 
@@ -74,25 +73,25 @@ module.exports = function(_packageUtils, _config, argv) {
 	if (argv['only-css']) {
 		buildJS = false;
 	}
-	bundleNames.forEach(function(bundle) {
-		log.info('build bundle: ' + bundle);
-		var prom = buildBundle(packageInfo.bundleMap[bundle],
-			bundle, Path.join(config().destDir, 'static'), depsMap);
-		proms.push(prom);
-	});
 
-	return Promise.all(proms)
-	.then(function(resolveds) { return new Promise(function(resolve, reject) {
+	var cssPromises = [];
+	var jsStreams = [];
+	fileCache.loadFromFile('depsMap.json').then(function(cachedDepsMap) {
+		depsMap = cachedDepsMap;
+		bundleNames.forEach(function(bundle) {
+			log.info(bundle);
+			var buildObj = buildBundle(packageInfo.bundleMap[bundle],
+				bundle, Path.join(config().destDir, 'static'), depsMap);
+			cssPromises.push(buildObj.cssPromise);
+			jsStreams.push(buildObj.jsStream);
+		});
+		return Promise.all(cssPromises);
+	}).then(function(cssBundlePaths) {
+		return new Promise(function(resolve, reject) {
 			log.debug('bundles stream created');
-
-			var cssBundlePaths = _.map(resolveds, function(resolved) {
-				return resolved[1];
-			});
-			var outStreams = _.map(resolveds, function(resolved) {
-				return resolved[0];
-			});
+			var outStreams;
 			if (buildCss) {
-				outStreams = outStreams.concat(gulp.src(cssBundlePaths, {base: Path.resolve('dist/static')}));
+				outStreams = jsStreams.concat(gulp.src(cssBundlePaths, {base: Path.resolve('dist/static')}));
 			}
 			bundleStream = es.merge(outStreams).on('error', function(er) {
 				log.error(er);
@@ -110,11 +109,11 @@ module.exports = function(_packageUtils, _config, argv) {
 					var depsGraph = createEntryDepsData(depsMap, packageInfo.entryPageMap);
 					printModuleDependencyGraph(depsGraph);
 					// [ Entry page package A ]--depends on--> ( bundle X, Y )
-					log.debug(_.keys(packageInfo.moduleMap));
 					var bundleDepsGraph = createBundleDependencyGraph(depsGraph, packageInfo.moduleMap);
 					pageCompilerParam.bundleDepsGraph = bundleDepsGraph;
 					pageCompilerParam.config = config;
 					pageCompilerParam.packageInfo = packageInfo;
+					pageCompilerParam.builtBundles = bundleNames;
 					this.push(pageCompilerParam);
 					callback();
 				}))
@@ -175,7 +174,7 @@ module.exports = function(_packageUtils, _config, argv) {
 	}
 
 	function createBundleDependencyGraph(packageDepsGraph, moduleMap) {
-		log.info('------- Bundle dependency ---------');
+		log.info('------- Entry package -> bundle dependency ---------');
 
 		var bundleDepsGraph = {};
 		_.forOwn(packageDepsGraph, function(deps, moduleName) {
@@ -228,7 +227,7 @@ module.exports = function(_packageUtils, _config, argv) {
 	}
 
 	function printModuleDependencyGraph(packageDeps) {
-		log.info('------- Package dependency ----------');
+		log.info('------- Entry package -> package dependency ----------');
 		_.forOwn(packageDeps, function(deps, moduleName) {
 			log.info(moduleName);
 
@@ -414,12 +413,7 @@ module.exports = function(_packageUtils, _config, argv) {
 		// }));
 		//b.add(listStream, {file: entryFile});
 		b.add(Path.join(destDir, jsBundleEntryMaker.bundleFileName));
-		// _.each(modules, function(moduleInfo) {
-		// 	if (moduleInfo.isEntryJS) {
-		// 		log.debug(moduleInfo.longName + ' is entry');
-		// 		b.add(moduleInfo.longName);
-		// 	}
-		// });
+
 
 		modules.forEach(function(module) {
 			b.require(module.longName);
@@ -440,7 +434,6 @@ module.exports = function(_packageUtils, _config, argv) {
 
 		var cssPromise = buildCssBundle(b, bundle, destDir);
 
-		//var deps = [];
 		// draw a cross bundles dependency map
 		var rootPath = config().rootPath;
 		b.pipeline.get('deps').push(through.obj(function(chunk, encoding, callback) {
@@ -453,28 +446,20 @@ module.exports = function(_packageUtils, _config, argv) {
 			});
 			depsMap[shortFilePath] = deps;
 			callback(null, chunk);
-		}, function(next) {
+		}/*, function flush(next) {
 			fileCache.mergeWithJsonCache(Path.join(config().destDir, 'depsMap.json'), depsMap)
 			.then(function(newDepsMap) {
 				_.assign(depsMap, newDepsMap);
 				next();
 			});
 			next();
-		}));
+		}*/));
 
-		// b.on('file', function(file, id) {
-		// 	if (_.startsWith(id, '.')) {
-		// 		log.debug('watchify file:' + id);
-		// 	}
-		// });
 		var jsStream = b.bundle()
 				.on('error', logError)
 			.pipe(source('js/' + bundle + '.js'))
 			.pipe(buffer())
 			.pipe(gulp.dest(destDir))
-			// .on('end', function() {
-			// 	log.trace(bundle + '\'s deps: ' + JSON.stringify(deps, null, '  '));
-			// })
 			.pipe(sourcemaps.init({
 				loadMaps: true
 			}))
@@ -483,16 +468,18 @@ module.exports = function(_packageUtils, _config, argv) {
 				.pipe(sourcemaps.write('./'))
 			.pipe(size({title: bundle}))
 			.on('error', logError);
-		return Promise.all([
-			jsStream, cssPromise
-		]);
+
+		return {
+			cssPromise: cssPromise,
+			jsStream: jsStream
+		};
 	}
 
 	function revisionBundleFile(bundleStream) {
-		//var def = Q.defer();
 		var revAll = new RevAll();
 		var revFilter = gulpFilter(['**/*.js', '**/*.css'], {restore: true});
-		return bundleStream.pipe(revFilter)
+		return bundleStream
+			.pipe(revFilter)
 			.pipe(revAll.revision())
 			.pipe(revFilter.restore)
 			.pipe(gulp.dest(Path.join(config().destDir, 'static')))
@@ -529,6 +516,7 @@ module.exports = function(_packageUtils, _config, argv) {
 		});
 
 		parce.on('done', function() {
+			log.debug('CSS Bundle built: ' + fileName);
 			resolve(fileName);
 		});
 

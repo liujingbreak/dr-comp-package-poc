@@ -1,6 +1,10 @@
 {
 	"appenders": [{
-		"type": "console",
-		"level": "INFO"
-	}]
+		"type": "console"
+	}],
+	"levels": {
+		"[all]": "DEBUG",
+		"browserifyBuilder.builder": "INFO",
+		"browserifyBuilder.pageCompiller": "TRACE"
+	}
 }
