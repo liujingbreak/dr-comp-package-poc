@@ -1,6 +1,7 @@
 /* global TweenMax, Power2, TimelineLite */
 require('@dr/gsap');
 var _ = require('lodash');
+var buildScenes = require('./buildScenes');
 
 module.exports = function(compileProvider) {
 	compileProvider.directive('drTextAnim', drTextAnim);
@@ -12,8 +13,8 @@ function drScrollableAnim(ScrollableAnim, $timeout, $window) {
 	return {
 		scope: false,
 		link: function(scope, iElement, iAttrs, controller) {
-			var scrollControl = new ScrollableAnim(iElement, 18);
-			scope[iAttrs.drScrollableAnim] = scrollControl;
+			var scrollControl = new ScrollableAnim(iElement, 16);
+			_.set(scope, iAttrs.drScrollableAnim, scrollControl);
 			var slogon = iElement.find('.screen-1').find('.center-box');
 
 			$timeout(function() {
@@ -26,7 +27,6 @@ function drScrollableAnim(ScrollableAnim, $timeout, $window) {
 				scrollControl.destory();
 				iElement.scrollTop(0);
 				scrollControl = new ScrollableAnim(iElement, 18);
-				scope[iAttrs.drScrollableAnim] = scrollControl;
 				buildScenes(scrollControl, iElement, scope);
 				scope.$apply();
 			}, 500);
@@ -42,65 +42,7 @@ function drScrollableAnim(ScrollableAnim, $timeout, $window) {
 }
 drScrollableAnim.$inject = ['ScrollableAnim', '$timeout', '$window'];
 
-function buildScenes(scrollControl, iElement, scope) {
-	var slogonPinned = false;
-	var slogon = iElement.find('.screen-1').find('.center-box');
-	slogon.find('.invisible').removeClass('invisible');
-	scrollControl.scene({
-		begin: slogon.offset().top - iElement.offset().top,
-		duration: 10,
-		startup: function(reverse, offset) {
-			if (reverse && slogonPinned) {
-				slogonPinned = false;
-				scrollControl.unpin(slogon);
-				return;
-			}
-			if (slogonPinned) {
-				return;
-			}
-			slogonPinned = true;
-			scrollControl.pin(slogon, iElement.offset().top);
-		}
-	});
 
-	var screen2 = iElement.find('.screen-2');
-
-	scrollControl.scene({
-		triggerElement: screen2,
-		timeline: function(timeline) {
-			timeline.staggerTo(
-				_(slogon.children().eq(0).children()).reverse().value(), 0.4,
-				{className: '+=invisible', yPercent: 500, ease: 'Power2.easeOut'},
-				0.016);
-			timeline.to(slogon.children().eq(0), 0.6, {height: 0, margin: 0, ease: 'Power2.easeIn'});
-		},
-		teardown: function(reverse, offset) {
-			// if (!reverse) {
-			// 	slogon.addClass('white');
-			// } else {
-			// 	slogon.removeClass('white');
-			// }
-		}
-	});
-
-	scrollControl.scene({
-		triggerElement: '.screen-2',
-		delayPercent: 50,
-		startup: function(reverse, offset) {
-			if (!reverse) {
-				scope.mainVm.showScreen2Text = true;
-				scope.$apply();
-			}
-		}
-	});
-
-	scrollControl.scene({
-		triggerElement: '.screen-3',
-		timeline: function(timeline) {
-			timeline.to(slogon, 1, {yPercent: -100, ease: 'Linear.easeNone'});
-		}
-	});
-}
 
 function drTextAnim($timeout) {
 	return {

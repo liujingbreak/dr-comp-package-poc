@@ -32,37 +32,38 @@ module.exports = {
 					timelinePos: '@',
 					duration: '@'
 				},
-				compile: function(tElement, tAttrs, transclude) {
-					return function(scope, iElement, iAttrs, controller) {
-						var timeline;
-						//iElement.addClass('dr-text-anim-hide');
-						splitTextLink(scope, iElement, iAttrs, controller);
-						if (scope.timeline) {
-							timeline = scope.timeline;
-						} else {
-							timeline = new TimelineLite({paused: true});
-						}
-						timeline.staggerFromTo(iElement[0].children, parseFloat(scope.duration),
-							{rotation: 30, yPercent: 90, visibility: 'visible', autoAlpha: 0},
-							{rotation: 0, autoAlpha: 1, yPercent: 0, ease: 'Back.easeOut',
-								onComplete: function() {
-									iElement.children().css('opacity', '');
-									if (scope.onComplete) {
-										scope.onComplete();
-									}
-								}},
-							0.06,
-							scope.timelinePos ? scope.timelinePos : '+=0'
-						);
-
-						if (iAttrs.drSplitTextShow) {
-							scope.$watch('drSplitTextShow', function(newVal) {
-								if (newVal) {
-									timeline.restart();
+				link: function(scope, iElement, iAttrs, controller) {
+					var timeline;
+					//iElement.addClass('dr-text-anim-hide');
+					splitTextLink(scope, iElement, iAttrs, controller);
+					if (scope.timeline) {
+						timeline = scope.timeline;
+					} else {
+						timeline = new TimelineLite({paused: true});
+					}
+					timeline.staggerFromTo(iElement[0].children, parseFloat(scope.duration),
+						{rotation: 30, yPercent: 90, visibility: 'visible', autoAlpha: 0},
+						{rotation: 0, autoAlpha: 1, yPercent: 0, ease: 'Back.easeOut',
+							onComplete: function() {
+								iElement.children().css('opacity', '');
+								scope.drSplitTextShow = false;
+								scope.$apply();
+								if (scope.onComplete) {
+									scope.onComplete();
 								}
-							});
-						}
-					};
+							}
+						},
+						0.06,
+						scope.timelinePos ? scope.timelinePos : '+=0'
+					);
+
+					if (iAttrs.drSplitTextShow) {
+						scope.$watch('drSplitTextShow', function(newVal) {
+							if (newVal) {
+								timeline.restart();
+							}
+						});
+					}
 				}
 			};
 		});
