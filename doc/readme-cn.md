@@ -37,6 +37,7 @@ Publish 所有的package到私有NPM registry后 (Sinopia)
 - 一个友好一点package 会多一个`README.md`
 
 ### @dr Package
+> `@dr` 是package的私有scope name, 我们暂时用它作为公司平台的scope name用于区分3rd-party package, 和防止误publish到NPM registry。
 
 @dr 的package 不仅是一个Node package, 而且可以包含浏览器端的资源
 - Node JS 代码
@@ -59,11 +60,15 @@ Publish 所有的package到私有NPM registry后 (Sinopia)
 ├─ browser/
 |		├─ js
 |		├─ less
-|		└─  views (html file)
+|		└─ views 	(html pages/templates)
 |		
-├─ server/   (NodeJs file)
-├─ assets/  （images...)
-├─ spec/	(test file)
+├─ server/
+|		├─ js 		(NodeJs file)
+|		└─ views 	(server rendered pages/templates)
+|
+├─ assets/  		(images...)
+├─ spec/			(test file)
+├─ README.md
 └─ package.json
 ```
 
@@ -95,6 +100,9 @@ Publish 所有的package到私有NPM registry后 (Sinopia)
 }
 
 ```
+关于package.json 的具体属性介绍，请阅读
+[Package.json specification](package-spec-cn.md)
+
 
 ### 平台
 
@@ -149,7 +157,7 @@ e.g.
 }
 ```
 
-你不需要手工编写recipe package.json, 执行`gulp link`会为你生成。
+不需要手工编写recipe package.json, 执行`gulp link`会为你生成。
 
 #### 依赖关联
 
@@ -179,7 +187,7 @@ include 其他package的文件，例如@dr/doc-less-var
 @import "npm://@dr/doc-less-var";
 ```
 
-#### Bundle
+#### Bundle 概念和配置
 bundle 概念即是Browserify的bundle, 在Webpack里被称为chunk.
 不同的package可以被组合到一个bundle文件中，以加快browser的下载.
 
