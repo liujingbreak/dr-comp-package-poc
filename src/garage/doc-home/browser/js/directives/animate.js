@@ -1,4 +1,4 @@
-/* global TweenMax, Linear, Power2, TimelineLite */
+/* global TweenMax, Power2, TimelineLite */
 require('@dr/gsap');
 var _ = require('lodash');
 
@@ -69,10 +69,10 @@ function buildScenes(scrollControl, iElement, scope) {
 		triggerElement: screen2,
 		timeline: function(timeline) {
 			timeline.staggerTo(
-				_(slogon.children().eq(0).children()).reverse().value(), 0.3,
-				{className: '+=invisible', ease: Linear.easeNone},
-				0.02);
-			timeline.to(slogon.children().eq(0), 0.6, {height: 0, margin: 0, ease: 'Power2.easeOut'});
+				_(slogon.children().eq(0).children()).reverse().value(), 0.4,
+				{className: '+=invisible', yPercent: 500, ease: 'Power2.easeOut'},
+				0.016);
+			timeline.to(slogon.children().eq(0), 0.6, {height: 0, margin: 0, ease: 'Power2.easeIn'});
 		},
 		teardown: function(reverse, offset) {
 			// if (!reverse) {

@@ -17,7 +17,7 @@ TBD.
 
 ### The infrastructure overview
 
-![overview digram](fehouse-infra.svg)
+![overview digram](fehouse-infra.png)
 
 图中每一个矩形都是一个NPM package.
 
@@ -35,6 +35,7 @@ Publish 所有的package到私有NPM registry后 (Sinopia)
 ### Node Package
 - 一个最简单的package 是一个带有`package.json` 文件的目录。
 - 一个友好一点package 会多一个`README.md`
+
 ### @dr Package
 
 @dr 的package 不仅是一个Node package, 而且可以包含浏览器端的资源
@@ -100,9 +101,9 @@ Publish 所有的package到私有NPM registry后 (Sinopia)
 #### 3rd-party library
 Nothing surprising
 
-![nodejs logo](node-logo.png)
-![browserify logo](browserify-logo.png)
-![Gulp](gulp-logo.png)
+<img src="node-logo.png" alt="nodejs logo" style="width: 200px;"/>
+<img src="browserify-logo.png" alt="nodejs logo" style="width: 200px;"/>
+<img src="gulp-logo.png" alt="nodejs logo" style="width: 200px;"/>
 &
 **Parcelify**, **LABjs**
 
