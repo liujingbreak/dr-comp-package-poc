@@ -14,9 +14,9 @@ var fs = require('fs');
 var Path = require('path');
 
 module.exports = {
-	activate: function(api) {
+	activate: function(api, apiPrototype) {
 		var app = express();
-		setupApi(api);
+		setupApi(api, apiPrototype);
 		api.eventBus.on('packagesActivated', function(packageCache) {
 			create(app, api.config(), packageCache);
 			api.eventBus.emit('expressStarted', app);

@@ -43,9 +43,6 @@ function buildScenes(scrollControl, iElement, scope) {
 					_(slogon.children().eq(0).children()).reverse().value(), 1,
 					{className: '+=invisible', y: 400, rotation: 90,  ease: 'Power2.easeIn'},
 					0.07);
-			} else {
-				scope.mainVm.animStart = true;
-				scope.$apply();
 			}
 		}
 	});

@@ -28,6 +28,8 @@ var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package
 	.command('clean', 'cleanup build environment like dist folder, cache, recipe package.json, even those private modules in node_modules folder')
 	.command('compile', 'compile static stuff like JS, less file into bundles, build command calls this command, depends on `gulp link`')
 	.command('lint', 'source code style check')
+	.command('install-recipe', 'link newly changed package.json files to recipe folder and `npm install` them, this makes sure all dependencies being installed')
+	.command('link', 'link newly changed package.json files to recipe folder')
 	.describe('b', '<bundle-name> if used with command `compile` or `build`, it will only compile specific bundle, which is more efficient')
 	.alias('b', 'bundle')
 	.describe('p', '<package-short-name> if used with command `lint`, it will only check specific package')

@@ -65,3 +65,6 @@ Package.json的一些特殊属性说明
 	```
 - `dr.noLint`
 	`gulp lint`不会对当前package check code style
+
+- `dr.type`
+	当value是"core"是，平台node server启动时会先加载当前的package，执行module.exports.activate(), 这样这个package 就是API provider可以monkey patch new API属性到api对象。

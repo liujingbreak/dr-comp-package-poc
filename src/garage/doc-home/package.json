@@ -10,6 +10,9 @@
 	  "bundle": "home",
 	  "entryPage": "index.html"
   },
+  "dependencies": {
+  	"markdown": "~0.5.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

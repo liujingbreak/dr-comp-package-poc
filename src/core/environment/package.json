@@ -5,7 +5,8 @@
   "main": "index.js",
   "browser": "index.js",
   "dr": {
-	  "bundle": "core"
+	  "bundle": "core",
+	  "type": "core"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

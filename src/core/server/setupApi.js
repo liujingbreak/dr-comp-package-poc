@@ -32,9 +32,7 @@ module.exports.createPackageDefinedRouters = function(app) {
 	app.use(revertRenderFunctionForError);//important
 };
 
-function setupApi(apiInstance) {
-	var apiPrototype = apiInstance.constructor.prototype;
-
+function setupApi(apiInstance, apiPrototype) {
 	/**
 	 * setup a router under package context path
 	 * same as app.use('/<package-path>', router);

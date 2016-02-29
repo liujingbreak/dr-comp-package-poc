@@ -5,6 +5,7 @@ var env = {
 
 	activate: function(api) {
 		env.config = api.config;
+		env.api = api;
 	},
 
 	/**
@@ -18,8 +19,6 @@ var env = {
 
 if (process.browser) {
 	env.api =  new (require('./browser-api'))();
-} else {
-	env.api = null; // TODO: nodeAPI
 }
 
 module.exports = env;

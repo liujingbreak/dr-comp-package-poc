@@ -7,7 +7,8 @@ Write a simple package
 -------------------
 Firstly, make sure server can run.
 Go to root folder, run:
-```
+
+```shell
 npm install
 gulp build
 npm start
