@@ -3,9 +3,10 @@ var env = {
 		return env.config;
 	},
 
-	activate: function(api) {
+	activate: function(api, apiPrototype) {
 		env.config = api.config;
-		env.api = api;
+		env.api = apiPrototype;
+		env.packageUtils = apiPrototype.packageUtils;
 	},
 
 	/**

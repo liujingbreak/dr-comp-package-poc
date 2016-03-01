@@ -1,7 +1,6 @@
 var markdown = require('markdown').markdown;
 var Path = require('path');
 var fs = require('fs');
-var env = require('@dr/environment');
 var _ = require('lodash');
 var log = require('@dr/logger').getLogger('doc-home');
 
@@ -28,14 +27,14 @@ module.exports.activate = function(api) {
 		}
 		res.send(html);
 	});
-};
 
-env.api.packageUtils.findAllPackages(function(name, entryPath, parsedName, json, packagePath) {
-	var path = Path.join(packagePath, 'README.md');
-	if (fs.existsSync(path)) {
-		log.debug('README.md found ' + path);
-		packageReadmeCache[parsedName.name] = {
-			path: path
-		};
-	}
-});
+	api.packageUtils.findAllPackages(function(name, entryPath, parsedName, json, packagePath) {
+		var path = Path.join(packagePath, 'README.md');
+		if (fs.existsSync(path)) {
+			log.debug('README.md found ' + path);
+			packageReadmeCache[parsedName.name] = {
+				path: path
+			};
+		}
+	});
+};
