@@ -1,4 +1,5 @@
-var markdown = require('markdown').markdown;
+var Markdown = require('markdown-it');
+var mk = new Markdown();
 var Path = require('path');
 var fs = require('fs');
 var _ = require('lodash');
@@ -22,7 +23,7 @@ module.exports.activate = function(api) {
 		var html = cache.compiled;
 		if (html === undefined) {
 			var text = fs.readFileSync(cache.path, 'utf8');
-			html = markdown.toHTML(text);
+			html = mk.render(text);
 			cache.compiled = html;
 		}
 		res.send(html);
