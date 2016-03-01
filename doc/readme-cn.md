@@ -11,6 +11,10 @@ Quick Start
 ### 如果你只是使用平台
 TBD.
 
+### 开始写一个简单package
+
+[Package 样例](../src/examples/exampleDrPackage/README.md)
+
 简介
 ---------
 > 一切都是NPM package！
@@ -244,3 +248,38 @@ var devMode = env.config().devMode;
 
 ##### browser package 读取平台配置
 TBD. 没有实现
+
+
+##### Gulp usage ######
+- 执行gulp 查看帮助
+- 初次编译 `gulp build`
+- 每次修改过package后， `gulp compile [-b <bundle/packageName>]`
+- 改动过 package.json, 新增减package，需要`gulp link`
+- 清理环境 `gulp clean`
+
+```
+Usage: gulp <command> [-b <bundle>] [-p package]
+
+Commands:
+  build           build everything from scratch, including install-recipe, link,
+                  npm install, compile
+  clean           cleanup build environment like dist folder, cache, recipe
+                  package.json, even those private modules in node_modules
+                  folder
+  compile         compile static stuff like JS, less file into bundles, build
+                  command calls this command, depends on `gulp link`
+  lint            source code style check
+  install-recipe  link newly changed package.json files to recipe folder and
+                  `npm install` them, this makes sure all dependencies being
+                  installed
+  link            link newly changed package.json files to recipe folder
+
+Options:
+  -b, --bundle   <bundle-name> if used with command `compile` or `build`, it
+                 will only compile specific bundle, which is more efficient
+  -p, --package  <package-short-name> if used with command `lint`, it will only
+                 check specific package
+  --only-js      only rebuild JS bundles
+  --only-css     only rebuild CSS bundles
+  -h, --help     Show help                                             [boolean]
+```
