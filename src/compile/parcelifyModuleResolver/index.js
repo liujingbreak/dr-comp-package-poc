@@ -38,8 +38,10 @@ module.exports = function(file, options) {
 			if (packageName) {
 				log.info('resolve assets: ' + match.substring(1));
 			}
-			return preChar + 'url(' + env.config().staticAssetsURL + '/assets/' +
+			var resolvedTo = preChar + 'url(' + env.config().staticAssetsURL + '/assets/' +
 			env.packageUtils.parseName(packageName).name + path + ')';
+			log.debug('-> ' + resolvedTo);
+			return resolvedTo;
 		});
 	}
 

@@ -1,5 +1,4 @@
-var Markdown = require('markdown-it');
-var mk = new Markdown();
+var markdownViewer = require('@dr/markdown-viewer');
 var Path = require('path');
 var fs = require('fs');
 var _ = require('lodash');
@@ -9,10 +8,10 @@ var packageReadmeCache = {};
 
 module.exports.activate = function(api) {
 	api.router().get('/', function(req, res) {
-		res.redirect('/' + api.packageName + '/index.html');
+		res.redirect(api.assetsUrl('/index.html'));
 	});
 
-	api.router().get('/readmes/:name', function(req, res) {
+	api.router().get('/rest/readmes/:name', function(req, res) {
 		var name = req.params.name;
 		var cache = packageReadmeCache[name];
 		if (!cache) {
@@ -20,12 +19,7 @@ module.exports.activate = function(api) {
 				_.keys(packageReadmeCache).join('<br/>'));
 			return;
 		}
-		var html = cache.compiled;
-		if (html === undefined) {
-			var text = fs.readFileSync(cache.path, 'utf8');
-			html = mk.render(text);
-			cache.compiled = html;
-		}
+		var html = markdownViewer(cache.path);
 		res.send(html);
 	});
 

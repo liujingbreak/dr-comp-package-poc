@@ -23,7 +23,8 @@ var rwPackageJson = require('./lib/gulp/rwPackageJson');
 var packageLintableSrc = require('./lib/gulp/packageLintableSrc');
 var packageUtils = require('./lib/packageMgr/packageUtils');
 var watchPackages = require('./lib/gulp/watchPackages');
-var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package]')
+var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package]\n' +
+	'$0 link [-r <recipe folder>] [-d <src folder>]')
 	.command('build', 'build everything from scratch, including install-recipe, link, npm install, compile')
 	.command('clean', 'cleanup build environment like dist folder, cache, recipe package.json, even those private modules in node_modules folder')
 	.command('compile', 'compile static stuff like JS, less file into bundles, build command calls this command, depends on `gulp link`')
@@ -36,6 +37,8 @@ var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package
 	.alias('p', 'package')
 	.describe('only-js', 'only rebuild JS bundles')
 	.describe('only-css', 'only rebuild CSS bundles')
+	.describe('d', '<src foldr> if used with command `link`, it will link packages from specific folder instead of `srcDir` configured in config.yaml')
+	.describe('r', '<recipe foldr> if used with command `link`, it will link packages only to specific recipe folder instead of `recipeFolder` configured in config.yaml')
 	.demand(1)
 	.help('h').alias('h', 'help')
 	.argv;
@@ -139,14 +142,16 @@ gulp.task('lint', function() {
  * link src/ ** /package.json from node_modules folder
  */
 gulp.task('link', function() {
-	return gulp.src(config().srcDir)
+	var srcDir = argv.d ? [].concat(argv.d) : config().srcDir;
+	var recipeDir = argv.r ? argv.r : config().recipeFolder;
+	return gulp.src(srcDir)
 		.pipe(findPackageJson())
 		.on('error', gutil.log)
 		.pipe(rwPackageJson.linkPkJson('node_modules'))
 		.on('error', gutil.log)
 		.pipe(gulp.dest('node_modules'))
 		.on('error', gutil.log)
-		.pipe(rwPackageJson.addDependency(Path.resolve(config().rootPath, config().recipeFolder, 'package.json')))
+		.pipe(rwPackageJson.addDependency(Path.resolve(config().rootPath, recipeDir, 'package.json')))
 		.pipe(gulp.dest('.'));
 });
 

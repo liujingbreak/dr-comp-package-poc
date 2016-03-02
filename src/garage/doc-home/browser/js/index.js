@@ -1,5 +1,6 @@
 require('@dr/angularjs');
 require('@dr/doc-ui');
+require('@dr/markdown-viewer');
 
 var textAnim = require('@dr/text-anim-ng');
 
@@ -16,13 +17,14 @@ pocHome.config(['$routeProvider', '$controllerProvider', '$compileProvider', '$f
 		pocHome.filterProvider     = $filterProvider;
 		pocHome.provide            = $provide;
 		textAnim.register(pocHome.compileProvider);
+		require('./routes')($routeProvider);
 	}]);
 pocHome
 .run(['$templateCache', function($templateCache) {
 		$templateCache.put('screens.html', require('../views/screens.html'));
 	}]);
-
 require('./controllers/mainController')(pocHome);
+require('./controllers/introController')(pocHome);
 require('./controllers/AsideController')(pocHome);
 require('./directives/animate')(pocHome);
 require('./service/scrollableAnim')(pocHome);

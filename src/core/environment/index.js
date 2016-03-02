@@ -1,8 +1,4 @@
 var env = {
-	config: function() {
-		return env.config;
-	},
-
 	activate: function(api, apiPrototype) {
 		env.config = api.config;
 		env.api = apiPrototype;
@@ -17,9 +13,4 @@ var env = {
 		env.packageUtils = packageUtils;
 	}
 };
-
-if (process.browser) {
-	env.api =  new (require('./browser-api'))();
-}
-
 module.exports = env;

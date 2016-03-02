@@ -20,6 +20,8 @@ devMode: false
 # If we have public CDN domain name like "http://cdn.dianrong.com"
 staticAssetsURL: ""
 
+serverURL: ""
+
 # Manually set bundle file name for 3rd-party libaraies, otherwise browserify
 # will bundle them with every package that depends on them.
 vendorBundleMap:

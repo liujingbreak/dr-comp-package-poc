@@ -57,6 +57,7 @@
     "yui"           : false,
 
     "globals"       : {
+		"__api": true,
 	    "jasmine": true,
 	    "describe": true,
 	    "it": true,

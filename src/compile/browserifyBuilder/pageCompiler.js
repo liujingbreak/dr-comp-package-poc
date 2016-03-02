@@ -91,7 +91,10 @@ function injectElements($, bundleSet, pkInstance, config, revisionMeta) {
 	body.append($('<script>').html(apiBootstrapTpl({
 		jsLinks: jsLinks,
 		entryPackage: pkInstance.longName,
-		debug: !!config().devMode
+		debug: !!config().devMode,
+		staticAssetsURL: JSON.stringify(config().staticAssetsURL),
+		serverURL: JSON.stringify(config().serverURL),
+		packageContextPathMapping: JSON.stringify(config().packageContextPathMapping)
 	})));
 }
 

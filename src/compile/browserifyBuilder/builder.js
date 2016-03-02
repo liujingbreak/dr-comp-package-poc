@@ -270,10 +270,10 @@ module.exports = function(_packageUtils, _config, argv) {
 		/**
 		 * @typedef PackageInfo
 		 * @type {Object}
-		 * @property {packageModuleInstance[]} allModules
-		 * @property {Object.<string, packageModuleInstance>} moduleMap key is module name
-		 * @property {Object.<string, packageModuleInstance[]>} bundleMap key is bundle name
-		 * @property {Object.<string, packageModuleInstance[]>} entryPageMap key is module name
+		 * @property {packageBrowserInstance[]} allModules
+		 * @property {Object.<string, packageBrowserInstance>} moduleMap key is module name
+		 * @property {Object.<string, packageBrowserInstance[]>} bundleMap key is bundle name
+		 * @property {Object.<string, packageBrowserInstance[]>} entryPageMap key is module name
 		 */
 		var info = {
 			allModules: null,
@@ -397,7 +397,7 @@ module.exports = function(_packageUtils, _config, argv) {
 			log.info('\t├─ ' + moduleInfo.longName);
 			mIdx++;
 		});
-		jsBundleEntryMaker = helper.JsBundleEntryMaker(bundle);
+		jsBundleEntryMaker = helper.JsBundleEntryMaker(bundle, modules);
 		var listFile = jsBundleEntryMaker.createPackageListFile(modules);
 		mkdirp.sync(destDir);
 		var entryFile = Path.join(destDir, jsBundleEntryMaker.bundleFileName);
@@ -419,7 +419,7 @@ module.exports = function(_packageUtils, _config, argv) {
 			b.require(module.longName);
 		});
 		b.transform(htmlTranform);
-		b.transform(jsBundleEntryMaker.jsTranformFactory());
+		b.transform(jsBundleEntryMaker.jsTranformer(modules));
 		excludeModules(packageInfo.allModules, b, _.map(modules, function(module) {return module.longName;}));
 		//browserifyInc(b, {cacheFile: Path.resolve(config().destDir, 'browserify-cache.json')});
 

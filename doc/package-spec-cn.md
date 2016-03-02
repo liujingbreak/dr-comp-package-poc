@@ -30,8 +30,8 @@ Package.json的一些特殊属性说明
 - `style`
 	主LESS文件
 
-- `transformer`
-	目前只有一个值`"@dr/parcelify-module-resolver"`
+- `transforms`
+	目前只有一个值`["@dr/parcelify-module-resolver"]`
 
 - `dr.bundle` (`dr.chunk`)
 	合并打包属浏览器端JS, CSS文件时应该被归类于的bundle文件

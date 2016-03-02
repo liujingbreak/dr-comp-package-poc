@@ -1,6 +1,8 @@
 var through = require('through2');
 var Path = require('path');
 var stream = require('stream');
+var log = require('log4js').getLogger('browserifyBuilder.browserifyHelper');
+var _ = require('lodash');
 var swig = require('swig');
 swig.setDefaults({autoescape: false});
 var config;
@@ -49,10 +51,11 @@ function jsTranform(file) {
 	}
 }
 
-function JsBundleEntryMaker(bundleName) {
+function JsBundleEntryMaker(bundleName, packageBrowserInstances) {
 	if (!(this instanceof JsBundleEntryMaker)) {
-		return new JsBundleEntryMaker(bundleName);
+		return new JsBundleEntryMaker(bundleName, packageBrowserInstances);
 	}
+	this.packages = packageBrowserInstances;
 	this.bundleName = bundleName;
 	this.bundleFileName = bundleName + '_dr_bundle.js';
 	this.bundleFileNameSet = {};
@@ -68,17 +71,29 @@ JsBundleEntryMaker.prototype = {
 	/**
 	 * TODO: use a template engine to generate js file stream
 	 */
-	createPackageListFile: function(packageInstances) {
+	createPackageListFile: function() {
+		var self = this;
 		var bundleFileListFunction = this.entryBundleFileTpl({
+			bundle: self.bundleName,
 			requireFilesFuncName: BOOT_FUNCTION_PREFIX + safeBundleNameOf(this.bundleName),
-			packageInstances: packageInstances
+			packageInstances: self.packages
 		});
 		this.bundleFileNameSet[this.bundleFileName] = true;
 		return bundleFileListFunction;
 	},
 
-	jsTranformFactory: function() {
+	jsTranformer: function() {
 		var self = this;
+		self.packagePath2Name = {};
+		self.packagePathList = [];
+		self.packages.forEach(function(instance, idx) {
+			if (!instance.packagePath) {
+				return;
+			}
+			var path = Path.relative(config().rootPath, instance.packagePath);
+			self.packagePath2Name[path] = instance.longName;
+			self.packagePathList.push(path);
+		});
 		return function(file) {
 			var source = '';
 			var ext = Path.extname(file).toLowerCase();
@@ -89,8 +104,15 @@ JsBundleEntryMaker.prototype = {
 					source += chunk;
 					next();
 				}, function(cb) {
-					//log.trace(basename + ' is injected with API variable');
-					source = apiVariableTpl({name: file, source: source});
+					if (source.indexOf('__api') >= 0) {
+						var name = self._findPackageByFile(file);
+						source = apiVariableTpl({
+							bundle: self.bundleName,
+							packageName: name,
+							source: source,
+							packageNameAvailable: name !== null
+						});
+					}
 					this.push(source);
 					cb();
 				});
@@ -102,6 +124,24 @@ JsBundleEntryMaker.prototype = {
 
 	createPackageListFileStream: function(bundleName, packageInstances) {
 		return str2Stream(this.createPackageListFile.apply(this, arguments));
+	},
+
+	_findPackageByFile: function(file) {
+		var found;
+		file = Path.relative(config().rootPath, file);
+		_.some(this.packagePathList, function(path) {
+			if (_.startsWith(file, path)) {
+				found = path;
+				return true;
+			}
+		});
+		if (!found) {
+			log.debug('file ' + file + ' doesn\'t belong to any of our private packages');
+			return null;
+		} else {
+			return this.packagePath2Name[found];
+		}
+		return found;
 	}
 };
 
