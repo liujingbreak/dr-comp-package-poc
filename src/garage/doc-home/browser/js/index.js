@@ -4,32 +4,35 @@ require('@dr/markdown-viewer');
 
 var textAnim = require('@dr/text-anim-ng');
 
-var pocHome = angular.module('pocHome', ['ngAnimate', 'ngRoute', 'docUi']);
-module.exports = pocHome;
+var docHome = angular.module('docHome', ['ngAnimate', 'ngRoute', 'docUi']);
+module.exports = docHome;
 
-pocHome.config(['$routeProvider', '$controllerProvider', '$compileProvider', '$filterProvider', '$provide',
+docHome.config(['$routeProvider', '$controllerProvider', '$compileProvider', '$filterProvider', '$provide',
 	function($routeProvider, $controllerProvider, $compileProvider, $filterProvider, $provide) {
 		// cache these providers so that we can lazy load angular component later on
 		// see http://ify.io/lazy-loading-in-angularjs/
-		pocHome.controllerProvider = $controllerProvider;
-		pocHome.compileProvider    = $compileProvider;
-		pocHome.routeProvider      = $routeProvider;
-		pocHome.filterProvider     = $filterProvider;
-		pocHome.provide            = $provide;
-		textAnim.register(pocHome.compileProvider);
+		docHome.controllerProvider = $controllerProvider;
+		docHome.compileProvider    = $compileProvider;
+		docHome.routeProvider      = $routeProvider;
+		docHome.filterProvider     = $filterProvider;
+		docHome.provide            = $provide;
+		textAnim.register(docHome.compileProvider);
 		require('./routes')($routeProvider);
 	}]);
-pocHome
+docHome
 .run(['$templateCache', function($templateCache) {
 		$templateCache.put('screens.html', require('../views/screens.html'));
 	}]);
-require('./controllers/mainController')(pocHome);
-require('./controllers/introController')(pocHome);
-require('./controllers/AsideController')(pocHome);
-require('./directives/animate')(pocHome);
-require('./service/scrollableAnim')(pocHome);
-require('./directives/showOnReady')(pocHome);
+require('./controllers/mainController')(docHome);
+require('./controllers/introController')(docHome);
+require('./controllers/AsideController')(docHome);
+require('./controllers/DocController')(docHome);
+require('./directives/animate')(docHome);
+require('./directives/menuAside')(docHome);
+require('./directives/docHome')(docHome);
+require('./directives/showOnReady')(docHome);
+require('./service/scrollableAnim')(docHome);
 
 angular.element(document).ready(function() {
-	angular.bootstrap(document, ['pocHome']);
+	angular.bootstrap(document, ['docHome']);
 });

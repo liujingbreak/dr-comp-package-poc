@@ -1,12 +1,12 @@
-@dr-navi-aside-width: @dr-unit-triple;
+@dr-navi-aside-width: 240px;
 @dr-navi-menu-item-height: @dr-unit-triple;
 .dr-navi-aside {
-	width: 240px;
+	width: @dr-navi-aside-width;
 	overflow-x: hidden;
 	overflow-y: auto;
 	height: 100%;
 	position:absolute;
-	min-width: @dr-navi-aside-width;
+	min-width: @dr-unit-triple;
 	.dr-menu {
 		.dr-button {
 			color: @dr-white;
@@ -17,7 +17,6 @@
 			i {
 				display: inline-block;
 				line-height: @dr-navi-menu-item-height;
-				width: @dr-navi-aside-width;
 			}
 			span {
 				display: inline-block;
@@ -25,12 +24,21 @@
 			.dr-mixin-noround();
 		}
 
-		li.dr-checked {
+		li {
 			> button,
 			> a {
-				background-color: @dr-green;
-				&:focus:before {
-					background-color: @dr-green-dark;
+				&:hover,
+				&:focus {
+					background-color: @dr-green-darker;
+				}
+			}
+			&.dr-checked {
+				> button,
+				> a {
+					background-color: @dr-green;
+					&:focus:before {
+						background-color: @dr-green-dark;
+					}
 				}
 			}
 		}

@@ -29,3 +29,16 @@ e.g.
 ```javascript
 console.log(__api.packageName);
 ```
+
+#### Api properties
+| name | description
+| -- | --
+| packageName | package name like `@dr/xxx`
+| packageShortName | package name without scope name
+| contextPath | Node server context path of current, e.g. `/xxx` packageShortName
+
+#### Api methods
+| name | description
+| -- | --
+| assetsUrl | `function(package, path)` parameter `package` is optional, default value is current package
+| config | `funtion()`

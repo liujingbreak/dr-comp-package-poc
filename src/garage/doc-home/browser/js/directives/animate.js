@@ -13,6 +13,7 @@ function drScrollableAnim(ScrollableAnim, $timeout, $window) {
 	return {
 		scope: false,
 		link: function(scope, iElement, iAttrs, controller) {
+			iElement.addClass('dr-scrollable-anim');
 			var scrollControl = new ScrollableAnim(iElement, 16);
 			_.set(scope, iAttrs.drScrollableAnim, scrollControl);
 			var slogon = iElement.find('.screen-1').find('.center-box');

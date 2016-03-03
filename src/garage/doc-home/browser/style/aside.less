@@ -1,6 +1,71 @@
+@dr-navi-aside-width: 240px;
+@sub-aside-width: 360px;
+@sub-menu-hover-color: rgba(255,255,255, .2);
+
 .main-aside {
+	position: relative;
+	width: @sub-aside-width + @dr-unit-triple;
 	.logo {
 		width: @dr-unit-triple;
 		height: @dr-unit-triple;
+	}
+	// to override @dr/doc-ui/aside.less
+	.sub-menu {
+		.dr-button {
+			padding-left: @dr-unit;
+			height: @dr-unit-double;
+			&:before {
+				display: none;
+			}
+			i {
+				width: @dr-unit-double;
+				line-height: normal;
+			}
+
+		}
+	}
+}
+
+.dr-menu {
+	i {
+		width: @dr-unit-triple;
+	}
+	button {
+		.dr-mixin-transition(background-color);
+	}
+}
+
+.sub-menu {
+	position: absolute;
+	left: @dr-navi-aside-width;
+	white-space: nowrap;
+	background-color: @dr-green-darker;
+	.dr-mixin-transition(background-color);
+	top: 0;
+	height: 100%;
+	min-width: @sub-aside-width;
+	&.highlight {
+		background-color: @dr-green;
+	}
+	.title {
+		font-weight: @dr-fontweight;
+		font-size: @dr-fontsize-big;
+		padding-left: @dr-unit-double;
+		line-height: @dr-unit-triple;
+		white-space: nowrap;
+	}
+	li.checked {
+		.dr-button {
+			background-color: @dr-white;
+			color: @dr-green;
+			&:hover {
+				background-color: @dr-white;
+			}
+		}
+	}
+	.dr-button {
+		&:hover {
+			background-color: @sub-menu-hover-color;
+		}
 	}
 }

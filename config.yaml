@@ -27,9 +27,9 @@ serverURL: ""
 vendorBundleMap:
   core: # bundle name
       - lodash
-      - q
       - jquery
       - eventemitter3
+      - bluebird
 
 # Global `browserify.bundle()` `noParse` option, there is also a package specific `dr.browserifyNoParse`
 # available option in individual package.json file

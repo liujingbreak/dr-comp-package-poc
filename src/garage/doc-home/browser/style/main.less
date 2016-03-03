@@ -1,21 +1,22 @@
 @import "npm://@dr/doc-less-var";
 
-.poc-home {
+.doc-home {
 
 	overflow-x: auto;
 	overflow-y: scroll;
 	.loading-hide {
-		opacity: 0;
+		//opacity: 0;
 		visibility: hidden;
 		&.show {
-			opacity: 1;
+			//opacity: 1;
 			visibility: visible;
 		}
 	}
 	@import "aside.less";
 	@import "mainSection.less";
 	@import "animate.less";
-
+	@import "dr-scrollable-anim.less";
+	@import "docSection.less";
 	// override dr less
 	h1, h2 {
 		> span {

@@ -3,11 +3,15 @@
 .main-section {
 	position: absolute;
 	left: @dr-unit-triple;
+	top: 0;
 	right: 0;
 	height: 100%;
-	overflow-x: scroll;
-	overflow-y: scroll;
-	-webkit-overflow-scrolling: touch;
+	background: @dr-lite-liter;
+}
+
+.ng-view {
+	height: 100%;
+	overflow: auto;
 }
 
 .viewer {
@@ -89,8 +93,4 @@
 			color: @dr-white;
 		}
 	}
-}
-
-.invisible {
-	visibility: hidden;
 }

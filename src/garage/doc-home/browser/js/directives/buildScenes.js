@@ -5,7 +5,7 @@ function buildScenes(scrollControl, iElement, scope) {
 	// var slogonPinned = false;
 	var slogon = iElement.find('.screen-1').find('.center-box');
 	// var headerText = slogon.children().eq(1);
-	slogon.find('.invisible').removeClass('invisible');
+	// slogon.find('.invisible').removeClass('invisible');
 
 	// scrollControl.scene({
 	// 	begin: headerText.offset().top - iElement.offset().top,
@@ -29,19 +29,12 @@ function buildScenes(scrollControl, iElement, scope) {
 
 	scrollControl.scene({
 		triggerElement: screen2,
-		delayPercent: 30,
-		// timeline: function(timeline) {
-		// 	timeline.staggerTo(
-		// 		_(slogon.children().eq(0).children()).reverse().value(), 0.4,
-		// 		{className: '+=invisible', y: 800, ease: 'Power2.easeOut'},
-		// 		0.016);
-		// 	timeline.to(slogon.children().eq(0), 0.6, {height: 0, margin: 0, ease: 'Power2.easeIn'});
-		// },
+		delayPercent: 5,
 		startup: function(reverse, offset) {
 			if (!reverse) {
 				TweenMax.staggerTo(
 					_(slogon.children().eq(0).children()).reverse().value(), 1,
-					{className: '+=invisible', y: 400, rotation: 90,  ease: 'Power2.easeIn'},
+					{className: '+=invisible', y: 300, rotation: 90,  ease: 'Power2.easeIn'},
 					0.07);
 			}
 		}
@@ -52,7 +45,7 @@ function buildScenes(scrollControl, iElement, scope) {
 		delayPercent: 50,
 		startup: function(reverse, offset) {
 			if (!reverse) {
-				scope.mainVm.showScreen2Text = true;
+				scope.introVm.showScreen2Text = true;
 				scope.$apply();
 			}
 		}

@@ -1,20 +1,22 @@
-<div class="screen screen-bground"></div>
-<div class="screen dr-bg-lite screen-1">
-	<div class="center-box">
-		<h2 class="t"
-			dr-split-text-show="introVm.animStart" duration="0.6" timeline="introVm.screen1Timeline" on-split-done="mainVm.loaded = true">是时候做一件奇怪的事情了</h2>
-		<h1 class="t" timeline="introVm.screen1Timeline" timeline-pos="+=0.7"
-			dr-split-text-show="introVm.animTimeline" duration="0.6">我们需要一个Web<span class="keyword">平台</span>
-		</h1>
+<div dr-scrollable-anim="introVm.scrollableAnim">
+	<div class="screen screen-bground"></div>
+	<div class="screen dr-bg-lite screen-1">
+		<div class="center-box">
+			<h2 class="t"
+				dr-split-text-show="introVm.animStart" duration="0.6" timeline="introVm.screen1Timeline" on-split-done="mainVm.loaded = true">是时候做一件奇怪的事情了</h2>
+			<h1 class="t" timeline="introVm.screen1Timeline" timeline-pos="+=0.7"
+				dr-split-text-show="introVm.animTimeline" duration="0.6">我们需要一个Web<span class="keyword">平台</span>
+			</h1>
+		</div>
 	</div>
-</div>
-<div class="screen screen-2">
-	<div class="center-box">
-		<div class="big-text t" dr-text-anim="introVm.showScreen2Text" duration="1.1" timeline="introVm.screen2Timeline">一个可以积累和分享公共组件的平台</div>
-		<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1.5" timeline="introVm.screen2Timeline">在这样一个平台上可以组合我们不同的产品</div>
-		<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1.2" timeline="introVm.screen2Timeline">我们每一个人都是组件的贡献者</div>
-		<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1" timeline="introVm.screen2Timeline">就像一个社区那样合作</div>
-		<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1" timeline="introVm.screen2Timeline"
-			>它不是一个Framework, 它是一个可以运行的组件库</div>
+	<div class="screen screen-2">
+		<div class="center-box">
+			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" duration="1.1" timeline="introVm.screen2Timeline">一个可以积累和分享公共组件的平台</div>
+			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1.5" timeline="introVm.screen2Timeline">在这样一个平台上可以组合我们不同的产品</div>
+			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1.2" timeline="introVm.screen2Timeline">我们每一个人都是组件的贡献者</div>
+			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1" timeline="introVm.screen2Timeline">就像一个社区那样合作</div>
+			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1" timeline="introVm.screen2Timeline"
+				>它不是一个Framework, 它是一个可以运行的组件库</div>
+		</div>
 	</div>
 </div>

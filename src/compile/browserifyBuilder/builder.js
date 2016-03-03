@@ -41,7 +41,6 @@ var packageUtils, config, jsBundleEntryMaker;
  * @return {Promise}               [description]
  */
 module.exports = function(_packageUtils, _config, argv) {
-	uncaughtException();
 	packageUtils = _packageUtils;
 	config = _config;
 	var helper = helperFactor(config);
@@ -67,16 +66,16 @@ module.exports = function(_packageUtils, _config, argv) {
 		}
 		bundleNames = bundlesTobuild;
 	}
-	if (argv['only-js']) {
-		buildCss = false;
-	}
+	// if (argv['only-js']) {
+	// 	buildCss = false;
+	// }
 	if (argv['only-css']) {
 		buildJS = false;
 	}
 
 	var cssPromises = [];
 	var jsStreams = [];
-	fileCache.loadFromFile('depsMap.json').then(function(cachedDepsMap) {
+	return fileCache.loadFromFile('depsMap.json').then(function(cachedDepsMap) {
 		depsMap = cachedDepsMap;
 		bundleNames.forEach(function(bundle) {
 			log.info(bundle);
@@ -541,12 +540,4 @@ module.exports = function(_packageUtils, _config, argv) {
 var bundleLog = require('@dr/logger').getLogger('browserifyBuilder.buildBundle');
 function logError(er) {
 	bundleLog.error(er.message, er);
-}
-
-function uncaughtException() {
-	process.removeAllListeners('uncaughtException');
-	process.on('uncaughtException', function(err) {
-		// handle the error safely
-		log.error('Uncaught exception: ', err, err.stack);
-	});
 }

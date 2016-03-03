@@ -58,6 +58,7 @@
 
     "globals"       : {
 		"__api": true,
+		"t": true,
 	    "jasmine": true,
 	    "describe": true,
 	    "it": true,

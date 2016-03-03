@@ -35,7 +35,7 @@ var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package
 	.alias('b', 'bundle')
 	.describe('p', '<package-short-name> if used with command `lint`, it will only check specific package')
 	.alias('p', 'package')
-	.describe('only-js', 'only rebuild JS bundles')
+	//.describe('only-js', 'only rebuild JS bundles')
 	.describe('only-css', 'only rebuild CSS bundles')
 	.describe('d', '<src foldr> if used with command `link`, it will link packages from specific folder instead of `srcDir` configured in config.yaml')
 	.describe('r', '<recipe foldr> if used with command `link`, it will link packages only to specific recipe folder instead of `recipeFolder` configured in config.yaml')
@@ -130,6 +130,10 @@ function installRecipe(recipeDir) {
 gulp.task('lint', function() {
 	es.merge([gulp.src(['*.js', 'lib/**/*.js'])]
 		.concat(packageLintableSrc(packageUtils.findAllPackages, argv.p)))
+	.pipe(require('through2').obj(function(file, en, next) {
+		gutil.log(file.path);
+		next(null, file);
+	}))
 	.pipe(jshint())
 	.pipe(jshint.reporter('jshint-stylish'))
 	.pipe(jshint.reporter('fail'))
@@ -166,6 +170,7 @@ gulp.task('compile', function() {
 			var job = Q.defer();
 			jobs.push(job.promise);
 			res.on('end', function() {
+				gutil.log(name + ' finished');
 				job.resolve();
 			}).on('error', function(er) {
 				gutil.log(er);

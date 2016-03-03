@@ -11,7 +11,7 @@ module.exports.activate = function(api) {
 		res.redirect(api.assetsUrl('/index.html'));
 	});
 
-	api.router().get('/rest/readmes/:name', function(req, res) {
+	api.router().get('/server/readmes/:name', function(req, res) {
 		var name = req.params.name;
 		var cache = packageReadmeCache[name];
 		if (!cache) {

@@ -4,6 +4,7 @@ module.exports = function(controllerProvider) {
 
 function introController($scope, $timeout) {
 	var introVm = this;
+	$scope.mainVm.selectedMenuIdx = 0;
 	introVm.animSlogonStart = false;
 	introVm.animStart = false;
 	introVm.screen1Timeline = new TimelineLite({paused: true});

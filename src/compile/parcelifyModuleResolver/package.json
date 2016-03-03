@@ -11,7 +11,8 @@
 	  "browser-resolve": "^1.11.0",
       "lodash": "^4.0.0",
 	  "through": "^2.3.8",
-	  "less-plugin-npm-import": "^2.1.0"
+	  "less-plugin-npm-import": "^2.1.0",
+	  "less-plugin-autoprefix": "^1.5.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

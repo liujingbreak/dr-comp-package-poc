@@ -1,5 +1,6 @@
 var through = require('through');
 var less = require('less');
+var LessPluginAutoPrefix = require('less-plugin-autoprefix');
 var NpmImportPlugin = require('less-plugin-npm-import');
 var log = require('@dr/logger').getLogger('parcelifyModuleResolver');
 var env = require('@dr/environment');
@@ -12,16 +13,19 @@ module.exports = function(file, options) {
 
 	var flush = function() {
 		var self = this;
-		var fileConfig = {
+		var lessOptions = {
 			compress: !env.config().devMode,
 			paths: [],
-			plugins: [new NpmImportPlugin()]
+			plugins: [
+				new LessPluginAutoPrefix({browsers: ['last 3 versions']}),
+				new NpmImportPlugin()
+			]
 		};
 
 		// Injects the path of the current file.
-		fileConfig.filename = file;
+		lessOptions.filename = file;
 
-		less.render(buf, fileConfig)
+		less.render(buf, lessOptions)
 		.then(function(output) {
 			self.push(replaceUrl(output.css));
 			self.push(null);
@@ -33,7 +37,7 @@ module.exports = function(file, options) {
 
 
 	function replaceUrl(css) {
-		return css.replace(/(\W)url\(['"]?assets:\/\/((?:@[^\/]+\/)?[^\/]+)(\/.*?)['"]?\)/g,
+		return css.replace(/(\W)url\(['"]?\s*assets:\/\/((?:@[^\/]+\/)?[^\/]+)(\/.*?)['"]?\s*\)/g,
 		function(match, preChar, packageName, path) {
 			if (packageName) {
 				log.info('resolve assets: ' + match.substring(1));
