@@ -128,15 +128,16 @@ function installRecipe(recipeDir) {
 }
 
 gulp.task('lint', function() {
-	es.merge([gulp.src(['*.js', 'lib/**/*.js'])]
-		.concat(packageLintableSrc(packageUtils.findAllPackages, argv.p)))
-	.pipe(require('through2').obj(function(file, en, next) {
-		gutil.log(file.path);
-		next(null, file);
-	}))
+	var i = 0;
+	return gulp.src(['*.js', 'lib/**/*.js']
+	.concat(packageLintableSrc(packageUtils.findAllPackages, argv.p)))
 	.pipe(jshint())
 	.pipe(jshint.reporter('jshint-stylish'))
 	.pipe(jshint.reporter('fail'))
+	.pipe(require('through2').obj(function(file, en, next) {
+		gutil.log(++i + ' ' + file.path);
+		next(null, file);
+	}))
 	.pipe(jscs())
 	.pipe(jscs.reporter())
 	.pipe(jscs.reporter('fail'));
@@ -167,7 +168,8 @@ gulp.task('compile', function() {
 		var res = require(name)(packageUtils, config, argv);
 		if (res && _.isFunction(res.pipe)) {
 			// is stream
-			var job = Q.defer();
+			gutil.log('is stream');
+			var job = Promise.defer();
 			jobs.push(job.promise);
 			res.on('end', function() {
 				gutil.log(name + ' finished');
@@ -177,11 +179,12 @@ gulp.task('compile', function() {
 				job.reject(er);
 			});
 		} else {
-			jobs.push(res);
+			jobs.push(Promise.resolve(res));
 		}
 	});
+	gutil.log('return');
 
-	return Q.all(jobs);
+	return Promise.all(jobs);
 });
 
 gulp.task('watch', function() {

@@ -9,7 +9,6 @@ function docHome($timeout) {
 		scope: false,
 		controller: ['$scope', '$element', '$attrs', '$parse',
 		function($scope, $element, $attrs, $parse) {
-			var AnimQ = require('../service/animQueue');
 			this.menuOpened = false;
 			var bodyVm = this;
 			var self = this;
@@ -26,7 +25,6 @@ function docHome($timeout) {
 			self.menuUnexpand = self.menuExpand = function(size) {
 				TweenMax.killTweensOf(bodyVm.mainSection[0]);
 				TweenMax.to(bodyVm.mainSection[0], 0.25, {x: size.width - 66, ease: 'Power2.easeOut'});
-
 			};
 
 			self.menuLeave = function() {

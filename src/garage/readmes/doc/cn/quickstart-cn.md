@@ -44,11 +44,9 @@ Quick Start
 	然后浏览器访问 [http://localhost:14333](http://localhost:14333)
 	如果你可以看到一个正常主页，就成功了
 
-	> 你可以管理你的profile level npmrc设置 by `npm set registry http://localhost:4873/`
-	>
-	> Another cool way is to use `nrm` to switch your NPM registry endpoint. （`npm install nrm`)
+	> [nrm](https://www.npmjs.com/package/nrm) 可用于管理多个NPM registry配置
 
-3.	尝试在本地Sinopia发布packages, 如果你没有安装本地Sinopia，请跳过此步
+3.	如果你安装了本地Sinopia, 可以尝试在本地Sinopia发布packages
 
 	```shell
 	npm set registry http://localhost:4873/

@@ -27,19 +27,18 @@ function compile(packageUtils, config, argv) {
 			return ''; // use external default escaping
 		}
 	});
-	return gulp.src(__dirname + '/../doc/**/*.*')
+	return gulp.src([Path.resolve(__dirname, '..', 'doc/**/*.*')])
 		.pipe(through.obj(function(row, enc, next) {
 			if (!_.endsWith(row.path, '.md')) {
 				return next(null, row);
 			}
 			var targetFile = Path.resolve(config().destDir, 'static/readmes', Path.relative(row.base, row.path));
-			log.debug(targetFile);
 			var dot = targetFile.lastIndexOf('.');
 			targetFile = targetFile.substring(0, dot) + '.html';
 			log.debug('check ' + targetFile);
 			if (fs.existsSync(targetFile) && fs.statSync(targetFile).mtime.getTime() >=
 				fs.statSync(row.path).mtime.getTime()) {
-				return;
+				return next();
 			}
 			log.debug('compile ' + row.path);
 			var html = mk.render(row.contents.toString());
@@ -73,7 +72,7 @@ function replaceAnchors($, config) {
 	$('a').each(function(index) {
 		var el = $(this);
 		var src = el.attr('href');
-		if (!_.startsWith(src, '/') && !_.startsWith(src, 'http://')) {
+		if (!_.startsWith(src, '/') && !_.startsWith(src, 'http')) {
 			if (_.endsWith(src, '.md')) {
 				src = src.substring(0, src.length - 3);
 			}

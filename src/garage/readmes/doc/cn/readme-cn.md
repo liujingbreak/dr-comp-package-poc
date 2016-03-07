@@ -21,9 +21,9 @@ TBD.
 
 ### The infrastructure overview
 
-![overview digram](fehouse-infra.png)
+![overview digram](images/fehouse-infra.png)
 
-图中每一个矩形都是一个NPM package.
+图中每一个方框都代表一个NPM package.
 
 描述一个场景：
 - 有多个Team
@@ -34,7 +34,7 @@ TBD.
 - Sinopia server 负责依赖管理， 有所有的package 都可以被publish到Sinopia
 
 Publish 所有的package到私有NPM registry后 (Sinopia)
-![](sinopia.png)
+![](images/sinopia.png)
 
 ### Node Package
 - 一个最简单的package 是一个带有`package.json` 文件的目录。
@@ -62,13 +62,13 @@ Publish 所有的package到私有NPM registry后 (Sinopia)
 可能的@dr package 目录结构
 ```
 ├─ browser/
-|		├─ js
-|		├─ less
-|		└─ views 	(html pages/templates)
+|	├─ js
+|	├─ less
+|	└─ views 	(html pages/templates)
 |		
 ├─ server/
-|		├─ js 		(NodeJs file)
-|		└─ views 	(server rendered pages/templates)
+|	├─ js 		(NodeJs file)
+|	└─ views 	(server rendered pages/templates)
 |
 ├─ assets/  		(images...)
 ├─ spec/			(test file)
@@ -113,9 +113,9 @@ Publish 所有的package到私有NPM registry后 (Sinopia)
 #### 3rd-party library
 Nothing surprising
 
-<img src="node-logo.png" alt="nodejs logo" style="width: 200px;"/>
-<img src="browserify-logo.png" alt="nodejs logo" style="width: 200px;"/>
-<img src="gulp-logo.png" alt="nodejs logo" style="width: 200px;"/>
+<img src="images/node-logo.png" alt="nodejs logo" style="width: 200px;"/>
+<img src="images/browserify-logo.png" alt="nodejs logo" style="width: 200px;"/>
+<img src="images/gulp-logo.png" alt="nodejs logo" style="width: 200px;"/>
 &
 **Parcelify**, **LABjs**
 
