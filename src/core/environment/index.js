@@ -8,9 +8,10 @@ var env = {
 	/**
 	 * called by gulp or other compilation time tool
 	 */
-	_setup: function(config, packageUtils) {
+	_setup: function(config, packageUtils, buildUtils) {
 		env.config = config;
 		env.packageUtils = packageUtils;
+		env.buildUtils = buildUtils;
 	}
 };
 module.exports = env;

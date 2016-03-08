@@ -1,5 +1,5 @@
 {
-  "name": "@dr/readmes",
+  "name": "@dr/readme-docs",
   "version": "0.0.0",
   "description": "All readme markdown files",
   "main": "lib/compiler.js",
@@ -13,6 +13,7 @@
   },
   "author": "LJ",
   "dr": {
-	  "type": "builder"
+	  "type": "builder",
+	  "priority": 1000
   }
 }

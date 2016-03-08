@@ -54,4 +54,5 @@ e.g.
 | 属性 | 说明
 | -- | --
 | `dr.noLint` | `gulp lint`不会对当前package check code style
-| `dr.type` | 当value是"core"是，平台node server启动时会先加载当前的package，执行module.exports.activate(), 这样这个package 就是API provider, 可以用于monkey patch 新的属性或方法到api对象。
+| `dr.type` | 当value是"core"是，平台node server启动时会先加载当前的package，执行module.exports.activate(), 这样这个package 就是API provider, 可以用于monkey patch 新的属性或方法到api对象。`dr.type` 还可以有其他的值，比如`builder` 代表是一个build tool, `gulp compile`会依次调用他们
+| `dr.priority` | 可以用于package排序，lib/packageMgr/packageUtils.find *XXX* Packages() 的callback会根据priority排序, 目前只有对`gulp compile`有用, 当有多个build tool时，可以有先后调用次序

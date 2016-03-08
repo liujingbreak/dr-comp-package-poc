@@ -127,7 +127,6 @@ function factory($timeout, $parse, $compile) {
 						var defer = Promise.defer();
 						TweenMax.to(subMenuEl[0], 0.25, {x: -33, ease: 'Power2.easeOut', onComplete: defer.resolve});
 						var selectedIdx = getMenuSelectedIdx(scope);
-						console.log(lastHover);
 						if (lastHover !== selectedIdx) {
 							subMenuEl.removeClass('highlight');
 						}

@@ -13,6 +13,7 @@
   "author": "LJ",
   "license": "ISC",
   "dr": {
-    "type": "builder"
+    "type": "builder",
+	"priority": 3000
   }
 }

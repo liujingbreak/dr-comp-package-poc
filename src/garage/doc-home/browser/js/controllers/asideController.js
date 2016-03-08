@@ -18,31 +18,35 @@ module.exports = function(controllerProvider) {
 					{
 						label: t('Introduction'),
 						action: function() {
-							$location.path('doc/readme-cn');
+							$location.path(docName2Route('readme-cn.md'));
 						}
 					}, {
 						label: t('Quick Start'),
 						action: function() {
-							$location.path('doc/quickstart-cn');
+							$location.path(docName2Route('quickstart-cn.md'));
 						}
 					}, {
 						label: t('Package.json Specification'),
 						action: function() {
-							$location.path('doc/package-spec-cn');
+							$location.path(docName2Route('package-spec-cn.md'));
 						}
 					}, {
 						label: t('API Specification'),
 						action: function() {
-							$location.path('doc/api-spec-cn');
+							$location.path(docName2Route('api-spec-cn.md'));
 						}
 					}, {
 						label: t('TODOs'),
 						action: function() {
-							$location.path('doc/todo-cn');
+							$location.path(docName2Route('todo-cn.md'));
 						}
 					}
 				]
 			}
 		];
+
+		function docName2Route(name) {
+			return 'doc/' + name;
+		}
 	}]);
 };
