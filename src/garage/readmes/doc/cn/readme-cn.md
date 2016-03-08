@@ -232,8 +232,7 @@ browserify会忽略bundle属性， 每一个@dr package会被打包单独的bund
 
 #### API 和组件耦合
 
-TBD.
-
+[API spec](api-spec-cn.md)
 
 #### 平台配置
 默认设置文件config.yaml, 请勿修改此文件 [/config.yaml](../config.yaml)

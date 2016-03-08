@@ -31,7 +31,7 @@ Quick Start
 	registry = http://10.9.14.9:4873/
 	```
 
-	执行在项目根目录下执行以下命令,
+	在项目根目录下执行以下命令,
 	> 第一次 `gulp build` 可能会执行较长时间
 
 	```shell
@@ -42,11 +42,11 @@ Quick Start
 	```
 
 	然后浏览器访问 [http://localhost:14333](http://localhost:14333)
-	如果你可以看到一个正常主页，就成功了
+	如果你可以看到一个正常主页就代表成功了
 
-	> [nrm](https://www.npmjs.com/package/nrm) 可用于管理多个NPM registry配置
+	> 当你有多个NPM registry endpoint 需要切换时，除了手工配置.npmrc文件外，也可以使用[nrm](https://www.npmjs.com/package/nrm)来管理
 
-3.	如果你安装了本地Sinopia, 可以尝试在本地Sinopia发布packages
+3.	如果要尝试在本地Sinopia发布packages
 
 	```shell
 	npm set registry http://localhost:4873/
