@@ -23,7 +23,6 @@ var rwPackageJson = require('./lib/gulp/rwPackageJson');
 var packageLintableSrc = require('./lib/gulp/packageLintableSrc');
 var packageUtils = require('./lib/packageMgr/packageUtils');
 var watchPackages = require('./lib/gulp/watchPackages');
-var buildUtils = require('./lib/gulp/buildUtils');
 var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package]\n' +
 	'$0 link [-r <recipe folder>] [-d <src folder>]')
 	.command('build', 'build everything from scratch, including install-recipe, link, npm install, compile')
@@ -162,36 +161,7 @@ gulp.task('link', function() {
 });
 
 gulp.task('compile', function() {
-	require('@dr/environment')._setup(config, packageUtils, buildUtils); // monkey patch some useful objects
-	var buildProm = Promise.resolve(null);
-
-	packageUtils.findNodePackageByType('builder', function(name, entryPath, parsedName, pkJson) {
-		buildProm = buildProm.then(function() {
-			gutil.log('run builder: ' + name);
-			return runBuilder(name);
-		});
-	});
-
-	function runBuilder(name) {
-		var res = require(name)(packageUtils, config, argv);
-		if (res && _.isFunction(res.pipe)) {
-			// is stream
-			var job = Promise.defer();
-			res.on('end', function() {
-				gutil.log('builder' + name + ' done');
-				job.resolve();
-			}).on('error', function(er) {
-				gutil.log(er);
-				job.reject(er);
-			});
-			return job.promise;
-		} else {
-			return Promise.resolve(res);
-		}
-	}
-	gutil.log('return');
-
-	return buildProm;
+	return require('./lib/packageMgr/packageCompiler')(argv);
 });
 
 gulp.task('watch', function() {
