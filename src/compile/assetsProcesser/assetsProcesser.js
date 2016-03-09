@@ -2,7 +2,6 @@ var gulp = require('gulp');
 var through = require('through2');
 var Path = require('path');
 var fs = require('fs');
-var _ = require('lodash');
 var es = require('event-stream');
 var log = require('log4js').getLogger('assetsProcesser');
 var buildUtils = require('@dr/environment').buildUtils;
@@ -14,7 +13,7 @@ module.exports = function(_packageUtils, _config, argv) {
 	if (config().devMode && argv.b && argv.b !== 'assets') {
 		return;
 	}
-	copyAssets();
+	return copyAssets();
 };
 
 

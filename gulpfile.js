@@ -195,7 +195,7 @@ gulp.task('compile', function() {
 });
 
 gulp.task('watch', function() {
-	watchPackages(argv.p);
+	watchPackages(argv.p, argv);
 });
 /**
  * TODO: bump dependencies version

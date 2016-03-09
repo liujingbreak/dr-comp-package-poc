@@ -60,6 +60,8 @@ function compile(_packageUtils, _config, argv) {
 		.pipe(gulp.dest(config().destDir + '/static/' + distDir))
 		.pipe(revAll.manifestFile())
 		.pipe(mergeWithExistingMani(readmePackagePath))
+		.pipe(gulp.dest(config().destDir))
+		.pipe(removeUselessManifestData())
 		.pipe(gulp.dest(readmePackagePath + '/dist'))
 		.on('end', function() {
 			buildUtils.writeTimestamp('readme');
@@ -77,7 +79,7 @@ function mergeWithExistingMani(readmePackagePath) {
 		var file = Path.join(readmePackagePath, 'dist', Path.basename(row.path));
 		if (fs.existsSync(file)) {
 			readFileAsync(file).then(function(data) {
-				var meta = JSON.parse(row.contents.toString('utf-8'));
+				var meta = JSON.parse(row.contents.toString('utf8'));
 				var newMeta = JSON.stringify(_.assign(JSON.parse(data), meta), null, '\t');
 				log.debug('merge with existing manifest');
 				row.contents = new Buffer(newMeta);
@@ -86,6 +88,20 @@ function mergeWithExistingMani(readmePackagePath) {
 		} else {
 			next(null, row);
 		}
+	});
+}
+
+function removeUselessManifestData() {
+	return through.obj(function(row, encode, next) {
+		var manifest = row.contents.toString('utf8');
+		var json = JSON.parse(manifest);
+		_.forOwn(json, function(value, key) {
+			if (!_.endsWith(key, '.md')) {
+				delete json[key];
+			}
+		});
+		row.contents = new Buffer(JSON.stringify(json, null, '\t'));
+		next(null, row);
 	});
 }
 
