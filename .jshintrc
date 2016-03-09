@@ -57,6 +57,8 @@
     "yui"           : false,
 
     "globals"       : {
+		"Promise": true,
+		"File": true,
 		"__api": true,
 		"t": true,
 	    "jasmine": true,

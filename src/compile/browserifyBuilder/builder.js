@@ -475,8 +475,10 @@ module.exports = function(_packageUtils, _config, argv) {
 	}
 
 	function revisionBundleFile(bundleStream) {
-		var revAll = new RevAll();
-		var revFilter = gulpFilter(['**/*.js', '**/*.css'], {restore: true});
+		var revAll = new RevAll({
+			debug: config().devMode
+		});
+		var revFilter = gulpFilter(['**/*.js', '**/*.map', '**/*.css'], {restore: true});
 		return bundleStream
 			.pipe(revFilter)
 			.pipe(revAll.revision())

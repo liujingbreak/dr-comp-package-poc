@@ -13,8 +13,6 @@ function controller($scope, $timeout, $routeParams) {
 	var docVm = this;
 
 	$scope.mainVm.selectedMenuIdx = 1;
-	console.log($routeParams.name);
-
 
 	var file = $routeParams.name.substring(0, $routeParams.name.lastIndexOf('.'));
 

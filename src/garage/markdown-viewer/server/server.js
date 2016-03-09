@@ -1,4 +1,4 @@
-/* global Promise */
+var Promise = require('bluebird');
 var fs = require('fs');
 var Markdown = require('markdown-it');
 var mk = new Markdown();
