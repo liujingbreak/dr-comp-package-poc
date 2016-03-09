@@ -1,0 +1,45 @@
+var gulp = require('gulp');
+var through = require('through2');
+var Path = require('path');
+var fs = require('fs');
+var _ = require('lodash');
+var es = require('event-stream');
+var log = require('log4js').getLogger('assetsProcesser');
+var buildUtils = require('@dr/environment').buildUtils;
+
+var packageUtils, config;
+module.exports = function(_packageUtils, _config, argv) {
+	packageUtils = _packageUtils;
+	config = _config;
+	if (config().devMode && argv.b && argv.b !== 'assets') {
+		return;
+	}
+	copyAssets();
+};
+
+
+function copyAssets() {
+	var src = [];
+	var streams = [];
+	packageUtils.findBrowserPackageByType(['*'], function(name, entryPath, parsedName, json, packagePath) {
+		var baseDir = Path.join(packagePath, 'assets');
+		if (fs.existsSync(baseDir)) {
+			src.push(Path.join(packagePath, 'assets', '**', '*'));
+			var stream = gulp.src(src, {base: baseDir})
+			.pipe(through.obj(function(file, enc, next) {
+				file.path = Path.join(baseDir, parsedName.name, Path.basename(file.path));
+				log.debug(file.path);
+				//file.path = file.path
+				next(null, file);
+			}));
+			streams.push(stream);
+		}
+	});
+
+	return es.merge(streams)
+	.pipe(gulp.dest(Path.join(config().destDir, 'static', 'assets')))
+	.on('end', function() {
+		log.debug('flush');
+		buildUtils.writeTimestamp('assets');
+	});
+}

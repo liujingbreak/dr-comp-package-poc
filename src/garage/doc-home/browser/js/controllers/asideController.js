@@ -36,6 +36,11 @@ module.exports = function(controllerProvider) {
 							$location.path(docName2Route('api-spec-cn.md'));
 						}
 					}, {
+						label: t('i18n'),
+						action: function() {
+							$location.path(docName2Route('i18n.md'));
+						}
+					}, {
 						label: t('TODOs'),
 						action: function() {
 							$location.path(docName2Route('todo-cn.md'));

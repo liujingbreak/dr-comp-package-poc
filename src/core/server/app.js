@@ -58,12 +58,13 @@ function create(app, setting, packageCache) {
 	});
 
 	// package level assets folder router
+
 	_.forOwn(packageCache, function(packageInstance, name) {
 		var assetsDir = Path.resolve(setting.rootPath, packageInstance.path, 'assets');
 		if (fs.existsSync(assetsDir)) {
 			log.debug('/assets/' + name + ' -> ' + assetsDir);
 			app.use('/assets/' + name, express.static(assetsDir, {
-				maxAge: ms(setting.cacheControlMaxAge),
+				//maxAge: ms(setting.cacheControlMaxAge),
 				setHeaders: setCORSHeader
 			}));
 		}

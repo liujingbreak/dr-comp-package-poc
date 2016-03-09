@@ -28,6 +28,7 @@
 		"@dr/readme": "0.0.0",
 		"@dr/readme-docs": "0.0.0",
 		"@dr/text-anim-ng": "0.0.0",
-		"@dr/logger": "0.0.3"
+		"@dr/logger": "0.0.3",
+		"@dr/assets-processer": "0.0.0"
 	}
 }

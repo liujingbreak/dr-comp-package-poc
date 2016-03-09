@@ -162,7 +162,6 @@ gulp.task('link', function() {
 });
 
 gulp.task('compile', function() {
-	var jobs = [];
 	require('@dr/environment')._setup(config, packageUtils, buildUtils); // monkey patch some useful objects
 	var buildProm = Promise.resolve(null);
 
@@ -192,7 +191,7 @@ gulp.task('compile', function() {
 	}
 	gutil.log('return');
 
-	return Promise.all(jobs);
+	return buildProm;
 });
 
 gulp.task('watch', function() {
