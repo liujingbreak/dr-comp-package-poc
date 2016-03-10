@@ -25,7 +25,7 @@ var mkdirp = require('mkdirp');
 var gutil = require('gulp-util');
 var cycle = require('cycle');
 
-var log = require('@dr/logger').getLogger('browserifyBuilder.builder');
+var log;
 var packageBrowserInstance = require('./packageBrowserInstance');
 var helperFactor = require('./browserifyHelper');
 var FileCache = require('./fileCache');
@@ -35,34 +35,46 @@ var packageUtils, config, jsBundleEntryMaker;
 
 /**
  * JS and CSS file Build process based on browserify and parcelify
- * @param  {packageUtils} _packageUtils [description]
- * @param  {config} _config       [description]
- * @param  {yargs.argv} argv       command line arguments encapuslated by `yargs`
- * @return {Promise}               [description]
  */
-module.exports = function(_packageUtils, _config, argv) {
-	packageUtils = _packageUtils;
-	config = _config;
+module.exports = {
+	compile: compile
+};
+
+function compile(api) {
+	log = require('@dr/logger').getLogger(api.packageName);
+	packageUtils = api.packageUtils;
+	config = api.config;
+	var argv = api.argv;
 	var helper = helperFactor(config);
 	//var jsTransform = helper.jsTransform;
 	var fileCache = new FileCache(config().destDir);
 	var buildCss = true;
 	var buildJS = true;
 
-	gutil.log('Usage: gulp compile [-b <bundle name> -b <bunle name> ...]');
-	gutil.log('\tbuild all JS and CSS bundles, if parameter <bundle name> is supplied, only that specific bundle will be rebuilt.');
+	gutil.log('Usage: gulp compile [-p <package name with or without scope part> -p <package name> ...]');
+	gutil.log('\tgulp compile [-b <bundle name> -b <bunle name> ...]');
+	gutil.log('\tbuild all JS and CSS bundles, if parameter <bundle name> is supplied, only that specific package or bundle will be rebuilt.');
 
 	var packageInfo = walkPackages();
+	//monkey patch new API
+	api.constructor.prototype.packageInfo = packageInfo;
+
 	log.info('------- building bundles ---------');
 	var depsMap = {};
 	var bundleStream;
 	var bundleNames = _.keys(packageInfo.bundleMap);
-
+	var bundlesTobuild;
 	if (argv.b) {
-		var bundlesTobuild = [].concat(argv.b);
-		if (_.intersection(bundleNames, bundlesTobuild).length < bundlesTobuild.length) {
-			gutil.log('bundle ' + bundlesTobuild + ' doesn\'t exist, existing bundles are:\n\t' + bundleNames.join('\n\t'));
-			return;
+		bundlesTobuild = [].concat(argv.b);
+		if (!validateBundleNames(bundleNames, bundlesTobuild)) {
+			return false;
+		}
+		bundleNames = bundlesTobuild;
+	}
+	if (argv.p) {
+		bundlesTobuild = packageNames2bundles([].concat(argv.p), packageInfo.moduleMap);
+		if (!validateBundleNames(bundleNames, bundlesTobuild)) {
+			return false;
 		}
 		bundleNames = bundlesTobuild;
 	}
@@ -475,9 +487,7 @@ module.exports = function(_packageUtils, _config, argv) {
 	}
 
 	function revisionBundleFile(bundleStream) {
-		var revAll = new RevAll({
-			debug: config().devMode
-		});
+		var revAll = new RevAll();
 		var revFilter = gulpFilter(['**/*.js', '**/*.map', '**/*.css'], {restore: true});
 		return bundleStream
 			.pipe(revFilter)
@@ -537,7 +547,42 @@ module.exports = function(_packageUtils, _config, argv) {
 		}));
 	});
 	}
-};
+}
+
+function validateBundleNames(bundleNames, bundlesTobuild) {
+	if (_.intersection(bundleNames, bundlesTobuild).length < bundlesTobuild.length) {
+		gutil.log('bundle ' + bundlesTobuild + ' doesn\'t exist, existing bundles are:\n\t' + bundleNames.join('\n\t'));
+		return false;
+	}
+	return true;
+}
+
+function packageNames2bundles(packageNames, moduleMap) {
+	var bundleSet = {};
+
+	_.forEach(packageNames, function(name) {
+		if (!{}.hasOwnProperty.call(moduleMap, name)) {
+			if (_.startsWith(name, '@')) {
+				log.error('Package cannot be found: ' + name);
+				return;
+			} else {
+				// guess the package scope name
+				var guessingName;
+				if (_.some(config().packageScopes, function(scope) {
+					guessingName = '@' + scope + '/' + name;
+					return {}.hasOwnProperty.call(moduleMap, guessingName);
+				})) {
+					name = guessingName;
+				} else {
+					log.error('Package cannot be found: ' + name);
+					return;
+				}
+			}
+		}
+		bundleSet[moduleMap[name].bundle] = true;
+	});
+	return _.keys(bundleSet);
+}
 
 var bundleLog = require('@dr/logger').getLogger('browserifyBuilder.buildBundle');
 function logError(er) {

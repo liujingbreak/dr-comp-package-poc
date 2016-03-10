@@ -41,6 +41,11 @@ module.exports = function(controllerProvider) {
 							$location.path(docName2Route('i18n.md'));
 						}
 					}, {
+						label: t('How does it works'),
+						action: function() {
+							$location.path(docName2Route('how-does-it-work.md'));
+						}
+					}, {
 						label: t('TODOs'),
 						action: function() {
 							$location.path(docName2Route('todo-cn.md'));

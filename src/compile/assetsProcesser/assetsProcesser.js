@@ -7,15 +7,20 @@ var log = require('log4js').getLogger('assetsProcesser');
 var buildUtils = require('@dr/environment').buildUtils;
 
 var packageUtils, config;
-module.exports = function(_packageUtils, _config, argv) {
-	packageUtils = _packageUtils;
-	config = _config;
+
+module.exports = {
+	compile: compile
+};
+
+function compile(api) {
+	var argv = api.argv;
+	packageUtils = api.packageUtils;
+	config = api.config;
 	if (config().devMode && argv.b && argv.b !== 'assets') {
 		return;
 	}
 	return copyAssets();
-};
-
+}
 
 function copyAssets() {
 	var src = [];

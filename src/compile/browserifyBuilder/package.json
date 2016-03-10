@@ -2,7 +2,7 @@
   "name": "@dr-core/browserify-builder",
   "version": "0.0.1",
   "description": "The default browser side stuff builder module based on browserify",
-  "main": "builder.js",
+  "main": "lib/builder.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
