@@ -21,7 +21,8 @@
 
 .screen {
 	height: 100%;
-	width: 100%;
+	//width: 100%;
+	overflow-x: auto;
 	text-align: center;
 	h1 {
 		font-weight: @dr-fontweight-light;
@@ -87,7 +88,7 @@
 	text-align: left;
 	font-weight: @dr-fontweight-light;
 	> div, > h1, > h2 {
-		white-space: nowrap;
+		line-height: 1.5em;
 	}
 	pre {
 		white-space: pre;

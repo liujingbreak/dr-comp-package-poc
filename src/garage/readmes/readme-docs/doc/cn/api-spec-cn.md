@@ -1,9 +1,11 @@
 API 详细说明
 ============
+> API是降低组件耦合度的糖果。
 - API instance是一个javascript对象。
 - 每个package组件运行时都可以获取对应它的API instance.
+- API instance包含了当前package的基本信息
 - API instance像一个service
-- API是降低组件耦合度的糖果。
+- API可以是一个查找service的name space.
 - API的属性和方法是可以动态修改的。
 
 Package传统的合作方式是互相`require()`对方，调用对方来完成一个复杂的功能, 比如
@@ -12,6 +14,9 @@ Package传统的合作方式是互相`require()`对方，调用对方来完成�
 var somePackage = require('@dr/some-package');
 somePackage.method();
 ```
+那样做就意味这个你的package必须依赖另一个package, 有时就降低了灵活性.
+
+或许你可以采用service provider的模式，或者你并不想污染global/window对象，呢么扩展API会是一个主意.
 
 ### How API works
 
@@ -48,9 +53,9 @@ console.log(__api.assetsUrl('some-picture.jpg'));
 | .packageShortName | 当前package name 不包含scope部分 e.g. `doc-home`
 | .packageInstance | packageInstance 对象,一些更复杂的当前package信息
 | .contextPath | 当前package Node 端运行作为Express router时的，http 访问根路径， 是根据config.yaml里面`nodeRoutePath + packageContextPathMapping`配置计算得，默认是`/<package short name>`, 比如`/doc-home`
-| .eventBus | 一个singleton 的EventEmitter对象
+| .eventBus | API prototype的属性, EventEmitter对象
 | .packageUtils | lib/packageMgr/packageUtils.js 查找其他package的工具
-| `.config()` | 获取config.yaml配置
+| `.config()` | API prototype的属性, 获取config.yaml配置
 | `.assetsUrl(packageName, path)` | 获取packageName对应的静态资源/assets目录下的文件的浏览器访问路径, `packageName` 为可选参数, 默认是当前package
 | `.isBrowser()` | false
 | `.isNode()` | true

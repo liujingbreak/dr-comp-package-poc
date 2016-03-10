@@ -4,7 +4,7 @@
 	}],
 	"levels": {
 		"[all]": "DEBUG",
-		"browserifyBuilder.builder": "INFO",
+		"@dr-core/browserify-builder": "INFO",
 		"browserifyBuilder.pageCompiller": "TRACE"
 	}
 }

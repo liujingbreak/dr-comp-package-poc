@@ -24,6 +24,7 @@ var parcelify = require('parcelify');
 var mkdirp = require('mkdirp');
 var gutil = require('gulp-util');
 var cycle = require('cycle');
+var chalk = require('chalk');
 
 var log;
 var packageBrowserInstance = require('./packageBrowserInstance');
@@ -93,7 +94,7 @@ function compile(api) {
 	return fileCache.loadFromFile('depsMap.json').then(function(cachedDepsMap) {
 		depsMap = cachedDepsMap;
 		bundleNames.forEach(function(bundle) {
-			log.info(bundle);
+			log.info(chalk.magenta(bundle));
 			var buildObj = buildBundle(packageInfo.bundleMap[bundle],
 				bundle, Path.join(config().destDir, 'static'), depsMap);
 			cssPromises.push(buildObj.cssPromise);
@@ -105,7 +106,7 @@ function compile(api) {
 			log.debug('bundles stream created');
 			var outStreams;
 			if (buildCss) {
-				outStreams = jsStreams.concat(gulp.src(cssBundlePaths, {base: Path.resolve('dist/static')}));
+				outStreams = jsStreams.concat(gulp.src(cssBundlePaths, {base: Path.resolve(config().destDir, 'static')}));
 			}
 			bundleStream = es.merge(outStreams).on('error', function(er) {
 				log.error(er);
@@ -221,14 +222,14 @@ function compile(api) {
 		});
 
 		_.forOwn(bundleDepsGraph, function(depBundleSet, entryModule) {
-			log.info(entryModule);
+			log.info(chalk.magenta(entryModule));
 			var size = _.size(depBundleSet);
 			var i = 1;
 			_.forOwn(depBundleSet, function(v, bundle) {
 				if (i === size) {
-					log.info('\t└─ ' + bundle);
+					log.info('\t└─ ' + chalk.magenta(bundle));
 				} else {
-					log.info('\t├─ ' + bundle);
+					log.info('\t├─ ' + chalk.magenta(bundle));
 				}
 				i++;
 			});
@@ -243,15 +244,15 @@ function compile(api) {
 	function printModuleDependencyGraph(packageDeps) {
 		log.info('------- Entry package -> package dependency ----------');
 		_.forOwn(packageDeps, function(deps, moduleName) {
-			log.info(moduleName);
+			log.info(chalk.magenta(moduleName));
 
 			var size = _.size(deps);
 			var i = 1;
 			_.forOwn(deps, function(file, dep) {
 				if (i === size) {
-					log.info('\t└─ ' + dep);
+					log.info('\t└─ ' + chalk.magenta(dep));
 				} else {
-					log.info('\t├─ ' + dep);
+					log.info('\t├─ ' + chalk.magenta(dep));
 				}
 				i++;
 			});
@@ -405,10 +406,10 @@ function compile(api) {
 				});
 			}
 			if (mIdx === moduleCount) {
-				log.info('\t└─ ' + moduleInfo.longName);
+				log.info('\t└─ ' + chalk.magenta(moduleInfo.longName));
 				return;
 			}
-			log.info('\t├─ ' + moduleInfo.longName);
+			log.info('\t├─ ' + chalk.magenta(moduleInfo.longName));
 			mIdx++;
 		});
 		jsBundleEntryMaker = helper.JsBundleEntryMaker(bundle, modules);
@@ -566,7 +567,7 @@ function packageNames2bundles(packageNames, moduleMap) {
 	_.forEach(packageNames, function(name) {
 		if (!{}.hasOwnProperty.call(moduleMap, name)) {
 			if (_.startsWith(name, '@')) {
-				log.error('Package cannot be found: ' + name);
+				log.warn(chalk.yellow('Browser package cannot be found: ' + name));
 				return;
 			} else {
 				// guess the package scope name
@@ -577,7 +578,7 @@ function packageNames2bundles(packageNames, moduleMap) {
 				})) {
 					name = guessingName;
 				} else {
-					log.error('Package cannot be found: ' + name);
+					log.warn(chalk.yellow('Browser package cannot be found: ' + name));
 					return;
 				}
 			}

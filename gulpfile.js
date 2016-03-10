@@ -14,6 +14,7 @@ var vps = require('vinyl-paths');
 var Q = require('q');
 Q.longStackSupport = true;
 var _ = require('lodash');
+var chalk = require('chalk');
 
 var cli = require('shelljs-nodecli');
 var Jasmine = require('jasmine');
@@ -225,5 +226,14 @@ gulp.task('publish', function() {
 function bumpVersion() {
 	return bump({
 		type: 'patch'
+	});
+}
+
+uncaughtException();
+function uncaughtException() {
+	process.removeAllListeners('uncaughtException');
+	process.on('uncaughtException', function(err) {
+		// handle the error safely
+		gutil.log(chalk.red('Uncaught exception: '), err, err.stack);
 	});
 }
