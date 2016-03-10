@@ -1,15 +1,15 @@
 TODOs
 =======
+每个人都是产品经理, 每个feature都是package
 
-有期待尚未完成的feature
-
-- Assets file revision
+- Assets file revision (@dr/assets-processer)
 - i18n text translation tool
-- Gulp watch script
 - Test script
-- Adaptive/Responsive layouts hints
-- Split load bundle in browser (also need to support angular JS lazy loader)
-- express middleware for security consideration
+- Adaptive/Responsive layouts
+- Split load bundle in browser (Support angular JS lazy loader)
+- Mobile browser super light and faster entry bundle
+- CDN assets pack
+- security consideration
 	- CORS
 	- CSRF
 	- Clickjacking
@@ -19,8 +19,8 @@ TODOs
 	- Socket Hijacking
 	- XSS
 	- Strict Transport Security
-- Mobile browser super light and faster entry bundle
-- CDN assets pack
+- Run node package in `vm` sandbox, inject API object into local variable scope of each node js file.
+- Gulp watch script enhance (detect new/delete package, watch node package)
 - Support SCSS ?
 - API to get locale information
 - Package readme file viewer

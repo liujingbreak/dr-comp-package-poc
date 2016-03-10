@@ -58,11 +58,17 @@
 }
 
 .screen-3{
-	background: radial-gradient(ellipse farthest-corner at 0% 0%, @dr-lite-dark -50%, @dr-lite-liter), @dr-lite-liter;
+	background: radial-gradient(ellipse farthest-corner at 0% 0%, @dr-dark -50%, @dr-dark-lite), @dr-dark-lite;
 	color: @dr-white;
 	.big-text {
 		font-size: @dr-fontsize-xbig;
 		padding: 1em;
+	}
+	h1 {
+		margin-bottom: 0;
+	}
+	.puppy {
+		padding-left: 3em;
 	}
 	padding: @dr-unit-triple 0;
 }
@@ -80,8 +86,11 @@
 	vertical-align: middle;
 	text-align: left;
 	font-weight: @dr-fontweight-light;
-	> * {
+	> div, > h1, > h2 {
 		white-space: nowrap;
+	}
+	pre {
+		white-space: pre;
 	}
 	.invisible {
 		opacity: 0;

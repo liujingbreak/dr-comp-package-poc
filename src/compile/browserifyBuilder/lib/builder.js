@@ -78,6 +78,9 @@ function compile(api) {
 		}
 		bundleNames = bundlesTobuild;
 	}
+	if (bundleNames.length <= 0) {
+		return Promise.resolve();
+	}
 	// if (argv['only-js']) {
 	// 	buildCss = false;
 	// }
@@ -581,7 +584,8 @@ function packageNames2bundles(packageNames, moduleMap) {
 		}
 		bundleSet[moduleMap[name].bundle] = true;
 	});
-	return _.keys(bundleSet);
+	var bundles = _.keys(bundleSet);
+	return bundles;
 }
 
 var bundleLog = require('@dr/logger').getLogger('browserifyBuilder.buildBundle');

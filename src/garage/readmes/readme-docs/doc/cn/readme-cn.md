@@ -177,6 +177,18 @@ var anotherPackage = require('@dr/some-useful-component')
 ```javascript
 require('jquery');
 ```
+Browser端JS还可以关联html文件
+```javascript
+var template = require('../views/template1.html');
+
+angular.module('docHome').run(['$templateCache', function($templateCache) {
+		$templateCache.put('screens.html', template);
+	}]);
+```
+这是得益于**html-browserify**插件
+
+> 基于Browserify对平台所有browser package的编译打包都是由组件@dr-core/browserify-builder 和 @dr-core/parcelify-module-resolver实现的。
+可以通过添加更多编译功能的package来支持更多类型的browser端的运行方式。[平台是如何工作的](how-does-it-work.md)
 
 **LESS/CSS 关联**
 
@@ -240,21 +252,28 @@ browserify会忽略bundle属性， 每一个@dr package会被打包单独的bund
 本地配置覆盖文件 [/config.local.yaml](../config.local.yaml)
 
 ##### Node package读取平台配置
+
 ```javascript
 var env = require('@dr/environment');
 var devMode = env.config().devMode;
+// or
+module.exports = {
+	activate: function(api) {
+		console.log(api.config().staticAssetsURL);
+	}
+}
 ```
 
 ##### browser package 读取平台配置
-TBD. 没有实现
 
+```javascript
+console.log(__api.config().staticAssetsURL);
+```
+
+> 请参看[API spec](api-spec-cn.md)
 
 ##### Gulp usage ######
-- 执行gulp 查看帮助
-- 初次编译 `gulp build`
-- 每次修改过package后， `gulp compile [-b <bundle/packageName>]`
-- 改动过 package.json, 新增减package，需要`gulp link`
-- 清理环境 `gulp clean`
+[Gulp命令说明](gulp-command-cn.md)
 
 ```
 Usage: gulp <command> [-b <bundle>] [-p package]
@@ -271,14 +290,24 @@ Commands:
   install-recipe  link newly changed package.json files to recipe folder and
                   `npm install` them, this makes sure all dependencies being
                   installed
+  watch           automatically rebuild specific bundle file when changes on
+                  browser packages source code is detected, if you change any
+                  package.json or add/remove packages, you need to restart watch
+                  command
   link            link newly changed package.json files to recipe folder
 
 Options:
   -b, --bundle   <bundle-name> if used with command `compile` or `build`, it
                  will only compile specific bundle, which is more efficient
-  -p, --package  <package-short-name> if used with command `lint`, it will only
-                 check specific package
-  --only-js      only rebuild JS bundles
+  -p, --package  <package-short-name> if used with command `compile`, `build`,
+                 `lint`, it will only build and check style on specific package,
+                 which is more efficient
   --only-css     only rebuild CSS bundles
+  -d             <src foldr> if used with command `link`, it will link packages
+                 from specific folder instead of `srcDir` configured in
+                 config.yaml
+  -r             <recipe foldr> if used with command `link`, it will link
+                 packages only to specific recipe folder instead of
+                 `recipeFolder` configured in config.yaml
   -h, --help     Show help                                             [boolean]
 ```

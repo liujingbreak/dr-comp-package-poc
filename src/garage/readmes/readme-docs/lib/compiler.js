@@ -31,7 +31,7 @@ var mk = new Markdown({
 });
 
 function compile(_packageUtils, _config, argv) {
-	if (argv.b && argv.b !== 'readme-docs') {
+	if (argv.p && argv.p !== 'readme-docs') {
 		log.info('skip readme compilation');
 		return;
 	}

@@ -50,4 +50,16 @@ function buildScenes(scrollControl, iElement, scope) {
 			}
 		}
 	});
+
+	var screen3 = iElement.find('.screen-3');
+	scrollControl.scene({
+		triggerElement: screen3,
+		delayPercent: 50,
+		startup: function(reverse, offset) {
+			if (!reverse) {
+				scope.introVm.showScreen3Text = true;
+				scope.$apply();
+			}
+		}
+	});
 }

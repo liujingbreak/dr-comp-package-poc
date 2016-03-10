@@ -3,7 +3,7 @@ var through = require('through2');
 var Path = require('path');
 var fs = require('fs');
 var es = require('event-stream');
-var log = require('log4js').getLogger('assetsProcesser');
+var log;
 var buildUtils = require('@dr/environment').buildUtils;
 
 var packageUtils, config;
@@ -13,10 +13,11 @@ module.exports = {
 };
 
 function compile(api) {
+	log = require('log4js').getLogger(api.packageName);
 	var argv = api.argv;
 	packageUtils = api.packageUtils;
 	config = api.config;
-	if (config().devMode && argv.b && argv.b !== 'assets') {
+	if (config().devMode && argv.p && argv.p !== 'assets') {
 		return;
 	}
 	return copyAssets();

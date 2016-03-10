@@ -48,9 +48,9 @@ drScrollableAnim.$inject = ['ScrollableAnim', '$timeout', '$window'];
 function drTextAnim($timeout) {
 	return {
 		scope: {
-			timeline: '=',
+			timeline: '=', // optional
 			onComplete: '&',
-			drTextAnim: '=',
+			drTextAnim: '=', // if true, timeline begins
 			timelinePos: '@',
 			duration: '@'
 		},
