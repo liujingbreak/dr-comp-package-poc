@@ -66,10 +66,11 @@ function drTextAnim($timeout) {
 				//iElement.addClass('dr-text-anim-hidden');
 				var text = iElement.text();
 				$timeout(function() {
-					var height = iElement.prop('clientHeight');
-					var width = iElement.prop('clientWidth');
+					console.log(iElement.css('width'));
+					var height = iElement.height();
+					var width = iElement.width();
 					iElement.css({
-						width: width + 'px', height: height + 'px'
+						minWidth: width + 'px', minHeight: height + 'px'
 					});
 					iElement.html('');
 				}, 0, false);
