@@ -85,7 +85,7 @@ gulp.task('clean:recipe:internal', function() {
 });
 
 gulp.task('clean:dist', function() {
-	return del([config().destDir]);
+	return del([config().staticDir, config().destDir]);
 });
 
 gulp.task('clean', ['clean:dist', 'clean:dependency', 'clean:recipe']);

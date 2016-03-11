@@ -9,23 +9,41 @@ var PluginError = gutil.PluginError;
 var File = require('vinyl');
 var swig = require('swig');
 var log = require('@dr/logger').getLogger('browserifyBuilder.pageCompiller');
+var packageUtils = require('@dr/environment').packageUtils;
 
-exports.stream = function() {
-	var buildInfo;
+module.exports = PageCompiler;
 
+function PageCompiler() {
+	this.builderInfo = null;
+	this.rootPackage = null;
+}
+
+/**
+ * @param  {string} pageType 'server' or 'static'
+ * @return {transform}          [description]
+ */
+PageCompiler.prototype.compile = function(pageType) {
+	var compiler = this;
 	return through.obj(function(param, encoding, cb) {
-		log.info('------- compiling changed entry pages ---------');
+		log.info('------- compiling changed entry server pages ---------');
 		log.info('(Only the pages which depend on any changed bundles will be replaced)');
-		buildInfo = param;
+
+		if (!compiler.buildInfo) {
+			compiler.buildInfo  = param;
+			var contextPathMapping = compiler.buildInfo.config().packageContextPathMapping;
+			if (contextPathMapping) {
+				compiler.rootPackage = findRootContextPackage(contextPathMapping);
+			}
+		}
 		cb();
 	}, function(cb) {
+		var buildInfo = compiler.buildInfo;
 		var promises = [];
 		var self = this;
 		_.forOwn(buildInfo.packageInfo.entryPageMap, function(instance, name) {
 			if (!needUpdateEntryPage(buildInfo.builtBundles, buildInfo.bundleDepsGraph[name])) {
 				return;
 			}
-			log.info('Entry page replaced: ' + instance.entryHtml);
 
 			var prom = Q.nfcall(fs.readFile, instance.entryHtml, 'utf-8')
 			.then(function(content) {
@@ -35,16 +53,22 @@ exports.stream = function() {
 
 				var htmlName = Path.basename(instance.entryHtml);
 				var pageRelFolder = Path.relative(instance.packagePath, Path.dirname(instance.entryHtml));
-				if (instance.isEntryServerTemplate) {
+				if ((pageType === 'server' && instance.isEntryServerTemplate) ||
+					pageType === 'static' && !instance.isEntryServerTemplate) {
+					log.info('Entry page replaced: ' + instance.entryHtml);
+					var pagePath = Path.resolve(instance.shortName, pageRelFolder, htmlName);
 					self.push(new File({
-						path: Path.resolve('server', instance.shortName, pageRelFolder, htmlName),
+						path: pagePath,
 						contents: new Buffer(hackedHtml)
 					}));
-				} else {
-					self.push(new File({
-						path: Path.resolve('static', instance.shortName, pageRelFolder, htmlName),
-						contents: new Buffer(hackedHtml)
-					}));
+					if (pageType === 'static' && compiler.rootPackage === instance.shortName) {
+						pagePath = Path.resolve(pageRelFolder, htmlName);
+						log.debug('copy root entry page of ' + compiler.rootPackage);
+						self.push(new File({
+							path: pagePath,
+							contents: new Buffer(hackedHtml)
+						}));
+					}
 				}
 			});
 			promises.push(prom);
@@ -55,8 +79,21 @@ exports.stream = function() {
 			log.error(err);
 			self.emit('error', new PluginError('browserifyBuilder.pageCompiler', err.stack, {showStack: true}));
 		});
-	});
+	} );
 };
+
+
+function findRootContextPackage(mapping) {
+	var rootPackage;
+	_.some(mapping, function(path, name) {
+		if (path === '/') {
+			rootPackage = packageUtils.parseName(name).name;
+			return true;
+		}
+		return false;
+	});
+	return rootPackage;
+}
 
 function needUpdateEntryPage(builtBundles, bundleSet) {
 	return builtBundles.some(function(bundleName) {

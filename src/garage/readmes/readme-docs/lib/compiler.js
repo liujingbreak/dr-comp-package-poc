@@ -57,7 +57,7 @@ function compile(_packageUtils, _config, argv) {
 			}
 			next(null, file);
 		}))
-		.pipe(gulp.dest(config().destDir + '/static/' + distDir))
+		.pipe(gulp.dest(config().staticDir + '/' + distDir))
 		.pipe(revAll.manifestFile())
 		.pipe(mergeWithExistingMani(readmePackagePath))
 		.pipe(gulp.dest(config().destDir))

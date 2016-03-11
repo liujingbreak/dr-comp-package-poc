@@ -47,7 +47,7 @@ function create(app, setting, packageCache) {
 	setupApi.createPackageDefinedMiddleware(app);
 	setupApi.createPackageDefinedRouters(app);
 
-	var assetsFolder = path.resolve(setting.rootPath, setting.destDir, 'static');
+	var assetsFolder = path.resolve(setting.rootPath, setting.staticDir);
 	log.debug('express static path: ' + assetsFolder);
 	app.use('/', express.static(assetsFolder, {
 		maxAge: ms(setting.cacheControlMaxAge),

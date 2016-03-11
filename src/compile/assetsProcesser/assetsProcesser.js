@@ -42,7 +42,7 @@ function copyAssets() {
 	});
 
 	return es.merge(streams)
-	.pipe(gulp.dest(Path.join(config().destDir, 'static', 'assets')))
+	.pipe(gulp.dest(Path.join(config().staticDir, 'assets')))
 	.on('end', function() {
 		log.debug('flush');
 		buildUtils.writeTimestamp('assets');

@@ -30,6 +30,7 @@ var log;
 var packageBrowserInstance = require('./packageBrowserInstance');
 var helperFactor = require('./browserifyHelper');
 var FileCache = require('./fileCache');
+var PageCompiler = require('./pageCompiler');
 var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
 
 var packageUtils, config, jsBundleEntryMaker;
@@ -96,17 +97,18 @@ function compile(api) {
 		bundleNames.forEach(function(bundle) {
 			log.info(chalk.magenta(bundle));
 			var buildObj = buildBundle(packageInfo.bundleMap[bundle],
-				bundle, Path.join(config().destDir, 'static'), depsMap);
+				bundle, Path.join(config().staticDir), depsMap);
 			cssPromises.push(buildObj.cssPromise);
 			jsStreams.push(buildObj.jsStream);
 		});
 		return Promise.all(cssPromises);
 	}).then(function(cssBundlePaths) {
+		var pageCompiler = new PageCompiler();
 		return new Promise(function(resolve, reject) {
 			log.debug('bundles stream created');
 			var outStreams;
 			if (buildCss) {
-				outStreams = jsStreams.concat(gulp.src(cssBundlePaths, {base: Path.resolve(config().destDir, 'static')}));
+				outStreams = jsStreams.concat(gulp.src(cssBundlePaths, {base: Path.resolve(config().staticDir)}));
 			}
 			bundleStream = es.merge(outStreams).on('error', function(er) {
 				log.error(er);
@@ -132,8 +134,10 @@ function compile(api) {
 					this.push(pageCompilerParam);
 					callback();
 				}))
-			.pipe(require('./pageCompiler').stream())
-			.pipe(gulp.dest(config().destDir))
+			.pipe(pageCompiler.compile('server'))
+			.pipe(gulp.dest(Path.join(config().destDir, 'server')))
+			.pipe(pageCompiler.compile('static'))
+			.pipe(gulp.dest(config().staticDir))
 			.on('finish', resolve);
 		});
 	}).then(_.bind(fileCache.tailDown, fileCache));
@@ -497,7 +501,7 @@ function compile(api) {
 			.pipe(revFilter)
 			.pipe(revAll.revision())
 			.pipe(revFilter.restore)
-			.pipe(gulp.dest(Path.join(config().destDir, 'static')))
+			.pipe(gulp.dest(Path.join(config().staticDir)))
 			.pipe(revAll.manifestFile())
 			.pipe(through.obj(function(row, encode, next) {
 				var file = Path.join(config().destDir, Path.basename(row.path));
