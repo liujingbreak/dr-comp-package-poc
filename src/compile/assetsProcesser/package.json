@@ -1,11 +1,11 @@
 {
   "name": "@dr-core/assets-processer",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Copy assets to destDir folder only when devMode is false",
   "main": "assetsProcesser.js",
   "dr": {
-	  "type": "builder",
-	  "priority": 2000
+    "type": "builder",
+    "priority": 2000
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

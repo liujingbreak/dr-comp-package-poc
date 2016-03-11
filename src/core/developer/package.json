@@ -1,6 +1,6 @@
 {
   "name": "@dr-core/developer",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "enable some dev environment helper tool and settings",
   "main": "developer.js",
   "browser": "developer.js",

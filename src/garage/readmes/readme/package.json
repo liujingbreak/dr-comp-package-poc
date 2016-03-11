@@ -1,10 +1,10 @@
 {
   "name": "@dr/readme",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Readme file mapping",
   "browser": "browser/index.js",
   "dr": {
-	  "bundle": "home"
+    "bundle": "home"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

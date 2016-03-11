@@ -1,11 +1,13 @@
 {
   "name": "@dr/example-common",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "",
   "browser": "browser.js",
   "main": "server.js",
   "style": "main.less",
-  "transforms": [ "@dr/parcelify-module-resolver" ],
+  "transforms": [
+    "@dr/parcelify-module-resolver"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

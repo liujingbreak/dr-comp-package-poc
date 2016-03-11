@@ -1,12 +1,12 @@
 {
   "name": "@dr/environment",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Runtime object holds api and config object",
   "main": "index.js",
   "browser": "browser.js",
   "dr": {
-	  "bundle": "core",
-	  "type": "core"
+    "bundle": "core",
+    "type": "core"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

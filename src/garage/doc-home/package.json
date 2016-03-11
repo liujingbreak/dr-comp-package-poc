@@ -1,17 +1,18 @@
 {
   "name": "@dr/doc-home",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Home page",
   "browser": "browser/js/index.js",
   "main": "server/server.js",
   "style": "browser/style/main.less",
-  "transforms": [ "@dr/parcelify-module-resolver"],
+  "transforms": [
+    "@dr/parcelify-module-resolver"
+  ],
   "dr": {
-	  "bundle": "home",
-	  "entryPage": "index.html"
+    "bundle": "home",
+    "entryPage": "index.html"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
