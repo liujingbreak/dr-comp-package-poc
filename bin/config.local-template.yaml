@@ -1,0 +1,7 @@
+# If you are not familiar with YAML format just like me,
+# read https://en.wikipedia.org/wiki/YAML
+
+devMode: true
+# During developing, you can set this to `true` to make every package to a single bundle
+bundlePerPackage: true
+cacheControlMaxAge: 0

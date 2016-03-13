@@ -1,0 +1,11 @@
+{
+  "name": "@dr/examples-recipe",
+  "version": "0.0.0",
+  "description": "Recipe package of examples-recipe",
+  "dependencies": {
+    "@dr/example-browserify": "0.0.4",
+    "@dr/example-common": "1.0.5",
+    "@dr/example-dr": "1.0.11",
+    "@dr/example-node": "1.0.11"
+  }
+}

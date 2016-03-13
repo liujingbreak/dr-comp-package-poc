@@ -270,7 +270,7 @@ function compile(api) {
 		var packageInfoCacheFile = Path.join(config().destDir, 'packageInfo.json');
 		var packageInfo;
 		if (!argv.b || argv.b.length === 0 || !!fs.existsSync(config().destDir) || !fs.existsSync(packageInfoCacheFile)) {
-			packageInfo = _walkPackages(Path.resolve(config().rootPath, config().recipeFolder, 'package.json'));
+			packageInfo = _walkPackages();
 			mkdirp.sync(config().destDir);
 			fs.writeFile(packageInfoCacheFile, JSON.stringify(cycle.decycle(packageInfo), null, '\t'));
 		} else {
@@ -281,11 +281,9 @@ function compile(api) {
 		return packageInfo;
 	}
 	/**
-	 *
-	 * @param  {string} packageJsonFile path of package.json
 	 * @return {PackageInfo}
 	 */
-	function _walkPackages(packageJsonFile) {
+	function _walkPackages() {
 		/**
 		 * @typedef PackageInfo
 		 * @type {Object}
@@ -300,10 +298,6 @@ function compile(api) {
 			bundleMap: null,
 			entryPageMap: {}
 		};
-		var recipePackageJson = JSON.parse(fs.readFileSync(packageJsonFile, 'utf-8'));
-		if (!recipePackageJson.dependencies) {
-			return {};
-		}
 		var vendorConfigInfo = vendorBundleMapConfig();
 		var map = info.bundleMap = vendorConfigInfo.bundleMap;
 		info.allModules = vendorConfigInfo.allModules;

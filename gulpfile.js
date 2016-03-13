@@ -20,10 +20,10 @@ var cli = require('shelljs-nodecli');
 var Jasmine = require('jasmine');
 
 var findPackageJson = require('./lib/gulp/findPackageJson');
-var rwPackageJson = require('./lib/gulp/rwPackageJson');
 var packageLintableSrc = require('./lib/gulp/packageLintableSrc');
 var packageUtils = require('./lib/packageMgr/packageUtils');
 var watchPackages = require('./lib/gulp/watchPackages');
+var recipeManager = require('./lib/gulp/recipeManager');
 var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package]\n' +
 	'$0 link [-r <recipe folder>] [-d <src folder>]')
 	.command('build', 'build everything from scratch, including install-recipe, link, npm install, compile')
@@ -63,25 +63,8 @@ gulp.task('clean:dependency', function() {
 	return del(dirs).then(gutil.log, gutil.log);
 });
 
-gulp.task('clean:recipe', ['clean:recipe:internal'], function() {
-	if (!config().recipeFolderPath) {
-		return;
-	}
-	gulp.src(config().recipeFolderPath + '/package.json', {base: config().rootPath})
-	.pipe(rwPackageJson.removeDependency())
-	.pipe(gulp.dest('.'));
-});
-
-gulp.task('clean:recipe:internal', function() {
-	if (config().dependencyMode) {
-		return Promise.resolve();
-	}
-	if (config().internalRecipeFolderPath === config().recipeFolderPath) {
-		return;
-	}
-	gulp.src(config().internalRecipeFolderPath + '/package.json', {base: __dirname})
-	.pipe(rwPackageJson.removeDependency())
-	.pipe(gulp.dest('.'));
+gulp.task('clean:recipe', function() {
+	recipeManager.clean();
 });
 
 gulp.task('clean:dist', function() {
@@ -109,11 +92,9 @@ gulp.task('build', ['install-recipe', 'link'], function() {
 
 gulp.task('install-recipe', ['link'], function() {
 	var promises = [];
-	if (!config().dependencyMode && config().internalRecipeFolderPath !== config().recipeFolderPath) {
-		promises.push(installRecipe(config().internalRecipeFolderPath));
-	}
-	promises.push(installRecipe(config().recipeFolderPath));
-
+	recipeManager.eachRecipe(function(src, recipeDir) {
+		promises.push(installRecipe(recipeDir));
+	});
 	return Promise.all(promises);
 });
 
@@ -149,17 +130,7 @@ gulp.task('lint', function() {
  * link src/ ** /package.json from node_modules folder
  */
 gulp.task('link', function() {
-	var srcDir = argv.d ? [].concat(argv.d) : config().srcDir;
-	var recipeDir = argv.r ? argv.r : config().recipeFolder;
-	return gulp.src(srcDir)
-		.pipe(findPackageJson())
-		.on('error', gutil.log)
-		.pipe(rwPackageJson.linkPkJson('node_modules'))
-		.on('error', gutil.log)
-		.pipe(gulp.dest('node_modules'))
-		.on('error', gutil.log)
-		.pipe(rwPackageJson.addDependency(Path.resolve(config().rootPath, recipeDir, 'package.json')))
-		.pipe(gulp.dest('.'));
+	return recipeManager.link();
 });
 
 gulp.task('compile', function() {
@@ -198,7 +169,11 @@ gulp.task('test-house', function() {
 });
 
 gulp.task('publish', function() {
-	return gulp.src(config().srcDir)
+	var srcDirs = [];
+	recipeManager.eachRecipe(function(src, recipe) {
+		srcDirs.push(src);
+	});
+	return gulp.src(srcDirs)
 		.pipe(findPackageJson())
 		.on('error', gutil.log)
 		.pipe(vps(function(paths) {

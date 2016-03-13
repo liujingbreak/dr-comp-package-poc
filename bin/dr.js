@@ -36,18 +36,10 @@ function init() {
 	content = content.replace('<plateformFolder>', relativePath);
 	fs.writeFileSync(Path.join(argv.d, 'gulpfile.js'), content, 'utf8');
 	shell.cp(Path.resolve(__dirname, 'config-template.yaml'), argv.d + '/config.local.yaml');
+	shell.cp(Path.resolve(__dirname, 'config.local-template.yaml'), argv.d + '/config.local.yaml');
+	shell.cp(Path.resolve(__dirname, 'app-template.js'), argv.d + '/app.js');
 	console.info('gulpfile.js, config.local.yaml copied');
 
-	var recipeFile = Path.join(argv.d, 'package.json');
-	if (!fs.existsSync(recipeFile)) {
-		console.info('package.json doesn\'t exist, create a new one');
-
-		fs.writeFileSync(recipeFile, JSON.stringify({
-			name: '@dr/' + Path.basename(argv.d) + '-recipe',
-			version: '0.0.0',
-			description: 'package components list'
-		}, null, '\t'), 'utf8');
-	}
 	if (!fs.existsSync(argv.d + '/.jscsrc')) {
 		shell.cp(Path.resolve(__dirname, '..', '.jscsrc'), argv.d + '/');
 		console.info('.jscsrc copied');
@@ -57,6 +49,11 @@ function init() {
 		console.info('.jshintrc copied');
 	}
 	shell.mkdir('src');
+	console.log(chalk.magenta('   -------------------------------------------------------'));
+	console.log(chalk.magenta(' < Congrads! Remember, all your packages are belong to us! >'));
+	console.log(chalk.magenta('   -------------------------------------------------------'));
+	console.log(chalk.magenta('\t\\   ^__^\n\t \\  (oo)\\_______\n\t    (__)\\       )\\/\\\n\t        ||----w |\n\t        ||     ||'));
+	console.log('Now you can run commands `npm install` `gulp build` `node app.js`');
 }
 
 function _checkFolder() {
@@ -66,6 +63,10 @@ function _checkFolder() {
 	}
 	if (fs.existsSync(Path.resolve(argv.d, 'config.local.yaml'))) {
 		console.error(chalk.red('config.local.yaml already exists, please remove or rename it'));
+		process.exit();
+	}
+	if (fs.existsSync(Path.resolve(argv.d, 'app.js'))) {
+		console.error(chalk.red('app.js already exists, please remove or rename it'));
 		process.exit();
 	}
 }
