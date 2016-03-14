@@ -1,3 +1,15 @@
 recipeSrcMapping:
     hellow-world-recipe: src
+
+# Recipes which are installed from registry server, they are owned by other contributors,
+# add to this list to make them a part of you server.
+#
+# You need to manually run commands to make sure them downloaded.
+#  npm install @dr/garage-recipe
+#  npm install @dr/examples-recipe
+# And maybe specify a version number like `npm install @dr/garage-recipe@0.0.0`
+installedRecipes:
+    # - node_modules/@dr/garage-recipe
+    # - node_modules/@dr/examples-recipe
+
 port: 14334

@@ -35,8 +35,9 @@ function init() {
 	}
 	content = content.replace('<plateformFolder>', relativePath);
 	fs.writeFileSync(Path.join(argv.d, 'gulpfile.js'), content, 'utf8');
-	shell.cp(Path.resolve(__dirname, 'config-template.yaml'), argv.d + '/config.local.yaml');
+	shell.cp(Path.resolve(__dirname, 'config-template.yaml'), argv.d + '/config.yaml');
 	shell.cp(Path.resolve(__dirname, 'config.local-template.yaml'), argv.d + '/config.local.yaml');
+	shell.cp(Path.resolve(__dirname, '..', 'log4js.json'), argv.d + '/log4js.json');
 	shell.cp(Path.resolve(__dirname, 'app-template.js'), argv.d + '/app.js');
 	console.info('gulpfile.js, config.local.yaml copied');
 

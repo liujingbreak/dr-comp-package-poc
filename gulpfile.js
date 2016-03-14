@@ -5,16 +5,17 @@ var gutil = require('gulp-util');
 var jshint = require('gulp-jshint');
 var jscs = require('gulp-jscs');
 var bump = require('gulp-bump');
+var through = require('through2');
 // var watchify = require('watchify');
-var es = require('event-stream');
-var vp = require('vinyl-paths');
 var del = require('del');
 var jscs = require('gulp-jscs');
 var vps = require('vinyl-paths');
+var File = require('vinyl');
 var Q = require('q');
 Q.longStackSupport = true;
 var _ = require('lodash');
 var chalk = require('chalk');
+var fs = require('fs');
 
 var cli = require('shelljs-nodecli');
 var Jasmine = require('jasmine');
@@ -50,7 +51,7 @@ require('log4js').configure(Path.join(__dirname, 'log4js.json'));
 
 gulp.task('default', function() {
 	gutil.log('please individually execute gulp [task]');
-	gutil.log('\tbuild clean, link, compile [-b <bundle> ...], bump-version, publish');
+	gutil.log('\tbuild clean, link, compile [-b <bundle> ...], bump, publish');
 });
 
 gulp.task('clean:dependency', function() {
@@ -91,15 +92,23 @@ gulp.task('build', ['install-recipe', 'link'], function() {
 });
 
 gulp.task('install-recipe', ['link'], function() {
-	var promises = [];
-	recipeManager.eachRecipe(function(src, recipeDir) {
-		promises.push(installRecipe(recipeDir));
+	var prom = Promise.resolve();
+	if (config().dependencyMode) {
+		prom = prom.then(function() {
+			return installRecipe(config().internalRecipeFolderPath);
+		});
+	}
+	recipeManager.eachRecipeSrc(function(src, recipeDir) {
+		prom = prom.then(function() {
+			return installRecipe(recipeDir);
+		});
 	});
-	return Promise.all(promises);
+	return prom;
 });
 
 function installRecipe(recipeDir) {
 	return new Promise(function(resolve, reject) {
+		gutil.log('install ' + recipeDir);
 		cli.exec('npm', 'install', recipeDir, function(code, output) {
 			if (code === 0) {
 				resolve(code);
@@ -144,22 +153,48 @@ gulp.task('watch', function() {
  * TODO: bump dependencies version
  */
 gulp.task('bump', function() {
-	return es.merge(
-		gulp.src(config().srcDir)
+	var srcDirs = [];
+	var recipes = [];
+	recipeManager.eachRecipeSrc(function(src, recipe) {
+		srcDirs.push(src);
+		recipes.push(recipe);
+	});
+	var stream = gulp.src(srcDirs)
 		.pipe(findPackageJson())
-		.pipe(vp(function(path) {
-			return new Promise(function(resolve, reject) {
-				gulp.src(path).pipe(bumpVersion())
-					.on('error', gutil.log)
-					.pipe(gulp.dest(Path.dirname(path)))
-					.on('end', resolve);
+		.pipe(through.obj(function(file, enc, next) {
+			file.contents = new Buffer(fs.readFileSync(file.path, 'utf8'));
+			next(null, file);
+		}, function(next) {
+			var self = this;
+			recipes.forEach(function(recipe) {
+				self.push(new File({
+					base: config().rootPath,
+					path: Path.resolve(recipe, 'package.json'),
+					contents: new Buffer(fs.readFileSync(Path.resolve(recipe, 'package.json'), 'utf8'))
+				}));
 			});
-		})),
-		gulp.src('./package.json')
+			next();
+		})).pipe(through.obj(function(file, enc, next) {
+			file.base = config().rootPath;
+			gutil.log('bump: ' + file.path);
+			next(null, file);
+		}))
 		.pipe(bumpVersion())
-		.on('error', gutil.log)
-		.pipe(gulp.dest('.'))
-	);
+		.pipe(gulp.dest(config().rootPath));
+
+	return new Promise(function(resolve, reject) {
+		stream.on('error', function(err) {
+			reject(err);
+		})
+		.on('end', function() {
+			gulp.start('link', function(err) {
+				if (err) {
+					return reject(err);
+				}
+				resolve();
+			});
+		});
+	});
 });
 
 gulp.task('test-house', function() {
@@ -170,7 +205,7 @@ gulp.task('test-house', function() {
 
 gulp.task('publish', function() {
 	var srcDirs = [];
-	recipeManager.eachRecipe(function(src, recipe) {
+	recipeManager.eachRecipeSrc(function(src, recipe) {
 		srcDirs.push(src);
 	});
 	return gulp.src(srcDirs)
@@ -185,16 +220,10 @@ gulp.task('publish', function() {
 					});
 			});
 		})).on('end', function() {
-			if (config().dependencyMode) {
-				cli.exec('npm', 'publish', config().recipeFolder);
-			} else {
-				cli.exec('npm', 'publish', config().internalRecipeFolderPath);
-				if (config().recipeFolderPath &&
-				config().recipeFolderPath !== config().internalRecipeFolderPath) {
-					cli.exec('npm', 'publish', config().recipeFolderPath);
-				}
-				cli.exec('npm', 'publish', '.');
-			}
+			recipeManager.eachRecipeSrc(function(src, recipeDir) {
+				cli.exec('npm', 'publish', recipeDir);
+			});
+			cli.exec('npm', 'publish', '.');
 		});
 });
 

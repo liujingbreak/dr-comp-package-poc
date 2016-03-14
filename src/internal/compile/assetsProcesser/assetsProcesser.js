@@ -40,7 +40,9 @@ function copyAssets() {
 			streams.push(stream);
 		}
 	});
-
+	if (streams.length === 0) {
+		return null;
+	}
 	return es.merge(streams)
 	.pipe(gulp.dest(Path.join(config().staticDir, 'assets')))
 	.on('end', function() {

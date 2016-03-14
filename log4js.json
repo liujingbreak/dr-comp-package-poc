@@ -4,6 +4,7 @@
 	}],
 	"levels": {
 		"[all]": "DEBUG",
+		"rwPackageJson": "INFO",
 		"@dr-core/browserify-builder": "INFO",
 		"browserifyBuilder.pageCompiller": "TRACE"
 	}

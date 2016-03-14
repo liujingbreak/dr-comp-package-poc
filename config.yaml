@@ -66,10 +66,11 @@ bundlePerPackage: false
 # even it is under node_modules folder loaded as dependency
 internalRecipeFolder: package-recipe
 
-# If you are about to read this property programatically, read `recipeFolderPath`
-# instead. It will be resolved to relative to process.cwd() folder, that what it
-# means to be.
-#recipeFolder: package-recipe
+# If you want to split your source code to different recipes
 recipeSrcMapping:
     garage-recipe: src/garage
     examples-recipe: src/examples
+
+# Recipes which are installed from registry server, they are owned by other contributors,
+# add to this list to make them a part of you server.
+installedRecipes: []
