@@ -10,6 +10,5 @@ recipeSrcMapping:
 # And maybe specify a version number like `npm install @dr/garage-recipe@0.0.0`
 installedRecipes:
     # - node_modules/@dr/garage-recipe
-    # - node_modules/@dr/examples-recipe
 
 port: 14334

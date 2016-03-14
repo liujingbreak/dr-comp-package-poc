@@ -35,10 +35,15 @@ function init() {
 	}
 	content = content.replace('<plateformFolder>', relativePath);
 	fs.writeFileSync(Path.join(argv.d, 'gulpfile.js'), content, 'utf8');
+	shell.mkdir('-p', 'src/examples');
 	shell.cp(Path.resolve(__dirname, 'config-template.yaml'), argv.d + '/config.yaml');
 	shell.cp(Path.resolve(__dirname, 'config.local-template.yaml'), argv.d + '/config.local.yaml');
 	shell.cp(Path.resolve(__dirname, '..', 'log4js.json'), argv.d + '/log4js.json');
 	shell.cp(Path.resolve(__dirname, 'app-template.js'), argv.d + '/app.js');
+	shell.cp('-R', [
+		Path.resolve(__dirname, 'examples', 'example-entry'),
+		Path.resolve(__dirname, 'examples', 'example-node'),
+	], argv.d + '/src/examples/');
 	console.info('gulpfile.js, config.local.yaml copied');
 
 	if (!fs.existsSync(argv.d + '/.jscsrc')) {
@@ -49,7 +54,7 @@ function init() {
 		shell.cp(Path.resolve(__dirname, '..', '.jshintrc'), argv.d + '/');
 		console.info('.jshintrc copied');
 	}
-	shell.mkdir('src');
+
 	console.log(chalk.magenta('   -------------------------------------------------------'));
 	console.log(chalk.magenta(' < Congrads! Remember, all your packages are belong to us! >'));
 	console.log(chalk.magenta('   -------------------------------------------------------'));

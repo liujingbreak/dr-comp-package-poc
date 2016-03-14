@@ -223,6 +223,8 @@ function compile(api) {
 				depBundleSet[bundle] = true;
 			});
 			depBundleSet[currBundle] = true;
+			// Core bundle should always be depended by all entry page modules!
+			depBundleSet.core = true;
 		});
 
 		_.forOwn(bundleDepsGraph, function(depBundleSet, entryModule) {
@@ -269,14 +271,15 @@ function compile(api) {
 	function walkPackages() {
 		var packageInfoCacheFile = Path.join(config().destDir, 'packageInfo.json');
 		var packageInfo;
-		if (!argv.b || argv.b.length === 0 || !!fs.existsSync(config().destDir) || !fs.existsSync(packageInfoCacheFile)) {
-			packageInfo = _walkPackages();
-			mkdirp.sync(config().destDir);
-			fs.writeFile(packageInfoCacheFile, JSON.stringify(cycle.decycle(packageInfo), null, '\t'));
-		} else {
+		if ( (argv.p || argv.b) && fs.existsSync(packageInfoCacheFile)) {
 			log.info('Reading build info cache from ' + packageInfoCacheFile);
 			packageInfo = JSON.parse(fs.readFileSync(packageInfoCacheFile, {encoding: 'utf8'}));
 			packageInfo = cycle.retrocycle(packageInfo);
+		} else {
+			log.info('scan for packages info');
+			packageInfo = _walkPackages();
+			mkdirp.sync(config().destDir);
+			fs.writeFile(packageInfoCacheFile, JSON.stringify(cycle.decycle(packageInfo), null, '\t'));
 		}
 		return packageInfo;
 	}
@@ -431,8 +434,8 @@ function compile(api) {
 		modules.forEach(function(module) {
 			b.require(module.longName);
 		});
-		b.transform(htmlTranform);
-		b.transform(jsBundleEntryMaker.jsTranformer(modules));
+		b.transform(htmlTranform, {global: true});
+		b.transform(jsBundleEntryMaker.jsTranformer(modules), {global: true});
 		excludeModules(packageInfo.allModules, b, _.map(modules, function(module) {return module.longName;}));
 		//browserifyInc(b, {cacheFile: Path.resolve(config().destDir, 'browserify-cache.json')});
 

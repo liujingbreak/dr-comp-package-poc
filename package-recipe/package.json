@@ -13,7 +13,7 @@
     "@dr-core/labjs": "0.0.2",
     "@dr-core/assets-processer": "0.0.2",
     "@dr-core/browserify-builder": "0.0.3",
-    "@dr-core/browserify-builder-api": "0.0.3",
+    "@dr-core/browserify-builder-api": "0.0.4",
     "@dr/parcelify-module-resolver": "0.0.2",
     "@dr-core/developer": "1.0.5",
     "@dr/environment": "0.0.2",

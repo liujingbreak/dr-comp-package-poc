@@ -1,1 +1,1 @@
-require('@dr/fe-house');
+require('web-fun-house');

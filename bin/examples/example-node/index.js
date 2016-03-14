@@ -25,7 +25,8 @@ function haveFun(api) {
 
 	api.eventBus.on('serverStarted', function() {
 		mafiaPromis.then(function(res) {
-			log.info('   "' + res + '"  ');
+			log.info('\n   "' + res + '"\n' +
+				'\t\\   ^__^\n\t \\  (oo)\\_______\n\t    (__)\\       )\\/\\\n\t        ||----w |\n\t        ||     ||');
 			def.resolve(res);
 			return res;
 		});

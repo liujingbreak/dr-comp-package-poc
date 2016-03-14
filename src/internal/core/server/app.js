@@ -73,6 +73,7 @@ function create(app, setting, packageCache) {
 	// error handlers
 	// catch 404 and forward to error handler
 	app.use(function(req, res, next) {
+		log.info('originalUrl: ' + req.originalUrl);
 		var err = new Error('Not Found');
 		err.status = 404;
 		next(err);
