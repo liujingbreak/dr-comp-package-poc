@@ -21,9 +21,14 @@ module.exports = function(controllerProvider) {
 							$location.path(docName2Route('readme-cn.md'));
 						}
 					}, {
-						label: t('Quick Start'),
+						label: t('Quick Start: I am platform developer'),
 						action: function() {
 							$location.path(docName2Route('quickstart-cn.md'));
+						}
+					}, {
+						label: t('Quick Start: I am using platform'),
+						action: function() {
+							$location.path(docName2Route('run-platform-as-tool-cn.md'));
 						}
 					}, {
 						label: t('Package.json Specification'),

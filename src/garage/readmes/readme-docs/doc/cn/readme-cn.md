@@ -8,8 +8,8 @@ Quick Start
 ### 如果你是平台开发者
 [Quick start](quickstart-cn.md)
 
-### 如果你只是使用平台
-TBD.
+### 如果你是使用平台
+[基于平台的web app开发](run-platform-as-tool-cn.md)
 
 ### 开始写一个简单package
 

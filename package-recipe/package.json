@@ -1,23 +1,18 @@
 {
-  "name": "@dr/fe-house-internal-recipe",
-  "version": "1.0.2",
-  "description": "Only as package components list",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "LJ",
-  "license": "ISC",
+  "name": "@dr/package-recipe",
+  "version": "0.0.1",
+  "description": "Recipe package of package-recipe",
   "dependencies": {
-    "@dr/angularjs": "1.0.8",
-    "@dr/gsap": "0.0.2",
-    "@dr-core/labjs": "0.0.2",
-    "@dr-core/assets-processer": "0.0.2",
-    "@dr-core/browserify-builder": "0.0.3",
-    "@dr-core/browserify-builder-api": "0.0.4",
-    "@dr/parcelify-module-resolver": "0.0.2",
-    "@dr-core/developer": "1.0.5",
-    "@dr/environment": "0.0.2",
-    "@dr-core/express-server": "0.0.11",
-    "@dr/logger": "0.0.5"
+    "@dr/angularjs": "1.0.9",
+    "@dr/gsap": "0.0.3",
+    "@dr-core/labjs": "0.0.3",
+    "@dr-core/assets-processer": "0.0.3",
+    "@dr-core/browserify-builder": "0.0.4",
+    "@dr-core/browserify-builder-api": "0.0.5",
+    "@dr/parcelify-module-resolver": "0.0.3",
+    "@dr-core/developer": "1.0.6",
+    "@dr/environment": "0.0.3",
+    "@dr-core/express-server": "0.0.12",
+    "@dr/logger": "0.0.6"
   }
 }
