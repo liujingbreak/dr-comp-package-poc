@@ -14,9 +14,9 @@ var buildUtils = require('@dr/environment').buildUtils;
 module.exports = compile;
 
 var packageUtils, config;
-const distDir = 'readme-docs';
-const srcDir = Path.resolve(__dirname, '..', 'doc');
-const readmeMappingFileName = 'readmeMapping.js';
+var distDir = 'readme-docs';
+var srcDir = Path.resolve(__dirname, '..', 'doc');
+var readmeMappingFileName = 'readmeMapping.js';
 
 var mk = new Markdown({
 	html: true,

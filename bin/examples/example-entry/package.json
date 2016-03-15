@@ -16,8 +16,5 @@
     "entryView": "index.html"
   },
   "author": "jing.liu.fe@d.com",
-  "license": "ISC",
-  "dependencies": {
-    "lodash": "^3.10.1"
-  }
+  "license": "ISC"
 }

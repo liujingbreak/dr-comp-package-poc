@@ -6,6 +6,7 @@ var jshint = require('gulp-jshint');
 var jscs = require('gulp-jscs');
 var bump = require('gulp-bump');
 var through = require('through2');
+var shell = require('shelljs');
 // var watchify = require('watchify');
 var del = require('del');
 var jscs = require('gulp-jscs');
@@ -36,6 +37,7 @@ var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package
 	.command('link', 'link newly changed package.json files to recipe folder')
 	.command('publish', 'npm publish every pakages in source code folder including all mapped recipes')
 	.command('bump', 'bump version number of all package.json, useful to call this before publishing packages')
+	.command('flatten', 'flattern NPM v2 nodule_modules structure, install-recipe comamnd will execute this command')
 	.describe('b', '<bundle-name> if used with command `compile` or `build`, it will only compile specific bundle, which is more efficient')
 	.alias('b', 'bundle')
 	.describe('p', '<package-short-name> if used with command `compile`, `build`, `lint`, it will only build and check style on specific package, which is more efficient')
@@ -50,6 +52,8 @@ var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package
 
 var config = require('./lib/config');
 require('log4js').configure(Path.join(__dirname, 'log4js.json'));
+
+var IS_NPM2 = _.startsWith(shell.exec('npm -v').output, '2.');
 
 gulp.task('default', function() {
 	gutil.log('please individually execute gulp [task]');
@@ -97,7 +101,7 @@ gulp.task('install-recipe', ['link'], function() {
 	var prom = Promise.resolve();
 	if (config().dependencyMode) {
 		prom = prom.then(function() {
-			return installRecipe(config().internalRecipeFolderPath);
+			return installRecipe(config().internalRecipeFolderPath, true);
 		});
 	}
 	recipeManager.eachRecipeSrc(function(src, recipeDir) {
@@ -105,19 +109,73 @@ gulp.task('install-recipe', ['link'], function() {
 			return installRecipe(recipeDir);
 		});
 	});
-	return prom;
+	return prom.then(flatternNpm2Folder);
 });
 
-function installRecipe(recipeDir) {
-	return new Promise(function(resolve, reject) {
-		gutil.log('install ' + recipeDir);
-		cli.exec('npm', 'install', recipeDir, function(code, output) {
-			if (code === 0) {
-				resolve(code);
-			} else {
-				reject(output);
+gulp.task('flatten', function() {
+	return flatternNpm2Folder();
+});
+
+function flatternNpm2Folder() {
+	var promises = [];
+	if (!IS_NPM2) {
+		return Promise.resolve();
+	}
+	gutil.log('NPM v2 needs flattern');
+	recipeManager.eachInstalledRecipe(function(recipeDir) {
+		var proms = new Promise(function(resolve, reject) {
+			var recipeDepDir = Path.resolve('node_modules', recipeDir, 'node_modules');
+			gutil.log('check recipe: ' + recipeDepDir);
+			try {
+				fs.accessSync(recipeDepDir, fs.R_OK);
+				gutil.log('flatten recipe node_modules folder ' + recipeDir);
+				shell.mv('node_modules/' + recipeDir + '/node_modules/*', 'node_modules/');
+				fs.rmdirSync(recipeDepDir);
+			} catch (err) {
 			}
+			var deps = JSON.parse(fs.readFileSync(Path.join(recipeDir, 'package.json'), 'utf8')).dependencies;
+			_.forOwn(deps, function(ver, name) {
+				try {
+					var componentDef = Path.join('node_modules', name, 'node_modules');
+					gutil.log('check package: ' + componentDef);
+					fs.accessSync(componentDef, fs.R_OK);
+					shell.mv('node_modules/' + name + '/node_modules/*', 'node_modules/');
+					fs.rmdirSync(componentDef);
+				} catch (err) {}
+			});
+			resolve();
 		});
+		promises.push(proms);
+	});
+	return Promise.all(promises);
+}
+
+function installRecipe(recipeDir, download) {
+	return new Promise(function(resolve, reject) {
+		if (IS_NPM2) {
+			var deps = JSON.parse(fs.readFileSync(Path.join(recipeDir, 'package.json'), 'utf8')).dependencies;
+			_.forOwn(deps, function(ver, name) {
+				var parsedName = packageUtils.parseName(name);
+				var target = download ? name : Path.join('node_modules', '@' + parsedName.scope, parsedName.name);
+
+				cli.exec('npm', 'install', target, function(code, output) {
+					if (code === 0) {
+						resolve(code);
+					} else {
+						reject(output);
+					}
+				});
+			});
+		} else {
+			gutil.log('install ' + recipeDir);
+			cli.exec('npm', 'install', recipeDir, function(code, output) {
+				if (code === 0) {
+					resolve(code);
+				} else {
+					reject(output);
+				}
+			});
+		}
 	});
 }
 

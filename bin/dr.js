@@ -28,12 +28,13 @@ if (argv._ && argv._[0]) {
 
 function init() {
 	_checkFolder();
+	var projectName = JSON.parse(fs.readFileSync(Path.join(__dirname, '..', 'package.json'), 'utf8')).name;
 	var content = fs.readFileSync(Path.join(__dirname, 'gulpfile-template.js'), 'utf8');
 	var relativePath = Path.relative(argv.d, rootPath);
 	if (!_.startsWith(relativePath, '.')) {
 		relativePath = './' + relativePath;
 	}
-	content = content.replace('<plateformFolder>', relativePath);
+	content = content.replace('<plateformFolder>', relativePath.replace('\\', '/'));
 	fs.writeFileSync(Path.join(argv.d, 'gulpfile.js'), content, 'utf8');
 	shell.mkdir('-p', 'src/examples');
 	shell.cp(Path.resolve(__dirname, 'config-template.yaml'), argv.d + '/config.yaml');
@@ -44,6 +45,14 @@ function init() {
 		Path.resolve(__dirname, 'examples', 'example-entry'),
 		Path.resolve(__dirname, 'examples', 'example-node'),
 	], argv.d + '/src/examples/');
+	// to solve npm 2.0 nested node_modules folder issue
+	var nestedDep = 'node_modules/' + projectName + '/node_modules';
+	fs.access(nestedDep, fs.R_OK, function(err) {
+		if (!err) {
+			console.info('Your NPM is old v2.x.x, and I hate it');
+			shell.mv('node_modules/' + projectName + '/node_modules/*', argv.d + '/node_modules/');
+		}
+	});
 	console.info('gulpfile.js, config.local.yaml copied');
 
 	if (!fs.existsSync(argv.d + '/.jscsrc')) {
