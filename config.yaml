@@ -16,7 +16,6 @@ port: 14333 # read by @dr-core/express-server
 cacheControlMaxAge: "365 days"
 packageScopes:
   - dr
-  # dr-core is considered as special packages which will be loaded before other packages
   - dr-core
 
 nodeRoutePath: /

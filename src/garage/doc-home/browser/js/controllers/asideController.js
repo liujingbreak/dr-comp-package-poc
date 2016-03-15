@@ -36,6 +36,11 @@ module.exports = function(controllerProvider) {
 							$location.path(docName2Route('package-spec-cn.md'));
 						}
 					}, {
+						label: t('环境配置和gulp命令提示'),
+						action: function() {
+							$location.path(docName2Route('dev-env-hints.md'));
+						}
+					}, {
 						label: t('API Specification'),
 						action: function() {
 							$location.path(docName2Route('api-spec-cn.md'));
