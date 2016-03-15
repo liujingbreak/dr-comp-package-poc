@@ -12,6 +12,7 @@ var del = require('del');
 var jscs = require('gulp-jscs');
 var vps = require('vinyl-paths');
 var File = require('vinyl');
+var mkdirp = require('mkdirp');
 var Q = require('q');
 Q.longStackSupport = true;
 var _ = require('lodash');
@@ -98,19 +99,124 @@ gulp.task('build', ['install-recipe', 'link'], function() {
 });
 
 gulp.task('install-recipe', ['link'], function() {
+	var lookingForDeps = configuredVendors();
 	var prom = Promise.resolve();
 	if (config().dependencyMode) {
-		prom = prom.then(function() {
-			return installRecipe(config().internalRecipeFolderPath, true);
+		prom = prom
+		.then(function() {
+			return installRecipe(config().internalRecipeFolderPath);
+		})
+		.then(function() {
+			var recipeName = JSON.parse(fs.readFileSync(
+				Path.resolve(config().internalRecipeFolderPath, 'package.json'), 'utf8')).name;
+			var parsedName = packageUtils.parseName(recipeName);
+			var installedPath = parsedName.scope ?
+				Path.resolve('node_modules', '@' + parsedName.scope, parsedName.name) :
+				Path.resolve('node_modules', parsedName.name);
+			return flattenInstalledRecipe(installedPath, lookingForDeps);
 		});
 	}
+	var depSet = {};
 	recipeManager.eachRecipeSrc(function(src, recipeDir) {
 		prom = prom.then(function() {
-			return installRecipe(recipeDir);
+			return installSrcDeps(src, depSet);
 		});
 	});
-	return prom.then(flatternNpm2Folder);
+	recipeManager.eachDownloadedRecipe(function(recipeDir) {
+		prom = prom.then(function() {
+			return flattenInstalledRecipe(recipeDir, lookingForDeps);
+		});
+	});
+	//return prom.then(flatternNpm2Folder);
+	return prom;
 });
+
+function configuredVendors() {
+	var vendorMap = config().vendorBundleMap;
+	var imap = {};
+	_.forOwn(vendorMap, function(moduleNames, bundle) {
+		moduleNames.forEach(function(name) {
+			imap[name] = true;
+		});
+	});
+	return imap;
+}
+
+var versionReg = /(?:\^|~|>=|>|<|<=)?(.*)/;
+
+function installSrcDeps(src, depSet) {
+	return new Promise(function(resolve, reject) {
+		gulp.src(src).pipe(findPackageJson())
+		.pipe(through.obj(function(file, enc, next) {
+			var deps = JSON.parse(fs.readFileSync(file.path, 'utf8')).dependencies;
+			_.forOwn(deps, function(version, name) {
+				version = versionReg.exec(version)[1];
+				if ({}.hasOwnProperty.call(depSet, name)) {
+					if (depSet[name] !== version) {
+						gutil.log(chalk.red('conflict dependency version ' + name + '@' +
+							version + ' in ' + file.path + ' vs existing ' + depSet[name]));
+					}
+					depSet[name] = version > depSet[name] ? version : depSet[name];
+				} else {
+					depSet[name] = version;
+				}
+				gutil.log(chalk.green('install src dependency ' + name));
+				cli.exec('npm', 'install', name + '@' + depSet[name]);
+			});
+			next();
+		}, function flush(next) {
+			resolve();
+		})).pipe(gulp.dest('.'));
+	});
+}
+
+function flattenInstalledRecipe(recipeDir, lookingForDeps) {
+	var recipeDepDir = Path.resolve(recipeDir, 'node_modules');
+	gutil.log('check recipe: ' + recipeDepDir);
+	if (fileExists(recipeDepDir, fs.R_OK)) {
+		gutil.log('flatten recipe node_modules folder ' + recipeDir);
+		// move packages to `level 1 node_modules folder`
+		fs.readdirSync(recipeDepDir).forEach(function(name) {
+			var p = Path.resolve(recipeDepDir, name);
+			if (_.startsWith(name, '@')) {
+				mkdirp.sync(Path.resolve('node_modules', name));
+				fs.readdirSync(p).forEach(function(subName) {
+					var target = Path.resolve('node_modules', name, subName);
+					fs.renameSync(Path.resolve(p, subName), target);
+					moveMatchedDepsToLevel1(target, lookingForDeps);
+				});
+			} else if (!_.startsWith(name, '.')) {
+				var target = Path.resolve('node_modules', name);
+
+				fs.renameSync(p, target);
+				moveMatchedDepsToLevel1(target, lookingForDeps);
+			}
+		});
+	}
+}
+
+function fileExists(file) {
+	try {
+		fs.accessSync(file, fs.R_OK);
+		return true;
+	} catch (e) {
+		return false;
+	}
+}
+//TODO: choose version
+function moveMatchedDepsToLevel1(targetPackagePath, lookingForDeps) {
+	var nm = Path.resolve(targetPackagePath, 'node_modules');
+	if (fileExists(nm, fs.R_OK)) {
+		_.forOwn(lookingForDeps, function(value, depName) {
+			gutil.log(Path.resolve(nm, depName));
+			if (fileExists(Path.resolve(nm, depName), fs.R_OK)) {
+				delete lookingForDeps[depName];
+				gutil.log('move vendor deps to level 1 node_modules folder: ' + depName);
+				fs.renameSync(Path.resolve(nm, depName), Path.resolve('node_modules', depName));
+			}
+		});
+	}
+}
 
 gulp.task('flatten', function() {
 	return flatternNpm2Folder();
@@ -152,22 +258,21 @@ function flatternNpm2Folder() {
 
 function installRecipe(recipeDir, download) {
 	return new Promise(function(resolve, reject) {
-		if (IS_NPM2) {
+		if (false) {
 			var deps = JSON.parse(fs.readFileSync(Path.join(recipeDir, 'package.json'), 'utf8')).dependencies;
 			_.forOwn(deps, function(ver, name) {
 				var parsedName = packageUtils.parseName(name);
 				var target = download ? name : Path.join('node_modules', '@' + parsedName.scope, parsedName.name);
 
 				cli.exec('npm', 'install', target, function(code, output) {
-					if (code === 0) {
-						resolve(code);
-					} else {
-						reject(output);
+					if (code !== 0) {
+						gutil.log(chalk.red('install faile ' + name));
 					}
+					resolve();
 				});
 			});
 		} else {
-			gutil.log('install ' + recipeDir);
+			gutil.log(chalk.blue('install recipe: ' + recipeDir));
 			cli.exec('npm', 'install', recipeDir, function(code, output) {
 				if (code === 0) {
 					resolve(code);

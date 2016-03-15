@@ -111,7 +111,7 @@ function compile(api) {
 				outStreams = jsStreams.concat(gulp.src(cssBundlePaths, {base: Path.resolve(config().staticDir)}));
 			}
 			bundleStream = es.merge(outStreams).on('error', function(er) {
-				log.error(er);
+				log.error('merged bundle stream error', er);
 			});
 
 			var pageCompilerParam = {};
@@ -377,11 +377,15 @@ function compile(api) {
 		var map = info.bundleMap = {};
 		_.forOwn(vendorMap, function(moduleNames, bundle) {
 			var modules = _.map(moduleNames, function(moduleName) {
+				var mainFile;
+				try {
+					mainFile = bResolve.sync(moduleName);
+				} catch (err) {}
 				var instance = packageBrowserInstance(config(), {
 					bundle: bundle,
 					longName: moduleName,
 					shortName: moduleName,
-					file: bResolve.sync(moduleName),
+					file: mainFile,
 					isEntryJS: {}.hasOwnProperty.call(config().defaultEntrySet, moduleName)
 				});
 				info.allModules.push(instance);
@@ -472,7 +476,9 @@ function compile(api) {
 		}*/));
 
 		var jsStream = b.bundle()
-				.on('error', logError)
+			.on('error', function(er) {
+				log.error('browserify bundle() ' + bundle + ' failed', er);
+			})
 			.pipe(source('js/' + bundle + '.js'))
 			.pipe(buffer())
 			.pipe(gulp.dest(destDir))
@@ -483,7 +489,7 @@ function compile(api) {
 			.pipe(gulpif(!config().devMode, rename('js/' + bundle + '.min.js')))
 				.pipe(sourcemaps.write('./'))
 			.pipe(size({title: bundle}))
-			.on('error', logError);
+			.on('error', function(er) {log.error('browserify bundle() sourcemaps failed', er);});
 
 		return {
 			cssPromise: cssPromise,
@@ -515,7 +521,7 @@ function compile(api) {
 				}
 			}))
 			.pipe(gulp.dest(config().destDir))
-			.on('error', function(err) { log.error(err);})
+			.on('error', function(err) { log.error('revision bundle error', err);})
 			.on('finish', function() {
 				log.debug('all bundles revisioned');
 			});
@@ -588,9 +594,4 @@ function packageNames2bundles(packageNames, moduleMap) {
 	});
 	var bundles = _.keys(bundleSet);
 	return bundles;
-}
-
-var bundleLog = require('@dr/logger').getLogger('browserifyBuilder.buildBundle');
-function logError(er) {
-	bundleLog.error(er.message, er);
 }

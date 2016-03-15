@@ -1,6 +1,17 @@
 {
-	"name": "@dr/package-recipe",
-	"version": "0.0.1",
-	"description": "Recipe package of package-recipe",
-	"dependencies": {}
+  "name": "@dr/package-recipe",
+  "version": "0.0.2",
+  "description": "Recipe package of package-recipe",
+  "dependencies": {
+    "@dr/angularjs": "1.0.10",
+    "@dr/gsap": "0.0.4",
+    "@dr-core/labjs": "0.0.4",
+    "@dr-core/assets-processer": "0.0.4",
+    "@dr-core/browserify-builder": "0.0.5",
+    "@dr-core/browserify-builder-api": "0.0.6",
+    "@dr/parcelify-module-resolver": "0.0.4",
+    "@dr/environment": "0.0.4",
+    "@dr-core/express-server": "0.0.13",
+    "@dr/logger": "0.0.7"
+  }
 }

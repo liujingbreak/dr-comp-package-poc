@@ -1,6 +1,6 @@
 {
   "name": "@dr-core/labjs",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "wrapper of labjs v2.0.3, which is customized by replace `this` to `window` to adapt browserify environment",
   "browser": "LAB.src.js",
   "dr": {

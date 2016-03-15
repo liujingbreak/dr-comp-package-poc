@@ -94,6 +94,8 @@ http://localhost:14334/example-entry
 
 ```
 npm install @dr/garage-recipe
+
+gulp install-recipe
 ```
 编辑 `config.yaml` or `config.local.yaml`, 修改`installedRecipes`属性
 
@@ -110,4 +112,4 @@ node app.js
 
 #### 6. 安装他人贡献的组件
 第5步介绍了一种引入其他组件的方法：install recipe。
-也可以单独`npm install xxx`， 然后手工添加到某个recipe `pakcage.json`的属性 `dependencies`中
+也可以单独`npm install xxx`， 然后手工添加到某个recipe `pakcage.json`的属性 `dependencies`中, 再`gulp install-recipe` 确保第三方的依赖也安装正确
