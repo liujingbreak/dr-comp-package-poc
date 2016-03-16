@@ -19,7 +19,7 @@ var SUBMENU_EXP_LEFT = 66 - 240;
 function factory($timeout, $parse, $compile) {
 	return {
 		scope: true,
-		require: '?^^drDocHome',
+		require: '^^drDocHome',
 		compile: function(tElement, tAttrs, transclude) {
 			var liTemplate = tElement.find('.dr-menu').eq(0).find('li');
 			liTemplate.attr({
@@ -46,6 +46,8 @@ function factory($timeout, $parse, $compile) {
 					var item = getMenuItem(scope)[i];
 					if (item.action) {
 						item.action();
+					} else if (item.subMenu) {
+						subMenuEnter();
 					}
 					scope.$apply();
 				});
