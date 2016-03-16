@@ -136,9 +136,14 @@ function configuredVendors() {
 	var imap = {};
 	_.forOwn(vendorMap, function(moduleNames, bundle) {
 		moduleNames.forEach(function(name) {
-			imap[name] = true;
+			try {
+				packageUtils.browserResolve(name);
+			} catch (e) {
+				imap[name] = true;
+			}
 		});
 	});
+	gutil.log('looking for depended vendors: ' + _.keys(imap));
 	return imap;
 }
 
@@ -153,7 +158,7 @@ function installSrcDeps(src, depSet) {
 				version = versionReg.exec(version)[1];
 				if ({}.hasOwnProperty.call(depSet, name)) {
 					if (depSet[name] !== version) {
-						gutil.log(chalk.red('conflict dependency version ' + name + '@' +
+						gutil.log(chalk.yellow('Different dependency version ' + name + '@' +
 							version + ' in ' + file.path + ' vs existing ' + depSet[name]));
 					}
 					depSet[name] = version > depSet[name] ? version : depSet[name];
@@ -208,7 +213,6 @@ function moveMatchedDepsToLevel1(targetPackagePath, lookingForDeps) {
 	var nm = Path.resolve(targetPackagePath, 'node_modules');
 	if (fileExists(nm, fs.R_OK)) {
 		_.forOwn(lookingForDeps, function(value, depName) {
-			gutil.log(Path.resolve(nm, depName));
 			if (fileExists(Path.resolve(nm, depName), fs.R_OK)) {
 				delete lookingForDeps[depName];
 				gutil.log('move vendor deps to level 1 node_modules folder: ' + depName);

@@ -9,7 +9,7 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"lodash": ">=3.10.1"
+		"lodash": "^4.6.1"
 	},
 	"drConfig": {
 		"type": "router"

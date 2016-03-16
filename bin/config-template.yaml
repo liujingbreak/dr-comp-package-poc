@@ -1,6 +1,21 @@
 recipeSrcMapping:
     hellow-world-recipe: src
 
+# Manually set bundle file name for 3rd-party libaraies, otherwise browserify
+# will bundle them with every package that depends on them.
+vendorBundleMap:
+  core: # bundle name
+      - lodash
+      - jquery
+      - eventemitter3
+      - bluebird
+
+browserifyNoParse:
+    - q
+    - lodash
+    - jquery
+    - @dr/gsap
+    - @dr/angularjs
 # Recipes which are installed from registry server, they are owned by other contributors,
 # add to this list to make them a part of you server.
 #
@@ -9,6 +24,6 @@ recipeSrcMapping:
 #  npm install @dr/examples-recipe
 # And maybe specify a version number like `npm install @dr/garage-recipe@0.0.0`
 installedRecipes:
-    # - node_modules/@dr/garage-recipe
+    #- node_modules/@dr/garage-recipe
 
 port: 14334

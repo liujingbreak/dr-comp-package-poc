@@ -1,6 +1,6 @@
 {
   "name": "web-fun-house",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "description": "This is a PoC for company's frontend platform",
   "main": "lib/server.js",
   "bin": "bin/dr.js",
