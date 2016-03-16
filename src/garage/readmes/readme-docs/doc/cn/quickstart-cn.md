@@ -23,15 +23,20 @@ Quick Start
 
 	现在尝试访问本地NPM registry [http://localhost:4873/](http://localhost:4873/)
 
-2.	git clone 平台源码
-
+2.	git clone 平台源码\
 	编辑根目录下`.npmrc`文件,
 	将NPM registry指向你所使用的server地址, 比如`http://10.9.14.9:4873`
 	```shell
 	registry = http://10.9.14.9:4873/
 	```
 
+	你需要安装Gulp 命令行工具:
+	```
+		sudo npm install -g gulp-cli
+	```
+
 	在项目根目录下执行以下命令,
+
 	> 第一次 `gulp build` 可能会执行较长时间
 
 	```shell

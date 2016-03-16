@@ -45,7 +45,7 @@ console.log(__api.contextPath);
 console.log(__api.assetsUrl('some-picture.jpg'));
 ```
 ### API 属性和方法
-- Node
+- #### Node
 
 | Name | description
 | -- | --
@@ -60,7 +60,7 @@ console.log(__api.assetsUrl('some-picture.jpg'));
 | `.isBrowser()` | false
 | `.isNode()` | true
 
-- 浏览器
+- #### 浏览器
 
 | Name | description
 | -- | --
@@ -73,6 +73,14 @@ console.log(__api.assetsUrl('some-picture.jpg'));
 | `.assetsUrl(packageName, path)` | 获取packageName对应的静态资源/assets目录下的文件的浏览器访问路径, `packageName` 为可选参数, 默认是当前package
 | `.isBrowser()` | true
 | `.isNode()` | false
+
+- #### Node compile-time
+对于"dr.typ"为"builder"的编译工具类package, 可获得的api和Node server运行时那些package的api一样，只是多了两个有用的属性
+| Name | description
+| -- | --
+| argv | **[yargs](https://www.npmjs.com/package/yargs)**, Gulp compile命令带有的参数，比如`-p`, '-b'等
+| buildUtils | lib/gulp.buildUtils.js
+
 
 ### 一些内置API providers
 

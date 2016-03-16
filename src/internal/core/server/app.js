@@ -18,8 +18,10 @@ module.exports = {
 		var app = express();
 		setupApi(api, apiPrototype);
 		api.eventBus.on('packagesActivated', function(packageCache) {
-			create(app, api.config(), packageCache);
-			api.eventBus.emit('expressStarted', app);
+			process.nextTick(()=> {
+				create(app, api.config(), packageCache);
+				api.eventBus.emit('expressStarted', app);
+			});
 		});
 	}
 };

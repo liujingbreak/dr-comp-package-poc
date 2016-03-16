@@ -111,11 +111,12 @@ function injectElements($, bundleSet, pkInstance, config, revisionMeta) {
 	var jsLinks = [];
 	_.forOwn(bundleSet, function(v, bundleName) {
 		var file = 'js/' + bundleName + (config().devMode ? '' : '.min') + '.js';
-		if (!revisionMeta[file]) {
+		var mappedFile = revisionMeta ? revisionMeta[file] : file;
+		if (!mappedFile) {
 			return null;
 		}
-		log.trace(file + ' -> ' + revisionMeta[file]);
-		var src = config().staticAssetsURL + '/' + revisionMeta[file];
+		log.trace(file + ' -> ' + mappedFile);
+		var src = config().staticAssetsURL + '/' + mappedFile;
 		var rs = URL_PAT.exec(src);
 		src = (rs[1] ? rs[1] : '') + rs[2].replace(/\/\/+/g, '/');
 		jsLinks.push(src);
@@ -151,11 +152,12 @@ var URL_PAT = /^((?:[^:\/]+:)?\/)?(.*)$/;
 function createScriptElement($, bundleName, config, revisionMeta) {
 	var scriptEl = $('<script>');
 	var file = 'js/' + bundleName + (config().devMode ? '' : '.min') + '.js';
-	if (!revisionMeta[file]) {
+	var mappedFile = revisionMeta ? revisionMeta[file] : file;
+	if (!mappedFile) {
 		return null;
 	}
-	log.trace(file + ' -> ' + revisionMeta[file]);
-	var src = config().staticAssetsURL + '/' + revisionMeta[file];
+	log.trace(file + ' -> ' + mappedFile);
+	var src = config().staticAssetsURL + '/' + mappedFile;
 	var rs = URL_PAT.exec(src);
 	src = (rs[1] ? rs[1] : '') + rs[2].replace(/\/\/+/g, '/');
 	scriptEl.attr('src', src);
@@ -165,11 +167,12 @@ function createScriptElement($, bundleName, config, revisionMeta) {
 function createCssLinkElement($, bundleName, config, revisionMeta) {
 	var element = $('<link/>');
 	var file = 'css/' + bundleName + '.css';
-	if (!revisionMeta[file]) {
+	var mappedFile = revisionMeta ? revisionMeta[file] : file;
+	if (!mappedFile) {
 		return null;
 	}
-	log.trace(file + ' -> ' + revisionMeta[file]);
-	var src = config().staticAssetsURL + '/' + revisionMeta[file];
+	log.trace(file + ' -> ' + mappedFile);
+	var src = config().staticAssetsURL + '/' + mappedFile;
 	var rs = URL_PAT.exec(src);
 	src = (rs[1] ? rs[1] : '') + rs[2].replace(/\/\/+/g, '/');
 	element.attr('rel', 'stylesheet');

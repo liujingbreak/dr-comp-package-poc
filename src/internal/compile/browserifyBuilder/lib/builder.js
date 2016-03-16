@@ -18,6 +18,7 @@ var rename = require('gulp-rename');
 var through = require('through2');
 var htmlTranform = require('html-browserify');
 var RevAll = require('gulp-rev-all');
+var File = require('vinyl');
 // var browserifyInc = require('browserify-incremental');
 // var xtend = require('xtend');
 var parcelify = require('parcelify');
@@ -32,7 +33,7 @@ var helperFactor = require('./browserifyHelper');
 var FileCache = require('./fileCache');
 var PageCompiler = require('./pageCompiler');
 var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
-
+var fileAccessAsync = Promise.promisify(fs.access, {context: fs});
 var packageUtils, config, jsBundleEntryMaker;
 
 /**
@@ -83,43 +84,70 @@ function compile(api) {
 	if (bundleNames.length <= 0) {
 		return Promise.resolve();
 	}
-	// if (argv['only-js']) {
-	// 	buildCss = false;
-	// }
+	if (argv['only-js']) {
+		buildCss = false;
+	}
 	if (argv['only-css']) {
 		buildJS = false;
 	}
 
 	var cssPromises = [];
 	var jsStreams = [];
+	var staticDir = Path.resolve(config().staticDir);
+	var cssStream = new through.obj(function(path, enc, next) {
+		fileAccessAsync(path, fs.R_OK).then(()=> {
+			return readFileAsync(path, 'utf8');
+		})
+		.then((data) => {
+			var file = new File({
+				// gulp-rev-all is too stupid that it can only accept same `base` for all files,
+				// So css files' base path must be sames as JS files.
+				// To make rev-all think they are all based on process.cwd(), I have to change a
+				// css file's path to a relative 'fake' location as as JS files.
+				// Otherwise rev-manifest.json will be screwed up.
+				path: Path.resolve(Path.relative(staticDir, path)),
+				contents: new Buffer(data)
+			});
+			this.push(file);
+		})
+		.catch((err)=>{}).finally(()=> next());
+	});
 	return fileCache.loadFromFile('depsMap.json').then(function(cachedDepsMap) {
 		depsMap = cachedDepsMap;
 		bundleNames.forEach(function(bundle) {
 			log.info(chalk.magenta(bundle));
 			var buildObj = buildBundle(packageInfo.bundleMap[bundle],
 				bundle, Path.join(config().staticDir), depsMap);
-			cssPromises.push(buildObj.cssPromise);
+			if (buildCss) {
+				cssPromises.push(
+					buildObj.cssPromise.then(filePath => {
+						cssStream.write(filePath);
+						return null;
+					}));
+			}
 			jsStreams.push(buildObj.jsStream);
 		});
-		return Promise.all(cssPromises);
-	}).then(function(cssBundlePaths) {
 		var pageCompiler = new PageCompiler();
-		return new Promise(function(resolve, reject) {
-			log.debug('bundles stream created');
-			var outStreams;
-			if (buildCss) {
-				outStreams = jsStreams.concat(gulp.src(cssBundlePaths, {base: Path.resolve(config().staticDir)}));
-			}
-			bundleStream = es.merge(outStreams).on('error', function(er) {
-				log.error('merged bundle stream error', er);
+		var outStreams = jsStreams;
+		if (buildCss) {
+			outStreams.push(cssStream);
+			Promise.all(cssPromises).then(()=> {
+				cssStream.end();
 			});
+		}
+		bundleStream = es.merge(outStreams)
+		.on('error', function(er) {
+			log.error('merged bundle stream error', er);
+		});
 
-			var pageCompilerParam = {};
+		var pageCompilerParam = {};
+		return new Promise(function(resolve, reject) {
 			revisionBundleFile(bundleStream)
 			.pipe(
 				through.obj(function transform(file, encoding, cb) {
 					var revisionMeta = JSON.parse(file.contents.toString('utf-8'));
 					pageCompilerParam.revisionMeta = revisionMeta;
+					log.debug(revisionMeta);
 					cb();
 				}, function flush(callback) {
 					// [ Entry page package A ]--depends on--> [ package B, C ]
@@ -140,7 +168,11 @@ function compile(api) {
 			.pipe(gulp.dest(config().staticDir))
 			.on('finish', resolve);
 		});
-	}).then(_.bind(fileCache.tailDown, fileCache));
+	}).then(_.bind(fileCache.tailDown, fileCache))
+	.catch( err => {
+		log.error(err);
+		process.exit(1);
+	});
 
 	/**
 	 * create a map of entry module and depended modules
@@ -379,8 +411,12 @@ function compile(api) {
 			var modules = _.map(moduleNames, function(moduleName) {
 				var mainFile;
 				try {
-					mainFile = bResolve.sync(moduleName);
-				} catch (err) {}
+					mainFile = bResolve.sync(moduleName, {paths: api.compileNodePath});
+				} catch (err) {
+					log.warn('This might be a problem:\n' +
+					' browser-resolve can\'t resolve on vendor bundle package: ' + chalk.red(moduleName) +
+					', remove it from ' + chalk.yellow('vendorBundleMap') + ' of config.yaml or `npm install it`');
+				}
 				var instance = packageBrowserInstance(config(), {
 					bundle: bundle,
 					longName: moduleName,
@@ -399,6 +435,7 @@ function compile(api) {
 	function buildBundle(modules, bundle, destDir, depsMap) {
 		var browserifyOpt = {
 			debug: true,
+			paths: api.compileNodePath,
 			noParse: config().browserifyNoParse ? config().browserifyNoParse : []
 		};
 		var mIdx = 1;
@@ -466,22 +503,16 @@ function compile(api) {
 			});
 			depsMap[shortFilePath] = deps;
 			callback(null, chunk);
-		}/*, function flush(next) {
-			fileCache.mergeWithJsonCache(Path.join(config().destDir, 'depsMap.json'), depsMap)
-			.then(function(newDepsMap) {
-				_.assign(depsMap, newDepsMap);
-				next();
-			});
-			next();
-		}*/));
+		}));
 
 		var jsStream = b.bundle()
-			.on('error', function(er) {
-				log.error('browserify bundle() ' + bundle + ' failed', er);
+			.on('error', (er) => {
+				log.error('browserify bundle() for bundle "' + bundle + '" failed', er);
+				jsStream.end();
+				//process.exit(1);
 			})
 			.pipe(source('js/' + bundle + '.js'))
 			.pipe(buffer())
-			.pipe(gulp.dest(destDir))
 			.pipe(sourcemaps.init({
 				loadMaps: true
 			}))
@@ -489,8 +520,11 @@ function compile(api) {
 			.pipe(gulpif(!config().devMode, rename('js/' + bundle + '.min.js')))
 				.pipe(sourcemaps.write('./'))
 			.pipe(size({title: bundle}))
-			.on('error', function(er) {log.error('browserify bundle() sourcemaps failed', er);});
-
+			.on('error', (er) => {
+				log.error('browserify bundle() sourcemaps failed', er);
+				jsStream.end();
+				//process.exit(1);
+			});
 		return {
 			cssPromise: cssPromise,
 			jsStream: jsStream
@@ -499,32 +533,61 @@ function compile(api) {
 
 	function revisionBundleFile(bundleStream) {
 		var revAll = new RevAll();
-		var revFilter = gulpFilter(['**/*.js', '**/*.map', '**/*.css'], {restore: true});
-		return bundleStream
+
+		var stream;
+		if (config().devMode) {
+			var fakeRevManifest = {};
+			stream = bundleStream
+			.pipe(through.obj(function(row, encode, next) {
+				var relivePath = Path.relative(row.base, row.path).replace(/\//g, '/');
+				fakeRevManifest[relivePath] = relivePath;
+				if (!_.endsWith(row.path, '.css')) {
+					this.push(row);
+				}
+				next();
+			}, function(next) {
+				var emptyFile = new File({
+					path: Path.resolve('rev-manifest.json'),
+					contents: new Buffer(JSON.stringify(fakeRevManifest, null, '\t'))
+				});
+				this.push(emptyFile);
+				next();
+			}))
+			.pipe(gulp.dest(Path.join(config().staticDir)))
+			.pipe(gulpFilter(['rev-manifest.json']));
+		} else {
+			var revFilter = gulpFilter(['**/*.js', '**/*.map', '**/*.css'], {restore: true});
+			stream = bundleStream
 			.pipe(revFilter)
+			.pipe(through.obj(function(row, en, next) {
+				this.push(row);
+				log.info(row.base + '|' + row.path);
+				next();
+			}))
 			.pipe(revAll.revision())
 			.pipe(revFilter.restore)
 			.pipe(gulp.dest(Path.join(config().staticDir)))
-			.pipe(revAll.manifestFile())
-			.pipe(through.obj(function(row, encode, next) {
-				var file = Path.join(config().destDir, Path.basename(row.path));
-				if (fs.existsSync(file)) {
-					readFileAsync(file).then(function(data) {
-						var meta = JSON.parse(row.contents.toString('utf-8'));
-						var newMeta = JSON.stringify(_.assign(JSON.parse(data), meta), null, '\t');
-						log.trace('merge with existing rev-manifest.json');
-						row.contents = new Buffer(newMeta);
-						next(null, row);
-					});
-				} else {
+			.pipe(revAll.manifestFile());
+		}
+		return stream.pipe(through.obj(function(row, encode, next) {
+			var file = Path.join(config().destDir, Path.basename(row.path));
+			if (fs.existsSync(file)) {
+				readFileAsync(file).then(function(data) {
+					var meta = JSON.parse(row.contents.toString('utf-8'));
+					var newMeta = JSON.stringify(_.assign(JSON.parse(data), meta), null, '\t');
+					log.trace('merge with existing rev-manifest.json');
+					row.contents = new Buffer(newMeta);
 					next(null, row);
-				}
-			}))
-			.pipe(gulp.dest(config().destDir))
-			.on('error', function(err) { log.error('revision bundle error', err);})
-			.on('finish', function() {
-				log.debug('all bundles revisioned');
-			});
+				});
+			} else {
+				next(null, row);
+			}
+		}))
+		.pipe(gulp.dest(config().destDir))
+		.on('error', function(err) { log.error('revision bundle error', err);})
+		.on('finish', function() {
+			log.debug('all bundles revisioned');
+		});
 	}
 
 	function buildCssBundle(b, bundle, destDir) { return new Promise(function(resolve, reject) {

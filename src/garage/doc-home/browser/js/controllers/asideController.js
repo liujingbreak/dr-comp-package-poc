@@ -26,7 +26,8 @@ module.exports = function(controllerProvider) {
 							$location.path(docName2Route('quickstart-cn.md'));
 						}
 					}, {
-						label: t('Quick Start: I am using platform'),
+						label: t('Quick Start: 安装平台 & 开发组建'),
+						flag: 'new',
 						action: function() {
 							$location.path(docName2Route('run-platform-as-tool-cn.md'));
 						}

@@ -2,13 +2,25 @@ TODOs
 =======
 每个人都是产品经理, 每个feature都是package
 
-- i18n text translation tool
-- API to get locale information
-- Test script
+### The platform
+
+- #### `Package.json` version number automatic bump script
+	- As a developer, once I changed package source code, script would remind me to bump patch version before I publish a certain package, or maybe automatically bump it.
+
+	- As a deployer, I need script to bump all packages' minor version number before publish them all.
+
+- i18n text translation tool\
+	Scan and generate translatable property files.
+- Provide API to get locale information
+- Test script\
+	Jasmine 2
+
 - Adaptive/Responsive layouts API/utility
+	- Detecting device and screen size/orientation change by Javascript, adding class name to root level element\
+	 e.g. `dr-mobile`, `dr-desktop`, `dr-pad`
 - Assets file revision (@dr/assets-processer)
-- Split load bundle in browser (Support angular JS lazy loader)
-- Mobile browser super light and faster entry bundle
+- Split and load on demand in browser (Support angular JS lazy loader)
+- Mobile browser super light and fast entry bundle
 - CDN assets pack
 - security consideration
 	- CORS
@@ -25,3 +37,10 @@ TODOs
 - Support SCSS ?
 - Package readme file viewer
 - ECMAScript 6 builder with Babel
+
+### Sinopia NPM registry server
+- Check Uploading package size limitation
+- Email notification for package publishing.
+
+
+### Workflow

@@ -66,7 +66,6 @@ function drTextAnim($timeout) {
 				//iElement.addClass('dr-text-anim-hidden');
 				var text = iElement.text();
 				$timeout(function() {
-					console.log(iElement.css('width'));
 					var height = iElement.height();
 					var width = iElement.width();
 					iElement.css({
