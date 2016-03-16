@@ -34,7 +34,7 @@ function init() {
 	if (!_.startsWith(relativePath, '.')) {
 		relativePath = './' + relativePath;
 	}
-	content = content.replace('<plateformFolder>', relativePath.replace('\\', '/'));
+	content = content.replace('<plateformFolder>', relativePath.replace(/\\/g, '/'));
 	fs.writeFileSync(Path.join(argv.d, 'gulpfile.js'), content, 'utf8');
 	shell.mkdir('-p', 'src/examples');
 	shell.cp(Path.resolve(__dirname, 'config-template.yaml'), argv.d + '/config.yaml');
