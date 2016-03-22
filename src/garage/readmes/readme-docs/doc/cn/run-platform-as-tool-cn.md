@@ -1,5 +1,6 @@
 依赖平台的开发方式
 ============
+_2016-3-26 更新_
 
 现在是时候用这个平台开发一个新Web app的时候了。
 
@@ -44,7 +45,7 @@ project-dir/
 ```
 node_modules/.bin/web-fun-house init
 ```
-这命令做了简化，自动生成样板源码和安装平台默认组件:
+_**这命令2016-3-26 做了简化**，自动生成样板源码和安装平台默认组件_:
 - 自动安装gulp
 - 自动安装一些核心的功能组件, 例如
 @dr-core/browserify-builder, @dr-core/express-server 等
@@ -75,14 +76,14 @@ npm install @dr/garage-recipe
 ```
 ~~编辑 `config.yaml` or `config.local.yaml`, 修改`installedRecipes`属性~~
 
-> 确保安装的recipe命名符合config.yaml的配置规范
+> 确保安装的recipe命名匹配config.yaml的配置
 > ```yaml
 > installedRecipes:
 >    - node_modules/@dr/*-recipe
 >    - node_modules/@dr/recipe-*
 > ```
 
-执行以下命令，大功告成
+再次执行以下命令
 ```
 gulp compile
 

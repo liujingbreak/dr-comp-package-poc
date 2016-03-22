@@ -21,8 +21,7 @@
 		<div class="sub-menu dr-menu">
 			<div class="title" ng-bind="currHoverMenu.label"></div>
 			<li menu-item-instance="subItem">
-				<button dr-button class="dr-button">
-					<i class="dr-icon-arrowright"></i><span ng-bind="subItem.label"></span>
+				<button dr-button class="dr-button"><div class="flag-new" ng-if="subItem.flag == 'new'"></div><i class="dr-icon-arrowright"></i><span ng-bind="subItem.label"></span>
 				</button>
 			</li>
 		</div>

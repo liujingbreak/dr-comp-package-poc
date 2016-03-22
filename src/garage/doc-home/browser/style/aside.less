@@ -1,6 +1,8 @@
 @dr-navi-aside-width: 240px;
 @sub-aside-width: 360px;
 @sub-menu-hover-color: rgba(255,255,255, .2);
+@flag-radius: 3px;
+@flag-new-color: rgba(255, 0, 0, 0.7);
 
 .main-aside {
 	position: relative;
@@ -33,6 +35,21 @@
 	button {
 		.dr-mixin-transition(background-color);
 	}
+}
+
+.flag-new {
+	position: absolute;
+	left: @dr-unit-half * 3 / 2;
+	top: @dr-unit-half * 3 /2;
+	width: @flag-radius * 2;
+	height: @flag-radius * 2;
+	background-color: @dr-red;
+	.dr-mixin-rounded(@flag-radius, @flag-radius, @flag-radius, @flag-radius);
+	box-shadow: 0 0 3px 0 @flag-new-color;
+}
+
+.dr-icon-arrowright.red {
+	color: @dr-red;
 }
 
 .sub-menu {

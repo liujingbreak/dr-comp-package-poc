@@ -20,24 +20,26 @@ module.exports = function(controllerProvider) {
 						action: function() {
 							$location.path(docName2Route('readme-cn.md'));
 						}
-					}, {
-						label: t('Quick Start: I am platform developer'),
-						action: function() {
-							$location.path(docName2Route('quickstart-cn.md'));
-						}
-					}, {
+					},  {
 						label: t('Quick Start: 安装平台 & 开发组建'),
 						flag: 'new',
 						action: function() {
 							$location.path(docName2Route('run-platform-as-tool-cn.md'));
 						}
 					}, {
+						label: t('Quick Start: I am platform developer'),
+						flag: 'new',
+						action: function() {
+							$location.path(docName2Route('quickstart-cn.md'));
+						}
+					},{
 						label: t('Package.json Specification'),
 						action: function() {
 							$location.path(docName2Route('package-spec-cn.md'));
 						}
 					}, {
 						label: t('环境配置和gulp命令提示'),
+						flag: 'new',
 						action: function() {
 							$location.path(docName2Route('dev-env-hints.md'));
 						}
@@ -57,7 +59,7 @@ module.exports = function(controllerProvider) {
 							$location.path(docName2Route('how-does-it-work.md'));
 						}
 					}, {
-						label: t('TODOs'),
+						label: t('Backlog'),
 						action: function() {
 							$location.path(docName2Route('todo-cn.md'));
 						}

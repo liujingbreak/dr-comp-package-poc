@@ -2,7 +2,6 @@ Quick Start
 ---------
 ### 如果你是平台开发者
 
-
 1.	你可以使用办公室内的Sinopia server, [http://10.9.14.9:4873](http://10.9.14.9:4873)
 	```shell
 	npm set registry http://10.9.14.9:4873
@@ -23,11 +22,14 @@ Quick Start
 
 	现在尝试访问本地NPM registry [http://localhost:4873/](http://localhost:4873/)
 
-2.	git clone 平台源码\
-	编辑根目录下`.npmrc`文件,
-	将NPM registry指向你所使用的server地址, 比如`http://10.9.14.9:4873`
+2.	git clone 平台源码
+	```
+	git clone https://github.com/liujingbreak/fe-house-poc.git
+	```
+	~~编辑根目录下`.npmrc`文件,
+	将NPM registry指向你所使用的server地址, 比如`http://10.9.14.9:4873`~~
 	```shell
-	registry = http://10.9.14.9:4873/
+	npm set registry http://10.9.14.9:4873/
 	```
 
 	你需要安装Gulp 命令行工具:

@@ -37,6 +37,7 @@ var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package
 	.command('install-recipe', 'link newly changed package.json files to recipe folder and `npm install` them, this makes sure all dependencies being installed')
 	.command('watch', 'automatically rebuild specific bundle file when changes on browser packages source code is detected, if you change any package.json or add/remove packages, you need to restart watch command')
 	.command('link', 'link newly changed package.json files to recipe folder')
+	.command('build-prod', 'disable config.local.yaml, build for production environment')
 	.command('publish', 'npm publish every pakages in source code folder including all mapped recipes')
 	.command('unpublish', 'npm unpublish every pakages in source code folder including all mapped recipes of version number in current source code')
 	.command('bump', 'bump version number of all package.json, useful to call this before publishing packages')
@@ -88,6 +89,14 @@ gulp.task('clean', ['clean:dist', 'clean:dependency', 'clean:recipe']);
 gulp.task('build', (cb)=> {
 	_npmInstallCurrFolder()
 	.then( ()=> {
+		runSequence('install-recipe', 'compile', cb);
+	});
+});
+
+gulp.task('build-prod', ['clean:dist'], (cb)=> {
+	_npmInstallCurrFolder()
+	.then( ()=> {
+		config.disableLocal();
 		runSequence('install-recipe', 'compile', cb);
 	});
 });

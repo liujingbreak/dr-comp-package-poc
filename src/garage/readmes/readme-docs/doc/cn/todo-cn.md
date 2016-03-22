@@ -1,13 +1,8 @@
-TODOs
+Backlog
 =======
 每个人都是产品经理, 每个feature都是package
 
 ### The platform
-
-- #### `Package.json` version number automatic bump script
-	- As a developer, once I changed package source code, script would remind me to bump patch version before I publish a certain package, or maybe automatically bump it.
-
-	- As a deployer, I need script to bump all packages' minor version number before publish them all.
 
 - i18n text translation tool\
 	Scan and generate translatable property files.
