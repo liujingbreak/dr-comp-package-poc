@@ -242,12 +242,12 @@ function compile(api) {
 				if (!moduleMap[dep] || !(bundle = moduleMap[dep].bundle) ) {
 					if (isDirectDeps === true) {
 						msg = 'Entry bundle "' + currBundle + '", module "' + dep + '" which is dependency of bundle "' +
-							currBundle + '" is not explicityly configured with any bundle';
-						log.error(msg);
+							currBundle + '" is not explicityly configured with any bundle, check out `vendorBundleMap` in config.yaml';
+						log.warn(msg);
 						throw new Error(msg);
 					} else {
 						msg = 'Entry bundle "' + currBundle + '", module "' + dep + '" which is dependency of "' +
-							isDirectDeps + '" is not explicityly configured with any bundle';
+							isDirectDeps + '" is not explicityly configured with any bundle, check out `vendorBundleMap` in config.yaml';
 						log.warn(msg);
 						return;
 					}
@@ -339,7 +339,7 @@ function compile(api) {
 
 		packageUtils.findBrowserPackageByType(['core', null], function(
 			name, entryPath, parsedName, pkJson, packagePath) {
-			var bundle, entryHtml;
+			var bundle, entryViews, entryPages;
 			var isEntryServerTemplate = true;
 			var noParseFiles;
 			var instance = packageBrowserInstance(config());
@@ -354,11 +354,17 @@ function compile(api) {
 				}
 				if (pkJson.dr.entryPage) {
 					isEntryServerTemplate = false;
-					entryHtml = Path.resolve(packagePath, pkJson.dr.entryPage);
+					entryPages = [].concat(pkJson.dr.entryPage);
+					entryPages = _.map(entryPages, path => {
+						return Path.resolve(packagePath, path);
+					});
 					info.entryPageMap[name] = instance;
 				} else if (pkJson.dr.entryView){
 					isEntryServerTemplate = true;
-					entryHtml = Path.resolve(packagePath, pkJson.dr.entryView);
+					entryViews = [].concat(pkJson.dr.entryView);
+					entryViews = _.map(entryViews, path => {
+						return Path.resolve(packagePath, path);
+					});
 					info.entryPageMap[name] = instance;
 				}
 				if (pkJson.dr.browserifyNoParse) {
@@ -374,7 +380,8 @@ function compile(api) {
 				parsedName: parsedName,
 				packagePath: packagePath,
 				active: pkJson.dr ? pkJson.dr.active : false,
-				entryHtml: entryHtml,
+				entryPages: entryPages,
+				entryViews: entryViews,
 				isEntryJS: pkJson.dr && pkJson.dr.isEntryJS !== undefined ? (!!pkJson.dr.isEntryJS) : {}.hasOwnProperty.call(config().defaultEntrySet, name),
 				browserifyNoParse: noParseFiles,
 				isEntryServerTemplate: isEntryServerTemplate

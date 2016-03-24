@@ -1,3 +1,12 @@
+
+# Package short name - route path map, used by express server.
+# By default, every package's is mapped to a route context path "/<package short name>"
+# e.g.
+#   if package name is "@dr/example-dr", default route root path will be `/example-dr`
+# If you want change this rule, config route path here.
+#packageContextPathMapping:
+#    doc-home: /
+
 recipeSrcMapping:
     hellow-world-recipe: src
 

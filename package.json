@@ -1,7 +1,7 @@
 {
   "name": "web-fun-house",
-  "version": "0.0.16",
-  "description": "This is a PoC for company's frontend platform",
+  "version": "0.0.18",
+  "description": "A company's web platform",
   "main": "lib/server.js",
   "bin": "bin/dr.js",
   "scripts": {

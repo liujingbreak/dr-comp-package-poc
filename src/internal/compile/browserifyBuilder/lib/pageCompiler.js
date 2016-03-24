@@ -3,6 +3,7 @@ var fs = require('fs');
 var cheerio = require('cheerio');
 var Path = require('path');
 var Q = require('q');
+var Promise = require('bluebird');
 var through = require('through2');
 var gutil = require('gulp-util');
 var PluginError = gutil.PluginError;
@@ -25,7 +26,7 @@ function PageCompiler() {
 PageCompiler.prototype.compile = function(pageType) {
 	var compiler = this;
 	return through.obj(function(param, encoding, cb) {
-		log.info('------- compiling changed entry server pages ---------');
+		log.info('------- compiling changed entry ' + pageType + ' pages ---------');
 		log.info('(Only the pages which depend on any changed bundles will be replaced)');
 
 		if (!compiler.buildInfo) {
@@ -44,34 +45,16 @@ PageCompiler.prototype.compile = function(pageType) {
 			if (!needUpdateEntryPage(buildInfo.builtBundles, buildInfo.bundleDepsGraph[name])) {
 				return;
 			}
-
-			var prom = Q.nfcall(fs.readFile, instance.entryHtml, 'utf-8')
-			.then(function(content) {
-				var $ = cheerio.load(content);
-				injectElements($, buildInfo.bundleDepsGraph[name], instance, buildInfo.config, buildInfo.revisionMeta);
-				var hackedHtml = $.html();
-
-				var htmlName = Path.basename(instance.entryHtml);
-				var pageRelFolder = Path.relative(instance.packagePath, Path.dirname(instance.entryHtml));
-				if ((pageType === 'server' && instance.isEntryServerTemplate) ||
-					pageType === 'static' && !instance.isEntryServerTemplate) {
-					log.info('Entry page replaced: ' + instance.entryHtml);
-					var pagePath = Path.resolve(instance.shortName, pageRelFolder, htmlName);
-					self.push(new File({
-						path: pagePath,
-						contents: new Buffer(hackedHtml)
-					}));
-					if (pageType === 'static' && compiler.rootPackage === instance.shortName) {
-						pagePath = Path.resolve(pageRelFolder, htmlName);
-						log.debug('copy root entry page of ' + compiler.rootPackage);
-						self.push(new File({
-							path: pagePath,
-							contents: new Buffer(hackedHtml)
-						}));
-					}
-				}
-			});
-			promises.push(prom);
+			if (pageType === 'static' && instance.entryPages) {
+				promises = promises.concat(instance.entryPages.map(page => {
+					return compiler.doEntryFile(page, instance, buildInfo, 'static', self);
+				}));
+			}
+			if (pageType === 'server' && instance.entryViews) {
+				promises = promises.concat(promises, instance.entryViews.map(page => {
+					return compiler.doEntryFile(page, instance, buildInfo, 'server', self);
+				}));
+			}
 		});
 		Q.all(promises).then(function() {
 			cb();
@@ -82,6 +65,36 @@ PageCompiler.prototype.compile = function(pageType) {
 	} );
 };
 
+var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
+
+PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageType, through) {
+	var compiler = this;
+	return readFileAsync(page, 'utf-8')
+	.then(function(content) {
+		var $ = cheerio.load(content);
+		injectElements($, buildInfo.bundleDepsGraph[instance.longName], instance, buildInfo.config, buildInfo.revisionMeta);
+		var hackedHtml = $.html();
+
+		var htmlName = Path.basename(page);
+		var pageRelFolder = Path.relative(instance.packagePath, Path.dirname(page));
+
+		log.info('Entry page replaced: ' + page);
+		var pagePath = Path.resolve(instance.shortName, pageRelFolder, htmlName);
+		through.push(new File({
+			path: pagePath,
+			contents: new Buffer(hackedHtml)
+		}));
+		if (pageType === 'static' && compiler.rootPackage === instance.shortName) {
+			pagePath = Path.resolve(pageRelFolder, htmlName);
+			log.debug('copy root entry page of ' + compiler.rootPackage);
+			through.push(new File({
+				path: pagePath,
+				contents: new Buffer(hackedHtml)
+			}));
+		}
+
+	});
+};
 
 function findRootContextPackage(mapping) {
 	var rootPackage;
