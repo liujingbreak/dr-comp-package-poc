@@ -27,7 +27,7 @@ Package.json的一些特殊属性说明
 | `style` | 主LESS文件
 | `transforms` | 目前只有一个值`["@dr/parcelify-module-resolver"]`
 | `dr.bundle` (`dr.chunk`) | 合并打包属浏览器端JS, CSS文件时应该被归类于的bundle文件，多个package可以被归类到一个bundle下，以提高下载速度
-| `dr.entryPage` | 可以是Array, 入口主静态页面，`gulp compile`时会自动copy到dist/static目录下，自动inject所依赖的JS, CSS bundle
+| `dr.entryPage` | 可以是Array, 入口主静态页面，`gulp compile`时会自动copy到dist/static目录下，自动inject所依赖的JS, CSS bundle, 可以是package内相对路径，也可以是引用其他package内的文件`npm://<package-name>/<path>`，e.g. `npm://@dr/parent/browser/views/index.html`
 | `dr.entryView` | 类似`dr.entryPage`, 可以是Array, 入口的server端render主页面, `gulp compile`时会自动copy到dist/server目录下, 用`api.getCompiledViewPath(relativePath)`可以获得compiled absolute path.
 | `dr.assetsDir` | 存放静态资源的目录，package根目录下的相对路径, 默认为`assets`
 e.g.

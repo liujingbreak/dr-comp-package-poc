@@ -40,7 +40,7 @@ var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package
 	.command('build-prod', 'disable config.local.yaml, build for production environment')
 	.command('publish', 'npm publish every pakages in source code folder including all mapped recipes')
 	.command('unpublish', 'npm unpublish every pakages in source code folder including all mapped recipes of version number in current source code')
-	.command('bump', 'bump version number of all package.json, useful to call this before publishing packages')
+	.command('bump', '[-v major|minor|patch|prerelease] bump version number of all package.json, useful to call this before publishing packages, default is increasing patch number by 1')
 	.command('flatten', 'flattern NPM v2 nodule_modules structure, install-recipe comamnd will execute this command')
 	.describe('b', '<bundle-name> if used with command `compile` or `build`, it will only compile specific bundle, which is more efficient')
 	.alias('b', 'bundle')
@@ -50,6 +50,7 @@ var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package
 	.describe('only-css', 'only rebuild CSS bundles')
 	.describe('d', '<src foldr> if used with command `link`, it will link packages from specific folder instead of `srcDir` configured in config.yaml')
 	.describe('r', '<recipe foldr> if used with command `link`, it will link packages only to specific recipe folder instead of `recipeFolder` configured in config.yaml')
+	.describe('v', 'major | minor | patch | prerelease, used with `bump`')
 	.demand(1)
 	.help('h').alias('h', 'help')
 	.argv;
@@ -99,6 +100,11 @@ gulp.task('build-prod', ['clean:dist'], (cb)=> {
 		config.disableLocal();
 		runSequence('install-recipe', 'compile', cb);
 	});
+});
+
+gulp.task('compile-prod', (cb)=> {
+	config.disableLocal();
+	runSequence('compile', cb);
 });
 
 function _npmInstallCurrFolder() {
@@ -316,8 +322,16 @@ gulp.task('unpublish', function() {
 });
 
 function bumpVersion() {
+	var type = 'patch';
+	if (argv.v) {
+		if (!{major: 1, minor: 1, patch: 1, prerelease: 1}.hasOwnProperty(argv.v)) {
+			gutil.log(chalk.red('expecting bump type is one of "major|minor|patch|prerelease", but get: ' + argv.v));
+			throw new Error('Invalid -v parameter');
+		}
+		type = argv.v;
+	}
 	return bump({
-		type: 'patch'
+		type: type
 	});
 }
 

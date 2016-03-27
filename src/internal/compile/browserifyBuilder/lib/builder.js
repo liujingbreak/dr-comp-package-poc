@@ -138,6 +138,7 @@ function compile(api) {
 		bundleStream = es.merge(outStreams)
 		.on('error', function(er) {
 			log.error('merged bundle stream error', er);
+			gutil.beep();
 		});
 
 		var pageCompilerParam = {};
@@ -171,6 +172,7 @@ function compile(api) {
 	}).then(_.bind(fileCache.tailDown, fileCache))
 	.catch( err => {
 		log.error(err);
+		gutil.beep();
 		process.exit(1);
 	});
 
@@ -199,6 +201,7 @@ function compile(api) {
 			if (!deps) {
 				log.error('Can not walk dependency tree for: ' + id +
 				', missing depended module or you may try rebuild all bundles');
+				gutil.beep();
 			}
 			_.forOwn(deps, function(depsValue, depsKey) {
 				var isRelativePath = _.startsWith(depsKey, '.');
@@ -344,8 +347,11 @@ function compile(api) {
 			var noParseFiles;
 			var instance = packageBrowserInstance(config());
 			if (!pkJson.dr) {
-				bundle = parsedName.name;
-			} else if (!pkJson.dr.builder || pkJson.dr.builder === 'browserify') {
+				pkJson.dr = {};
+				log.error('missing "dr" property in ' + Path.join(packagePath, 'package.json'));
+				gutil.beep();
+			}
+			if (!pkJson.dr.builder || pkJson.dr.builder === 'browserify') {
 				if (config().bundlePerPackage === true && parsedName.name !== 'browserify-builder-api') {
 					bundle = parsedName.name;
 				} else {
@@ -356,14 +362,14 @@ function compile(api) {
 					isEntryServerTemplate = false;
 					entryPages = [].concat(pkJson.dr.entryPage);
 					entryPages = _.map(entryPages, path => {
-						return Path.resolve(packagePath, path);
+						return path;
 					});
 					info.entryPageMap[name] = instance;
 				} else if (pkJson.dr.entryView){
 					isEntryServerTemplate = true;
 					entryViews = [].concat(pkJson.dr.entryView);
 					entryViews = _.map(entryViews, path => {
-						return Path.resolve(packagePath, path);
+						return path;
 					});
 					info.entryPageMap[name] = instance;
 				}
@@ -515,6 +521,7 @@ function compile(api) {
 		var jsStream = b.bundle()
 			.on('error', (er) => {
 				log.error('browserify bundle() for bundle "' + bundle + '" failed', er);
+				gutil.beep();
 				jsStream.end();
 				//process.exit(1);
 			})
@@ -545,6 +552,7 @@ function compile(api) {
 		if (config().devMode) {
 			var fakeRevManifest = {};
 			stream = bundleStream
+			.pipe(gulp.dest(Path.join(config().staticDir)))
 			.pipe(through.obj(function(row, encode, next) {
 				var relivePath = Path.relative(row.base, row.path).replace(/\//g, '/');
 				fakeRevManifest[relivePath] = relivePath;
@@ -560,7 +568,6 @@ function compile(api) {
 				this.push(emptyFile);
 				next();
 			}))
-			.pipe(gulp.dest(Path.join(config().staticDir)))
 			.pipe(gulpFilter(['rev-manifest.json']));
 		} else {
 			var revFilter = gulpFilter(['**/*.js', '**/*.map', '**/*.css'], {restore: true});
@@ -591,7 +598,10 @@ function compile(api) {
 			}
 		}))
 		.pipe(gulp.dest(config().destDir))
-		.on('error', function(err) { log.error('revision bundle error', err);})
+		.on('error', function(err) {
+			log.error('revision bundle error', err);
+			gutil.beep();
+		})
 		.on('finish', function() {
 			log.debug('all bundles revisioned');
 		});
@@ -614,6 +624,7 @@ function compile(api) {
 
 		parce.on('error', function(err) {
 			log.error('parcelify bundle error: ', err);
+			gutil.beep();
 			reject(fileName);
 		});
 		// this is a work around for a bug introduced in Parcelify

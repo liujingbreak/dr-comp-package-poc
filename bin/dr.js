@@ -10,6 +10,7 @@ var yargs = require('yargs');
 var Promise = require('bluebird');
 var argv = yargs.usage('Usage: $0 <command> [-d <target_folder>]')
 	.command('init', 'Initialize environment, create gulpfile.js and other basic configuration')
+	.command('update', 're-initialize environment, create gulpfile.js and other basic configuration, but don\'t copy examples')
 	.command('install-gulp', 'install gulp to local node_modules')
 	.demand(1)
 	.describe('d', 'set target directory')
@@ -26,13 +27,16 @@ if (argv._ && argv._[0]) {
 		case 'init':
 			init();
 			break;
+		case 'update':
+			init(true);
+			break;
 		case 'install-gulp':
 			installGulpAsync();
 			break;
 	}
 }
 
-function init() {
+function init(noSample) {
 	_checkFolder();
 	//var projectName = JSON.parse(fs.readFileSync(Path.join(__dirname, '..', 'package.json'), 'utf8')).name;
 	var content = fs.readFileSync(Path.join(__dirname, 'gulpfile-template.js'), 'utf8');
@@ -47,10 +51,12 @@ function init() {
 	shell.cp(Path.resolve(__dirname, 'config.local-template.yaml'), argv.d + '/config.local.yaml');
 	shell.cp(Path.resolve(__dirname, '..', 'log4js.json'), argv.d + '/log4js.json');
 	shell.cp(Path.resolve(__dirname, 'app-template.js'), argv.d + '/app.js');
-	shell.cp('-R', [
-		Path.resolve(__dirname, 'examples', 'example-entry'),
-		Path.resolve(__dirname, 'examples', 'example-node'),
-	], argv.d + '/src/examples/');
+	if (!noSample) {
+		shell.cp('-R', [
+			Path.resolve(__dirname, 'examples', 'example-entry'),
+			Path.resolve(__dirname, 'examples', 'example-node'),
+		], argv.d + '/src/examples/');
+	}
 	if (!fs.existsSync(argv.d + '/.jscsrc')) {
 		shell.cp(Path.resolve(__dirname, '..', '.jscsrc'), argv.d + '/');
 		console.info('.jscsrc copied');
@@ -97,7 +103,7 @@ function installGulpAsync() {
 		var ver = JSON.parse(fs.readFileSync(Path.resolve('node_modules/web-fun-house/package.json'), 'utf8')).devDependencies.gulp;
 		console.log('npm install gulp@' + ver);
 		return new Promise((resolve, reject) => {
-			cli.exec('npm', 'install', 'gulp@' + ver, (code, output)=> {
+			cli.exec('npm', 'install', '--save', 'gulp@' + ver, (code, output)=> {
 				if (code === 0) {
 					resolve(null);
 				} else {

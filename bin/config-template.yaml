@@ -1,3 +1,5 @@
+# Full configuration:
+#   https://github.com/dr-web-house/web-fun-house/blob/master/config.yaml
 
 # Package short name - route path map, used by express server.
 # By default, every package's is mapped to a route context path "/<package short name>"

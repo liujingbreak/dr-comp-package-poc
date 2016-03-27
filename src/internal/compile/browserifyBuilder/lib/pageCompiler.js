@@ -69,23 +69,21 @@ var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
 
 PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageType, through) {
 	var compiler = this;
-	return readFileAsync(page, 'utf-8')
+	var pathInfo = resolvePagePath(page, instance, buildInfo.packageInfo.moduleMap);
+	return readFileAsync(pathInfo.abs, 'utf-8')
 	.then(function(content) {
 		var $ = cheerio.load(content);
 		injectElements($, buildInfo.bundleDepsGraph[instance.longName], instance, buildInfo.config, buildInfo.revisionMeta);
 		var hackedHtml = $.html();
 
-		var htmlName = Path.basename(page);
-		var pageRelFolder = Path.relative(instance.packagePath, Path.dirname(page));
-
-		log.info('Entry page replaced: ' + page);
-		var pagePath = Path.resolve(instance.shortName, pageRelFolder, htmlName);
+		var pagePath = Path.resolve(instance.shortName, pathInfo.path);
+		log.info('Entry page processed: ' + pagePath);
 		through.push(new File({
 			path: pagePath,
 			contents: new Buffer(hackedHtml)
 		}));
 		if (pageType === 'static' && compiler.rootPackage === instance.shortName) {
-			pagePath = Path.resolve(pageRelFolder, htmlName);
+			pagePath = Path.resolve(pathInfo.path);
 			log.debug('copy root entry page of ' + compiler.rootPackage);
 			through.push(new File({
 				path: pagePath,
@@ -95,6 +93,27 @@ PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageTyp
 
 	});
 };
+
+var npmPat = /npm:\/\/((?:@[^\/]+\/)?[^\/]+)\/(.*?$)/;
+
+function resolvePagePath(page, instance, moduleMap) {
+	if (page.startsWith('npm://')) {
+		var matched = npmPat.exec(page.replace(/\\/g, '/'));
+		var packageName = matched[1];
+		var path = matched[2];
+		return {
+			package: moduleMap[packageName].packagePath,
+			path: path,
+			abs: Path.resolve(moduleMap[packageName].packagePath, path)
+		};
+	} else {
+		return {
+			package: instance.packagePath,
+			path: page,
+			abs: Path.resolve(instance.packagePath, page)
+		};
+	}
+}
 
 function findRootContextPackage(mapping) {
 	var rootPackage;

@@ -1,6 +1,6 @@
 {
   "name": "@dr/parcelify-module-resolver",
-  "version": "0.0.12",
+  "version": "0.0.13-0",
   "description": "parcelify import transformer",
   "main": "index.js",
   "dr": {
