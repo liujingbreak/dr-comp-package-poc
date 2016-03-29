@@ -1,6 +1,6 @@
 {
 	"name": "@dr/example-node",
-	"version": "1.0.25-0",
+	"version": "1.0.25",
 	"description": "sample node package",
 	"main": "index.js",
 	"scripts": {
