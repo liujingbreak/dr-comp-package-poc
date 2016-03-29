@@ -1,5 +1,16 @@
 Updates
 =======
+### 2016-3-30
+- Static Assets URL
+
+	引用当前package内的assets文件路径，可以省略package name,
+	比如， 原来是 `assets://@dr/doc-home/images/bg.jpg`, 可以省略为
+	`assets:///images/bg.jpg`
+	> 注意: 省略package name时，`assets:///` 的路径是有三个slash`/`开始
+
+	修改了文档[Introduction](http://dr-web-house.github.io/#/doc/readme-cn.md)
+
+
 ### 2016-3-29
 - 更新文档 [Daily Work: 安装平台 & 开发组建](/#/doc/run-platform-as-tool-cn.md)
 - 新命令

@@ -90,7 +90,6 @@ PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageTyp
 				contents: new Buffer(hackedHtml)
 			}));
 		}
-
 	});
 };
 

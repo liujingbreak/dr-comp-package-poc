@@ -205,15 +205,19 @@ include 其他package的文件，例如@dr/doc-less-var
 
 #### Static Assets URL
 静态资源文件放入`packageRootDir/assets` 目录,
-用`assets://<package-name>` 引用
+用`assets://<package-name>` 引用, 如果是引用当前package内的assets，可以省略`<package-name>`, 如: `assets:///photo.jpg`
+> 注意: 省略package name时，`assets:///` 的路径是有三个slash`/`开始
 
 ```less
 .some-selector {
-	background-image: url(assests://@dr/my-package/background.jpg);
+	background-image: url(assests://@dr/my-package/images/background.jpg);
 }
 .some-equivalent {
-	background-image: url("assests://@dr/my-package/background.jpg");
-	background-image: url('assests://@dr/my-package/background.jpg');
+	background-image: url("assests://@dr/my-package/images/background.jpg");
+	background-image: url('assests://@dr/my-package/images/background.jpg');
+}
+.current-package-image {
+	background-image: url("assests:///images/background.jpg");
 }
 
 ```

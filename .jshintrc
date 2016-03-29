@@ -35,7 +35,7 @@
     "loopfunc"      : false,
     "moz"           : false,
     "multistr"      : false,
-    "proto"         : false,
+    "proto"         : true,
     "scripturl"     : false,
     "shadow"        : false,
     "sub"           : false,

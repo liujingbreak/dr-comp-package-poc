@@ -23,13 +23,14 @@ function defer() {
 	};
 }
 
-function BrowserApi(packageName) {
+function BrowserApi(packageName, bundleName) {
 	if (!(this instanceof BrowserApi)) {
 		return new BrowserApi(packageName);
 	}
 	this.packageName = packageName;
 	var m = packageNameReg.exec(packageName);
 	this.packageShortName = m[2];
+	this.bundle = bundleName;
 
 	var path = this.config().packageContextPathMapping[this.packageShortName];
 	path = path != null ? path : '/' + this.packageShortName;

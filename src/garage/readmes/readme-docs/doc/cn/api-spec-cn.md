@@ -1,5 +1,7 @@
 API 详细说明
 ============
+_2016-3-30 更新_
+
 > API是降低组件耦合度的糖果。
 - API instance是一个javascript对象。
 - 每个package组件运行时都可以获取对应它的API instance.
@@ -37,7 +39,7 @@ module.exports = {
 	}
 }
 ```
-- 浏览器端JS 获取API比较简单, 在任何JS文件里可以访问全局变量`__api` (__api其实每个JS file的局部变量)， 类似`__filename`, `__dirname`
+- 浏览器端JS 获取API比较简单, 在任何JS文件里可以访问全局变量`__api` (`__api`其实每个JS file的局部变量)， 类似`__filename`, `__dirname`
 
 ```javascript
 console.log(__api.packageName);
@@ -76,10 +78,13 @@ console.log(__api.assetsUrl('some-picture.jpg'));
 
 - #### Node compile-time
 对于"dr.typ"为"builder"的编译工具类package, 可获得的api和Node server运行时那些package的api一样，只是多了两个有用的属性
+
 | Name | description
 | -- | --
-| argv | **[yargs](https://www.npmjs.com/package/yargs)**, Gulp compile命令带有的参数，比如`-p`, '-b'等
-| buildUtils | lib/gulp.buildUtils.js
+| .argv | **[yargs](https://www.npmjs.com/package/yargs)**, Gulp compile命令带有的参数，比如`-p`, '-b'等
+| .buildUtils | lib/gulp.buildUtils.js
+| .packageInfo | monkey patched by `@dr-core/browserify-builder`
+| .findBrowserPackageByPath(filePath) | monkey patched by `@dr-core/browserify-builder`, 返回package source code对应的package name
 
 
 ### 一些内置API providers

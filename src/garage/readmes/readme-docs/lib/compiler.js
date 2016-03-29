@@ -9,6 +9,7 @@ var log = require('log4js').getLogger('readmes.compiler');
 var cheerio = require('cheerio');
 var RevAll = require('gulp-rev-all');
 var Promise = require('bluebird');
+var File = require('vinyl');
 var buildUtils = require('@dr/environment').buildUtils;
 
 module.exports = compile;
@@ -80,6 +81,7 @@ function mergeWithExistingMani(readmePackagePath) {
 		if (fs.existsSync(file)) {
 			readFileAsync(file).then(function(data) {
 				var meta = JSON.parse(row.contents.toString('utf8'));
+				log.debug(meta);
 				var newMeta = JSON.stringify(_.assign(JSON.parse(data), meta), null, '\t');
 				log.debug('merge with existing manifest');
 				row.contents = new Buffer(newMeta);
@@ -106,18 +108,30 @@ function removeUselessManifestData() {
 }
 
 function compileMarkdown() {
+	var count = 0;
 	return through.obj(function(row, enc, next) {
-		if (!_.endsWith(row.path, '.md')) {
-			return next(null, row);
-		}
 		if (buildUtils.readTimestamp('readme') && buildUtils.readTimestamp('readme') >=
 			fs.statSync(row.path).mtime.getTime()) {
 			return next();
+		}
+		count++;
+		if (!_.endsWith(row.path, '.md')) {
+			return next(null, row);
 		}
 		log.debug('compile ' + row.path);
 		var html = mk.render(row.contents.toString());
 		row.contents = new Buffer(html);
 		this.push(row);
+		next();
+	}, function(next) {
+		if (count === 0) {
+			log.debug('no files changed');
+			// gulp-rev-all require at lease 1 file in stream
+			this.push(new File({
+				path: Path.resolve(srcDir, '_placeholder.txt'),
+				contents: new Buffer('')
+			}));
+		}
 		next();
 	});
 }

@@ -68,9 +68,6 @@ JsBundleEntryMaker.prototype = {
 
 	entryBundleFileTpl: swig.compileFile(Path.join(__dirname, 'templates', 'bundle.js.swig'), {autoescape: false}),
 
-	/**
-	 * TODO: use a template engine to generate js file stream
-	 */
 	createPackageListFile: function() {
 		var self = this;
 		var bundleFileListFunction = this.entryBundleFileTpl({

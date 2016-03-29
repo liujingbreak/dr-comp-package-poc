@@ -24,7 +24,7 @@ module.exports = function(file, options) {
 
 		// Injects the path of the current file.
 		lessOptions.filename = file;
-
+		log.info('package: ' + env.findBrowserPackageByPath(file));
 		less.render(buf, lessOptions)
 		.then(function(output) {
 			self.push(replaceUrl(output.css));
@@ -37,8 +37,12 @@ module.exports = function(file, options) {
 
 
 	function replaceUrl(css) {
-		return css.replace(/(\W)url\(['"]?\s*assets:\/\/((?:@[^\/]+\/)?[^\/]+)(\/.*?)['"]?\s*\)/g,
+		return css.replace(/(\W)url\(['"]?\s*assets:\/\/((?:@[^\/]+\/)?[^\/]+)?(\/.*?)['"]?\s*\)/g,
 		function(match, preChar, packageName, path) {
+			log.info(match);
+			if (!packageName || packageName === '') {
+				packageName = env.findBrowserPackageByPath(path);
+			}
 			if (packageName) {
 				log.info('resolve assets: ' + match.substring(1));
 			}

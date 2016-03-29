@@ -60,7 +60,8 @@ function compile(api) {
 
 	var packageInfo = walkPackages();
 	//monkey patch new API
-	api.constructor.prototype.packageInfo = packageInfo;
+	api.__proto__.packageInfo = packageInfo;
+	require('./compilerApi')(api);
 
 	log.info('------- building bundles ---------');
 	var depsMap = {};
@@ -340,7 +341,7 @@ function compile(api) {
 		var map = info.bundleMap = vendorConfigInfo.bundleMap;
 		info.allModules = vendorConfigInfo.allModules;
 
-		packageUtils.findBrowserPackageByType(['core', null], function(
+		packageUtils.findBrowserPackageByType('*', function(
 			name, entryPath, parsedName, pkJson, packagePath) {
 			var bundle, entryViews, entryPages;
 			var isEntryServerTemplate = true;
