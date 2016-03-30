@@ -7,9 +7,11 @@ var env = require('@dr/environment');
 
 module.exports = function(file, options) {
 	var buf = '';
+	var currPackage;
 	var transform = function(buffer) {
 		buf += buffer;
 	};
+
 
 	var flush = function() {
 		var self = this;
@@ -24,7 +26,6 @@ module.exports = function(file, options) {
 
 		// Injects the path of the current file.
 		lessOptions.filename = file;
-		log.info('package: ' + env.findBrowserPackageByPath(file));
 		less.render(buf, lessOptions)
 		.then(function(output) {
 			self.push(replaceUrl(output.css));
@@ -41,7 +42,10 @@ module.exports = function(file, options) {
 		function(match, preChar, packageName, path) {
 			log.info(match);
 			if (!packageName || packageName === '') {
-				packageName = env.findBrowserPackageByPath(path);
+				if (!currPackage) {
+					currPackage = env.findBrowserPackageByPath(file);
+				}
+				packageName = currPackage;
 			}
 			if (packageName) {
 				log.info('resolve assets: ' + match.substring(1));

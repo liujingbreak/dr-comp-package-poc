@@ -43,7 +43,7 @@
     "url": "git+https://github.com/greensock/GreenSock-JS.git"
   },
   "scripts": {},
-  "version": "0.0.13",
+  "version": "0.0.14-0",
   "dr": {
     "bundle": "ui-lib",
     "noLint": true
