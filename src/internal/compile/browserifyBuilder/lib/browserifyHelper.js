@@ -2,8 +2,8 @@ var through = require('through2');
 var Path = require('path');
 var stream = require('stream');
 var log = require('log4js').getLogger('browserifyBuilder.browserifyHelper');
-var _ = require('lodash');
 var swig = require('swig');
+var assetsProcesser = require('@dr-core/assets-processer');
 swig.setDefaults({autoescape: false});
 var config;
 
@@ -21,7 +21,6 @@ module.exports = function(_config) {
 		buildinSet[name] = true;
 	});
 	return {
-		jsTranform: jsTranform,
 		JsBundleEntryMaker: JsBundleEntryMaker,
 		buildins: buildins,
 		buildinSet: buildinSet,
@@ -34,27 +33,11 @@ var BOOT_FUNCTION_PREFIX = '_bundle_';
 var apiVariableTpl = swig.compileFile(Path.join(__dirname, 'templates', 'apiVariable.js.swig'),
 	{autoescape: false});
 
-function jsTranform(file) {
-	var source = '';
-	var ext = Path.extname(file).toLowerCase();
-	if (ext === '.js' && Path.basename(file) !== 'browserifyBuilderApi.browser.js') {
-		return through(function(chunk, enc, next) {
-			source += chunk;
-			next();
-		}, function(cb) {
-			source = apiVariableTpl({name: file, source: source});
-			this.push(source);
-			cb();
-		});
-	} else {
-		return through();
-	}
-}
-
-function JsBundleEntryMaker(bundleName, packageBrowserInstances) {
+function JsBundleEntryMaker(api, bundleName, packageBrowserInstances) {
 	if (!(this instanceof JsBundleEntryMaker)) {
-		return new JsBundleEntryMaker(bundleName, packageBrowserInstances);
+		return new JsBundleEntryMaker(api, bundleName, packageBrowserInstances);
 	}
+	this.api = api;
 	this.packages = packageBrowserInstances;
 	this.bundleName = bundleName;
 	this.bundleFileName = bundleName + '_dr_bundle.js';
@@ -81,16 +64,6 @@ JsBundleEntryMaker.prototype = {
 
 	jsTranformer: function() {
 		var self = this;
-		self.packagePath2Name = {};
-		self.packagePathList = [];
-		self.packages.forEach(function(instance, idx) {
-			if (!instance.packagePath) {
-				return;
-			}
-			var path = Path.relative(config().rootPath, instance.packagePath);
-			self.packagePath2Name[path] = instance.longName;
-			self.packagePathList.push(path);
-		});
 		return function(file) {
 			var source = '';
 			var ext = Path.extname(file).toLowerCase();
@@ -102,7 +75,8 @@ JsBundleEntryMaker.prototype = {
 					next();
 				}, function(cb) {
 					if (source.indexOf('__api') >= 0) {
-						var name = self._findPackageByFile(file);
+						log.debug('reference __api in ' + file);
+						var name = self.api.findBrowserPackageByPath(file);
 						source = apiVariableTpl({
 							bundle: self.bundleName,
 							packageName: name,
@@ -110,6 +84,21 @@ JsBundleEntryMaker.prototype = {
 							packageNameAvailable: name !== null
 						});
 					}
+					this.push(source);
+					cb();
+				});
+			} else if (ext === '.html'){
+				return through(function(chunk, enc, next) {
+					source += chunk;
+					next();
+				}, function(cb) {
+					var currPackage;
+					source = assetsProcesser.replaceAssetsUrl(source, ()=> {
+						if (!currPackage) {
+							currPackage = self.api.findBrowserPackageByPath(file);
+						}
+						return currPackage;
+					});
 					this.push(source);
 					cb();
 				});
@@ -121,24 +110,6 @@ JsBundleEntryMaker.prototype = {
 
 	createPackageListFileStream: function(bundleName, packageInstances) {
 		return str2Stream(this.createPackageListFile.apply(this, arguments));
-	},
-
-	_findPackageByFile: function(file) {
-		var found;
-		file = Path.relative(config().rootPath, file);
-		_.some(this.packagePathList, function(path) {
-			if (_.startsWith(file, path)) {
-				found = path;
-				return true;
-			}
-		});
-		if (!found) {
-			log.debug('file ' + file + ' doesn\'t belong to any of our private packages');
-			return null;
-		} else {
-			return this.packagePath2Name[found];
-		}
-		return found;
 	}
 };
 

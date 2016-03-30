@@ -468,7 +468,7 @@ function compile(api) {
 			log.info('\t├─ ' + chalk.magenta(moduleInfo.longName));
 			mIdx++;
 		});
-		jsBundleEntryMaker = helper.JsBundleEntryMaker(bundle, modules);
+		jsBundleEntryMaker = helper.JsBundleEntryMaker(api, bundle, modules);
 		var listFile = jsBundleEntryMaker.createPackageListFile(modules);
 		mkdirp.sync(destDir);
 		var entryFile = Path.join(destDir, jsBundleEntryMaker.bundleFileName);

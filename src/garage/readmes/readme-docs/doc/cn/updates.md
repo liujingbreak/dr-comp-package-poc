@@ -1,5 +1,11 @@
 Updates
 =======
+### 2016-3-31
+- Static Assets URL
+
+	所有被browser javascript `require()`的 `.html`文件， 包括entryPage, entryView文件 会在gulp compile时自动替换 `assets:///<file-path>` 或者 `assets://<package-name>/<file-path>` 的引用。
+	这样就可以直接在html中添加 `<img src="assets:///photo.jpg">` 而不需要通过angularJS之类的web framework来处理正确的URL了。
+
 ### 2016-3-30
 - Static Assets URL
 

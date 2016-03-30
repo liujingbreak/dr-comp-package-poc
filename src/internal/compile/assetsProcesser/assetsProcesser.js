@@ -4,12 +4,14 @@ var Path = require('path');
 var fs = require('fs');
 var es = require('event-stream');
 var log;
-var buildUtils = require('@dr/environment').buildUtils;
+var env = require('@dr/environment');
+var buildUtils = env.buildUtils;
 
 var packageUtils, config;
 
 module.exports = {
-	compile: compile
+	compile: compile,
+	replaceAssetsUrl: replaceAssetsUrl
 };
 
 function compile(api) {
@@ -56,4 +58,20 @@ function copyAssets() {
 		log.debug('flush');
 		buildUtils.writeTimestamp('assets');
 	});
+}
+
+function replaceAssetsUrl(str, getCurrPackage) {
+	return str.replace(/([^a-zA-Z\d_.]|^)assets:\/\/((?:@[^\/]+\/)?[^\/]+)?(\/.*?)(['"),;:!\s]|$)/gm,
+		(match, leading, packageName, path, tail) => {
+			if (!packageName || packageName === '') {
+				packageName = getCurrPackage();
+			}
+			if (packageName) {
+				log.info('resolve assets to ' + packageName);
+			}
+			var resolvedTo = leading + env.config().staticAssetsURL + '/assets/' +
+			env.packageUtils.parseName(packageName).name + path + tail;
+			log.debug('-> ' + resolvedTo);
+			return resolvedTo;
+		});
 }

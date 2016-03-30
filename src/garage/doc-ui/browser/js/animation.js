@@ -45,9 +45,7 @@ function drIncludeAnim($compile) {
 		restrict: 'C',
 		scope: false,
 		link: function(scope, iElement, iAttrs) {
-			console.log(iElement[0]);
 			scope.$on('$includeContentLoaded', function() {
-				//console.log(iElement[0]);
 				TweenMax.fromTo(iElement[0], 0.3,
 					{opacity: 0, y: 40},
 					{opacity: 1, y: 0, ease: 'Power2.easeOut'});

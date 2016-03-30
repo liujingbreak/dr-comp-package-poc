@@ -11,6 +11,7 @@ var File = require('vinyl');
 var swig = require('swig');
 var log = require('@dr/logger').getLogger('browserifyBuilder.pageCompiller');
 var packageUtils = require('@dr/environment').packageUtils;
+var assetsProcesser = require('@dr-core/assets-processer');
 
 module.exports = PageCompiler;
 
@@ -75,7 +76,9 @@ PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageTyp
 		var $ = cheerio.load(content);
 		injectElements($, buildInfo.bundleDepsGraph[instance.longName], instance, buildInfo.config, buildInfo.revisionMeta);
 		var hackedHtml = $.html();
-
+		hackedHtml = assetsProcesser.replaceAssetsUrl(hackedHtml, ()=> {
+			return pathInfo.packageName;
+		});
 		var pagePath = Path.resolve(instance.shortName, pathInfo.path);
 		log.info('Entry page processed: ' + pagePath);
 		through.push(new File({
@@ -101,12 +104,14 @@ function resolvePagePath(page, instance, moduleMap) {
 		var packageName = matched[1];
 		var path = matched[2];
 		return {
+			packageName: packageName,
 			package: moduleMap[packageName].packagePath,
 			path: path,
 			abs: Path.resolve(moduleMap[packageName].packagePath, path)
 		};
 	} else {
 		return {
+			packageName: instance.longName,
 			package: instance.packagePath,
 			path: page,
 			abs: Path.resolve(instance.packagePath, page)

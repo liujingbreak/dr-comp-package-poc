@@ -221,8 +221,15 @@ include 其他package的文件，例如@dr/doc-less-var
 }
 
 ```
-
 URL prefix 'assests://' will be replaced with calculated value of `config().staticAssetsURL + '/assets/' + packageShortName`
+
+- html 文件也是同样
+```html
+
+<img src="assests:///some-photo.jpg">
+<a href="assests:///some-file">
+```
+但是只有package.json中dr.entryView, dr.entryPage, 以及被javascript `require()`的html文件会得到URL替换, assets目录下的文件不会被替换处理，如果你的html文件是放在assets目录下的，请使用相对路径引用其他resource.
 
 
 #### Bundle 概念和配置

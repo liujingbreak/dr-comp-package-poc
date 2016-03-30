@@ -40,7 +40,6 @@ module.exports = function(file, options) {
 	function replaceUrl(css) {
 		return css.replace(/(\W)url\(['"]?\s*assets:\/\/((?:@[^\/]+\/)?[^\/]+)?(\/.*?)['"]?\s*\)/g,
 		function(match, preChar, packageName, path) {
-			log.info(match);
 			if (!packageName || packageName === '') {
 				if (!currPackage) {
 					currPackage = env.findBrowserPackageByPath(file);
