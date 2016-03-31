@@ -8,19 +8,16 @@ module.exports = function(goFunc) {
 			}
 		},  {
 			label: t('Daily Work: 安装平台 & 开发组建'),
-			flag: 'new',
 			action: function() {
 				goFunc('run-platform-as-tool-cn.md');
 			}
 		}, {
 			label: t('Package.json Specification'),
-			flag: 'new',
 			action: function() {
 				goFunc('package-spec-cn.md');
 			}
 		}, {
 			label: t('环境配置和gulp命令提示'),
-			flag: 'new',
 			action: function() {
 				goFunc('dev-env-hints.md');
 			}
