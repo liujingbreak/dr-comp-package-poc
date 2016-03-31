@@ -1,6 +1,6 @@
 API 详细说明
 ============
-_2016-3-30 更新_
+_2016-4-6 更新_
 
 > API是降低组件耦合度的糖果。
 - API instance是一个javascript对象。
@@ -73,6 +73,8 @@ console.log(__api.assetsUrl('some-picture.jpg'));
 | .packageUtils | lib/packageMgr/packageUtils.js 查找其他package的工具
 | `.config()` | 获取config.yaml配置， 但是浏览器端只有部分config属性可读:  `staticAssetsURL`, `serverURL`, `packageContextPathMapping`
 | `.assetsUrl(packageName, path)` | 获取packageName对应的静态资源/assets目录下的文件的浏览器访问路径, `packageName` 为可选参数, 默认是当前package
+| .loadLocaleBundles(language, callback) | LABjs loads locale bundles to current page
+| .loadPrefLocaleBundles(callback) | LABjs loads locale bundles based on browser prefered language, language choosing logic is in the order of: `navigator.languages[0], navigator.language, navigator.browserLanguage, navigator.systemLanguage, navigator.userLanguage, navigator.languages[1] ...`
 | `.isBrowser()` | true
 | `.isNode()` | false
 
@@ -85,7 +87,7 @@ console.log(__api.assetsUrl('some-picture.jpg'));
 | .buildUtils | lib/gulp.buildUtils.js
 | .packageInfo | monkey patched by `@dr-core/browserify-builder`
 | .findBrowserPackageByPath(filePath) | monkey patched by `@dr-core/browserify-builder`, 返回package source code对应的package name
-
+| .**loadLocaleBundles(locale, callback)** | 利用LABjs 预先load locale bundle, locale值是 'zh', 'en', 'en-us'等language country code, callback内执行加载完后的逻辑
 
 ### 一些内置API providers
 

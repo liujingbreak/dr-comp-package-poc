@@ -5,6 +5,7 @@ var fs = require('fs');
 var es = require('event-stream');
 var log;
 var env = require('@dr/environment');
+var resolveStaticUrl = require('@dr-core/browserify-builder-api').resolveUrl;
 var buildUtils = env.buildUtils;
 
 var packageUtils, config;
@@ -53,7 +54,7 @@ function copyAssets() {
 		return null;
 	}
 	return es.merge(streams)
-	.pipe(gulp.dest(Path.join(config().staticDir, 'assets')))
+	.pipe(gulp.dest(Path.join(config().staticDir)))
 	.on('end', function() {
 		log.debug('flush');
 		buildUtils.writeTimestamp('assets');
@@ -69,8 +70,7 @@ function replaceAssetsUrl(str, getCurrPackage) {
 			if (packageName) {
 				log.info('resolve assets to ' + packageName);
 			}
-			var resolvedTo = leading + env.config().staticAssetsURL + '/assets/' +
-			env.packageUtils.parseName(packageName).name + path + tail;
+			var resolvedTo = leading + resolveStaticUrl(env.config, packageName, path) + tail;
 			log.debug('-> ' + resolvedTo);
 			return resolvedTo;
 		});

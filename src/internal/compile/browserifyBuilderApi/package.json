@@ -1,6 +1,6 @@
 {
   "name": "@dr-core/browserify-builder-api",
-  "version": "0.0.16",
+  "version": "0.0.17-1",
   "description": "Add some useful API to work with browserify-builder",
   "browser": "browserifyBuilderApi.browser.js",
   "main": "browserifyBuilderApi.server.js",

@@ -1,5 +1,31 @@
 Updates
 =======
+### 2016-4-6
+- i18n support
+	新的browser side API
+	| Name | description
+	| -- | --
+	| .loadLocaleBundles(language, callback) | LABjs loads locale bundles to current page
+	| .loadPrefLocaleBundles(callback) | LABjs loads locale bundles based on browser prefered language, language choosing logic is in the order of: `navigator.languages[0], navigator.language, navigator.browserLanguage, navigator.systemLanguage, navigator.userLanguage, navigator.languages[1] ...`
+
+- 很简单的i18n example！查看src/examples/example-i18n
+
+- 支持AngularJS i18n
+
+- 增加了Browserify **yamlify** transform
+
+	```javascript
+	var constants = require('./constants.yaml');
+	```
+- Express server 增加了gzip middleware
+- 支持了browser JS require() 文件名特殊标记`{locale}`
+	```
+	require('./xxx-{locale}xxx');
+	```
+	```
+	gulp compile --locale en
+	```
+
 ### 2016-3-31
 - Static Assets URL
 

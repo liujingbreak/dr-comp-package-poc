@@ -4,3 +4,5 @@ module.exports.activate = function(api) {
 		return '/' + this.config().destDir + '/server/' + this.packageShortName + '/' + packageRelativePath;
 	};
 };
+
+module.exports.resolveUrl = require('./resolveUrl');

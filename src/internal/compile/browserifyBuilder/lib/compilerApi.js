@@ -1,10 +1,12 @@
 var Path = require('path');
 var _ = require('lodash');
 var log = require('log4js').getLogger(Path.basename(__filename, '.js'));
+var chalk = require('chalk');
 
 module.exports = function(api) {
 	var proto = api.__proto__;
 	proto.findBrowserPackageByPath = findBrowserPackageByPath;
+	proto.packageNames2bundles = packageNames2bundles;
 	require('@dr/environment').findBrowserPackageByPath = findBrowserPackageByPath.bind(proto);
 	initPackageListInfo(proto);
 };
@@ -35,4 +37,33 @@ function findBrowserPackageByPath(file) {
 	} else {
 		return this._packagePath2Name[this._packagePathList[idx - 1]];
 	}
+}
+
+function packageNames2bundles(packageNames) {
+	var moduleMap = this.packageInfo.moduleMap;
+	var bundleSet = {};
+
+	_.forEach(packageNames, name => {
+		if (!{}.hasOwnProperty.call(moduleMap, name)) {
+			if (_.startsWith(name, '@')) {
+				log.warn(chalk.yellow('Browser package cannot be found: ' + name));
+				return;
+			} else {
+				// guess the package scope name
+				var guessingName;
+				if (_.some(this.config().packageScopes, function(scope) {
+					guessingName = '@' + scope + '/' + name;
+					return {}.hasOwnProperty.call(moduleMap, guessingName);
+				})) {
+					name = guessingName;
+				} else {
+					log.warn(chalk.yellow('Browser package cannot be found: ' + name));
+					return;
+				}
+			}
+		}
+		bundleSet[moduleMap[name].bundle] = true;
+	});
+	var bundles = _.keys(bundleSet);
+	return bundles;
 }

@@ -6,12 +6,12 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var engines = require('consolidate');
 var swig = require('swig');
-var ms = require('ms');
 var setupApi = require('./setupApi');
 var log = require('log4js').getLogger('server.app');
 var _ = require('lodash');
 var fs = require('fs');
 var Path = require('path');
+var compression = require('compression');
 
 module.exports = {
 	activate: function(api, apiPrototype) {
@@ -45,14 +45,14 @@ function create(app, setting, packageCache) {
 		extended: false
 	}));
 	app.use(cookieParser());
-
+	app.use(compression());
 	setupApi.createPackageDefinedMiddleware(app);
 	setupApi.createPackageDefinedRouters(app);
 
-	var assetsFolder = path.resolve(setting.rootPath, setting.staticDir);
-	log.debug('express static path: ' + assetsFolder);
-	app.use('/', express.static(assetsFolder, {
-		maxAge: ms(setting.cacheControlMaxAge),
+	var staticFolder = path.resolve(setting.rootPath, setting.staticDir);
+	log.debug('express static path: ' + staticFolder);
+	app.use('/', express.static(staticFolder, {
+		maxAge: setting.cacheControlMaxAge,
 		setHeaders: setCORSHeader
 	}));
 	app.get('/', function(req, res) {
@@ -64,9 +64,9 @@ function create(app, setting, packageCache) {
 	_.forOwn(packageCache, function(packageInstance, name) {
 		var assetsDir = Path.resolve(setting.rootPath, packageInstance.path, 'assets');
 		if (fs.existsSync(assetsDir)) {
-			log.debug('/assets/' + name + ' -> ' + assetsDir);
-			app.use('/assets/' + name, express.static(assetsDir, {
-				//maxAge: ms(setting.cacheControlMaxAge),
+			log.debug(name + ' -> ' + assetsDir);
+			app.use('/' + name, express.static(assetsDir, {
+				//maxAge: setting.cacheControlMaxAge,
 				setHeaders: setCORSHeader
 			}));
 		}

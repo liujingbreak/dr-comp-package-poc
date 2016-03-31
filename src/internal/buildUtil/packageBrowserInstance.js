@@ -11,6 +11,7 @@ module.exports = PackageBrowserInstance;
  * @param {string} attrs.parsedName
  * @param {string} attrs.active
  * @param {string} attrs.entryPage
+ * @param {string} attrs.i18n
  */
 function PackageBrowserInstance(configSetting, attrs) {
 	if (!(this instanceof PackageBrowserInstance)) {

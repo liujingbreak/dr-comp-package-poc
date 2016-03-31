@@ -42,3 +42,5 @@ console.log(__api.packageName);
 | -- | --
 | assetsUrl | `function(package, path)` parameter `package` is optional, default value is current package
 | config | `funtion()`
+| .loadLocaleBundles(language, callback) | LABjs loads locale bundles to current page
+| .loadPrefLocaleBundles(callback) | LABjs loads locale bundles based on browser prefered language, language choosing logic is in the order of: `navigator.languages[0], navigator.language, navigator.browserLanguage, navigator.systemLanguage, navigator.userLanguage, navigator.languages[1] ...`

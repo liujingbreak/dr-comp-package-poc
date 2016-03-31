@@ -131,7 +131,14 @@ gulp.task('install-recipe', ['link'], function(cb) {
 	if (config().dependencyMode) {
 		prom = prom
 		.then(function() {
-			return packageInstaller.installRecipeAsync(config().internalRecipeFolderPath);
+			var currPkJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+			var savedVer = currPkJson.dependencies ? currPkJson.dependencies['@dr/internal-recipe'] :
+				(currPkJson.devDependencies ? currPkJson.devDependencies['@dr/internal-recipe'] : false);
+			if (savedVer) {
+				return packageInstaller.installRecipeAsync('@dr/internal-recipe@' + savedVer);
+			} else {
+				return packageInstaller.installRecipeAsync(config().internalRecipeFolderPath);
+			}
 		});
 	}
 

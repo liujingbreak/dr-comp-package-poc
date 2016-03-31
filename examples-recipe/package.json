@@ -1,11 +1,12 @@
 {
   "name": "@dr/examples-recipe",
-  "version": "0.0.13",
+  "version": "0.0.14-1",
   "description": "Recipe package of examples-recipe",
   "dependencies": {
-    "@dr/example-common": "1.0.18",
-    "@dr/example-entry": "1.0.24",
-    "@dr/example-node": "1.0.26",
-    "@dr/example-browserify": "0.0.17"
+    "@dr/example-common": "1.0.19-1",
+    "@dr/example-entry": "1.0.25-1",
+    "@dr/example-i18n": "0.0.1",
+    "@dr/example-node": "1.0.27-1",
+    "@dr/example-browserify": "0.0.18-1"
   }
 }

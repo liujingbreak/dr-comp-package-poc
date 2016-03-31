@@ -74,7 +74,8 @@ PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageTyp
 	return readFileAsync(pathInfo.abs, 'utf-8')
 	.then(function(content) {
 		var $ = cheerio.load(content);
-		injectElements($, buildInfo.bundleDepsGraph[instance.longName], instance, buildInfo.config, buildInfo.revisionMeta);
+		injectElements($, buildInfo.bundleDepsGraph[instance.longName], instance,
+			buildInfo.config, buildInfo.revisionMeta, buildInfo.entryDataProvider);
 		var hackedHtml = $.html();
 		hackedHtml = assetsProcesser.replaceAssetsUrl(hackedHtml, ()=> {
 			return pathInfo.packageName;
@@ -137,9 +138,9 @@ function needUpdateEntryPage(builtBundles, bundleSet) {
 	});
 }
 
-var apiBootstrapTpl = swig.compileFile(Path.join(__dirname, 'templates', 'entryPageBootstrap.js.swig'), {autoescape: false});
+var entryBootstrapTpl = swig.compileFile(Path.join(__dirname, 'templates', 'entryPageBootstrap.js.swig'), {autoescape: false});
 
-function injectElements($, bundleSet, pkInstance, config, revisionMeta) {
+function injectElements($, bundleSet, pkInstance, config, revisionMeta, entryDataProvider) {
 	var body = $('body');
 	var head = $('head');
 	_injectElementsByBundle($, head, body, 'labjs', config, revisionMeta);
@@ -162,13 +163,12 @@ function injectElements($, bundleSet, pkInstance, config, revisionMeta) {
 			head.append(bundleCss);
 		}
 	});
-	body.append($('<script>').html(apiBootstrapTpl({
+	var entryData = entryDataProvider(pkInstance.longName);
+	body.append($('<script>').html(entryBootstrapTpl({
 		jsLinks: jsLinks,
 		entryPackage: pkInstance.longName,
 		debug: !!config().devMode,
-		staticAssetsURL: JSON.stringify(config().staticAssetsURL),
-		serverURL: JSON.stringify(config().serverURL),
-		packageContextPathMapping: JSON.stringify(config().packageContextPathMapping)
+		data: JSON.stringify(entryData)
 	})));
 }
 

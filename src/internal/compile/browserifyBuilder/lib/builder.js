@@ -17,6 +17,7 @@ var gulpFilter = require('gulp-filter');
 var rename = require('gulp-rename');
 var through = require('through2');
 var htmlTranform = require('html-browserify');
+var yamlify = require('yamlify');
 var RevAll = require('gulp-rev-all');
 var File = require('vinyl');
 // var browserifyInc = require('browserify-incremental');
@@ -24,23 +25,27 @@ var File = require('vinyl');
 var parcelify = require('parcelify');
 var mkdirp = require('mkdirp');
 var gutil = require('gulp-util');
-var cycle = require('cycle');
 var chalk = require('chalk');
 
 var log;
-var packageBrowserInstance = require('./packageBrowserInstance');
 var helperFactor = require('./browserifyHelper');
-var FileCache = require('./fileCache');
+var FileCache = require('@dr-core/build-util').fileCache;
 var PageCompiler = require('./pageCompiler');
+var walkPackages = require('@dr-core/build-util').walkPackages;
 var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
 var fileAccessAsync = Promise.promisify(fs.access, {context: fs});
 var packageUtils, config, jsBundleEntryMaker;
 
+var tasks = [];
+var fileCache;
 /**
  * JS and CSS file Build process based on browserify and parcelify
  */
 module.exports = {
-	compile: compile
+	compile: compile,
+	addTask: task => {
+		tasks.push(task);
+	}
 };
 
 function compile(api) {
@@ -50,7 +55,7 @@ function compile(api) {
 	var argv = api.argv;
 	var helper = helperFactor(config);
 	//var jsTransform = helper.jsTransform;
-	var fileCache = new FileCache(config().destDir);
+	fileCache = fileCache ? fileCache : new FileCache(config().destDir);
 	var buildCss = true;
 	var buildJS = true;
 
@@ -58,7 +63,9 @@ function compile(api) {
 	gutil.log('\tgulp compile [-b <bundle name> -b <bunle name> ...]');
 	gutil.log('\tbuild all JS and CSS bundles, if parameter <bundle name> is supplied, only that specific package or bundle will be rebuilt.');
 
-	var packageInfo = walkPackages();
+	var packageInfo = walkPackages(config, argv, packageUtils, api.compileNodePath);
+	var i18nModuleNameSet;
+	var availableLocaleBundleSet;
 	//monkey patch new API
 	api.__proto__.packageInfo = packageInfo;
 	require('./compilerApi')(api);
@@ -76,7 +83,7 @@ function compile(api) {
 		bundleNames = bundlesTobuild;
 	}
 	if (argv.p) {
-		bundlesTobuild = packageNames2bundles([].concat(argv.p), packageInfo.moduleMap);
+		bundlesTobuild = api.packageNames2bundles([].concat(argv.p));
 		if (!validateBundleNames(bundleNames, bundlesTobuild)) {
 			return false;
 		}
@@ -91,6 +98,9 @@ function compile(api) {
 	if (argv['only-css']) {
 		buildJS = false;
 	}
+
+	// extra data returned from task, which will be injected to entry page.
+	// e.g. i18n information.
 
 	var cssPromises = [];
 	var jsStreams = [];
@@ -113,8 +123,18 @@ function compile(api) {
 		})
 		.catch((err)=>{}).finally(()=> next());
 	});
-	return fileCache.loadFromFile('depsMap.json').then(function(cachedDepsMap) {
-		depsMap = cachedDepsMap;
+	return Promise.all([fileCache.loadFromFile('bundleInfoCache.json'),
+	fileCache.loadFromFile('depsMap.json')]).then(function(results) {
+		var bundleInfoCache = results[0];
+		if (!bundleInfoCache.i18nModuleNameSet) {
+			bundleInfoCache.i18nModuleNameSet = {};
+		}
+		if (!bundleInfoCache.availableLocaleBundleSet) {
+			bundleInfoCache.availableLocaleBundleSet = {};
+		}
+		i18nModuleNameSet = bundleInfoCache.i18nModuleNameSet;
+		availableLocaleBundleSet = bundleInfoCache.availableLocaleBundleSet;
+		depsMap = results[1];
 		bundleNames.forEach(function(bundle) {
 			log.info(chalk.magenta(bundle));
 			var buildObj = buildBundle(packageInfo.bundleMap[bundle],
@@ -162,7 +182,18 @@ function compile(api) {
 					pageCompilerParam.packageInfo = packageInfo;
 					pageCompilerParam.builtBundles = bundleNames;
 					this.push(pageCompilerParam);
-					callback();
+					api.__proto__.bundleDepsGraph = bundleDepsGraph;
+					runTasks().then(getDataFuncs => {
+						pageCompilerParam.entryDataProvider = function(entryPackageName) {
+							var browserApi = {};
+							monkeyPatchBrowserApi(browserApi, entryPackageName);
+							getDataFuncs.forEach(getData => {
+								getData(browserApi, entryPackageName);
+							});
+							return browserApi;
+						};
+						callback();
+					});
 				}))
 			.pipe(pageCompiler.compile('server'))
 			.pipe(gulp.dest(Path.join(config().destDir, 'server')))
@@ -190,7 +221,6 @@ function compile(api) {
 			var entryDepsSet = packageDeps[moduleName] = {};
 			_walkDeps(moduleName, moduleName, entryDepsSet, true);
 		});
-
 		function _walkDeps(id, file, entryDepsSet, isParentOurs, lastDirectDeps) {
 			var deps;
 			if (!file) { // since for external module, the `file` is always `false`
@@ -199,10 +229,14 @@ function compile(api) {
 				deps = depsMap[file];
 				deps = deps ? deps : depsMap[id];
 			}
-			if (!deps) {
+			if (!deps && !{}.hasOwnProperty.call(i18nModuleNameSet, id)) {
 				log.error('Can not walk dependency tree for: ' + id +
 				', missing depended module or you may try rebuild all bundles');
+				log.info(i18nModuleNameSet);
 				gutil.beep();
+			}
+			if (!deps) {
+				return;
 			}
 			_.forOwn(deps, function(depsValue, depsKey) {
 				var isRelativePath = _.startsWith(depsKey, '.');
@@ -243,7 +277,11 @@ function compile(api) {
 					return;
 				}
 				var bundle, msg;
-				if (!moduleMap[dep] || !(bundle = moduleMap[dep].bundle) ) {
+				if ({}.hasOwnProperty.call(i18nModuleNameSet, dep)) {
+					// it is i18n module like "@dr/angularjs/i18n" which is not belong to any preload bundle
+					return;
+				}
+				if (!moduleMap[dep] || !(bundle = moduleMap[dep].bundle)) {
 					if (isDirectDeps === true) {
 						msg = 'Entry bundle "' + currBundle + '", module "' + dep + '" which is dependency of bundle "' +
 							currBundle + '" is not explicityly configured with any bundle, check out `vendorBundleMap` in config.yaml';
@@ -304,152 +342,11 @@ function compile(api) {
 		});
 	}
 
-	function walkPackages() {
-		var packageInfoCacheFile = Path.join(config().destDir, 'packageInfo.json');
-		var packageInfo;
-		if ( (argv.p || argv.b) && fs.existsSync(packageInfoCacheFile)) {
-			log.info('Reading build info cache from ' + packageInfoCacheFile);
-			packageInfo = JSON.parse(fs.readFileSync(packageInfoCacheFile, {encoding: 'utf8'}));
-			packageInfo = cycle.retrocycle(packageInfo);
-		} else {
-			log.info('scan for packages info');
-			packageInfo = _walkPackages();
-			mkdirp.sync(config().destDir);
-			fs.writeFile(packageInfoCacheFile, JSON.stringify(cycle.decycle(packageInfo), null, '\t'));
-		}
-		return packageInfo;
-	}
-	/**
-	 * @return {PackageInfo}
-	 */
-	function _walkPackages() {
-		/**
-		 * @typedef PackageInfo
-		 * @type {Object}
-		 * @property {packageBrowserInstance[]} allModules
-		 * @property {Object.<string, packageBrowserInstance>} moduleMap key is module name
-		 * @property {Object.<string, packageBrowserInstance[]>} bundleMap key is bundle name
-		 * @property {Object.<string, packageBrowserInstance[]>} entryPageMap key is module name
-		 */
-		var info = {
-			allModules: null,
-			moduleMap: {},
-			bundleMap: null,
-			entryPageMap: {}
-		};
-		var vendorConfigInfo = vendorBundleMapConfig();
-		var map = info.bundleMap = vendorConfigInfo.bundleMap;
-		info.allModules = vendorConfigInfo.allModules;
-
-		packageUtils.findBrowserPackageByType('*', function(
-			name, entryPath, parsedName, pkJson, packagePath) {
-			var bundle, entryViews, entryPages;
-			var isEntryServerTemplate = true;
-			var noParseFiles;
-			var instance = packageBrowserInstance(config());
-			if (!pkJson.dr) {
-				pkJson.dr = {};
-				log.error('missing "dr" property in ' + Path.join(packagePath, 'package.json'));
-				gutil.beep();
-			}
-			if (!pkJson.dr.builder || pkJson.dr.builder === 'browserify') {
-				if (config().bundlePerPackage === true && parsedName.name !== 'browserify-builder-api') {
-					bundle = parsedName.name;
-				} else {
-					bundle = pkJson.dr.bundle || pkJson.dr.chunk;
-					bundle = bundle ? bundle : parsedName.name;
-				}
-				if (pkJson.dr.entryPage) {
-					isEntryServerTemplate = false;
-					entryPages = [].concat(pkJson.dr.entryPage);
-					entryPages = _.map(entryPages, path => {
-						return path;
-					});
-					info.entryPageMap[name] = instance;
-				} else if (pkJson.dr.entryView){
-					isEntryServerTemplate = true;
-					entryViews = [].concat(pkJson.dr.entryView);
-					entryViews = _.map(entryViews, path => {
-						return path;
-					});
-					info.entryPageMap[name] = instance;
-				}
-				if (pkJson.dr.browserifyNoParse) {
-					noParseFiles = [].concat(pkJson.dr.browserifyNoParse);
-				}
-			} else {
-				return;
-			}
-			instance.init({
-				bundle: bundle,
-				longName: name,
-				file: bResolve.sync(name),
-				parsedName: parsedName,
-				packagePath: packagePath,
-				active: pkJson.dr ? pkJson.dr.active : false,
-				entryPages: entryPages,
-				entryViews: entryViews,
-				isEntryJS: pkJson.dr && pkJson.dr.isEntryJS !== undefined ? (!!pkJson.dr.isEntryJS) : {}.hasOwnProperty.call(config().defaultEntrySet, name),
-				browserifyNoParse: noParseFiles,
-				isEntryServerTemplate: isEntryServerTemplate
-			});
-			info.allModules.push(instance);
-
-			if (!{}.hasOwnProperty.call(map, bundle)) {
-				map[bundle] = [];
-			}
-			map[bundle].push(instance);
-		});
-
-		info.allModules.forEach(function(instance) {
-			if (!instance.longName) {
-				log.debug('no long name? ' + JSON.stringify(instance, null, '\t'));
-			}
-			info.moduleMap[instance.longName] = instance;
-		});
-
-		return info;
-	}
-	/**
-	 * Read config.json, attribute 'vendorBundleMap'
-	 * @return {[type]} [description]
-	 */
-	function vendorBundleMapConfig() {
-		var info = {
-			allModules: [],
-			bundleMap: null
-		};
-		var vendorMap = config().vendorBundleMap;
-		var map = info.bundleMap = {};
-		_.forOwn(vendorMap, function(moduleNames, bundle) {
-			var modules = _.map(moduleNames, function(moduleName) {
-				var mainFile;
-				try {
-					mainFile = bResolve.sync(moduleName, {paths: api.compileNodePath});
-				} catch (err) {
-					log.warn('This might be a problem:\n' +
-					' browser-resolve can\'t resolve on vendor bundle package: ' + chalk.red(moduleName) +
-					', remove it from ' + chalk.yellow('vendorBundleMap') + ' of config.yaml or `npm install it`');
-				}
-				var instance = packageBrowserInstance(config(), {
-					bundle: bundle,
-					longName: moduleName,
-					shortName: moduleName,
-					file: mainFile,
-					isEntryJS: {}.hasOwnProperty.call(config().defaultEntrySet, moduleName)
-				});
-				info.allModules.push(instance);
-				return instance;
-			});
-			map[bundle] = modules;
-		});
-		return info;
-	}
-
 	function buildBundle(modules, bundle, destDir, depsMap) {
 		var browserifyOpt = {
 			debug: true,
 			paths: api.compileNodePath,
+			basedir: process.cwd(),
 			noParse: config().browserifyNoParse ? config().browserifyNoParse : []
 		};
 		var mIdx = 1;
@@ -468,8 +365,8 @@ function compile(api) {
 			log.info('\t├─ ' + chalk.magenta(moduleInfo.longName));
 			mIdx++;
 		});
-		jsBundleEntryMaker = helper.JsBundleEntryMaker(api, bundle, modules);
-		var listFile = jsBundleEntryMaker.createPackageListFile(modules);
+		jsBundleEntryMaker = helper.JsBundleEntryMaker(api, bundle, modules, argv.locale ? argv.locale : 'zh');
+		var listFile = jsBundleEntryMaker.createPackageListFile();
 		mkdirp.sync(destDir);
 		var entryFile = Path.join(destDir, jsBundleEntryMaker.bundleFileName);
 
@@ -482,26 +379,16 @@ function compile(api) {
 		// var b = browserify(xtend(browserifyInc.args, {
 		// 	debug: true
 		// }));
-		//b.add(listStream, {file: entryFile});
+		//b.add(listStream, {file: entryFile, basedir: process.cwd});
 		b.add(Path.join(destDir, jsBundleEntryMaker.bundleFileName));
-
-
-		modules.forEach(function(module) {
-			b.require(module.longName);
-		});
+		b.require(modules.map(module => { return module.longName; }));
 		b.transform(htmlTranform, {global: true});
+		b.transform(yamlify, {global: true});
 		b.transform(jsBundleEntryMaker.jsTranformer(modules), {global: true});
-		excludeModules(packageInfo.allModules, b, _.map(modules, function(module) {return module.longName;}));
-		//browserifyInc(b, {cacheFile: Path.resolve(config().destDir, 'browserify-cache.json')});
 
-		//TODO: algorithm here can be optmized
-		function excludeModules(allModules, b, entryModules) {
-			allModules.forEach(function(pkModule) {
-				if (!_.includes(entryModules, pkModule.longName)) {
-					b.exclude(pkModule.longName);
-				}
-			});
-		}
+		var excludeList = excludeModules(packageInfo.allModules, b, _.map(modules, function(module) {return module.longName;}));
+		excludeI18nModules(packageInfo.allModules, b);
+		//browserifyInc(b, {cacheFile: Path.resolve(config().destDir, 'browserify-cache.json')});
 
 		var cssPromise = buildCssBundle(b, bundle, destDir);
 
@@ -519,31 +406,128 @@ function compile(api) {
 			callback(null, chunk);
 		}));
 
+		var bundleBasename = 'js/' + bundle;
 		var jsStream = b.bundle()
 			.on('error', (er) => {
 				log.error('browserify bundle() for bundle "' + bundle + '" failed', er);
 				gutil.beep();
 				jsStream.end();
-				//process.exit(1);
 			})
-			.pipe(source('js/' + bundle + '.js'))
+			.pipe(source(bundleBasename + '.js'))
 			.pipe(buffer())
 			.pipe(sourcemaps.init({
 				loadMaps: true
 			}))
 			.pipe(gulpif(!config().devMode, uglify()))
-			.pipe(gulpif(!config().devMode, rename('js/' + bundle + '.min.js')))
-				.pipe(sourcemaps.write('./'))
-			.pipe(size({title: bundle}))
+			.pipe(gulpif(!config().devMode, rename(bundleBasename + '.min.js')))
+			.pipe(sourcemaps.write('./'))
+			.pipe(size({title: bundleBasename}))
 			.on('error', (er) => {
 				log.error('browserify bundle() sourcemaps failed', er);
 				jsStream.end();
-				//process.exit(1);
 			});
+
+		var i18nStream = buildI18nBundles(browserifyOpt, modules, excludeList, bundle);
+		if (i18nStream) {
+			jsStream = es.merge([jsStream, i18nStream]);
+		}
 		return {
 			cssPromise: cssPromise,
 			jsStream: jsStream
 		};
+	}
+
+	function buildI18nBundles(browserifyOpt, modules, excludeList, bundle) {
+		var streams = [];
+		config().locales.forEach(locale => {
+			var stm = buildLocaleBundle(browserifyOpt, locale, modules, excludeList, bundle);
+			if (stm) {
+				streams.push(stm);
+			}
+		});
+		if (streams.length === 0) {
+			return null;
+		}
+		availableLocaleBundleSet[bundle] = 1;
+		return es.merge(streams);
+	}
+
+	function buildLocaleBundle(browserifyOpt, locale, modules, excludeList, bundle) {
+		var maker = helper.JsBundleWithI18nMaker(api, bundle, modules, locale);
+		var listFile = maker.createI18nListFile();
+		if (!listFile) {
+			return null;
+		}
+		var listFilePath = Path.resolve(maker.i18nBundleEntryFileName);
+		//fs.writeFileSync(entryFile, listFile);
+		log.debug('i18n:\n' + listFile);
+		var b = browserify(browserifyOpt);
+		var listStream = through();
+		listStream.write(listFile, 'utf8');
+		listStream.end();
+		maker.i18nModuleForRequire.forEach(expose => {
+			b.require(expose.file, expose.opts);
+			i18nModuleNameSet[expose.opts.expose] = 1;
+		});
+		b.add(listStream, {file: listFilePath, basedir: process.cwd});
+		b.transform(htmlTranform, {global: true});
+		b.transform(yamlify, {global: true});
+		b.transform(jsBundleEntryMaker.jsTranformer(modules), {global: true});
+		excludeList.forEach(b.exclude, b);
+
+		var bundleBasename = 'js/' + bundle + '_' + locale;
+
+		var out = b.bundle()
+			.on('error', (er) => {
+				log.error('browserify bundle() for bundle "' + bundle + '" failed', er);
+				gutil.beep();
+				out.end();
+			})
+			.pipe(source(bundleBasename + '.js'))
+			.pipe(buffer())
+			.pipe(sourcemaps.init({
+				loadMaps: true
+			}))
+			.pipe(gulpif(!config().devMode, uglify()))
+			.pipe(gulpif(!config().devMode, rename(bundleBasename + '.min.js')))
+			.pipe(sourcemaps.write('./'))
+			.pipe(size({title: bundleBasename}))
+			.on('error', (er) => {
+				log.error('browserify bundle() sourcemaps failed', er);
+				out.end();
+			});
+		return out;
+	}
+
+	function monkeyPatchBrowserApi(browserApi, entryPackage) {
+		var bundleSet = api.bundleDepsGraph[entryPackage];
+		delete bundleSet.labjs;
+		var localeBundlesForEntry = _.intersection(Object.keys(bundleSet), Object.keys(availableLocaleBundleSet));
+		if (localeBundlesForEntry.length > 0) {
+			browserApi.localeBundles = localeBundlesForEntry;
+		}
+		browserApi._config = {};
+		config().browserSideConfigProp.forEach(propName => {
+			browserApi._config[propName] = config()[propName];
+		});
+		return localeBundlesForEntry;
+	}
+
+	function excludeModules(allModules, b, entryModules) {
+		var excludeList = [];
+		allModules.forEach(function(pkModule) {
+			if (!_.includes(entryModules, pkModule.longName)) {
+				b.exclude(pkModule.longName);
+				excludeList.push(pkModule.longName);
+			}
+		});
+		return excludeList;
+	}
+
+	function excludeI18nModules(allModules, b) {
+		allModules.forEach((pkModule) => {
+			b.exclude(pkModule.longName + '/i18n');
+		});
 	}
 
 	function revisionBundleFile(bundleStream) {
@@ -576,7 +560,6 @@ function compile(api) {
 			.pipe(revFilter)
 			.pipe(through.obj(function(row, en, next) {
 				this.push(row);
-				log.info(row.base + '|' + row.path);
 				next();
 			}))
 			.pipe(revAll.revision())
@@ -640,6 +623,15 @@ function compile(api) {
 		}));
 	});
 	}
+
+	function runTasks() {
+		var reses = [];
+		while (tasks.length > 0) {
+			var taskRes = tasks.shift()();
+			reses.push(taskRes);
+		}
+		return Promise.all(reses);
+	}
 }
 
 function validateBundleNames(bundleNames, bundlesTobuild) {
@@ -648,32 +640,4 @@ function validateBundleNames(bundleNames, bundlesTobuild) {
 		return false;
 	}
 	return true;
-}
-
-function packageNames2bundles(packageNames, moduleMap) {
-	var bundleSet = {};
-
-	_.forEach(packageNames, function(name) {
-		if (!{}.hasOwnProperty.call(moduleMap, name)) {
-			if (_.startsWith(name, '@')) {
-				log.warn(chalk.yellow('Browser package cannot be found: ' + name));
-				return;
-			} else {
-				// guess the package scope name
-				var guessingName;
-				if (_.some(config().packageScopes, function(scope) {
-					guessingName = '@' + scope + '/' + name;
-					return {}.hasOwnProperty.call(moduleMap, guessingName);
-				})) {
-					name = guessingName;
-				} else {
-					log.warn(chalk.yellow('Browser package cannot be found: ' + name));
-					return;
-				}
-			}
-		}
-		bundleSet[moduleMap[name].bundle] = true;
-	});
-	var bundles = _.keys(bundleSet);
-	return bundles;
 }

@@ -1,6 +1,6 @@
 {
   "name": "@dr/doc-less-var",
-  "version": "0.0.14",
+  "version": "0.0.15-1",
   "description": "less variables and mixins",
   "style": "less/include.less",
   "dr": {

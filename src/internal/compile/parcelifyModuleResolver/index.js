@@ -4,6 +4,7 @@ var LessPluginAutoPrefix = require('less-plugin-autoprefix');
 var NpmImportPlugin = require('less-plugin-npm-import');
 var log = require('@dr/logger').getLogger('parcelifyModuleResolver');
 var env = require('@dr/environment');
+var resolveStaticUrl = require('@dr-core/browserify-builder-api').resolveUrl;
 
 module.exports = function(file, options) {
 	var buf = '';
@@ -49,10 +50,14 @@ module.exports = function(file, options) {
 			if (packageName) {
 				log.info('resolve assets: ' + match.substring(1));
 			}
-			var resolvedTo = preChar + 'url(' + env.config().staticAssetsURL + '/assets/' +
-			env.packageUtils.parseName(packageName).name + path + ')';
-			log.debug('-> ' + resolvedTo);
-			return resolvedTo;
+			try {
+				var resolvedTo = preChar + 'url(' + resolveStaticUrl(env.config, packageName, path) + ')';
+				log.debug('-> ' + resolvedTo);
+				return resolvedTo;
+			} catch (e) {
+				log.error(e);
+				return match;
+			}
 		});
 	}
 

@@ -1,7 +1,7 @@
 {
   "name": "@dr-core/express-server",
   "description": "express server",
-  "version": "0.0.23",
+  "version": "0.0.24-1",
   "main": "app.js",
   "dependencies": {
     "body-parser": "~1.13.2",
@@ -12,7 +12,7 @@
     "serve-favicon": "~2.3.0",
     "consolidate": "^0.13.1",
     "jade": "1.11.0",
-    "ms": "^0.7.1"
+    "compression": "^1.6.1"
   },
   "dr": {
     "type": "core"
