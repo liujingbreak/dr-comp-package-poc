@@ -1,14 +1,14 @@
 {
   "name": "@dr/garage-recipe",
-  "version": "0.0.10-0",
+  "version": "0.0.10",
   "description": "Recipe package of garage-recipe",
   "dependencies": {
-    "@dr/doc-home": "0.0.16-0",
-    "@dr/doc-less-var": "0.0.14-0",
-    "@dr/doc-ui": "0.0.14-0",
-    "@dr/markdown-viewer": "0.0.14-0",
-    "@dr/readme": "0.0.14-0",
-    "@dr/readme-docs": "0.0.14-0",
-    "@dr/text-anim-ng": "0.0.14-0"
+    "@dr/doc-home": "0.0.16",
+    "@dr/doc-less-var": "0.0.14",
+    "@dr/doc-ui": "0.0.14",
+    "@dr/markdown-viewer": "0.0.14",
+    "@dr/readme": "0.0.14",
+    "@dr/readme-docs": "0.0.14",
+    "@dr/text-anim-ng": "0.0.14"
   }
 }

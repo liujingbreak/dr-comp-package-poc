@@ -1,6 +1,6 @@
 {
   "name": "@dr/example-common",
-  "version": "1.0.18-0",
+  "version": "1.0.18",
   "description": "",
   "browser": "browser.js",
   "main": "server.js",
