@@ -23,7 +23,6 @@ var Jasmine = require('jasmine');
 
 var findPackageJson = require('./lib/gulp/findPackageJson');
 var packageLintableSrc = require('./lib/gulp/packageLintableSrc');
-var packageUtils = require('./lib/packageMgr/packageUtils');
 var watchPackages = require('./lib/gulp/watchPackages');
 var recipeManager = require('./lib/gulp/recipeManager');
 var PackageInstall = require('./lib/gulp/packageInstallMgr');
@@ -179,7 +178,7 @@ gulp.task('check-dep', function() {
 gulp.task('lint', function() {
 	var i = 0;
 	return gulp.src(['*.js', 'lib/**/*.js']
-	.concat(packageLintableSrc(packageUtils.findAllPackages, argv.p)))
+	.concat(packageLintableSrc(argv.p)))
 	.pipe(jshint())
 	.pipe(jshint.reporter('jshint-stylish'))
 	.pipe(jshint.reporter('fail'))
