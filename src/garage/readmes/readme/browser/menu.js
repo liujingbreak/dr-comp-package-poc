@@ -2,7 +2,6 @@ module.exports = function(goFunc) {
 	return [
 		{
 			label: t('Introduction'),
-			flag: 'new',
 			action: function() {
 				goFunc('readme-cn.md');
 			}
@@ -28,6 +27,7 @@ module.exports = function(goFunc) {
 			}
 		}, {
 			label: t('i18n'),
+			flag: 'new',
 			action: function() {
 				goFunc('i18n.md');
 			}

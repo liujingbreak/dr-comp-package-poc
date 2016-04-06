@@ -1,14 +1,16 @@
 Updates
 =======
 ### 2016-4-6
+- 更新了 [i18n文档](/doc-home/index.html#/doc/i18n.md)
 - i18n support
 	新的browser side API
 	| Name | description
 	| -- | --
 	| .loadLocaleBundles(language, callback) | LABjs loads locale bundles to current page
 	| .loadPrefLocaleBundles(callback) | LABjs loads locale bundles based on browser prefered language, language choosing logic is in the order of: `navigator.languages[0], navigator.language, navigator.browserLanguage, navigator.systemLanguage, navigator.userLanguage, navigator.languages[1] ...`
-
-- 很简单的i18n example！查看src/examples/example-i18n
+	| .getPrefLanguage() | __api.loadPrefLocaleBundles() 调用此方法
+- 很简单的i18n example！查看\
+	[github.com/dr-web-house/web-fun-house/tree/master/src/examples/example-i18n](https://github.com/dr-web-house/web-fun-house/tree/master/src/examples/example-i18n)
 
 - 支持AngularJS i18n
 

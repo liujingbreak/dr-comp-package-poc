@@ -74,6 +74,16 @@ BrowserApi.prototype = {
 	},
 
 	loadPrefLocaleBundles: function(waitCallback) {
+		var pref = this.getPrefLanguage();
+		if (this.config().devMode && console) {
+			console.log('preferred language ' + pref);
+		}
+		this.loadLocaleBundles(pref, function() {
+			waitCallback(pref);
+		});
+	},
+
+	getPrefLanguage: function() {
 		var availables = this.config().locales;
 		var chooseLang = [
 			navigator.languages[0],
@@ -95,11 +105,6 @@ BrowserApi.prototype = {
 			return false;
 		});
 		pref = pref ? pref : 'en';
-		if (this.config().devMode && console) {
-			console.log('preferred language ' + pref);
-		}
-		this.loadLocaleBundles(pref, function() {
-			waitCallback(pref);
-		});
+		return pref;
 	}
 };

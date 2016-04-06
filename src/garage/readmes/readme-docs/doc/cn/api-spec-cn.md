@@ -75,6 +75,7 @@ console.log(__api.assetsUrl('some-picture.jpg'));
 | `.assetsUrl(packageName, path)` | 获取packageName对应的静态资源/assets目录下的文件的浏览器访问路径, `packageName` 为可选参数, 默认是当前package
 | .loadLocaleBundles(language, callback) | LABjs loads locale bundles to current page
 | .loadPrefLocaleBundles(callback) | LABjs loads locale bundles based on browser prefered language, language choosing logic is in the order of: `navigator.languages[0], navigator.language, navigator.browserLanguage, navigator.systemLanguage, navigator.userLanguage, navigator.languages[1] ...`
+| .getPrefLanguage() | __api.loadPrefLocaleBundles() 调用此方法
 | `.isBrowser()` | true
 | `.isNode()` | false
 
