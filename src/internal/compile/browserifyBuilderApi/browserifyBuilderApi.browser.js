@@ -35,7 +35,6 @@ function BrowserApi(packageName, bundleName) {
 
 	var path = this.config().packageContextPathMapping[this.packageShortName];
 	path = path != null ? path : '/' + this.packageShortName;
-
 	this.contextPath = this.config().serverURL + path;
 }
 
@@ -44,6 +43,8 @@ BrowserApi.setup = function(obj) {
 };
 
 BrowserApi.prototype = {
+	i18nLoaded: false,
+
 	config: function() {
 		return BrowserApi.prototype._config;
 	},
@@ -70,7 +71,10 @@ BrowserApi.prototype = {
 		var localeBundleUrls = _.map(localeBundles, function(bundle) {
 			return prefix + '/' + bundle;
 		});
-		window.$LAB.script(localeBundleUrls).wait(waitCallback);
+		window.$LAB.script(localeBundleUrls).wait(function() {
+			BrowserApi.prototype.i18nLoaded = true;
+			waitCallback();
+		});
 	},
 
 	loadPrefLocaleBundles: function(waitCallback) {
@@ -81,6 +85,11 @@ BrowserApi.prototype = {
 		this.loadLocaleBundles(pref, function() {
 			waitCallback(pref);
 		});
+	},
+
+	isLocaleBundleLoaded: function() {
+		console.log(this);
+		return this.i18nLoaded;
 	},
 
 	getPrefLanguage: function() {
@@ -106,5 +115,9 @@ BrowserApi.prototype = {
 		});
 		pref = pref ? pref : 'en';
 		return pref;
+	},
+
+	extend: function(obj) {
+		_.assign(BrowserApi.prototype, obj);
 	}
 };

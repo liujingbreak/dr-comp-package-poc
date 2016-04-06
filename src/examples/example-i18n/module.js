@@ -1,6 +1,8 @@
 require('@dr/angularjs');
-var messages = require('@dr/example-i18n/i18n');
-
+var messages;
+if (__api.isLocaleBundleLoaded()) {
+	messages = require('@dr/example-i18n/i18n');
+}
 angular.module('example-i18n', []).controller('MainController',
 function() {
 	var mainVm = this;

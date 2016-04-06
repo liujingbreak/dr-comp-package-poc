@@ -9,6 +9,8 @@ Updates
 	| .loadLocaleBundles(language, callback) | LABjs loads locale bundles to current page
 	| .loadPrefLocaleBundles(callback) | LABjs loads locale bundles based on browser prefered language, language choosing logic is in the order of: `navigator.languages[0], navigator.language, navigator.browserLanguage, navigator.systemLanguage, navigator.userLanguage, navigator.languages[1] ...`
 	| .getPrefLanguage() | __api.loadPrefLocaleBundles() 调用此方法
+	| `.isLocaleBundleLoaded()` | return true 如果locale bundle已经加载，可以安全调用的require('xxx/i18n')了
+	| `.extend(obj)` | 扩展 API prototype `__api.__proto__`,  `__api.constructor.prototype`
 - 很简单的i18n example！查看\
 	[github.com/dr-web-house/web-fun-house/tree/master/src/examples/example-i18n](https://github.com/dr-web-house/web-fun-house/tree/master/src/examples/example-i18n)
 
