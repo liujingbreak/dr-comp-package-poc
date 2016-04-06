@@ -9,7 +9,6 @@ function() {
 })
 .directive('translate', function() {
 	return function(scope, el, attrs) {
-		console.log(el);
 		el.html(messages[el.text()]);
 	};
 });

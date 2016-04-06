@@ -65,12 +65,11 @@ BrowserApi.prototype = {
 	},
 
 	loadLocaleBundles: function(locale, waitCallback) {
-		var localeBundleUrls = [];
 		var prefix = this.config().staticAssetsURL;
-		var localeBundles = this.localeBundles;
-		for (var i = 0, l = localeBundles.length; i < l; i++) {
-			localeBundleUrls.push(prefix + '/js/' + localeBundles[i] + '_' + locale + '.js');
-		}
+		var localeBundles = this.localeBundlesMap[locale];
+		var localeBundleUrls = _.map(localeBundles, function(bundle) {
+			return prefix + '/' + bundle;
+		});
 		window.$LAB.script(localeBundleUrls).wait(waitCallback);
 	},
 

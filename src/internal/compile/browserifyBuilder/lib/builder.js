@@ -186,7 +186,7 @@ function compile(api) {
 					runTasks().then(getDataFuncs => {
 						pageCompilerParam.entryDataProvider = function(entryPackageName) {
 							var browserApi = {};
-							monkeyPatchBrowserApi(browserApi, entryPackageName);
+							monkeyPatchBrowserApi(browserApi, entryPackageName, pageCompilerParam.revisionMeta);
 							getDataFuncs.forEach(getData => {
 								getData(browserApi, entryPackageName);
 							});
@@ -499,17 +499,25 @@ function compile(api) {
 		return out;
 	}
 
-	function monkeyPatchBrowserApi(browserApi, entryPackage) {
+	function monkeyPatchBrowserApi(browserApi, entryPackage, revisionMeta) {
 		var bundleSet = api.bundleDepsGraph[entryPackage];
 		delete bundleSet.labjs;
 		var localeBundlesForEntry = _.intersection(Object.keys(bundleSet), Object.keys(availableLocaleBundleSet));
 		if (localeBundlesForEntry.length > 0) {
-			browserApi.localeBundles = localeBundlesForEntry;
+			var bundleLocaleMap = browserApi.localeBundlesMap = {};
+			config().locales.forEach(locale => {
+				bundleLocaleMap[locale] = localeBundlesForEntry.map(bundleName => {
+					var file = 'js/' + bundleName + '_' + locale + (config().devMode ? '' : '.min') + '.js';
+					return revisionMeta[file];
+				});
+			});
 		}
-		browserApi._config = {};
-		config().browserSideConfigProp.forEach(propName => {
-			browserApi._config[propName] = config()[propName];
-		});
+		browserApi._config = {
+			staticAssetsURL: config().staticAssetsURL,
+			serverURL: config().serverURL,
+			packageContextPathMapping: config().packageContextPathMapping,
+			locales: config().locales
+		};
 		return localeBundlesForEntry;
 	}
 

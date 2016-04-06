@@ -4,8 +4,12 @@ require('@dr-core/labjs');
 	window.$LAB
 	.setGlobalDefaults({ {% if debug %}Debug:true{% endif %} })
 	.script(bundles).wait(function() {
-		drApi = require('@dr-core/browserify-builder-api');
-		drApi.setup({{data}});
-		require('{{ entryPackage }}');
+		try {
+			drApi = require('@dr-core/browserify-builder-api');
+			drApi.setup({{data}});
+			require('{{ entryPackage }}');
+		}catch(e){
+			if(console) console.error(e.stack);
+		}
 	});
 })();
