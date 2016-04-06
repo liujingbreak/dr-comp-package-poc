@@ -1,6 +1,6 @@
 {
   "name": "@dr/angularjs",
-  "version": "1.0.21-2",
+  "version": "1.0.22",
   "description": "wrapper of angularjs v1.4.5",
   "browser": "main.js",
   "dr": {

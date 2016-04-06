@@ -1,6 +1,6 @@
 {
   "name": "@dr/example-i18n",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Demo how we support i18n in browser side package",
   "browser": "index.js",
   "style": "style.less",
@@ -8,8 +8,8 @@
     "@dr/parcelify-module-resolver"
   ],
   "dr": {
-	"bundle": "example",
-	"entryPage": "index.html",
+    "bundle": "example",
+    "entryPage": "index.html",
     "i18n": "i18n/locale-{locale}.yaml"
   },
   "scripts": {
