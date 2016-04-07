@@ -40,7 +40,7 @@ var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package
 	.command('publish', 'npm publish every pakages in source code folder including all mapped recipes')
 	.command('unpublish', 'npm unpublish every pakages in source code folder including all mapped recipes of version number in current source code')
 	.command('bump', '[-v major|minor|patch|prerelease] bump version number of all package.json, useful to call this before publishing packages, default is increasing patch number by 1')
-	.command('flatten', 'flattern NPM v2 nodule_modules structure, install-recipe comamnd will execute this command')
+	.command('flatten-recipe', 'flattern NPM v2 nodule_modules structure, install-recipe comamnd will execute this command')
 	.describe('b', '<bundle-name> if used with command `compile` or `build`, it will only compile specific bundle, which is more efficient')
 	.alias('b', 'bundle')
 	.describe('p', '<package-short-name> if used with command `compile`, `build`, `lint`, it will only build and check style on specific package, which is more efficient')
@@ -142,7 +142,13 @@ gulp.task('install-recipe', ['link'], function(cb) {
 	}
 
 	prom = prom.then(() => {
-		return flattenRecipe();
+		return new Promise((resolve, reject) => {
+			process.nextTick(() => {
+				// Put it in process.nextTick to hopefully solve a windows install random 'EPERM' error.
+				flattenRecipe();
+				resolve();
+			});
+		});
 	});
 
 	var srcDirs = [];
@@ -155,8 +161,6 @@ gulp.task('install-recipe', ['link'], function(cb) {
 		return packageInstaller.installDependsAsync();
 	}).then(() => cb());
 });
-
-
 
 gulp.task('flatten-recipe', flattenRecipe);
 

@@ -7,14 +7,14 @@ module.exports = function(controllerProvider) {
 
 		asideVm.menuItems = [
 			{
-				label: t('Home'),
+				label: $translate('Home'),
 				subMenu: [],
 				action: function() {
 					$location.path('/');
 				}
 			},
 			{
-				label: t('Documentation'),
+				label: $translate('Documentation'),
 				subMenu: readme.buildMenu(docName2Route)
 			}
 		];
