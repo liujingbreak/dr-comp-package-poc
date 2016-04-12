@@ -4,7 +4,7 @@ module.exports = BrowserApi;
 
 var packageNameReg = /(?:@([^\/]+)\/)?(\S+)/;
 
-window.t = function(text) {
+window.$translate = function(text) {
 	return text;
 };
 
@@ -88,7 +88,6 @@ BrowserApi.prototype = {
 	},
 
 	isLocaleBundleLoaded: function() {
-		console.log(this);
 		return this.i18nLoaded;
 	},
 

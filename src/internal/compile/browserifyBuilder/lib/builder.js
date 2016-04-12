@@ -459,8 +459,6 @@ function compile(api) {
 			return null;
 		}
 		var listFilePath = Path.resolve(maker.i18nBundleEntryFileName);
-		//fs.writeFileSync(entryFile, listFile);
-		log.debug('i18n:\n' + listFile);
 		var b = browserify(browserifyOpt);
 		var listStream = through();
 		listStream.write(listFile, 'utf8');
@@ -547,7 +545,7 @@ function compile(api) {
 			stream = bundleStream
 			.pipe(gulp.dest(Path.join(config().staticDir)))
 			.pipe(through.obj(function(row, encode, next) {
-				var relivePath = Path.relative(row.base, row.path).replace(/\//g, '/');
+				var relivePath = Path.relative(row.base, row.path).replace(/\\/g, '/');
 				fakeRevManifest[relivePath] = relivePath;
 				if (!_.endsWith(row.path, '.css')) {
 					this.push(row);

@@ -54,6 +54,7 @@ function init(noSample) {
 	if (!noSample) {
 		shell.cp('-R', [
 			Path.resolve(__dirname, 'examples', 'example-entry'),
+			Path.resolve(__dirname, 'examples', 'example-i18n'),
 			Path.resolve(__dirname, 'examples', 'example-node'),
 		], argv.d + '/src/examples/');
 	}
@@ -100,7 +101,7 @@ function fileAccessable(file) {
 
 function installGulpAsync() {
 	if (!fileAccessable(Path.resolve('node_modules/gulp'))) {
-		var ver = JSON.parse(fs.readFileSync(Path.resolve('node_modules/web-fun-house/package.json'), 'utf8')).devDependencies.gulp;
+		var ver = JSON.parse(fs.readFileSync(Path.resolve(__dirname + '/../package.json'), 'utf8')).devDependencies.gulp;
 		console.log('npm install gulp@' + ver);
 		return new Promise((resolve, reject) => {
 			cli.exec('npm', 'install', '--save', 'gulp@' + ver, (code, output)=> {

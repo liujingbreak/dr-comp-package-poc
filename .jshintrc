@@ -60,7 +60,7 @@
 		"Promise": true,
 		"File": true,
 		"__api": true,
-		"t": true,
+		"$translate": true,
 	    "jasmine": true,
 	    "describe": true,
 	    "it": true,

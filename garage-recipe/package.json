@@ -8,7 +8,7 @@
     "@dr/doc-ui": "0.0.15",
     "@dr/markdown-viewer": "0.0.15",
     "@dr/readme": "0.0.15",
-    "@dr/readme-docs": "0.0.16",
+    "@dr/readme-docs": "0.0.17",
     "@dr/text-anim-ng": "0.0.15"
   }
 }

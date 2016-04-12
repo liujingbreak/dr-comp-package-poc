@@ -1,54 +1,54 @@
 module.exports = function(goFunc) {
 	return [
 		{
-			label: t('Introduction'),
+			label: $translate('Introduction'),
 			action: function() {
 				goFunc('readme-cn.md');
 			}
 		},  {
-			label: t('Daily Work: 安装平台 & 开发组建'),
+			label: $translate('Daily Work: 安装平台 & 开发组建'),
 			action: function() {
 				goFunc('run-platform-as-tool-cn.md');
 			}
 		}, {
-			label: t('Package.json Specification'),
+			label: $translate('Package.json Specification'),
 			action: function() {
 				goFunc('package-spec-cn.md');
 			}
 		}, {
-			label: t('环境配置和gulp命令提示'),
+			label: $translate('环境配置和gulp命令提示'),
 			action: function() {
 				goFunc('dev-env-hints.md');
 			}
 		}, {
-			label: t('API Specification'),
+			label: $translate('API Specification'),
 			action: function() {
 				goFunc('api-spec-cn.md');
 			}
 		}, {
-			label: t('i18n'),
+			label: $translate('i18n'),
 			flag: 'new',
 			action: function() {
 				goFunc('i18n.md');
 			}
 		}, {
-			label: t('How does it work'),
+			label: $translate('How does it work'),
 			action: function() {
 				goFunc('how-does-it-work.md');
 			}
 		}, {
-			label: t('Updates'),
+			label: $translate('Updates'),
 			flag: 'new',
 			action: function() {
 				goFunc('updates.md');
 			}
 		}, {
-			label: t('Quick Start: I am platform developer'),
+			label: $translate('Quick Start: I am platform developer'),
 			action: function() {
 				goFunc('quickstart-cn.md');
 			}
 		},{
-			label: t('Backlog'),
+			label: $translate('Backlog'),
 			action: function() {
 				goFunc('todo-cn.md');
 			}
