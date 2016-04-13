@@ -102,6 +102,7 @@ Node API methods
 | .router() | return an Express Router object, e.g. `api.route().get(function(req, res) {});`
 | .use() | Express use() method, to bind middleware
 | .param() | Express param() method
+| .express | Express instance, 这样你就可以使用一些特殊的middleware 比如express.static
 
 > 必须在module.exports.activate(api) function内调用
 

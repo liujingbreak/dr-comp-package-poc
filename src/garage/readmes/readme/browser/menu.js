@@ -37,6 +37,12 @@ module.exports = function(goFunc) {
 				goFunc('how-does-it-work.md');
 			}
 		}, {
+			label: $translate('Test'),
+			flag: 'new',
+			action: function() {
+				goFunc('test.md');
+			}
+		}, {
 			label: $translate('Updates'),
 			flag: 'new',
 			action: function() {

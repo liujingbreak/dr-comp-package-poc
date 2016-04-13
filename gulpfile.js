@@ -19,7 +19,6 @@ var fs = require('fs');
 var runSequence = require('run-sequence');
 
 var cli = require('shelljs-nodecli');
-var Jasmine = require('jasmine');
 
 var findPackageJson = require('./lib/gulp/findPackageJson');
 var packageLintableSrc = require('./lib/gulp/packageLintableSrc');
@@ -41,6 +40,7 @@ var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package
 	.command('unpublish', 'npm unpublish every pakages in source code folder including all mapped recipes of version number in current source code')
 	.command('bump', '[-v major|minor|patch|prerelease] bump version number of all package.json, useful to call this before publishing packages, default is increasing patch number by 1')
 	.command('flatten-recipe', 'flattern NPM v2 nodule_modules structure, install-recipe comamnd will execute this command')
+	.command('test', '[-p <package-short-name>] [-f <spec-file-path>] run Jasmine test for specific or all packages')
 	.describe('b', '<bundle-name> if used with command `compile` or `build`, it will only compile specific bundle, which is more efficient')
 	.alias('b', 'bundle')
 	.describe('p', '<package-short-name> if used with command `compile`, `build`, `lint`, it will only build and check style on specific package, which is more efficient')
@@ -50,6 +50,8 @@ var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package
 	.describe('d', '<src foldr> if used with command `link`, it will link packages from specific folder instead of `srcDir` configured in config.yaml')
 	.describe('r', '<recipe foldr> if used with command `link`, it will link packages only to specific recipe folder instead of `recipeFolder` configured in config.yaml')
 	.describe('v', 'major | minor | patch | prerelease, used with `bump`')
+	.describe('f', '<file-path> command `gulp test -f specFile1 [-f specFile2] ...`')
+	.alias('f', 'file')
 	.demand(1)
 	.help('h').alias('h', 'help')
 	.argv;
@@ -267,11 +269,6 @@ gulp.task('bump', function(cb) {
 	});
 });
 
-gulp.task('test-house', function() {
-	var jasmine = new Jasmine();
-	jasmine.loadConfigFile('spec/support/jasmine.json');
-	jasmine.execute();
-});
 
 gulp.task('publish', function() {
 	var srcDirs = [];
@@ -329,6 +326,10 @@ gulp.task('unpublish', function() {
 			gutil.log('unpublish ' + data.name + '@' + data.version);
 			cli.exec('npm', 'unpublish', data.name + '@' + data.version, {silent: false});
 		});
+});
+
+gulp.task('test', function() {
+	require('./lib/gulp/runTest')(argv);
 });
 
 function bumpVersion() {

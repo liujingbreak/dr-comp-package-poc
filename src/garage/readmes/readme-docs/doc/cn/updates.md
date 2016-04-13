@@ -1,5 +1,26 @@
 Updates
 =======
+### 2016-4-14
+1. `gulp test` 命令
+	```
+	gulp test [-p <package name>] [-f <spec file>] [--spec <spec name filter>]
+	```
+
+	[如何测试](/doc-home/index.html#/doc/test.md)
+2. **translate-generator** 工具
+	```
+	gulp compile --translate [-p <package-name>]
+	```
+	扫描`.js`, `.html` 文件，自动生成可翻译的文件
+	```
+		<package-dir>/i18n/
+			├─ index.js
+			├─ messages-en.yaml
+			├─ messages-zh.yaml
+			└─ ... other locale files in form of messages-{locale}.yaml
+	```
+	详细扫描的规则 [i18n文档](/doc-home/index.html#/doc/i18n.md)
+
 ### 2016-4-6
 - 更新了 [i18n文档](/doc-home/index.html#/doc/i18n.md)
 - i18n support
