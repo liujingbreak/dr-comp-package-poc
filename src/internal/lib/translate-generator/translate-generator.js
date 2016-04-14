@@ -29,13 +29,14 @@ module.exports = {
 			}, 'src');
 		}
 		return Promise.all(proms);
-	}
+	},
+	scanPackage: scanPackage
 };
 
 var readFileAsync = Promise.promisify(fs.readFile);
 var writeFileAsync = Promise.promisify(fs.writeFile);
 
-function scanPackage(packagePath, json) {
+function scanPackage(packagePath) {
 	log.debug(packagePath);
 	var yamls = {};
 	var i18nDir = Path.join(packagePath, 'i18n');
@@ -56,15 +57,17 @@ function scanPackage(packagePath, json) {
 		}
 	});
 
+	var trackExess = _.cloneDeep(existings);
+
 	var proms = glob.sync(Path.join(packagePath, '/**/*.html').replace(/\\/g, '/')).map(path => {
 		return readFileAsync(path, 'utf8').then(content => {
 			log.debug('scan: ' + path);
 			var $ = cheerio.load(content);
 			$('.t').each((i, dom) => {
-				dirty = doElement($(dom), yamls, existings);
+				dirty = doElement($(dom), yamls, existings, trackExess);
 			});
 			$('[translate]').each((i, dom) => {
-				dirty = doElement($(dom), yamls, existings);
+				dirty = doElement($(dom), yamls, existings, trackExess);
 			});
 		});
 	});
@@ -73,15 +76,16 @@ function scanPackage(packagePath, json) {
 		return readFileAsync(path, 'utf8').then(content => {
 			log.debug('scan: ' + path);
 			jsParser(config, content, (key) => {
-				dirty = onKeyFound(key, yamls, existings);
+				dirty = onKeyFound(key, yamls, existings, trackExess);
 			});
 		});
 	});
 
 	return Promise.all(proms.concat(promJS)).then(() => {
 		if (!dirty) {
-			return null;
+			return printRedundant(trackExess);
 		}
+
 		return new Promise((resolve, reject) => {
 			mkdirp(i18nDir, (err) => {
 				var indexFile = Path.join(i18nDir, 'index.js');
@@ -96,11 +100,13 @@ function scanPackage(packagePath, json) {
 				});
 				Promise.all(writeProms).then(resolve);
 			});
+		}).then(() => {
+			return printRedundant(trackExess);
 		});
 	});
 }
 
-function doElement(el, yamls, existing) {
+function doElement(el, yamls, existing, trackExess) {
 	var key;
 	var translateAttr = el.attr('translate');
 	if (translateAttr && translateAttr !== '') {
@@ -109,20 +115,34 @@ function doElement(el, yamls, existing) {
 		key = el.text();
 	}
 	log.debug('found key in HTML: ' + key);
-	return onKeyFound(key, yamls, existing);
+	return onKeyFound(key, yamls, existing, trackExess);
 }
 
-function onKeyFound(key, yamls, existing) {
+function onKeyFound(key, yamls, existing, trackExess) {
 	var quote = JSON.stringify(key);
 	var newLine = quote + ': ' + quote + '\n';
 	var dirty = false;
 	_.forOwn(yamls, (content, locale) => {
+		delete trackExess[locale][key];
 		if (!existing[locale] || !{}.hasOwnProperty.call(existing[locale], key)) {
 			yamls[locale] += newLine;
 			dirty = true;
 		}
 	});
 	return dirty;
+}
+
+function printRedundant(trackExess) {
+	_.each(trackExess, (messages, locale) => {
+		if (_.size(messages) > 0) {
+			log.warn('Redundant message keys are found,' +
+			' they are currently not referened from no source code, suggest to remove them from message files.\n' +
+			'locale: ' + locale + '\n');
+			_.forOwn(messages, (value, key) => {
+				log.warn('\t' + key);
+			});
+		}
+	});
 }
 
 function fileExists(file) {
