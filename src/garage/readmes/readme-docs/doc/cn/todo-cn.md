@@ -5,14 +5,16 @@ Backlog
 
 ### The platform
 
--	i18n text translation tool\\ Scan and generate translatable property files.
--	Provide API to get locale information
--	Test script\\ Jasmine 2
+- Load certificate key pair for enable express SSL service
+-	~~i18n text translation tool\\ Scan and generate translatable property files.~~
+-	~~Provide API to get locale information~~
+-	~~Test script\\ Jasmine 2~~
 
 -	Adaptive/Responsive layouts API/utility
 
 	-	Detecting device and screen size/orientation change by Javascript, adding class name to root level element\\ e.g. `dr-device-mouse`, `dr-device-touch`, `dr-desktop`, `dr-tablet`, `dr-mobile`, `dr-engine-gecko`, ...
 
+- **Component store**, Components demo center
 -	Assets file revision (@dr/assets-processer)
 
 -	Split and load on demand in browser (Support angular JS lazy loader)
@@ -45,7 +47,7 @@ Backlog
 
 ### Sinopia NPM registry server
 
--	Check Uploading package size limitation
--	Email notification for package publishing.
+-	~~Check Uploading package size limitation~~
+-	~~Email notification for package publishing.~~
 
 ### Workflow
