@@ -10,7 +10,7 @@
   "dr": {
     "bundle": "example",
     "entryPage": "index.html",
-    "i18n": "i18n/locale-{locale}.yaml"
+    "i18n": "i18n/{locale}.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

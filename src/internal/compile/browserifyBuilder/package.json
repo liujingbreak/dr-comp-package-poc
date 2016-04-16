@@ -11,7 +11,7 @@
     "parcelify-import-resolver": "0.0.2"
   },
   "author": "LJ",
-  "license": "ISC",
+  "license": "MIT",
   "dr": {
     "type": "builder",
     "priority": 3000

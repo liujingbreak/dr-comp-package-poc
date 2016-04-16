@@ -19,6 +19,7 @@ var through = require('through2');
 var htmlTranform = require('html-browserify');
 var yamlify = require('yamlify');
 var RevAll = require('gulp-rev-all');
+var PrintNode = require('./printUtil');
 var File = require('vinyl');
 // var browserifyInc = require('browserify-incremental');
 // var xtend = require('xtend');
@@ -32,6 +33,7 @@ var helperFactor = require('./browserifyHelper');
 var FileCache = require('@dr-core/build-util').fileCache;
 var PageCompiler = require('./pageCompiler');
 var walkPackages = require('@dr-core/build-util').walkPackages;
+var packageBrowserInstance = require('@dr-core/build-util').packageInstance;
 var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
 var fileAccessAsync = Promise.promisify(fs.access, {context: fs});
 var packageUtils, config, jsBundleEntryMaker;
@@ -64,14 +66,13 @@ function compile(api) {
 	gutil.log('\tbuild all JS and CSS bundles, if parameter <bundle name> is supplied, only that specific package or bundle will be rebuilt.');
 
 	var packageInfo = walkPackages(config, argv, packageUtils, api.compileNodePath);
-	var i18nModuleNameSet;
-	var availableLocaleBundleSet;
+	var i18nModuleNameSet, pk2localeModule;
 	//monkey patch new API
 	api.__proto__.packageInfo = packageInfo;
 	require('./compilerApi')(api);
 
-	log.info('------- building bundles ---------');
 	var depsMap = {};
+	var localeDepsMap;
 	var bundleStream;
 	var bundleNames = _.keys(packageInfo.bundleMap);
 	var bundlesTobuild;
@@ -123,28 +124,39 @@ function compile(api) {
 		})
 		.catch((err)=>{}).finally(()=> next());
 	});
-	return Promise.all([fileCache.loadFromFile('bundleInfoCache.json'),
-	fileCache.loadFromFile('depsMap.json')]).then(function(results) {
+	return Promise.all([
+		fileCache.loadFromFile('bundleInfoCache.json'),
+		fileCache.loadFromFile('depsMap.json')
+	])
+	.then(function(results) {
+		depsMap = results[1];
 		var bundleInfoCache = results[0];
 		if (!bundleInfoCache.i18nModuleNameSet) {
 			bundleInfoCache.i18nModuleNameSet = {};
 		}
-		if (!bundleInfoCache.availableLocaleBundleSet) {
-			bundleInfoCache.availableLocaleBundleSet = {};
+		if (!bundleInfoCache.depsMap) {
+			bundleInfoCache.depsMap = {};
+		}
+		// package to locale module map Object.<{string} name, Object.<{string} locale, Object>>
+		if (!bundleInfoCache.pk2localeModule) {
+			bundleInfoCache.pk2localeModule = {};
 		}
 		i18nModuleNameSet = bundleInfoCache.i18nModuleNameSet;
-		availableLocaleBundleSet = bundleInfoCache.availableLocaleBundleSet;
-		depsMap = results[1];
+		pk2localeModule = bundleInfoCache.pk2localeModule;
+		localeDepsMap = bundleInfoCache.depsMap;
+
+		log.info('------- building bundles ---------');
 		bundleNames.forEach(function(bundle) {
-			log.info(chalk.magenta(bundle));
+			log.info(chalk.inverse(bundle));
 			var buildObj = buildBundle(packageInfo.bundleMap[bundle],
-				bundle, Path.join(config().staticDir), depsMap);
+				bundle, config().staticDir, depsMap);
 			if (buildCss) {
-				cssPromises.push(
-					buildObj.cssPromise.then(filePath => {
+				buildObj.cssPromises.forEach(prom => {
+					cssPromises.push(prom.then(filePath => {
 						cssStream.write(filePath);
 						return null;
 					}));
+				});
 			}
 			jsStreams.push(buildObj.jsStream);
 		});
@@ -173,16 +185,17 @@ function compile(api) {
 					cb();
 				}, function flush(callback) {
 					// [ Entry page package A ]--depends on--> [ package B, C ]
-					var depsGraph = createEntryDepsData(depsMap, packageInfo.entryPageMap);
+					var depsGraph = createEntryDepsData(depsMap, packageInfo);
 					printModuleDependencyGraph(depsGraph);
 					// [ Entry page package A ]--depends on--> ( bundle X, Y )
-					var bundleDepsGraph = createBundleDependencyGraph(depsGraph, packageInfo.moduleMap);
-					pageCompilerParam.bundleDepsGraph = bundleDepsGraph;
+					var bundleGraph = createBundleDependencyGraph(depsGraph, packageInfo);
+					pageCompilerParam.bundleDepsGraph = bundleGraph.bundleDepsGraph;
 					pageCompilerParam.config = config;
 					pageCompilerParam.packageInfo = packageInfo;
 					pageCompilerParam.builtBundles = bundleNames;
 					this.push(pageCompilerParam);
-					api.__proto__.bundleDepsGraph = bundleDepsGraph;
+					api.__proto__.bundleDepsGraph = bundleGraph.bundleDepsGraph;
+					api.__proto__.localeBundlesDepsGraph = bundleGraph.localeBundlesDepsGraph;
 					runTasks().then(getDataFuncs => {
 						pageCompilerParam.entryDataProvider = function(entryPackageName) {
 							var browserApi = {};
@@ -201,7 +214,10 @@ function compile(api) {
 			.pipe(gulp.dest(config().staticDir))
 			.on('finish', resolve);
 		});
-	}).then(_.bind(fileCache.tailDown, fileCache))
+	}).then(() => {
+		walkPackages.saveCache(packageInfo);
+		fileCache.tailDown();
+	})
 	.catch( err => {
 		log.error(err);
 		gutil.beep();
@@ -214,25 +230,41 @@ function compile(api) {
 	 * @param  {[type]} entryMap [description]
 	 * @return {object<string, object<string, (boolean | string)>>} a map
 	 */
-	function createEntryDepsData(depsMap, entryMap) {
-		//log.trace('createEntryDepsData: ' + JSON.stringify(depsMap, null, '  '));
-		var packageDeps = {};
-		_.forOwn(entryMap, function(pkInstance, moduleName) {
-			var entryDepsSet = packageDeps[moduleName] = {};
-			_walkDeps(moduleName, moduleName, entryDepsSet, true);
+	function createEntryDepsData(depsMap, packageInfo) {
+		//log.debug('createEntryDepsData() ' + JSON.stringify(depsMap, null, '  '));
+		var packageDeps = {entries: {}, localeEntries: {}};
+		_.forOwn(packageInfo.entryPageMap, function(pkInstance, moduleName) {
+			var entryDepsSet = packageDeps.entries[moduleName] = {};
+			_walkDeps(depsMap, moduleName, moduleName, entryDepsSet, true);
 		});
-		function _walkDeps(id, file, entryDepsSet, isParentOurs, lastDirectDeps) {
+		//log.debug('packageInfo.localeEntryMap: ' + JSON.stringify(packageInfo.localeEntryMap, null, '  '));
+		_.forOwn(packageInfo.localeEntryMap, (entryMap, locale) => {
+			var result = packageDeps.localeEntries[locale] = {};
+			_.forOwn(entryMap, function(pkInstance, moduleName) {
+				var entryDepsSet = result[moduleName] = {};
+				_walkDeps(localeDepsMap[locale], moduleName, moduleName, entryDepsSet, true, null, depsMap);
+			});
+		});
+		//log.debug('createEntryDepsData() packageDeps = ' + JSON.stringify(packageDeps, null, '  '))
+		function _walkDeps(depsMap, id, file, entryDepsSet, isParentOurs, lastDirectDeps, parentDepsMap) {
 			var deps;
 			if (!file) { // since for external module, the `file` is always `false`
 				deps = depsMap[id];
+				if (parentDepsMap && !deps) {
+					deps = parentDepsMap[id];
+				}
 			} else {
 				deps = depsMap[file];
 				deps = deps ? deps : depsMap[id];
+				if (parentDepsMap && !deps) {
+					deps = parentDepsMap[file] ? parentDepsMap[file] : parentDepsMap[id];
+				}
 			}
 			if (!deps && !{}.hasOwnProperty.call(i18nModuleNameSet, id)) {
 				log.error('Can not walk dependency tree for: ' + id +
 				', missing depended module or you may try rebuild all bundles');
-				log.info(i18nModuleNameSet);
+				log.info(parentDepsMap[id]);
+				log.info('i18nModuleNameSet: ' + JSON.stringify(i18nModuleNameSet, null, '  '));
 				gutil.beep();
 			}
 			if (!deps) {
@@ -249,97 +281,151 @@ function compile(api) {
 					}
 					entryDepsSet[depsKey] = isParentOurs ? true : lastDirectDeps;
 					if (isOurs) {
-						_walkDeps(depsKey, depsValue, entryDepsSet, true);
+						_walkDeps(depsMap, depsKey, depsValue, entryDepsSet, true, null, parentDepsMap);
 					} else {
-						_walkDeps(depsKey, depsValue, entryDepsSet, false, depsKey);
+						_walkDeps(depsMap, depsKey, depsValue, entryDepsSet, false, depsKey, parentDepsMap);
 					}
 				} else {
 					// require id is a local file path
-					_walkDeps(depsKey, depsValue, entryDepsSet, isParentOurs, lastDirectDeps);
+					_walkDeps(depsMap, depsKey, depsValue, entryDepsSet, isParentOurs, lastDirectDeps, parentDepsMap);
 				}
 			});
 		}
 		return packageDeps;
 	}
 
-	function createBundleDependencyGraph(packageDepsGraph, moduleMap) {
-		log.info('------- Entry package -> bundle dependency ---------');
+	/**
+	 * @return object {bundleDepsGraph, localeBundlesDepsGraph: {moduleName, {locale, {bundle: boolean}}}
+	 */
+	function createBundleDependencyGraph(packageDepsGraph, packageInfo) {
+		var moduleMap = packageInfo.moduleMap;
+		var localeBundlesDepsGraph = {};
+		var bundleDepsGraph = createGraph(packageDepsGraph.entries);
+		printNode(toPrintModel());
 
-		var bundleDepsGraph = {};
-		_.forOwn(packageDepsGraph, function(deps, moduleName) {
-			var currBundle = moduleMap[moduleName].bundle;
-			var depBundleSet = {};
-			bundleDepsGraph[moduleName] = depBundleSet;
-			_.forOwn(deps, function(isDirectDeps, dep) {
-				//log.debug('Is dep '+ dep +' our package ? ' + isVendor);
-				if (dep.substring(0, 1) === '_') {
-					// skip some browerify internal module like `_process`
-					return;
-				}
-				var bundle, msg;
-				if ({}.hasOwnProperty.call(i18nModuleNameSet, dep)) {
-					// it is i18n module like "@dr/angularjs/i18n" which is not belong to any preload bundle
-					return;
-				}
-				if (!moduleMap[dep] || !(bundle = moduleMap[dep].bundle)) {
-					if (isDirectDeps === true) {
-						msg = 'Entry bundle "' + currBundle + '", module "' + dep + '" which is dependency of bundle "' +
-							currBundle + '" is not explicityly configured with any bundle, check out `vendorBundleMap` in config.yaml';
-						log.warn(msg);
-						throw new Error(msg);
-					} else {
-						msg = 'Entry bundle "' + currBundle + '", module "' + dep + '" which is dependency of "' +
-							isDirectDeps + '" is not explicityly configured with any bundle, check out `vendorBundleMap` in config.yaml';
-						log.warn(msg);
+		function createGraph(entries) {
+			var bundleDepsGraph = {};
+			_.forOwn(entries, function(deps, moduleName) {
+				var currBundle = moduleMap[moduleName].bundle;
+				var depBundleSet = bundleDepsGraph[moduleName] = {};
+				var locDepBundleSet = localeBundlesDepsGraph[moduleName] = {};
+				depBundleSet[currBundle] = true;
+				_.forOwn(deps, function(isDirectDeps, dep) {
+					//log.debug('Is dep '+ dep +' our package ? ' + isVendor);
+					if (dep.substring(0, 1) === '_') {
+						// skip some browerify internal module like `_process`
 						return;
 					}
-				}
-				depBundleSet[bundle] = true;
+					var bundle, msg;
+					if ({}.hasOwnProperty.call(i18nModuleNameSet, dep)) {
+						// it is i18n module like "@dr/angularjs/i18n" which is not belong to any initial bundle
+						config().locales.forEach(locale => {
+							var graph = locDepBundleSet[locale];
+							if (!graph) {
+								graph = locDepBundleSet[locale] = {};
+							}
+							var localeModuleName = pk2localeModule[dep][locale];
+							var localeDeps = packageDepsGraph.localeEntries[locale][localeModuleName];
+							graph[packageInfo.localeEntryMap[locale][localeModuleName].bundle] = true;
+							//log.debug('localeDeps: ' + JSON.stringify(localeDeps, null, '  '));
+							_.keys(localeDeps).forEach(moduleName => {
+								graph[moduleMap[moduleName].bundle] = true;
+							});
+						});
+						return;
+					}
+					if (!moduleMap[dep] || !(bundle = moduleMap[dep].bundle)) {
+						if (isDirectDeps === true) {
+							msg = 'Entry bundle "' + currBundle + '", module "' + dep + '" which is dependency of bundle "' +
+								currBundle + '" is not explicityly configured with any bundle, check out `vendorBundleMap` in config.yaml';
+							log.warn(msg);
+							throw new Error(msg);
+						} else {
+							msg = 'Entry bundle "' + currBundle + '", module "' + dep + '" which is dependency of "' +
+								isDirectDeps + '" is not explicityly configured with any bundle, check out `vendorBundleMap` in config.yaml';
+							log.warn(msg);
+							return;
+						}
+					}
+					depBundleSet[bundle] = true;
+				});
+				// Core bundle should always be depended by all entry page modules!
+				depBundleSet.core = true;
+				_.forOwn(depBundleSet, (whatever, initialBundle) => {
+					_.forOwn(locDepBundleSet, (localeBundleSet, locale) => {
+						// remove any locale bundle that are duplicate with initial bundles, we don't want to load them twice in browser.
+						delete localeBundleSet[initialBundle];
+					});
+				});
 			});
-			depBundleSet[currBundle] = true;
-			// Core bundle should always be depended by all entry page modules!
-			depBundleSet.core = true;
-		});
+			return bundleDepsGraph;
+		}
 
-		_.forOwn(bundleDepsGraph, function(depBundleSet, entryModule) {
-			log.info(chalk.magenta(entryModule));
-			var size = _.size(depBundleSet);
-			var i = 1;
-			_.forOwn(depBundleSet, function(v, bundle) {
-				if (i === size) {
-					log.info('\t└─ ' + chalk.magenta(bundle));
-				} else {
-					log.info('\t├─ ' + chalk.magenta(bundle));
-				}
-				i++;
+		function toPrintModel() {
+			var node = new PrintNode({content: '------- Entry package -> bundle dependency ---------'});
+			_.forOwn(bundleDepsGraph, function(depBundleSet, entryModule) {
+				var subNode1 = PrintNode({content: chalk.inverse(entryModule), parent: node});
+				_.forOwn(depBundleSet, function(whatever, bundle) {
+					PrintNode({content: chalk.magenta(bundle), parent: subNode1});
+				});
+				_.forOwn(localeBundlesDepsGraph[entryModule], (depBundleSet, locale) => {
+					var subNode2 = PrintNode({content: '{locale: ' + chalk.cyan(locale) + '}', parent: subNode1});
+					_.forOwn(depBundleSet, function(whatever, bundle) {
+						PrintNode({content: chalk.magenta(bundle), parent: subNode2});
+					});
+				});
 			});
-			if (size === 0) {
-				log.info('\t└─ <empty>');
-			}
-		});
+			return node;
+		}
 
-		return bundleDepsGraph;
+		function printNode(node) {
+			log.info(node.prefix() + node.content);
+			_.each(node.children, child => {
+				printNode(child);
+			});
+		}
+		return {
+			bundleDepsGraph: bundleDepsGraph,
+			localeBundlesDepsGraph: localeBundlesDepsGraph
+		};
 	}
 
 	function printModuleDependencyGraph(packageDeps) {
 		log.info('------- Entry package -> package dependency ----------');
-		_.forOwn(packageDeps, function(deps, moduleName) {
-			log.info(chalk.magenta(moduleName));
+		print(packageDeps.entries);
 
-			var size = _.size(deps);
-			var i = 1;
-			_.forOwn(deps, function(file, dep) {
-				if (i === size) {
-					log.info('\t└─ ' + chalk.magenta(dep));
-				} else {
-					log.info('\t├─ ' + chalk.magenta(dep));
-				}
-				i++;
+		_.forOwn(packageDeps.localeEntries, (entries, locale) => {
+			log.info('------- locale package {' + locale + '} -> package dependency ----------');
+			var nameMap = {};
+			_.forOwn(pk2localeModule, (locales, name) => {
+				nameMap[locales[locale]] = name;
 			});
-			if (size === 0) {
-				log.info('\t└─ <empty>');
-			}
+			print(entries, nameMap);
 		});
+
+		function print(entries, moduleNameMap) {
+			var end = _.size(entries);
+			var entryIdx = 0;
+			_.forOwn(entries, function(deps, moduleName) {
+				entryIdx++;
+				var leading = entryIdx < end ? '├' : '└';
+				var leadingChr = entryIdx < end ? '|' : ' ';
+				log.info(leading + '─┬ ' + chalk.green(moduleNameMap ? moduleNameMap[moduleName] : moduleName));
+				var size = _.size(deps);
+				var row = 1;
+				_.forOwn(deps, function(file, dep) {
+					if (row === size) {
+						log.info(leadingChr + ' └─── ' + chalk.cyan(dep));
+					} else {
+						log.info(leadingChr + ' ├─── ' + chalk.cyan(dep));
+					}
+					row++;
+				});
+				if (size === 0) {
+					log.info(leadingChr + ' └─── <empty>');
+				}
+			});
+		}
 	}
 
 	function buildBundle(modules, bundle, destDir, depsMap) {
@@ -359,16 +445,17 @@ function compile(api) {
 				});
 			}
 			if (mIdx === moduleCount) {
-				log.info('\t└─ ' + chalk.magenta(moduleInfo.longName));
+				log.info(' └─── ' + chalk.magenta(moduleInfo.longName));
 				return;
 			}
-			log.info('\t├─ ' + chalk.magenta(moduleInfo.longName));
+			log.info(' ├─── ' + chalk.magenta(moduleInfo.longName));
 			mIdx++;
 		});
-		jsBundleEntryMaker = helper.JsBundleEntryMaker(api, bundle, modules, argv.locale ? argv.locale : 'zh');
+		var entryJsDir = Path.join(config().destDir, 'temp');
+		jsBundleEntryMaker = helper.JsBundleEntryMaker(api, bundle, modules );
 		var listFile = jsBundleEntryMaker.createPackageListFile();
-		mkdirp.sync(destDir);
-		var entryFile = Path.join(destDir, jsBundleEntryMaker.bundleFileName);
+		mkdirp.sync(entryJsDir);
+		var entryFile = Path.join(entryJsDir, jsBundleEntryMaker.bundleFileName);
 
 		fs.writeFileSync(entryFile, listFile);
 
@@ -380,7 +467,7 @@ function compile(api) {
 		// 	debug: true
 		// }));
 		//b.add(listStream, {file: entryFile, basedir: process.cwd});
-		b.add(Path.join(destDir, jsBundleEntryMaker.bundleFileName));
+		b.add(entryFile);
 		b.require(modules.map(module => { return module.longName; }));
 		b.transform(htmlTranform, {global: true});
 		b.transform(yamlify, {global: true});
@@ -390,9 +477,125 @@ function compile(api) {
 		excludeI18nModules(packageInfo.allModules, b);
 		//browserifyInc(b, {cacheFile: Path.resolve(config().destDir, 'browserify-cache.json')});
 
-		var cssPromise = buildCssBundle(b, bundle, destDir);
+		var cssPromises = [buildCssBundle(b, bundle, destDir)];
 
 		// draw a cross bundles dependency map
+		browserifyDepsMap(b, depsMap);
+		var jsStream = _createBrowserifyBundle(b, bundle);
+
+		var i18nBuildRet = buildI18nBundles(browserifyOpt, modules, excludeList, bundle, entryJsDir, depsMap);
+		if (i18nBuildRet) {
+			jsStream = es.merge([jsStream, i18nBuildRet[0]]);
+			cssPromises = cssPromises.concat(i18nBuildRet[1]);
+		}
+		return {
+			cssPromises: cssPromises,
+			jsStream: jsStream
+		};
+	}
+
+	function buildI18nBundles(browserifyOpt, modules, excludeList, bundle, entryJsDir, depsMap) {
+		var streams = [];
+		var cssPromises = [];
+		var maker = helper.JsBundleWithI18nMaker(api, bundle, modules, resolve);
+
+		config().locales.forEach(locale => {
+			localeDepsMap[locale] = localeDepsMap[locale] ? localeDepsMap[locale] : {};
+			var ret = buildLocaleBundle(maker, browserifyOpt, locale, modules, excludeList, bundle, entryJsDir, localeDepsMap[locale]);
+			if (ret) {
+				streams.push(ret[0]);
+				cssPromises.push(ret[1]);
+			}
+		});
+		if (streams.length === 0) {
+			return null;
+		}
+		return [es.merge(streams), cssPromises];
+	}
+
+	function buildLocaleBundle(maker, browserifyOpt, locale, modules, excludeList, bundle, entryJsDir, depsMap) {
+		var listFile = maker.createI18nListFile(locale);
+		if (!listFile) {
+			return null;
+		}
+
+		_.assign(pk2localeModule, maker.pk2LocaleModule);
+
+		var localeBunleName = bundle + '_' + locale;
+
+		var b = browserify(browserifyOpt);
+		maker.i18nModuleForRequire.forEach(expose => {
+			b.require(expose.file, expose.opts);
+			var localeModuleName = expose.id;
+			var pkInstance = packageBrowserInstance(config(), {
+				isVendor: false,
+				bundle: localeBunleName,
+				longName: expose.opts.expose + '{' + locale + '}',
+				shortName: expose.opts.expose + '{' + locale + '}',
+				file: expose.file
+				//isEntryJS: {}.hasOwnProperty.call(config().defaultEntrySet, moduleName)
+			});
+			if (!packageInfo.localeEntryMap[locale]) {
+				packageInfo.localeEntryMap[locale] = {};
+			}
+			packageInfo.localeEntryMap[locale][localeModuleName] = pkInstance;
+			packageInfo.moduleMap[expose.opts.expose + '{' + locale + '}'] = pkInstance;
+			//log.debug('buildLocaleBundle() locale entry ' + localeModuleName);
+			i18nModuleNameSet[expose.opts.expose] = 1;
+		});
+		//var listFilePath = Path.resolve(maker.i18nBundleEntryFileName(locale));
+		// var listStream = through();
+		// listStream.write(listFile, 'utf8');
+		// listStream.end();
+		// b.add(listStream, {file: listFilePath, basedir: process.cwd});
+		var listFilePath = Path.join(entryJsDir, maker.i18nBundleEntryFileName(locale));
+		fs.writeFileSync(listFilePath, listFile);
+		b.add(listFilePath);
+		b.transform(htmlTranform, {global: true});
+		b.transform(yamlify, {global: true});
+		b.transform(jsBundleEntryMaker.jsTranformer(modules), {global: true});
+		browserifyDepsMap(b, depsMap);
+		var cssProm = buildCssBundle(b, bundle + '_' + locale, config().staticDir);
+		excludeList.forEach(b.exclude, b);
+		var out = _createBrowserifyBundle(b, localeBunleName);
+		return [out, cssProm];
+	}
+
+	function monkeyPatchBrowserApi(browserApi, entryPackage, revisionMeta) {
+		var localeBundleSet = api.localeBundlesDepsGraph[entryPackage];
+		var apiBundleLocaleMap = browserApi.localeBundlesMap = {};
+		config().locales.forEach(locale => {
+			var localBundles = _.keys(localeBundleSet[locale]);
+			apiBundleLocaleMap[locale] = {};
+			apiBundleLocaleMap[locale].js = localBundles.map(bundleName => {
+				var file = 'js/' + bundleName + (config().devMode ? '' : '.min') + '.js';
+				return revisionMeta[file];
+			});
+			localBundles.forEach(bundleName => {
+				var file = 'css/' + bundleName + (config().devMode ? '' : '.min') + '.css';
+				var destFile = revisionMeta[file];
+				if (destFile) {
+					if (!apiBundleLocaleMap[locale].css) {
+						apiBundleLocaleMap[locale].css = [];
+					}
+					apiBundleLocaleMap[locale].css.push(destFile);
+				}
+			});
+		});
+
+		browserApi._config = {
+			staticAssetsURL: config().staticAssetsURL,
+			serverURL: config().serverURL,
+			packageContextPathMapping: config().packageContextPathMapping,
+			locales: config().locales
+		};
+	}
+
+	/**
+	 * draw a cross bundles dependency map
+	 * @param  {object} b       browserify instance
+	 */
+	function browserifyDepsMap(b, depsMap) {
 		var rootPath = config().rootPath;
 		b.pipeline.get('deps').push(through.obj(function(chunk, encoding, callback) {
 			var shortFilePath = Path.isAbsolute(chunk.file) ? Path.relative(rootPath, chunk.file) : chunk.file;
@@ -405,118 +608,6 @@ function compile(api) {
 			depsMap[shortFilePath] = deps;
 			callback(null, chunk);
 		}));
-
-		var bundleBasename = 'js/' + bundle;
-		var jsStream = b.bundle()
-			.on('error', (er) => {
-				log.error('browserify bundle() for bundle "' + bundle + '" failed', er);
-				gutil.beep();
-				jsStream.end();
-			})
-			.pipe(source(bundleBasename + '.js'))
-			.pipe(buffer())
-			.pipe(sourcemaps.init({
-				loadMaps: true
-			}))
-			.pipe(gulpif(!config().devMode, uglify()))
-			.pipe(gulpif(!config().devMode, rename(bundleBasename + '.min.js')))
-			.pipe(sourcemaps.write('./'))
-			.pipe(size({title: bundleBasename}))
-			.on('error', (er) => {
-				log.error('browserify bundle() sourcemaps failed', er);
-				jsStream.end();
-			});
-
-		var i18nStream = buildI18nBundles(browserifyOpt, modules, excludeList, bundle);
-		if (i18nStream) {
-			jsStream = es.merge([jsStream, i18nStream]);
-		}
-		return {
-			cssPromise: cssPromise,
-			jsStream: jsStream
-		};
-	}
-
-	function buildI18nBundles(browserifyOpt, modules, excludeList, bundle) {
-		var streams = [];
-		config().locales.forEach(locale => {
-			var stm = buildLocaleBundle(browserifyOpt, locale, modules, excludeList, bundle);
-			if (stm) {
-				streams.push(stm);
-			}
-		});
-		if (streams.length === 0) {
-			return null;
-		}
-		availableLocaleBundleSet[bundle] = 1;
-		return es.merge(streams);
-	}
-
-	function buildLocaleBundle(browserifyOpt, locale, modules, excludeList, bundle) {
-		var maker = helper.JsBundleWithI18nMaker(api, bundle, modules, locale);
-		var listFile = maker.createI18nListFile();
-		if (!listFile) {
-			return null;
-		}
-		var listFilePath = Path.resolve(maker.i18nBundleEntryFileName);
-		var b = browserify(browserifyOpt);
-		var listStream = through();
-		listStream.write(listFile, 'utf8');
-		listStream.end();
-		maker.i18nModuleForRequire.forEach(expose => {
-			b.require(expose.file, expose.opts);
-			i18nModuleNameSet[expose.opts.expose] = 1;
-		});
-		b.add(listStream, {file: listFilePath, basedir: process.cwd});
-		b.transform(htmlTranform, {global: true});
-		b.transform(yamlify, {global: true});
-		b.transform(jsBundleEntryMaker.jsTranformer(modules), {global: true});
-		excludeList.forEach(b.exclude, b);
-
-		var bundleBasename = 'js/' + bundle + '_' + locale;
-
-		var out = b.bundle()
-			.on('error', (er) => {
-				log.error('browserify bundle() for bundle "' + bundle + '" failed', er);
-				gutil.beep();
-				out.end();
-			})
-			.pipe(source(bundleBasename + '.js'))
-			.pipe(buffer())
-			.pipe(sourcemaps.init({
-				loadMaps: true
-			}))
-			.pipe(gulpif(!config().devMode, uglify()))
-			.pipe(gulpif(!config().devMode, rename(bundleBasename + '.min.js')))
-			.pipe(sourcemaps.write('./'))
-			.pipe(size({title: bundleBasename}))
-			.on('error', (er) => {
-				log.error('browserify bundle() sourcemaps failed', er);
-				out.end();
-			});
-		return out;
-	}
-
-	function monkeyPatchBrowserApi(browserApi, entryPackage, revisionMeta) {
-		var bundleSet = api.bundleDepsGraph[entryPackage];
-		delete bundleSet.labjs;
-		var localeBundlesForEntry = _.intersection(Object.keys(bundleSet), Object.keys(availableLocaleBundleSet));
-		if (localeBundlesForEntry.length > 0) {
-			var bundleLocaleMap = browserApi.localeBundlesMap = {};
-			config().locales.forEach(locale => {
-				bundleLocaleMap[locale] = localeBundlesForEntry.map(bundleName => {
-					var file = 'js/' + bundleName + '_' + locale + (config().devMode ? '' : '.min') + '.js';
-					return revisionMeta[file];
-				});
-			});
-		}
-		browserApi._config = {
-			staticAssetsURL: config().staticAssetsURL,
-			serverURL: config().serverURL,
-			packageContextPathMapping: config().packageContextPathMapping,
-			locales: config().locales
-		};
-		return localeBundlesForEntry;
 	}
 
 	function excludeModules(allModules, b, entryModules) {
@@ -543,7 +634,7 @@ function compile(api) {
 		if (config().devMode) {
 			var fakeRevManifest = {};
 			stream = bundleStream
-			.pipe(gulp.dest(Path.join(config().staticDir)))
+			.pipe(gulp.dest(config().staticDir))
 			.pipe(through.obj(function(row, encode, next) {
 				var relivePath = Path.relative(row.base, row.path).replace(/\\/g, '/');
 				fakeRevManifest[relivePath] = relivePath;
@@ -570,7 +661,7 @@ function compile(api) {
 			}))
 			.pipe(revAll.revision())
 			.pipe(revFilter.restore)
-			.pipe(gulp.dest(Path.join(config().staticDir)))
+			.pipe(gulp.dest(config().staticDir))
 			.pipe(revAll.manifestFile());
 		}
 		return stream.pipe(through.obj(function(row, encode, next) {
@@ -597,7 +688,7 @@ function compile(api) {
 		});
 	}
 
-	function buildCssBundle(b, bundle, destDir) { return new Promise(function(resolve, reject) {
+	function buildCssBundle(b, bundle, destDir) {
 		mkdirp.sync(Path.resolve(destDir, 'css'));
 		var fileName = Path.resolve(destDir, 'css', bundle + '.css');
 		var parce = parcelify(b, {
@@ -606,28 +697,38 @@ function compile(api) {
 			},
 			appTransforms: ['@dr/parcelify-module-resolver']
 		});
+		return new Promise(function(resolve, reject) {
+			parce.on('done', function() {
+				log.debug('buildCssBundle(): ' + fileName);
+				resolve(fileName);
+			});
 
-		parce.on('done', function() {
-			log.debug('CSS Bundle built: ' + fileName);
-			resolve(fileName);
+			parce.on('error', function(err) {
+				log.error('parcelify bundle error: ', err);
+				gutil.beep();
+				reject(fileName);
+			});
+			// this is a work around for a bug introduced in Parcelify
+			// check this out, https://github.com/rotundasoftware/parcelify/issues/30
+			b.pipeline.get('dedupe').push( through.obj( function( row, enc, next ) {
+				if (fs.existsSync(row.file)) {
+					if (fs.lstatSync(row.file).isDirectory()) {
+						// most likely it is an i18n folder
+						row.file = resolve(row.file);
+					}
+				} else {
+					// row.file is a package name
+					var resolved = packageInfo.moduleMap[row.id] ? packageInfo.moduleMap[row.id].file : null;
+					row.file = resolved ? resolved : resolve(row.file);
+				}
+				this.push(row);
+				next();
+			}));
 		});
+	}
 
-		parce.on('error', function(err) {
-			log.error('parcelify bundle error: ', err);
-			gutil.beep();
-			reject(fileName);
-		});
-		// this is a work around for a bug introduced in Parcelify
-		// check this out, https://github.com/rotundasoftware/parcelify/issues/30
-		b.pipeline.get('dedupe').push( through.obj( function( row, enc, next ) {
-			if (!fs.existsSync(row.file)) {
-				var resolved = packageInfo.moduleMap[row.id].file;
-				row.file = resolved ? resolved : bResolve.sync(row.file);
-			}
-			this.push(row);
-			next();
-		}));
-	});
+	function resolve(file) {
+		return bResolve.sync(file, {paths: api.compileNodePath});
 	}
 
 	function runTasks() {
@@ -638,6 +739,30 @@ function compile(api) {
 		}
 		return Promise.all(reses);
 	}
+}
+
+function _createBrowserifyBundle(b, bundle) {
+	var bundleBasename = 'js/' + bundle;
+	var out = b.bundle()
+		.on('error', (er) => {
+			log.error('browserify bundle() for bundle "' + bundle + '" failed', er);
+			gutil.beep();
+			out.end();
+		})
+		.pipe(source(bundleBasename + '.js'))
+		.pipe(buffer())
+		.pipe(sourcemaps.init({
+			loadMaps: true
+		}))
+		.pipe(gulpif(!config().devMode, uglify()))
+		.pipe(gulpif(!config().devMode, rename(bundleBasename + '.min.js')))
+		.pipe(sourcemaps.write('./'))
+		.pipe(size({title: bundleBasename}))
+		.on('error', (er) => {
+			log.error('browserify bundle() sourcemaps failed', er);
+			out.end();
+		});
+	return out;
 }
 
 function validateBundleNames(bundleNames, bundlesTobuild) {

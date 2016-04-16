@@ -1,0 +1,12 @@
+{
+  "name": "@dr/example-local-zh",
+  "version": "0.0.1",
+  "description": "A demo package that contains locale specific stuff",
+  "browser": "index.js",
+  "style": "zh-style.less",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "LJ",
+  "license": "MIT"
+}

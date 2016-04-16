@@ -1,4 +1,5 @@
 module.exports = {
 	fileCache: require('./fileCache'),
-	walkPackages: require('./packagesWalker')
+	walkPackages: require('./packagesWalker'),
+	packageInstance: require('./packageBrowserInstance')
 };

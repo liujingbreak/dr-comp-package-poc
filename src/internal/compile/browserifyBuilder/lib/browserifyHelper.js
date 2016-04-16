@@ -6,6 +6,7 @@ var swig = require('swig');
 var fs = require('fs');
 var assetsProcesser = require('@dr-core/assets-processer');
 var _ = require('lodash');
+var glob = require('glob');
 swig.setDefaults({autoescape: false});
 var config;
 
@@ -119,33 +120,42 @@ JsBundleEntryMaker.prototype = {
 	}
 };
 
-function JsBundleWithI18nMaker(api, bundleName, packageBrowserInstances, locale) {
+function JsBundleWithI18nMaker(api, bundleName, packageBrowserInstances, browserResolve) {
 	if (!(this instanceof JsBundleWithI18nMaker)) {
-		return new JsBundleWithI18nMaker(api, bundleName, packageBrowserInstances, locale);
+		return new JsBundleWithI18nMaker(api, bundleName, packageBrowserInstances, browserResolve);
 	}
 	JsBundleEntryMaker.apply(this, arguments);
-	this.i18nBundleEntryFileName = bundleName + '_locale_' + locale + '.js';
-	this.i18nModuleForRequire = [];
+	this.browserResolve = browserResolve;
+	this.pk2LocaleModule = {};
 }
 
 JsBundleWithI18nMaker.prototype = _.create(JsBundleEntryMaker.prototype, {
-	createI18nListFile: function() {
+	createI18nListFile: function(locale) {
 		var i18nModules = [];
+		this.i18nModuleForRequire = [];
 		this.packages.forEach(pkInstance => {
 			if (pkInstance.isVendor) {
 				return;
 			}
-			var i18nPath = this.i18nPath(pkInstance);
+			var i18nPath = this.i18nPath(pkInstance, locale);
+			var i18nModuleName = pkInstance.longName + '/i18n';
 			if (i18nPath) {
+				var shoftI18nPath = Path.relative(Path.resolve(), i18nPath);
 				i18nModules.push({
-					longName: './' + Path.relative(process.cwd(), i18nPath).replace(/\\/g, '/')
+					longName: i18nModuleName
 				});
 				this.i18nModuleForRequire.push({
 					file: i18nPath,
 					opts: {
-						expose: pkInstance.longName + '/i18n'
-					}
+						expose: i18nModuleName
+					},
+					id: shoftI18nPath
 				});
+				this.createI18nPackageJson(i18nPath, i18nModuleName, locale);
+				if (!this.pk2LocaleModule[i18nModuleName]) {
+					this.pk2LocaleModule[i18nModuleName] = {};
+				}
+				this.pk2LocaleModule[i18nModuleName][locale] = shoftI18nPath;
 			}
 		});
 		if (i18nModules.length === 0) {
@@ -158,7 +168,11 @@ JsBundleWithI18nMaker.prototype = _.create(JsBundleEntryMaker.prototype, {
 		});
 	},
 
-	i18nPath: function(pkInstance) {
+	i18nBundleEntryFileName: function(locale) {
+		return this.bundleName + '_bundle_entry_' + locale + '.js';
+	},
+
+	i18nPath: function(pkInstance, locale) {
 		var i18nPath = pkInstance.i18n;
 		if (!i18nPath) {
 			i18nPath = Path.resolve(pkInstance.packagePath, 'i18n');
@@ -166,12 +180,25 @@ JsBundleWithI18nMaker.prototype = _.create(JsBundleEntryMaker.prototype, {
 				return null;
 			}
 		}
-		i18nPath = Path.resolve(pkInstance.packagePath, i18nPath.replace(/\{locale\}/g, this.locale));
+		i18nPath = Path.resolve(pkInstance.packagePath, i18nPath.replace(/\{locale\}/g, locale));
 		if (!fileExists(i18nPath)) {
 			log.error('i18n not found: ' + pkInstance.i18n + ' in ' + pkInstance.longName);
 			return null;
 		}
-		return i18nPath;
+		return this.browserResolve(i18nPath);
+	},
+
+	createI18nPackageJson: function(i18nPath, i18nModuleName, locale) {
+		if (this.i18nPackageJsonCreated) {
+			return;
+		}
+		var folder = fs.lstatSync(i18nPath).isDirectory() ? i18nPath : Path.dirname(i18nPath);
+		var jsonFile = Path.join(folder, 'package.json');
+		var json = {};
+		if (!fs.existsSync(jsonFile)) {
+			fs.writeFileSync(jsonFile, JSON.stringify(json, null, '  '));
+		}
+		this.i18nPackageJsonCreated = true;
 	}
 });
 JsBundleWithI18nMaker.prototype.constructor = JsBundleWithI18nMaker;

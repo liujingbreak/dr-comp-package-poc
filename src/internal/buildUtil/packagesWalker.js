@@ -10,8 +10,9 @@ var chalk = require('chalk');
 var log = require('log4js').getLogger('buildUtil.' + Path.basename(__filename, '.js'));
 
 module.exports = walkPackages;
+module.exports.saveCache = saveCache;
 
-var config, argv, packageUtils, compileNodePath;
+var config, argv, packageUtils, compileNodePath, packageInfoCacheFile;
 
 /**
  * @return {PackageInfo}
@@ -20,7 +21,7 @@ var config, argv, packageUtils, compileNodePath;
  * @property {packageBrowserInstance[]} allModules
  * @property {Object.<string, packageBrowserInstance>} moduleMap key is module name
  * @property {Object.<string, packageBrowserInstance[]>} bundleMap key is bundle name
- * @property {Object.<string, packageBrowserInstance[]>} entryPageMap key is module name
+ * @property {Object.<string, packageBrowserInstance>} entryPageMap key is module name
  */
 function walkPackages(_config, _argv, _packageUtils, _compileNodePath) {
 	config = _config;
@@ -28,7 +29,7 @@ function walkPackages(_config, _argv, _packageUtils, _compileNodePath) {
 	packageUtils = _packageUtils;
 	compileNodePath = _compileNodePath;
 
-	var packageInfoCacheFile = Path.join(config().destDir, 'packageInfo.json');
+	packageInfoCacheFile = Path.join(config().destDir, 'packageInfo.json');
 	var packageInfo;
 	if ( (argv.p || argv.b) && fs.existsSync(packageInfoCacheFile)) {
 		log.info('Reading build info cache from ' + packageInfoCacheFile);
@@ -38,9 +39,14 @@ function walkPackages(_config, _argv, _packageUtils, _compileNodePath) {
 		log.info('scan for packages info');
 		packageInfo = _walkPackages();
 		mkdirp.sync(config().destDir);
-		fs.writeFile(packageInfoCacheFile, JSON.stringify(cycle.decycle(packageInfo), null, '\t'));
+		//saveCache(packageInfo);
 	}
 	return packageInfo;
+}
+
+
+function saveCache(packageInfo) {
+	fs.writeFile(packageInfoCacheFile, JSON.stringify(cycle.decycle(packageInfo), null, '\t'));
 }
 
 /**
@@ -51,7 +57,8 @@ function _walkPackages() {
 		allModules: null,
 		moduleMap: {},
 		bundleMap: null,
-		entryPageMap: {}
+		entryPageMap: {},
+		localeEntryMap: {}
 	};
 	var vendorConfigInfo = vendorBundleMapConfig();
 	var map = info.bundleMap = vendorConfigInfo.bundleMap;
@@ -65,8 +72,8 @@ function _walkPackages() {
 		var instance = packageBrowserInstance(config());
 		if (!pkJson.dr) {
 			pkJson.dr = {};
-			log.error('missing "dr" property in ' + Path.join(packagePath, 'package.json'));
-			gutil.beep();
+			// log.error('missing "dr" property in ' + Path.join(packagePath, 'package.json'));
+			// gutil.beep();
 		}
 		if (!pkJson.dr.builder || pkJson.dr.builder === 'browserify') {
 			if (config().bundlePerPackage === true && parsedName.name !== 'browserify-builder-api') {
@@ -106,7 +113,7 @@ function _walkPackages() {
 			active: pkJson.dr ? pkJson.dr.active : false,
 			entryPages: entryPages,
 			entryViews: entryViews,
-			isEntryJS: pkJson.dr && pkJson.dr.isEntryJS !== undefined ? (!!pkJson.dr.isEntryJS) : {}.hasOwnProperty.call(config().defaultEntrySet, name),
+			//isEntryJS: pkJson.dr && pkJson.dr.isEntryJS !== undefined ? (!!pkJson.dr.isEntryJS) : {}.hasOwnProperty.call(config().defaultEntrySet, name),
 			browserifyNoParse: noParseFiles,
 			isEntryServerTemplate: isEntryServerTemplate,
 			i18n: pkJson.dr ? (pkJson.dr.i18n ? pkJson.dr.i18n : null) : null
@@ -155,8 +162,8 @@ function vendorBundleMapConfig() {
 				bundle: bundle,
 				longName: moduleName,
 				shortName: moduleName,
-				file: mainFile,
-				isEntryJS: {}.hasOwnProperty.call(config().defaultEntrySet, moduleName)
+				file: mainFile
+				//isEntryJS: {}.hasOwnProperty.call(config().defaultEntrySet, moduleName)
 			});
 			info.allModules.push(instance);
 			return instance;

@@ -1,7 +1,7 @@
 var log = require('@dr/logger').getLogger('example.exampleBrowserify');
 var angular = require('@dr/angularjs');
 
-var sampleHtml = require('./sampleBrowser.js');
+var sampleHtml = require('./browser');
 
 log.debug(sampleHtml);
 

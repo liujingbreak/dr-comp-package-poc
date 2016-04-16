@@ -68,10 +68,21 @@ BrowserApi.prototype = {
 	loadLocaleBundles: function(locale, waitCallback) {
 		var prefix = this.config().staticAssetsURL;
 		var localeBundles = this.localeBundlesMap[locale];
-		var localeBundleUrls = _.map(localeBundles, function(bundle) {
+		var localeBundleJsUrls = _.map(localeBundles.js, function(bundle) {
 			return prefix + '/' + bundle;
 		});
-		window.$LAB.script(localeBundleUrls).wait(function() {
+		if (localeBundles.css && localeBundles.css.length > 0) {
+			var h = window.document.getElementsByTagName('head')[0];
+			_.each(localeBundles.css, function(bundle) {
+				var cssDom = document.createElement('link');
+				cssDom.rel = 'stylesheet';
+				cssDom.href = prefix + '/' + bundle;
+				cssDom.type = 'text/css';
+				cssDom.id = bundle;
+				h.appendChild(cssDom);
+			});
+		}
+		window.$LAB.script(localeBundleJsUrls).wait(function() {
 			BrowserApi.prototype.i18nLoaded = true;
 			waitCallback();
 		});
