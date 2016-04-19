@@ -45,8 +45,13 @@ var fileCache;
  */
 module.exports = {
 	compile: compile,
-	addTask: task => {
-		tasks.push(task);
+	addTransform:
+	/**
+	 * Add transform to browserify builder's pipe stream
+	 * @param {transform} | {transform[]} transforms
+	 */
+	function(transforms) {
+
 	}
 };
 
@@ -189,10 +194,12 @@ function compile(api) {
 					printModuleDependencyGraph(depsGraph);
 					// [ Entry page package A ]--depends on--> ( bundle X, Y )
 					var bundleGraph = createBundleDependencyGraph(depsGraph, packageInfo);
-					pageCompilerParam.bundleDepsGraph = bundleGraph.bundleDepsGraph;
-					pageCompilerParam.config = config;
-					pageCompilerParam.packageInfo = packageInfo;
-					pageCompilerParam.builtBundles = bundleNames;
+					_.assign(pageCompilerParam, {
+						config: config,
+						bundleDepsGraph: bundleGraph.bundleDepsGraph,
+						packageInfo: packageInfo,
+						builtBundles: bundleNames
+					});
 					this.push(pageCompilerParam);
 					api.__proto__.bundleDepsGraph = bundleGraph.bundleDepsGraph;
 					api.__proto__.localeBundlesDepsGraph = bundleGraph.localeBundlesDepsGraph;
