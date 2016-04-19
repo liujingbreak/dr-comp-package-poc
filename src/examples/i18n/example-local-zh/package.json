@@ -1,6 +1,6 @@
 {
   "name": "@dr/example-local-zh",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A demo package that contains locale specific stuff",
   "browser": "index.js",
   "style": "zh-style.less",

@@ -1,6 +1,6 @@
 {
   "name": "@dr/environment",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "Runtime object holds api and config object",
   "main": "index.js",
   "browser": "browser.js",
