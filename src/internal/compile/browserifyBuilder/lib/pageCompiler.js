@@ -15,9 +15,10 @@ var assetsProcesser = require('@dr-core/assets-processer');
 
 module.exports = PageCompiler;
 
-function PageCompiler() {
+function PageCompiler(addonTransforms) {
 	this.builderInfo = null;
 	this.rootPackage = null;
+	this.addonTransforms = addonTransforms;
 }
 
 /**
@@ -71,8 +72,10 @@ var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
 PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageType, through) {
 	var compiler = this;
 	var pathInfo = resolvePagePath(page, instance, buildInfo.packageInfo.moduleMap);
+	var pagePath = Path.resolve(instance.shortName, pathInfo.path);
 	return readFileAsync(pathInfo.abs, 'utf-8')
 	.then(function(content) {
+		content = compiler.transform(pathInfo.abs, content);
 		var $ = cheerio.load(content);
 		injectElements($, buildInfo.bundleDepsGraph[instance.longName], instance,
 			buildInfo.config, buildInfo.revisionMeta, buildInfo.entryDataProvider);
@@ -80,7 +83,7 @@ PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageTyp
 		hackedHtml = assetsProcesser.replaceAssetsUrl(hackedHtml, ()=> {
 			return pathInfo.packageName;
 		});
-		var pagePath = Path.resolve(instance.shortName, pathInfo.path);
+
 		log.info('Entry page processed: ' + pagePath);
 		through.push(new File({
 			path: pagePath,
@@ -95,6 +98,18 @@ PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageTyp
 			}));
 		}
 	});
+};
+
+PageCompiler.prototype.transform = function(filePath, content) {
+	if (Array.isArray(this.addonTransforms) && this.addonTransforms.length > 0) {
+		this.addonTransforms.forEach(transform => {
+			var thr = transform(filePath);
+			thr.write(content);
+			thr.end();
+			content = thr.read().toString();
+		});
+	}
+	return content;
 };
 
 var npmPat = /npm:\/\/((?:@[^\/]+\/)?[^\/]+)\/(.*?$)/;

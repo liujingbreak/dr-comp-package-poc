@@ -6,6 +6,7 @@ var chalk = require('chalk');
 module.exports = function(api) {
 	var proto = api.__proto__;
 	proto.findBrowserPackageByPath = findBrowserPackageByPath;
+	proto.findBrowserPackageInstanceByPath = findBrowserPackageInstanceByPath;
 	proto.packageNames2bundles = packageNames2bundles;
 	require('@dr/environment').findBrowserPackageByPath = findBrowserPackageByPath.bind(proto);
 	initPackageListInfo(proto);
@@ -20,7 +21,7 @@ function initPackageListInfo(proto) {
 			return;
 		}
 		var path = Path.relative(proto.config().rootPath, instance.packagePath);
-		proto._packagePath2Name[path] = instance.longName;
+		proto._packagePath2Name[path] = instance;
 		proto._packagePathList.push(path);
 	});
 	proto._packagePathList.sort();
@@ -28,6 +29,10 @@ function initPackageListInfo(proto) {
 
 
 function findBrowserPackageByPath(file) {
+	return this.findBrowserPackageInstanceByPath(file).longName;
+}
+
+function findBrowserPackageInstanceByPath(file) {
 	file = Path.relative(this.config().rootPath, file);
 	var idx = _.sortedIndex(this._packagePathList, file);
 

@@ -6,7 +6,6 @@ var swig = require('swig');
 var fs = require('fs');
 var assetsProcesser = require('@dr-core/assets-processer');
 var _ = require('lodash');
-var glob = require('glob');
 swig.setDefaults({autoescape: false});
 var config;
 
@@ -33,7 +32,7 @@ module.exports = function(_config) {
 };
 //exports.dependencyTree = dependencyTree;
 
-var BOOT_FUNCTION_PREFIX = '_bundle_';
+var BOOT_FUNCTION_PREFIX = '_deps_';
 var apiVariableTpl = swig.compileFile(Path.join(__dirname, 'templates', 'apiVariable.js.swig'),
 	{autoescape: false});
 

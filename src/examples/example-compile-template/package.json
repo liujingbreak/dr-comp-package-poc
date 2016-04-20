@@ -1,0 +1,19 @@
+{
+  "name": "@dr/example-compile-template",
+  "version": "0.0.1",
+  "description": "sample package demonstrates how compilation time template works",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "browser": "browser.js",
+  "main": "server.js",
+  "dr": {
+    "bundle": "example",
+    "entryPage": "index.html"
+  },
+  "author": "jing.liu.fe@d.com",
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "~4.6.1"
+  }
+}

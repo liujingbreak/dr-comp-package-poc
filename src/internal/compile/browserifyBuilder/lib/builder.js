@@ -40,6 +40,7 @@ var packageUtils, config, jsBundleEntryMaker;
 
 var tasks = [];
 var fileCache;
+var addonTransforms = [];
 /**
  * JS and CSS file Build process based on browserify and parcelify
  */
@@ -51,11 +52,15 @@ module.exports = {
 	 * @param {transform} | {transform[]} transforms
 	 */
 	function(transforms) {
-
+		addonTransforms = addonTransforms.concat(transforms);
 	}
 };
 
 function compile(api) {
+	gutil.log('Usage: gulp compile [-p <package name with or without scope part> -p <package name> ...]');
+	gutil.log('\tgulp compile [-b <bundle name> -b <bunle name> ...]');
+	gutil.log('\tbuild all JS and CSS bundles, if parameter <bundle name> is supplied, only that specific package or bundle will be rebuilt.');
+
 	log = require('@dr/logger').getLogger(api.packageName);
 	packageUtils = api.packageUtils;
 	config = api.config;
@@ -65,18 +70,15 @@ function compile(api) {
 	fileCache = fileCache ? fileCache : new FileCache(config().destDir);
 	var buildCss = true;
 	var buildJS = true;
-
-	gutil.log('Usage: gulp compile [-p <package name with or without scope part> -p <package name> ...]');
-	gutil.log('\tgulp compile [-b <bundle name> -b <bunle name> ...]');
-	gutil.log('\tbuild all JS and CSS bundles, if parameter <bundle name> is supplied, only that specific package or bundle will be rebuilt.');
-
-	var packageInfo = walkPackages(config, argv, packageUtils, api.compileNodePath);
+	var cssPromises = [];
+	var jsStreams = [];
+	var staticDir = Path.resolve(config().staticDir);
 	var i18nModuleNameSet, pk2localeModule;
+	var packageInfo = walkPackages(config, argv, packageUtils, api.compileNodePath);
 	//monkey patch new API
 	api.__proto__.packageInfo = packageInfo;
 	require('./compilerApi')(api);
 
-	var depsMap = {};
 	var localeDepsMap;
 	var bundleStream;
 	var bundleNames = _.keys(packageInfo.bundleMap);
@@ -108,16 +110,14 @@ function compile(api) {
 	// extra data returned from task, which will be injected to entry page.
 	// e.g. i18n information.
 
-	var cssPromises = [];
-	var jsStreams = [];
-	var staticDir = Path.resolve(config().staticDir);
-	var cssStream = new through.obj(function(path, enc, next) {
+
+	var cssStream = through.obj(function(path, enc, next) {
 		fileAccessAsync(path, fs.R_OK).then(()=> {
 			return readFileAsync(path, 'utf8');
 		})
 		.then((data) => {
 			var file = new File({
-				// gulp-rev-all is too stupid that it can only accept same `base` for all files,
+				// gulp-rev-all is so stupid that it can only accept same `base` for all files,
 				// So css files' base path must be sames as JS files.
 				// To make rev-all think they are all based on process.cwd(), I have to change a
 				// css file's path to a relative 'fake' location as as JS files.
@@ -133,22 +133,21 @@ function compile(api) {
 		fileCache.loadFromFile('bundleInfoCache.json'),
 		fileCache.loadFromFile('depsMap.json')
 	])
-	.then(function(results) {
-		depsMap = results[1];
+	.then(buildStart)
+	.then(() => {
+		walkPackages.saveCache(packageInfo);
+		fileCache.tailDown();
+	})
+	.catch( err => {
+		log.error(err);
+		gutil.beep();
+		process.exit(1);
+	});
+
+	function buildStart(results) {
+		var depsMap = results[1];
 		var bundleInfoCache = results[0];
-		if (!bundleInfoCache.i18nModuleNameSet) {
-			bundleInfoCache.i18nModuleNameSet = {};
-		}
-		if (!bundleInfoCache.depsMap) {
-			bundleInfoCache.depsMap = {};
-		}
-		// package to locale module map Object.<{string} name, Object.<{string} locale, Object>>
-		if (!bundleInfoCache.pk2localeModule) {
-			bundleInfoCache.pk2localeModule = {};
-		}
-		i18nModuleNameSet = bundleInfoCache.i18nModuleNameSet;
-		pk2localeModule = bundleInfoCache.pk2localeModule;
-		localeDepsMap = bundleInfoCache.depsMap;
+		initI18nBundleInfo(bundleInfoCache);
 
 		log.info('------- building bundles ---------');
 		bundleNames.forEach(function(bundle) {
@@ -165,7 +164,7 @@ function compile(api) {
 			}
 			jsStreams.push(buildObj.jsStream);
 		});
-		var pageCompiler = new PageCompiler();
+		var pageCompiler = new PageCompiler(addonTransforms);
 		var outStreams = jsStreams;
 		if (buildCss) {
 			outStreams.push(cssStream);
@@ -221,16 +220,23 @@ function compile(api) {
 			.pipe(gulp.dest(config().staticDir))
 			.on('finish', resolve);
 		});
-	}).then(() => {
-		walkPackages.saveCache(packageInfo);
-		fileCache.tailDown();
-	})
-	.catch( err => {
-		log.error(err);
-		gutil.beep();
-		process.exit(1);
-	});
+	}
 
+	function initI18nBundleInfo(bundleInfoCache) {
+		if (!bundleInfoCache.i18nModuleNameSet) {
+			bundleInfoCache.i18nModuleNameSet = {};
+		}
+		if (!bundleInfoCache.depsMap) {
+			bundleInfoCache.depsMap = {};
+		}
+		// package to locale module map Object.<{string} name, Object.<{string} locale, Object>>
+		if (!bundleInfoCache.pk2localeModule) {
+			bundleInfoCache.pk2localeModule = {};
+		}
+		i18nModuleNameSet = bundleInfoCache.i18nModuleNameSet;
+		pk2localeModule = bundleInfoCache.pk2localeModule;
+		localeDepsMap = bundleInfoCache.depsMap;
+	}
 	/**
 	 * create a map of entry module and depended modules
 	 * @param  {[type]} depsMap  [description]
@@ -476,9 +482,12 @@ function compile(api) {
 		//b.add(listStream, {file: entryFile, basedir: process.cwd});
 		b.add(entryFile);
 		b.require(modules.map(module => { return module.longName; }));
+		addonTransforms.forEach(addonTransform => {
+			b.transform(addonTransform, {global: true});
+		});
 		b.transform(htmlTranform, {global: true});
 		b.transform(yamlify, {global: true});
-		b.transform(jsBundleEntryMaker.jsTranformer(modules), {global: true});
+		b.transform(jsBundleEntryMaker.jsTranformer(), {global: true});
 
 		var excludeList = excludeModules(packageInfo.allModules, b, _.map(modules, function(module) {return module.longName;}));
 		excludeI18nModules(packageInfo.allModules, b);
@@ -558,9 +567,12 @@ function compile(api) {
 		var listFilePath = Path.join(entryJsDir, maker.i18nBundleEntryFileName(locale));
 		fs.writeFileSync(listFilePath, listFile);
 		b.add(listFilePath);
+		addonTransforms.forEach(addonTransform => {
+			b.transform(addonTransform, {global: true});
+		});
 		b.transform(htmlTranform, {global: true});
 		b.transform(yamlify, {global: true});
-		b.transform(jsBundleEntryMaker.jsTranformer(modules), {global: true});
+		b.transform(jsBundleEntryMaker.jsTranformer(), {global: true});
 		browserifyDepsMap(b, depsMap);
 		var cssProm = buildCssBundle(b, bundle + '_' + locale, config().staticDir);
 		excludeList.forEach(b.exclude, b);
@@ -698,11 +710,15 @@ function compile(api) {
 	function buildCssBundle(b, bundle, destDir) {
 		mkdirp.sync(Path.resolve(destDir, 'css'));
 		var fileName = Path.resolve(destDir, 'css', bundle + '.css');
+		var appTransforms = ['@dr/parcelify-module-resolver'];
+		// addonTransforms.forEach(addonTransform => {
+		// 	appTransforms.push(addonTransform);
+		// });
 		var parce = parcelify(b, {
 			bundles: {
 				style: fileName
 			},
-			appTransforms: ['@dr/parcelify-module-resolver']
+			appTransforms: appTransforms
 		});
 		return new Promise(function(resolve, reject) {
 			parce.on('done', function() {

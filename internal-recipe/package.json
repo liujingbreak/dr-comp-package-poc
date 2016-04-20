@@ -1,6 +1,6 @@
 {
   "name": "@dr/internal-recipe",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "Recipe package of package-recipe",
   "dependencies": {
     "@dr/angularjs": "1.0.24",
@@ -14,6 +14,7 @@
     "@dr/environment": "0.0.18",
     "@dr-core/express-server": "0.0.26",
     "@dr/logger": "0.0.20",
-    "@dr/translate-generator": "0.0.2"
+    "@dr/translate-generator": "0.0.2",
+    "@dr/template-builder": "0.0.1"
   }
 }

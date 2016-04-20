@@ -1,0 +1,15 @@
+{
+  "name": "@dr/template-builder",
+  "version": "0.0.1",
+  "description": "A swig based template transform and builder",
+  "main": "templateBuilder.js",
+  "dr": {
+	"type": "builder",
+	"priority": 2900
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "LJ",
+  "license": "MIT"
+}

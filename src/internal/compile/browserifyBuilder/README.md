@@ -31,8 +31,8 @@ locales:
 module exports is an object:
 | members | description
 | -- | --
-| compile(api) | function, called by `gulp compile` command
-
+| .compile(api) | function, called by `gulp compile` command
+| .addTransform(transforms) | `transforms` is a browserify Transform or an array of Transform, so that you can pre-process those files before browserify compiles them. Transforms are also applied to `dr.entryPage` which is configured in package.json.
 
 ### Priority
 3000
