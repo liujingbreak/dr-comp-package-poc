@@ -5,7 +5,7 @@
   "main": "lib/server.js",
   "bin": "bin/dr.js",
   "scripts": {
-    "start": "node lib/server.js",
+    "start": "node lib/main.js",
     "check": "gulp lint"
   },
   "repository": {

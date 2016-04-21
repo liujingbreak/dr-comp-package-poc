@@ -3,7 +3,6 @@ var fs = require('fs');
 var cycle = require('cycle');
 var mkdirp = require('mkdirp');
 var packageBrowserInstance = require('./packageBrowserInstance');
-var gutil = require('gulp-util');
 var _ = require('lodash');
 var bResolve = require('browser-resolve');
 var chalk = require('chalk');

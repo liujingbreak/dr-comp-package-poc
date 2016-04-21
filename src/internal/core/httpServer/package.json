@@ -1,0 +1,10 @@
+{
+  "name": "@dr/http-server",
+  "description": "http and https server",
+  "version": "0.0.1",
+  "main": "server.js",
+  "dr": {
+    "type": "core",
+	"serverPriority": 0
+  }
+}

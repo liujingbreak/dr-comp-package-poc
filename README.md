@@ -1,6 +1,6 @@
 Frontend platform ~~PoC~~ Prototype
 =====================
-> This doc is outdated, please read [中文Readme](doc/readme-cn.md)
+> This doc is outdated, this project has been moved to organization _dr-web-house_ 
 
 
 The problem

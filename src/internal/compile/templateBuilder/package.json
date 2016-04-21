@@ -5,7 +5,7 @@
   "main": "templateBuilder.js",
   "dr": {
 	"type": "builder",
-	"priority": 2900
+	"builderPriority": "before @dr-core/browserify-builder"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

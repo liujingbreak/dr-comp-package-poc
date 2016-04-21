@@ -8,13 +8,14 @@
     "@dr-core/labjs": "0.0.17",
     "@dr-core/build-util": "0.0.4",
     "@dr-core/assets-processer": "0.0.17",
-    "@dr-core/browserify-builder": "0.0.23",
+    "@dr-core/browserify-builder": "0.0.24",
     "@dr-core/browserify-builder-api": "0.0.20",
     "@dr/parcelify-module-resolver": "0.0.17",
     "@dr/environment": "0.0.18",
-    "@dr-core/express-server": "0.0.26",
     "@dr/logger": "0.0.20",
     "@dr/translate-generator": "0.0.2",
-    "@dr/template-builder": "0.0.1"
+    "@dr/template-builder": "0.0.1",
+    "@dr-core/express-app": "0.0.26",
+    "@dr/http-server": "0.0.1"
   }
 }

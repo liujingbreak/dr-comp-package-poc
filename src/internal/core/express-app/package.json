@@ -1,13 +1,13 @@
 {
-  "name": "@dr-core/express-server",
-  "description": "express server",
+  "name": "@dr-core/express-app",
+  "description": "express app",
   "version": "0.0.26",
   "main": "app.js",
   "dependencies": {
     "body-parser": "~1.13.2",
     "cookie-parser": "~1.3.5",
     "debug": "~2.2.0",
-    "express": "~4.13.1",
+    "express": "^4.13.4",
     "morgan": "~1.6.1",
     "serve-favicon": "~2.3.0",
     "consolidate": "^0.13.1",
