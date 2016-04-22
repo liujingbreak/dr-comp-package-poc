@@ -115,7 +115,7 @@ function installDevDependencyAsync() {
 			console.log('npm install ' + name + '@' + ver);
 			promise = promise.then(() => {
 				return new Promise((resolve, reject) => {
-					cli.exec('npm', 'install', '--save', name + '@' + ver, (code, output)=> {
+					cli.exec('npm', 'install', '--save-dev', name + '@' + ver, (code, output)=> {
 						if (code === 0) {
 							resolve(null);
 						} else {

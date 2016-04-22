@@ -1,6 +1,6 @@
 {
   "name": "@dr/doc-home",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "Home page",
   "browser": "browser/loader.js",
   "main": "server/server.js",
