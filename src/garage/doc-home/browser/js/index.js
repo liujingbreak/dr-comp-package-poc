@@ -4,6 +4,7 @@ require('@dr/markdown-viewer');
 
 var textAnim = require('@dr/text-anim-ng');
 
+
 var docHome = angular.module('docHome', ['ngAnimate', 'ngRoute', 'docUi']);
 module.exports = docHome;
 

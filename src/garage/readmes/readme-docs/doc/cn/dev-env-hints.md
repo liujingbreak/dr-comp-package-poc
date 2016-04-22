@@ -1,6 +1,6 @@
 gulp常用命令和开发环境配置
 ==========
-_2016-3-26 更新_
+_2016-3-28 更新_
 
 
 - Node version >= 4.2.0
@@ -91,7 +91,10 @@ _2016-3-26 更新_
 	gulp build，但是忽略config.local.yaml配置，用于production环境的build: uglify, revisioning bundles等
 
 - ### gulp bump
-	所有source code 和响应recipe的package.json build version number + 1, `gulp public`前使用
+	所有source code 和响应recipe的package.json build version number + 1, `gulp public`前使用\
+	可选参数:\
+	`-v major|minor|patch|prerelease`
+	> 当`gulp bump -v prerelease`时, 生成的package.json version 是x.x.x-0开始的prerelease号，publish到Sinopia不会发送提醒email
 
 - ### gulp publish
 	npm publish所有package and recipe, not including installed packages.

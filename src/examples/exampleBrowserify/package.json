@@ -1,6 +1,6 @@
 {
   "name": "@dr/example-browserify",
-  "version": "0.0.12",
+  "version": "0.0.21",
   "description": "Test browserify",
   "browser": "exampleBrowserify.browser.js",
   "main": "exampleBrowserify.server.js",

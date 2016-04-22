@@ -1,4 +1,5 @@
 # If you are not familiar with YAML format just like me, read https://en.wikipedia.org/wiki/YAML
+# and js-yaml https://www.npmjs.com/package/js-yaml
 # PLEASE DON'T MODIFY THIS FILE, instead you may create a local file called `config.local.yaml`
 # to overwrites this file.
 srcDir: src/internal
@@ -18,9 +19,18 @@ packageScopes:
   - dr
   - dr-core
 
+# Only build out i18n bundles for following locales, e.g. for angularjs it means only
+# some locales for file match pattern:
+#  i18n/angular-locale_{locale}.js
+# will be built out into bundles.
+locales:
+    - zh
+    - en
+
 nodeRoutePath: /
 
-# enable devMode to denote default builder tool do not uglify JS bundles
+# enable devMode to denote default builder tool do not do things like uglify JS bundles,
+# revisioning file name...
 devMode: false
 
 # If we have public CDN domain name like "http://cdn.dianrong.com"
@@ -29,7 +39,7 @@ staticAssetsURL: ""
 serverURL: ""
 
 # Manually set bundle file name for 3rd-party libaraies, otherwise browserify
-# will bundle them with every package that depends on them.
+# will bundle them to every package that depends on them.
 vendorBundleMap:
   core: # bundle name
       - lodash
@@ -42,8 +52,8 @@ browserifyNoParse:
     - q
     - lodash
     - jquery
-    - @dr/gsap
-    - @dr/angularjs
+    - "@dr/angularjs"
+    - "@dr/gsap"
 
 packageContextPathMapping:
     # Package short name - route path map, used by express server.
@@ -77,3 +87,17 @@ installedRecipes:
 
 gulp:
     watchTimeout: 3500
+
+# Following is a list of current configuration property names of which property
+# are visible to browser side environment, meaning those properties will be stringified
+# and downloaded to client browser as a property of API object, can be returned from
+# script:
+#   __api.config()
+#
+# Not everything in these file should be visible to browser, e.g. database connection setting
+browserSideConfigProp:
+    - staticAssetsURL
+    - serverURL
+    - packageContextPathMapping
+    - locales
+    - devMode

@@ -1,6 +1,6 @@
 {
   "name": "@dr/text-anim-ng",
-  "version": "0.0.9",
+  "version": "0.0.18",
   "description": "An Angular 1.x directive which can split text element into character based elements",
   "browser": "textAnim.js",
   "style": "textAnim.less",
@@ -8,7 +8,7 @@
     "@dr/parcelify-module-resolver"
   ],
   "dr": {
-    "bundle": "ui-core"
+    "bundle": "ui-lib"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -19,11 +19,9 @@ var fs = require('fs');
 var runSequence = require('run-sequence');
 
 var cli = require('shelljs-nodecli');
-var Jasmine = require('jasmine');
 
 var findPackageJson = require('./lib/gulp/findPackageJson');
 var packageLintableSrc = require('./lib/gulp/packageLintableSrc');
-var packageUtils = require('./lib/packageMgr/packageUtils');
 var watchPackages = require('./lib/gulp/watchPackages');
 var recipeManager = require('./lib/gulp/recipeManager');
 var PackageInstall = require('./lib/gulp/packageInstallMgr');
@@ -40,8 +38,9 @@ var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package
 	.command('build-prod', 'disable config.local.yaml, build for production environment')
 	.command('publish', 'npm publish every pakages in source code folder including all mapped recipes')
 	.command('unpublish', 'npm unpublish every pakages in source code folder including all mapped recipes of version number in current source code')
-	.command('bump', 'bump version number of all package.json, useful to call this before publishing packages')
-	.command('flatten', 'flattern NPM v2 nodule_modules structure, install-recipe comamnd will execute this command')
+	.command('bump', '[-v major|minor|patch|prerelease] bump version number of all package.json, useful to call this before publishing packages, default is increasing patch number by 1')
+	.command('flatten-recipe', 'flattern NPM v2 nodule_modules structure, install-recipe comamnd will execute this command')
+	.command('test', '[-p <package-short-name>] [-f <spec-file-path>] run Jasmine test for specific or all packages')
 	.describe('b', '<bundle-name> if used with command `compile` or `build`, it will only compile specific bundle, which is more efficient')
 	.alias('b', 'bundle')
 	.describe('p', '<package-short-name> if used with command `compile`, `build`, `lint`, it will only build and check style on specific package, which is more efficient')
@@ -50,6 +49,9 @@ var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package
 	.describe('only-css', 'only rebuild CSS bundles')
 	.describe('d', '<src foldr> if used with command `link`, it will link packages from specific folder instead of `srcDir` configured in config.yaml')
 	.describe('r', '<recipe foldr> if used with command `link`, it will link packages only to specific recipe folder instead of `recipeFolder` configured in config.yaml')
+	.describe('v', 'major | minor | patch | prerelease, used with `bump`')
+	.describe('f', '<file-path> command `gulp test -f specFile1 [-f specFile2] ...`')
+	.alias('f', 'file')
 	.demand(1)
 	.help('h').alias('h', 'help')
 	.argv;
@@ -101,6 +103,11 @@ gulp.task('build-prod', ['clean:dist'], (cb)=> {
 	});
 });
 
+gulp.task('compile-prod', (cb)=> {
+	config.disableLocal();
+	runSequence('compile', cb);
+});
+
 function _npmInstallCurrFolder() {
 	return new Promise(function(resolve, reject) {
 		if (!config().dependencyMode) {
@@ -125,12 +132,25 @@ gulp.task('install-recipe', ['link'], function(cb) {
 	if (config().dependencyMode) {
 		prom = prom
 		.then(function() {
-			return packageInstaller.installRecipeAsync(config().internalRecipeFolderPath);
+			var currPkJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+			var savedVer = currPkJson.dependencies ? currPkJson.dependencies['@dr/internal-recipe'] :
+				(currPkJson.devDependencies ? currPkJson.devDependencies['@dr/internal-recipe'] : false);
+			if (savedVer) {
+				return packageInstaller.installRecipeAsync('@dr/internal-recipe@' + savedVer);
+			} else {
+				return packageInstaller.installRecipeAsync(config().internalRecipeFolderPath);
+			}
 		});
 	}
 
 	prom = prom.then(() => {
-		return flattenRecipe();
+		return new Promise((resolve, reject) => {
+			process.nextTick(() => {
+				// Put it in process.nextTick to hopefully solve a windows install random 'EPERM' error.
+				flattenRecipe();
+				resolve();
+			});
+		});
 	});
 
 	var srcDirs = [];
@@ -143,8 +163,6 @@ gulp.task('install-recipe', ['link'], function(cb) {
 		return packageInstaller.installDependsAsync();
 	}).then(() => cb());
 });
-
-
 
 gulp.task('flatten-recipe', flattenRecipe);
 
@@ -166,7 +184,7 @@ gulp.task('check-dep', function() {
 gulp.task('lint', function() {
 	var i = 0;
 	return gulp.src(['*.js', 'lib/**/*.js']
-	.concat(packageLintableSrc(packageUtils.findAllPackages, argv.p)))
+	.concat(packageLintableSrc(argv.p)))
 	.pipe(jshint())
 	.pipe(jshint.reporter('jshint-stylish'))
 	.pipe(jshint.reporter('fail'))
@@ -251,11 +269,6 @@ gulp.task('bump', function(cb) {
 	});
 });
 
-gulp.task('test-house', function() {
-	var jasmine = new Jasmine();
-	jasmine.loadConfigFile('spec/support/jasmine.json');
-	jasmine.execute();
-});
 
 gulp.task('publish', function() {
 	var srcDirs = [];
@@ -315,9 +328,21 @@ gulp.task('unpublish', function() {
 		});
 });
 
+gulp.task('test', function() {
+	require('./lib/gulp/runTest')(argv);
+});
+
 function bumpVersion() {
+	var type = 'patch';
+	if (argv.v) {
+		if (!{major: 1, minor: 1, patch: 1, prerelease: 1}.hasOwnProperty(argv.v)) {
+			gutil.log(chalk.red('expecting bump type is one of "major|minor|patch|prerelease", but get: ' + argv.v));
+			throw new Error('Invalid -v parameter');
+		}
+		type = argv.v;
+	}
 	return bump({
-		type: 'patch'
+		type: type
 	});
 }
 

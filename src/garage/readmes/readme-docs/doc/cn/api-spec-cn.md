@@ -1,5 +1,7 @@
 API 详细说明
 ============
+_2016-4-6 更新_
+
 > API是降低组件耦合度的糖果。
 - API instance是一个javascript对象。
 - 每个package组件运行时都可以获取对应它的API instance.
@@ -37,7 +39,7 @@ module.exports = {
 	}
 }
 ```
-- 浏览器端JS 获取API比较简单, 在任何JS文件里可以访问全局变量`__api` (__api其实每个JS file的局部变量)， 类似`__filename`, `__dirname`
+- 浏览器端JS 获取API比较简单, 在任何JS文件里可以访问全局变量`__api` (`__api`其实每个JS file的局部变量)， 类似`__filename`, `__dirname`
 
 ```javascript
 console.log(__api.packageName);
@@ -71,16 +73,24 @@ console.log(__api.assetsUrl('some-picture.jpg'));
 | .packageUtils | lib/packageMgr/packageUtils.js 查找其他package的工具
 | `.config()` | 获取config.yaml配置， 但是浏览器端只有部分config属性可读:  `staticAssetsURL`, `serverURL`, `packageContextPathMapping`
 | `.assetsUrl(packageName, path)` | 获取packageName对应的静态资源/assets目录下的文件的浏览器访问路径, `packageName` 为可选参数, 默认是当前package
+| `.loadLocaleBundles(language, callback)` | LABjs loads locale bundles to current page
+| `.loadPrefLocaleBundles(callback)` | LABjs loads locale bundles based on browser prefered language, language choosing logic is in the order of: `navigator.languages[0], navigator.language, navigator.browserLanguage, navigator.systemLanguage, navigator.userLanguage, navigator.languages[1] ...`
+| `.getPrefLanguage()` | __api.loadPrefLocaleBundles() 调用此方法
+| `.isLocaleBundleLoaded()` | return true 如果locale bundle已经加载，可以安全调用的require('xxx/i18n')了
+| `.extend(obj)` | 扩展 API prototype `__api.__proto__`,  `__api.constructor.prototype`
 | `.isBrowser()` | true
 | `.isNode()` | false
 
 - #### Node compile-time
 对于"dr.typ"为"builder"的编译工具类package, 可获得的api和Node server运行时那些package的api一样，只是多了两个有用的属性
+
 | Name | description
 | -- | --
-| argv | **[yargs](https://www.npmjs.com/package/yargs)**, Gulp compile命令带有的参数，比如`-p`, '-b'等
-| buildUtils | lib/gulp.buildUtils.js
-
+| .argv | **[yargs](https://www.npmjs.com/package/yargs)**, Gulp compile命令带有的参数，比如`-p`, '-b'等
+| .buildUtils | lib/gulp.buildUtils.js
+| .packageInfo | monkey patched by `@dr-core/browserify-builder`
+| .findBrowserPackageByPath(filePath) | monkey patched by `@dr-core/browserify-builder`, 返回package source code对应的package name
+| .**loadLocaleBundles(locale, callback)** | 利用LABjs 预先load locale bundle, locale值是 'zh', 'en', 'en-us'等language country code, callback内执行加载完后的逻辑
 
 ### 一些内置API providers
 
@@ -92,6 +102,7 @@ Node API methods
 | .router() | return an Express Router object, e.g. `api.route().get(function(req, res) {});`
 | .use() | Express use() method, to bind middleware
 | .param() | Express param() method
+| .express | Express instance, 这样你就可以使用一些特殊的middleware 比如express.static
 
 > 必须在module.exports.activate(api) function内调用
 

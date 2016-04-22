@@ -1,0 +1,22 @@
+{
+  "name": "@dr/translate-generator",
+  "version": "0.0.3",
+  "description": "A tool to scan source package files and generate translatable files",
+  "main": "translate-generator.js",
+  "dr": {
+    "type": "builder",
+    "priority": 1100
+  },
+  "dependencies": {
+    "esprima": "^2.7.1",
+    "esprima-walk": "^0.1.0",
+    "cheerio": "^0.19.0",
+    "mkdirp": "^0.5.1",
+    "js-yaml": "~3.0.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "LJ",
+  "license": "ISC"
+}

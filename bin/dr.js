@@ -8,9 +8,11 @@ var fs = require('fs');
 var Path = require('path');
 var yargs = require('yargs');
 var Promise = require('bluebird');
+var os = require('os');
 var argv = yargs.usage('Usage: $0 <command> [-d <target_folder>]')
 	.command('init', 'Initialize environment, create gulpfile.js and other basic configuration')
-	.command('install-gulp', 'install gulp to local node_modules')
+	.command('update', 're-initialize environment, create gulpfile.js and other basic configuration, but don\'t copy examples')
+	.command('install-deps', 'install gulp to local node_modules')
 	.demand(1)
 	.describe('d', 'set target directory')
 	.alias('d', 'dir')
@@ -26,13 +28,16 @@ if (argv._ && argv._[0]) {
 		case 'init':
 			init();
 			break;
+		case 'update':
+			init(true);
+			break;
 		case 'install-gulp':
-			installGulpAsync();
+			installDevDependencyAsync();
 			break;
 	}
 }
 
-function init() {
+function init(noSample) {
 	_checkFolder();
 	//var projectName = JSON.parse(fs.readFileSync(Path.join(__dirname, '..', 'package.json'), 'utf8')).name;
 	var content = fs.readFileSync(Path.join(__dirname, 'gulpfile-template.js'), 'utf8');
@@ -47,10 +52,13 @@ function init() {
 	shell.cp(Path.resolve(__dirname, 'config.local-template.yaml'), argv.d + '/config.local.yaml');
 	shell.cp(Path.resolve(__dirname, '..', 'log4js.json'), argv.d + '/log4js.json');
 	shell.cp(Path.resolve(__dirname, 'app-template.js'), argv.d + '/app.js');
-	shell.cp('-R', [
-		Path.resolve(__dirname, 'examples', 'example-entry'),
-		Path.resolve(__dirname, 'examples', 'example-node'),
-	], argv.d + '/src/examples/');
+	if (!noSample) {
+		shell.cp('-R', [
+			Path.resolve(__dirname, 'examples', 'example-entry'),
+			Path.resolve(__dirname, 'examples', 'example-i18n'),
+			Path.resolve(__dirname, 'examples', 'example-node'),
+		], argv.d + '/src/examples/');
+	}
 	if (!fs.existsSync(argv.d + '/.jscsrc')) {
 		shell.cp(Path.resolve(__dirname, '..', '.jscsrc'), argv.d + '/');
 		console.info('.jscsrc copied');
@@ -59,8 +67,15 @@ function init() {
 		shell.cp(Path.resolve(__dirname, '..', '.jshintrc'), argv.d + '/');
 		console.info('.jshintrc copied');
 	}
+	if (fileAccessable(Path.resolve('.git/hooks'))) {
+		shell.cp('-f', Path.resolve(__dirname, 'git-hooks', '*'), argv.d + '/.git/hooks/');
+		console.info('git hooks are copied');
+		if (os.platform().indexOf('win32') <= 0) {
+			shell.chmod('-R', '+x', argv.d + '/.git/hooks/*');
+		}
+	}
 	// to solve npm 2.0 nested node_modules folder issue
-	installGulpAsync().then(()=> {
+	installDevDependencyAsync().then(()=> {
 		cli.exec(Path.join('node_modules', '.bin', 'gulp'), 'install-recipe', (code, output) => {
 			if (code === 0) {
 				console.log(chalk.magenta('   -------------------------------------------------------'));
@@ -92,19 +107,24 @@ function fileAccessable(file) {
 	}
 }
 
-function installGulpAsync() {
-	if (!fileAccessable(Path.resolve('node_modules/gulp'))) {
-		var ver = JSON.parse(fs.readFileSync(Path.resolve('node_modules/web-fun-house/package.json'), 'utf8')).devDependencies.gulp;
-		console.log('npm install gulp@' + ver);
-		return new Promise((resolve, reject) => {
-			cli.exec('npm', 'install', 'gulp@' + ver, (code, output)=> {
-				if (code === 0) {
-					resolve(null);
-				} else {
-					reject(output);
-				}
+function installDevDependencyAsync() {
+	var devDeps = JSON.parse(fs.readFileSync(Path.resolve(__dirname + '/../package.json'), 'utf8')).devDependencies;
+	var promise = Promise.resolve();
+	_.forOwn(devDeps, (ver, name) => {
+		if (!fileAccessable(Path.resolve('node_modules/' + name))) {
+			console.log('npm install ' + name + '@' + ver);
+			promise = promise.then(() => {
+				return new Promise((resolve, reject) => {
+					cli.exec('npm', 'install', '--save-dev', name + '@' + ver, (code, output)=> {
+						if (code === 0) {
+							resolve(null);
+						} else {
+							reject(output);
+						}
+					});
+				});
 			});
-		});
-	}
-	return Promise.resolve();
+		}
+	});
+	return promise;
 }

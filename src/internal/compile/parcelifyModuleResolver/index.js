@@ -4,12 +4,15 @@ var LessPluginAutoPrefix = require('less-plugin-autoprefix');
 var NpmImportPlugin = require('less-plugin-npm-import');
 var log = require('@dr/logger').getLogger('parcelifyModuleResolver');
 var env = require('@dr/environment');
+var resolveStaticUrl = require('@dr-core/browserify-builder-api').resolveUrl;
 
 module.exports = function(file, options) {
 	var buf = '';
+	var currPackage;
 	var transform = function(buffer) {
 		buf += buffer;
 	};
+
 
 	var flush = function() {
 		var self = this;
@@ -24,7 +27,6 @@ module.exports = function(file, options) {
 
 		// Injects the path of the current file.
 		lessOptions.filename = file;
-
 		less.render(buf, lessOptions)
 		.then(function(output) {
 			self.push(replaceUrl(output.css));
@@ -37,15 +39,25 @@ module.exports = function(file, options) {
 
 
 	function replaceUrl(css) {
-		return css.replace(/(\W)url\(['"]?\s*assets:\/\/((?:@[^\/]+\/)?[^\/]+)(\/.*?)['"]?\s*\)/g,
+		return css.replace(/(\W)url\(['"]?\s*assets:\/\/((?:@[^\/]+\/)?[^\/]+)?(\/.*?)['"]?\s*\)/g,
 		function(match, preChar, packageName, path) {
+			if (!packageName || packageName === '') {
+				if (!currPackage) {
+					currPackage = env.findBrowserPackageByPath(file);
+				}
+				packageName = currPackage;
+			}
 			if (packageName) {
 				log.info('resolve assets: ' + match.substring(1));
 			}
-			var resolvedTo = preChar + 'url(' + env.config().staticAssetsURL + '/assets/' +
-			env.packageUtils.parseName(packageName).name + path + ')';
-			log.debug('-> ' + resolvedTo);
-			return resolvedTo;
+			try {
+				var resolvedTo = preChar + 'url(' + resolveStaticUrl(env.config, packageName, path) + ')';
+				log.debug('-> ' + resolvedTo);
+				return resolvedTo;
+			} catch (e) {
+				log.error(e);
+				return match;
+			}
 		});
 	}
 

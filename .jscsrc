@@ -36,7 +36,7 @@
 	"disallowTrailingWhitespace": true,
 	"disallowYodaConditions": true,
 	"requireBlocksOnNewline": 1,
-	"requireCamelCaseOrUpperCaseIdentifiers": true,
+	"requireCamelCaseOrUpperCaseIdentifiers": false,
 	"requireCapitalizedConstructors": true,
 	"requireCommaBeforeLineBreak": true,
 	"requireCurlyBraces": [

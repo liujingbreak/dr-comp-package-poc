@@ -2,8 +2,10 @@ var through = require('through2');
 var Path = require('path');
 var stream = require('stream');
 var log = require('log4js').getLogger('browserifyBuilder.browserifyHelper');
-var _ = require('lodash');
 var swig = require('swig');
+var fs = require('fs');
+var assetsProcesser = require('@dr-core/assets-processer');
+var _ = require('lodash');
 swig.setDefaults({autoescape: false});
 var config;
 
@@ -21,8 +23,8 @@ module.exports = function(_config) {
 		buildinSet[name] = true;
 	});
 	return {
-		jsTranform: jsTranform,
 		JsBundleEntryMaker: JsBundleEntryMaker,
+		JsBundleWithI18nMaker: JsBundleWithI18nMaker,
 		buildins: buildins,
 		buildinSet: buildinSet,
 		str2Stream: str2Stream
@@ -30,70 +32,39 @@ module.exports = function(_config) {
 };
 //exports.dependencyTree = dependencyTree;
 
-var BOOT_FUNCTION_PREFIX = '_bundle_';
+var BOOT_FUNCTION_PREFIX = '_deps_';
 var apiVariableTpl = swig.compileFile(Path.join(__dirname, 'templates', 'apiVariable.js.swig'),
 	{autoescape: false});
 
-function jsTranform(file) {
-	var source = '';
-	var ext = Path.extname(file).toLowerCase();
-	if (ext === '.js' && Path.basename(file) !== 'browserifyBuilderApi.browser.js') {
-		return through(function(chunk, enc, next) {
-			source += chunk;
-			next();
-		}, function(cb) {
-			source = apiVariableTpl({name: file, source: source});
-			this.push(source);
-			cb();
-		});
-	} else {
-		return through();
-	}
-}
-
-function JsBundleEntryMaker(bundleName, packageBrowserInstances) {
+function JsBundleEntryMaker(api, bundleName, packageBrowserInstances, locale) {
 	if (!(this instanceof JsBundleEntryMaker)) {
-		return new JsBundleEntryMaker(bundleName, packageBrowserInstances);
+		return new JsBundleEntryMaker(api, bundleName, packageBrowserInstances, locale);
 	}
+	this.api = api;
 	this.packages = packageBrowserInstances;
 	this.bundleName = bundleName;
-	this.bundleFileName = bundleName + '_dr_bundle.js';
-	this.bundleFileNameSet = {};
+	this.bundleFileName = bundleName + '_bundle_entry.js';
 	this.activeModules = {}; //key: bundle name, value: array of active module name
+	this.locale = locale;
 }
 
+var apiVarablePat = /(?:^|[^\w$\.])__api(?:$|[^\w$])/mg;
+var requireI18nPat = /(^|[^\w$\.])require\s*\(([^)]*)\)/mg;
+
 JsBundleEntryMaker.prototype = {
-
-	BOOT_FUNCTION_PREFIX: BOOT_FUNCTION_PREFIX,
-
 	entryBundleFileTpl: swig.compileFile(Path.join(__dirname, 'templates', 'bundle.js.swig'), {autoescape: false}),
 
-	/**
-	 * TODO: use a template engine to generate js file stream
-	 */
 	createPackageListFile: function() {
-		var self = this;
 		var bundleFileListFunction = this.entryBundleFileTpl({
-			bundle: self.bundleName,
+			bundle: this.bundleName,
 			requireFilesFuncName: BOOT_FUNCTION_PREFIX + safeBundleNameOf(this.bundleName),
-			packageInstances: self.packages
+			packageInstances: this.packages
 		});
-		this.bundleFileNameSet[this.bundleFileName] = true;
 		return bundleFileListFunction;
 	},
 
 	jsTranformer: function() {
 		var self = this;
-		self.packagePath2Name = {};
-		self.packagePathList = [];
-		self.packages.forEach(function(instance, idx) {
-			if (!instance.packagePath) {
-				return;
-			}
-			var path = Path.relative(config().rootPath, instance.packagePath);
-			self.packagePath2Name[path] = instance.longName;
-			self.packagePathList.push(path);
-		});
 		return function(file) {
 			var source = '';
 			var ext = Path.extname(file).toLowerCase();
@@ -104,8 +75,10 @@ JsBundleEntryMaker.prototype = {
 					source += chunk;
 					next();
 				}, function(cb) {
-					if (source.indexOf('__api') >= 0) {
-						var name = self._findPackageByFile(file);
+					apiVarablePat.lastIndex = 0;
+					if (apiVarablePat.test(source)) {
+						log.debug('reference __api in ' + file);
+						var name = self.api.findBrowserPackageByPath(file);
 						source = apiVariableTpl({
 							bundle: self.bundleName,
 							packageName: name,
@@ -113,6 +86,25 @@ JsBundleEntryMaker.prototype = {
 							packageNameAvailable: name !== null
 						});
 					}
+					source = source.replace(requireI18nPat, (match, leading, path) => {
+						path = path.replace(/\{locale\}/g, self.locale ? self.locale : 'en');
+						return leading + 'require(' + path + ')';
+					});
+					this.push(source);
+					cb();
+				});
+			} else if (ext === '.html'){
+				return through(function(chunk, enc, next) {
+					source += chunk;
+					next();
+				}, function(cb) {
+					var currPackage;
+					source = assetsProcesser.replaceAssetsUrl(source, ()=> {
+						if (!currPackage) {
+							currPackage = self.api.findBrowserPackageByPath(file);
+						}
+						return currPackage;
+					});
 					this.push(source);
 					cb();
 				});
@@ -124,26 +116,91 @@ JsBundleEntryMaker.prototype = {
 
 	createPackageListFileStream: function(bundleName, packageInstances) {
 		return str2Stream(this.createPackageListFile.apply(this, arguments));
-	},
-
-	_findPackageByFile: function(file) {
-		var found;
-		file = Path.relative(config().rootPath, file);
-		_.some(this.packagePathList, function(path) {
-			if (_.startsWith(file, path)) {
-				found = path;
-				return true;
-			}
-		});
-		if (!found) {
-			log.debug('file ' + file + ' doesn\'t belong to any of our private packages');
-			return null;
-		} else {
-			return this.packagePath2Name[found];
-		}
-		return found;
 	}
 };
+
+function JsBundleWithI18nMaker(api, bundleName, packageBrowserInstances, browserResolve) {
+	if (!(this instanceof JsBundleWithI18nMaker)) {
+		return new JsBundleWithI18nMaker(api, bundleName, packageBrowserInstances, browserResolve);
+	}
+	JsBundleEntryMaker.apply(this, arguments);
+	this.browserResolve = browserResolve;
+	this.pk2LocaleModule = {};
+}
+
+JsBundleWithI18nMaker.prototype = _.create(JsBundleEntryMaker.prototype, {
+	createI18nListFile: function(locale) {
+		var i18nModules = [];
+		this.i18nModuleForRequire = [];
+		this.packages.forEach(pkInstance => {
+			if (pkInstance.isVendor) {
+				return;
+			}
+			var i18nPath = this.i18nPath(pkInstance, locale);
+			var i18nModuleName = pkInstance.longName + '/i18n';
+			if (i18nPath) {
+				var shoftI18nPath = Path.relative(Path.resolve(), i18nPath);
+				i18nModules.push({
+					longName: i18nModuleName
+				});
+				this.i18nModuleForRequire.push({
+					file: i18nPath,
+					opts: {
+						expose: i18nModuleName
+					},
+					id: shoftI18nPath
+				});
+				this.createI18nPackageJson(i18nPath, i18nModuleName, locale);
+				if (!this.pk2LocaleModule[i18nModuleName]) {
+					this.pk2LocaleModule[i18nModuleName] = {};
+				}
+				this.pk2LocaleModule[i18nModuleName][locale] = shoftI18nPath;
+			}
+		});
+		if (i18nModules.length === 0) {
+			return null;
+		}
+		return this.entryBundleFileTpl({
+			bundle: this.bundleName,
+			requireFilesFuncName: '_i18nBundle_' + safeBundleNameOf(this.bundleName),
+			packageInstances: i18nModules
+		});
+	},
+
+	i18nBundleEntryFileName: function(locale) {
+		return this.bundleName + '_bundle_entry_' + locale + '.js';
+	},
+
+	i18nPath: function(pkInstance, locale) {
+		var i18nPath = pkInstance.i18n;
+		if (!i18nPath) {
+			i18nPath = Path.resolve(pkInstance.packagePath, 'i18n');
+			if (!fileExists(i18nPath)) {
+				return null;
+			}
+		}
+		i18nPath = Path.resolve(pkInstance.packagePath, i18nPath.replace(/\{locale\}/g, locale));
+		if (!fileExists(i18nPath)) {
+			log.error('i18n not found: ' + pkInstance.i18n + ' in ' + pkInstance.longName);
+			return null;
+		}
+		return this.browserResolve(i18nPath);
+	},
+
+	createI18nPackageJson: function(i18nPath, i18nModuleName, locale) {
+		if (this.i18nPackageJsonCreated) {
+			return;
+		}
+		var folder = fs.lstatSync(i18nPath).isDirectory() ? i18nPath : Path.dirname(i18nPath);
+		var jsonFile = Path.join(folder, 'package.json');
+		var json = {};
+		if (!fs.existsSync(jsonFile)) {
+			fs.writeFileSync(jsonFile, JSON.stringify(json, null, '  '));
+		}
+		this.i18nPackageJsonCreated = true;
+	}
+});
+JsBundleWithI18nMaker.prototype.constructor = JsBundleWithI18nMaker;
 
 function safeBundleNameOf(bundleName) {
 	return bundleName.replace(/-/g, '_');
@@ -155,4 +212,13 @@ function str2Stream(str) {
 	output.push(str);
 	output.push(null);
 	return output;
+}
+
+function fileExists(file) {
+	try {
+		fs.accessSync(file, fs.R_OK);
+		return true;
+	} catch (e) {
+		return false;
+	}
 }

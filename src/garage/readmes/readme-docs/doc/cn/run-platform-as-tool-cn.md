@@ -1,8 +1,8 @@
-依赖平台的开发方式
+Daily Work: 安装平台 & 开发组建
 ============
-_2016-3-26 更新_
+_2016-3-29 更新_
 
-现在是时候用这个平台开发一个新Web app的时候了。
+让工具变的更简单，如果可以用一天手工完成的工作，请一定花两天的时间用脚本来完成 :)
 
 > 建议安装全局的Gulp 命令行工具:
 > ```
@@ -13,21 +13,17 @@ _2016-3-26 更新_
 ### 1. 安装平台
 
 创建一个空目录，一定要`npm init`一个package.json文件
-
 ```
 	project-dir/
 		└─ package.json
 ```
 执行
-
-
 ```shell
 
 npm set registry http://10.9.14.9:4873
 
-npm install web-fun-house
+npm install --save web-fun-house
 ```
-
 你的目录会是
 
 ```
@@ -47,11 +43,10 @@ node_modules/.bin/web-fun-house init
 ```
 _**这命令2016-3-26 做了简化**，自动生成样板源码和安装平台默认组件_:
 - 自动安装gulp
-- 自动安装一些核心的功能组件, 例如
+- 执行`gulp install-recipe`自动安装一些核心的功能组件, 例如
 @dr-core/browserify-builder, @dr-core/express-server 等
 
-
-你可能还需要手工添加适合你项目的 `.gitignore`, `.npmignore` 文件。
+你还需要手工添加适合你项目的 `.gitignore`, `.npmignore` 文件。
 
 ### ~~3. 安装平台默认组件~~
 
@@ -71,7 +66,6 @@ http://localhost:14334/example-entry
 
 ```
 npm install @dr/garage-recipe
-
 # no need to run 'gulp install-recipe' anymore
 ```
 ~~编辑 `config.yaml` or `config.local.yaml`, 修改`installedRecipes`属性~~
@@ -123,4 +117,79 @@ gulp clean
 gulp install-recipe
 ```
 会删除所有dist和node_modules下的私有package，包括核心组建,
-恢复开发环境需要重新执行 `gulp install-recipe` 或者 `node_modules/.bin/web-fun-house init`来安装核心package, 其他package都需要手动npm install
+恢复开发环境需要重新执行 `gulp install-recipe` 或者 `node_modules/.bin/web-fun-house update` 来安装核心package, 其他package都需要手动npm install
+
+#### 8. 从git repo clone全新的项目
+由于新下载的项目通常会ignore node_modules目录，所以需要重新install web-fun-house和依赖
+```
+npm install web-fun-house
+./node_modules/.bin/web-fun-house update
+```
+> `web-fun-house update`和`web-fun-house init`区别是后者会copy example目录, 所以已有的项目不需要再init，
+> 执行`./node_modules/.bin/web-fun-house`查看帮助
+
+#### 9. 升级
+_平台本身和其他组建一定会一直有更新，当别的同学维护的package publish了新版本时，需要更新本地的package_
+- 当有新版本web-fun-house发布后, 在项目根目录下再一次执行
+	```
+	npm install web-fun-house
+	./node_modules/.bin/web-fun-house update
+	```
+- 更新某个recipe 或者单独更新某个package
+	```
+	npm install @dr/xxx
+	```
+好了，再次`gulp compile`吧！
+
+#### 10. build Production版本
+build一个uglified, revisioned, compressed，大块bundle的生产环境版本
+
+```
+gulp build-prod
+```
+这个命令会`gulp clean:dist` dist, dist/static目录，它不会读config.local.yaml的配置内容。
+这就是生产环境的build过程，还记得config.local.yaml里那些关闭的设置吗。
+
+```json
+devMode: true
+# During developing, you can set this to `true` to make every package toa single bundle
+bundlePerPackage: true
+cacheControlMaxAge: 0
+```
+当然你也可以直接删除config.local.yaml :)
+
+#### 11. 发布
+这将是载入史册的伟大的一步，在此之前请不要忘记`gulp lint`和测试。
+
+首次发布, 为了简单，通常可以所有的package一起发布
+```
+gulp publish
+```
+后悔刚刚发布所有package
+```
+gulp unpublish
+```
+更新patch版本再次发布, 会触发Sinopia邮件提醒
+```
+gulp bump
+gulp publish
+```
+更新prerelease版本再次发布，不会触发Sinopia邮件提醒, 如果只是为悄悄的和基友调试，发布一个prerelease版本再合适不过了
+```
+gulp bump -v prerelease
+gulp publish
+```
+记得将bump后的被自动修改的所有package.json文件提交`git commit -m 'bump version'`
+
+##### 手动修改单个package的package.json version 并发布
+你可以手动修改单个组件package的package.json，之后需要执行:
+
+`gulp link` (同步recipe里面dependencies的版本)
+
+**而且你还需要手工修改相应的recipe package.json version**
+然后:
+```
+npm publish <package-directory-path>
+npm publish <recipe-directory-path>
+```
+recipe必须一起被发布，不然如果其他team是通过recipe来更新一批组建时，无法获得最新的组件版本

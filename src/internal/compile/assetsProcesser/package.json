@@ -1,11 +1,11 @@
 {
   "name": "@dr-core/assets-processer",
-  "version": "0.0.9",
+  "version": "0.0.18",
   "description": "Copy assets to destDir folder only when devMode is false",
   "main": "assetsProcesser.js",
   "dr": {
     "type": "builder",
-    "priority": 2000
+    "builderPriority": 2000
   },
   "dependencies": {
     "through2": "^2.0.1"

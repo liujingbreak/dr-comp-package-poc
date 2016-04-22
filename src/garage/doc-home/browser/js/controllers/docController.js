@@ -21,6 +21,6 @@ function controller($scope, $timeout, $routeParams) {
 }
 
 function docName2Route(name) {
-	var mdPath = readme[locale + '/' + name + '.md'];
+	var mdPath = readme.manifest[locale + '/' + name + '.md'];
 	return mdPath.substring(0, mdPath.lastIndexOf('.')) + '.html';
 }

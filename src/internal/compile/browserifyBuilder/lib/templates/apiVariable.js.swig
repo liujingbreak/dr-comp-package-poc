@@ -1,2 +1,2 @@
-{% if packageNameAvailable %}var __api = drApi('{{packageName}}');{% endif %}
+{% if packageNameAvailable %}var __api = drApi('{{packageName}}', '{{bundle}}');{% endif %}
 {{ source }}

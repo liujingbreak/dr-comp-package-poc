@@ -3,6 +3,7 @@ var fs = require('fs');
 var cheerio = require('cheerio');
 var Path = require('path');
 var Q = require('q');
+var Promise = require('bluebird');
 var through = require('through2');
 var gutil = require('gulp-util');
 var PluginError = gutil.PluginError;
@@ -10,12 +11,14 @@ var File = require('vinyl');
 var swig = require('swig');
 var log = require('@dr/logger').getLogger('browserifyBuilder.pageCompiller');
 var packageUtils = require('@dr/environment').packageUtils;
+var assetsProcesser = require('@dr-core/assets-processer');
 
 module.exports = PageCompiler;
 
-function PageCompiler() {
+function PageCompiler(addonTransforms) {
 	this.builderInfo = null;
 	this.rootPackage = null;
+	this.addonTransforms = addonTransforms;
 }
 
 /**
@@ -25,7 +28,7 @@ function PageCompiler() {
 PageCompiler.prototype.compile = function(pageType) {
 	var compiler = this;
 	return through.obj(function(param, encoding, cb) {
-		log.info('------- compiling changed entry server pages ---------');
+		log.info('------- compiling changed entry ' + pageType + ' pages ---------');
 		log.info('(Only the pages which depend on any changed bundles will be replaced)');
 
 		if (!compiler.buildInfo) {
@@ -44,34 +47,16 @@ PageCompiler.prototype.compile = function(pageType) {
 			if (!needUpdateEntryPage(buildInfo.builtBundles, buildInfo.bundleDepsGraph[name])) {
 				return;
 			}
-
-			var prom = Q.nfcall(fs.readFile, instance.entryHtml, 'utf-8')
-			.then(function(content) {
-				var $ = cheerio.load(content);
-				injectElements($, buildInfo.bundleDepsGraph[name], instance, buildInfo.config, buildInfo.revisionMeta);
-				var hackedHtml = $.html();
-
-				var htmlName = Path.basename(instance.entryHtml);
-				var pageRelFolder = Path.relative(instance.packagePath, Path.dirname(instance.entryHtml));
-				if ((pageType === 'server' && instance.isEntryServerTemplate) ||
-					pageType === 'static' && !instance.isEntryServerTemplate) {
-					log.info('Entry page replaced: ' + instance.entryHtml);
-					var pagePath = Path.resolve(instance.shortName, pageRelFolder, htmlName);
-					self.push(new File({
-						path: pagePath,
-						contents: new Buffer(hackedHtml)
-					}));
-					if (pageType === 'static' && compiler.rootPackage === instance.shortName) {
-						pagePath = Path.resolve(pageRelFolder, htmlName);
-						log.debug('copy root entry page of ' + compiler.rootPackage);
-						self.push(new File({
-							path: pagePath,
-							contents: new Buffer(hackedHtml)
-						}));
-					}
-				}
-			});
-			promises.push(prom);
+			if (pageType === 'static' && instance.entryPages) {
+				promises = promises.concat(instance.entryPages.map(page => {
+					return compiler.doEntryFile(page, instance, buildInfo, 'static', self);
+				}));
+			}
+			if (pageType === 'server' && instance.entryViews) {
+				promises = promises.concat(promises, instance.entryViews.map(page => {
+					return compiler.doEntryFile(page, instance, buildInfo, 'server', self);
+				}));
+			}
 		});
 		Q.all(promises).then(function() {
 			cb();
@@ -82,6 +67,73 @@ PageCompiler.prototype.compile = function(pageType) {
 	} );
 };
 
+var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
+
+PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageType, through) {
+	var compiler = this;
+	var pathInfo = resolvePagePath(page, instance, buildInfo.packageInfo.moduleMap);
+	var pagePath = Path.resolve(instance.shortName, pathInfo.path);
+	return readFileAsync(pathInfo.abs, 'utf-8')
+	.then(function(content) {
+		content = compiler.transform(pathInfo.abs, content);
+		var $ = cheerio.load(content);
+		injectElements($, buildInfo.bundleDepsGraph[instance.longName], instance,
+			buildInfo.config, buildInfo.revisionMeta, buildInfo.entryDataProvider);
+		var hackedHtml = $.html();
+		hackedHtml = assetsProcesser.replaceAssetsUrl(hackedHtml, ()=> {
+			return pathInfo.packageName;
+		});
+
+		log.info('Entry page processed: ' + pagePath);
+		through.push(new File({
+			path: pagePath,
+			contents: new Buffer(hackedHtml)
+		}));
+		if (pageType === 'static' && compiler.rootPackage === instance.shortName) {
+			pagePath = Path.resolve(pathInfo.path);
+			log.debug('copy root entry page of ' + compiler.rootPackage);
+			through.push(new File({
+				path: pagePath,
+				contents: new Buffer(hackedHtml)
+			}));
+		}
+	});
+};
+
+PageCompiler.prototype.transform = function(filePath, content) {
+	if (Array.isArray(this.addonTransforms) && this.addonTransforms.length > 0) {
+		this.addonTransforms.forEach(transform => {
+			var thr = transform(filePath);
+			thr.write(content);
+			thr.end();
+			content = thr.read().toString();
+		});
+	}
+	return content;
+};
+
+var npmPat = /npm:\/\/((?:@[^\/]+\/)?[^\/]+)\/(.*?$)/;
+
+function resolvePagePath(page, instance, moduleMap) {
+	if (page.startsWith('npm://')) {
+		var matched = npmPat.exec(page.replace(/\\/g, '/'));
+		var packageName = matched[1];
+		var path = matched[2];
+		return {
+			packageName: packageName,
+			package: moduleMap[packageName].packagePath,
+			path: path,
+			abs: Path.resolve(moduleMap[packageName].packagePath, path)
+		};
+	} else {
+		return {
+			packageName: instance.longName,
+			package: instance.packagePath,
+			path: page,
+			abs: Path.resolve(instance.packagePath, page)
+		};
+	}
+}
 
 function findRootContextPackage(mapping) {
 	var rootPackage;
@@ -101,9 +153,9 @@ function needUpdateEntryPage(builtBundles, bundleSet) {
 	});
 }
 
-var apiBootstrapTpl = swig.compileFile(Path.join(__dirname, 'templates', 'entryPageBootstrap.js.swig'), {autoescape: false});
+var entryBootstrapTpl = swig.compileFile(Path.join(__dirname, 'templates', 'entryPageBootstrap.js.swig'), {autoescape: false});
 
-function injectElements($, bundleSet, pkInstance, config, revisionMeta) {
+function injectElements($, bundleSet, pkInstance, config, revisionMeta, entryDataProvider) {
 	var body = $('body');
 	var head = $('head');
 	_injectElementsByBundle($, head, body, 'labjs', config, revisionMeta);
@@ -126,13 +178,12 @@ function injectElements($, bundleSet, pkInstance, config, revisionMeta) {
 			head.append(bundleCss);
 		}
 	});
-	body.append($('<script>').html(apiBootstrapTpl({
+	var entryData = entryDataProvider(pkInstance.longName);
+	body.append($('<script>').html(entryBootstrapTpl({
 		jsLinks: jsLinks,
 		entryPackage: pkInstance.longName,
 		debug: !!config().devMode,
-		staticAssetsURL: JSON.stringify(config().staticAssetsURL),
-		serverURL: JSON.stringify(config().serverURL),
-		packageContextPathMapping: JSON.stringify(config().packageContextPathMapping)
+		data: JSON.stringify(entryData)
 	})));
 }
 

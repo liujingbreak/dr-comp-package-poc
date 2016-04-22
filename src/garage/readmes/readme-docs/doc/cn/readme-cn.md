@@ -203,6 +203,35 @@ include 其他package的文件，例如@dr/doc-less-var
 @import "npm://@dr/doc-less-var";
 ```
 
+#### Static Assets URL
+静态资源文件放入`packageRootDir/assets` 目录,
+用`assets://<package-name>` 引用, 如果是引用当前package内的assets，可以省略`<package-name>`, 如: `assets:///photo.jpg`
+> 注意: 省略package name时，`assets:///` 的路径是有三个slash`/`开始
+
+```less
+.some-selector {
+	background-image: url(assests://@dr/my-package/images/background.jpg);
+}
+.some-equivalent {
+	background-image: url("assests://@dr/my-package/images/background.jpg");
+	background-image: url('assests://@dr/my-package/images/background.jpg');
+}
+.current-package-image {
+	background-image: url("assests:///images/background.jpg");
+}
+
+```
+URL prefix 'assests://' will be replaced with calculated value of `config().staticAssetsURL + '/assets/' + packageShortName`
+
+- html 文件也是同样
+```html
+
+<img src="assests:///some-photo.jpg">
+<a href="assests:///some-file">
+```
+但是只有package.json中dr.entryView, dr.entryPage, 以及被javascript `require()`的html文件会得到URL替换, assets目录下的文件不会被替换处理，如果你的html文件是放在assets目录下的，请使用相对路径引用其他resource.
+
+
 #### Bundle 概念和配置
 bundle 概念即是Browserify的bundle, 在Webpack里被称为chunk.
 不同的package可以被组合到一个bundle文件中，以加快browser的下载.

@@ -17,6 +17,16 @@ function SimpleCache(tempDir) {
 	this.fileJsonCache = {};
 }
 
+SimpleCache.prototype.newJsonCache = function(fileName, newJson) {
+	this.fileJsonCache[fileName] = newJson;
+	return newJson;
+};
+
+/**
+ * @param  {[type]} fileName
+ * @param  {[type]} override partial object data
+ * @return {Promise}         resolve to merged new object
+ */
 SimpleCache.prototype.mergeWithJsonCache = function(fileName, override) {
 	var self = this;
 	var cache = this.fileJsonCache[fileName];
@@ -35,6 +45,10 @@ SimpleCache.prototype.mergeWithJsonCache = function(fileName, override) {
 };
 
 SimpleCache.prototype.loadFromFile = function(fileName) {
+	if (this.fileJsonCache[fileName]) {
+		log.debug('use memory cache, skip reading file');
+		return Promise.resolve(this.fileJsonCache[fileName]);
+	}
 	var filePath = Path.resolve(this.dir, fileName);
 	var self = this;
 	if (fs.existsSync(filePath)) {
@@ -51,6 +65,10 @@ SimpleCache.prototype.loadFromFile = function(fileName) {
 	}
 };
 
+/**
+ * write cache to file
+ */
+SimpleCache.prototype.flush =
 SimpleCache.prototype.tailDown = function() {
 	var proms = [];
 	var self = this;
