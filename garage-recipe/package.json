@@ -9,6 +9,7 @@
     "@dr/markdown-viewer": "0.0.18",
     "@dr/readme": "0.0.18",
     "@dr/readme-docs": "0.0.20",
-    "@dr/text-anim-ng": "0.0.18"
+    "@dr/text-anim-ng": "0.0.18",
+    "@dr/doc-favicon-icon": "0.0.1"
   }
 }

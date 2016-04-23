@@ -32,7 +32,7 @@ function copyAssets() {
 	var streams = [];
 	packageUtils.findBrowserPackageByType(['*'], function(name, entryPath, parsedName, json, packagePath) {
 		var baseDir;
-		if (json.dr.assetsDir) {
+		if (json.dr && json.dr.assetsDir) {
 			baseDir = Path.join(packagePath, json.dr.assetsDir);
 		} else {
 			baseDir = Path.join(packagePath, 'assets');

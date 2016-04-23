@@ -1,5 +1,10 @@
 Updates
 =======
+### 2016-4-23
+1. package.json 废弃`dr.priority`, 分为支持`"dr"."builderPriority"` 和 `dr.serverPriority`, `before|after package-name`的形式。
+2. 更完整的i18n, /i18n目录下的locale js文件可以require()另一个package, 可以有stylesheets，和其他普通package 一样复杂的resource。从而可以支持复杂的本地化，
+> 不推荐为某个locale编写太复杂的定制,比如重新设计style。那意味着并不是i18n。
+
 ### 2016-4-14
 1. `gulp test` 命令
 	```
@@ -29,7 +34,7 @@ Updates
 	| -- | --
 	| .loadLocaleBundles(language, callback) | LABjs loads locale bundles to current page
 	| .loadPrefLocaleBundles(callback) | LABjs loads locale bundles based on browser prefered language, language choosing logic is in the order of: `navigator.languages[0], navigator.language, navigator.browserLanguage, navigator.systemLanguage, navigator.userLanguage, navigator.languages[1] ...`
-	| .getPrefLanguage() | __api.loadPrefLocaleBundles() 调用此方法
+	| .getPrefLanguage() | `__api.loadPrefLocaleBundles()` 调用此方法
 	| `.isLocaleBundleLoaded()` | return true 如果locale bundle已经加载，可以安全调用的require('xxx/i18n')了
 	| `.extend(obj)` | 扩展 API prototype `__api.__proto__`,  `__api.constructor.prototype`
 - 很简单的i18n example！查看\

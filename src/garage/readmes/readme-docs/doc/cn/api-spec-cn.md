@@ -30,14 +30,13 @@ API 像一个service对象， Node平台会在启动时为每个package创建一
 - Node side, API 对象是在main JS file `module.exports.activate(api)` 时被传入的
 
 ```javascript
-module.exports = {
-	activate: function(api) {
-		console.log(api.packageName);
-		api.router().get(function(req, res) {
-			res.render('/template.html');
-		});
-	}
-}
+exports.activate = function(api) {
+	console.log(api.packageName);
+	api.router().get(function(req, res) {
+		res.render('/template.html');
+	});
+};
+
 ```
 - 浏览器端JS 获取API比较简单, 在任何JS文件里可以访问全局变量`__api` (`__api`其实每个JS file的局部变量)， 类似`__filename`, `__dirname`
 

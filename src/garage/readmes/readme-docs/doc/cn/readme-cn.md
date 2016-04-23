@@ -286,11 +286,9 @@ browserify会忽略bundle属性， 每一个@dr package会被打包单独的bund
 var env = require('@dr/environment');
 var devMode = env.config().devMode;
 // or
-module.exports = {
-	activate: function(api) {
-		console.log(api.config().staticAssetsURL);
-	}
-}
+module.exports.activate = function(api) {
+	console.log(api.config().staticAssetsURL);
+};
 ```
 
 ##### browser package 读取平台配置

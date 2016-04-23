@@ -12,6 +12,7 @@ module.exports = function(goFunc) {
 			}
 		}, {
 			label: $translate('Package.json Specification'),
+			flag: 'new',
 			action: function() {
 				goFunc('package-spec-cn.md');
 			}
@@ -27,7 +28,7 @@ module.exports = function(goFunc) {
 			}
 		}, {
 			label: $translate('i18n'),
-			flag: 'new',
+			flag: '',
 			action: function() {
 				goFunc('i18n.md');
 			}
@@ -38,7 +39,7 @@ module.exports = function(goFunc) {
 			}
 		}, {
 			label: $translate('Test'),
-			flag: 'new',
+			flag: '',
 			action: function() {
 				goFunc('test.md');
 			}
