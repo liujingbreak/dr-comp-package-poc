@@ -8,7 +8,8 @@
     "builderPriority": 2000
   },
   "dependencies": {
-    "through2": "^2.0.1"
+    "through2": "^2.0.1",
+    "shelljs": "^0.3.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

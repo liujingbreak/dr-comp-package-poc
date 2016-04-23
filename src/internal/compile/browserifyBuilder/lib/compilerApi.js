@@ -37,7 +37,7 @@ function findBrowserPackageInstanceByPath(file) {
 	var idx = _.sortedIndex(this._packagePathList, file);
 
 	if (!file.startsWith(this._packagePathList[idx - 1])) {
-		log.debug('file ' + file + ' doesn\'t belong to any of our private packages');
+		log.error('file ' + file + ' doesn\'t belong to any of our private packages');
 		return null;
 	} else {
 		return this._packagePath2Name[this._packagePathList[idx - 1]];
