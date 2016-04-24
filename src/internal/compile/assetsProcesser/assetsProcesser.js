@@ -36,7 +36,7 @@ function copyRootPackageFavicon() {
 		return;
 	}
 	log.debug('copyRootPackageFavicon 2');
- 	_.some(config().packageContextPathMapping, (path, pkName) => {
+	_.some(config().packageContextPathMapping, (path, pkName) => {
 		log.debug('copyRootPackageFavicon ' + path);
 		if (path === '/') {
 			packageUtils.lookForPackages(pkName, (fullName, entryPath, parsedName, json, packagePath) => {

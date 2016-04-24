@@ -12,7 +12,8 @@ module.exports = {
 		api = _api;
 		browserifyBuilder.addTransform(transformFactory);
 		return null;
-	}
+	},
+	swig: swig
 };
 
 var packageCache = {};
@@ -25,7 +26,8 @@ function transformFactory(file) {
 		if (packageExports && _.isFunction(packageExports.onCompileTemplate)) {
 			log.debug('found file: ' + file);
 			var swigOptions = packageExports.onCompileTemplate(
-				Path.relative(packageIns.packagePath, file).replace(/\\/g, '/'));
+				Path.relative(packageIns.packagePath, file).replace(/\\/g, '/'),
+				swig);
 			if (swigOptions) {
 				return createTransform(swigOptions, file);
 			}

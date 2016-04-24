@@ -1,4 +1,4 @@
-var log = require('log4js').getLogger('server');
+var log = require('@dr/logger').getLogger('http-server');
 var http = require('http');
 var https = require('https');
 var fs = require('fs');

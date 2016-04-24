@@ -1,5 +1,5 @@
 var express = require('express');
-var log = require('log4js').getLogger('core.server.setApi');
+var log = require('log4js').getLogger('express-app.setApi');
 var _ = require('lodash');
 var Path = require('path');
 

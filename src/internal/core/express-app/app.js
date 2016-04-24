@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 var engines = require('consolidate');
 var swig = require('swig');
 var setupApi = require('./setupApi');
-var log = require('log4js').getLogger('server.app');
+var log = require('log4js').getLogger('express-app.app');
 var _ = require('lodash');
 var fs = require('fs');
 var Path = require('path');
@@ -97,6 +97,7 @@ function create(app, setting, packageCache) {
 	// no stacktraces leaked to user
 	app.use(function(err, req, res, next) {
 		res.status(err.status || 500);
+		log.error(err);
 		res.render('error.jade', {
 			message: err.message,
 			error: {}
