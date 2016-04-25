@@ -11,7 +11,8 @@ destDir: dist
 # or move its location out of `destDir`, but it can't not be out of process.cwd()
 staticDir: dist/static
 
-port: 14333 # read by @dr-core/express-server
+port: 14333 # read by @dr/http-server
+sslPort: 14433
 # set max-age property of the Cache-Control header in `ms` format, see https://github.com/expressjs/serve-static
 # unit convention reference to github.com/guille/ms.js
 cacheControlMaxAge: "365 days"
@@ -33,6 +34,8 @@ nodeRoutePath: /
 # revisioning file name...
 devMode: false
 
+# You don't want others read your source code in production environment
+enableSourceMaps: false
 # If we have public CDN domain name like "http://cdn.dianrong.com"
 staticAssetsURL: ""
 

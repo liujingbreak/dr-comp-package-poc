@@ -1,10 +1,11 @@
-var log = require('@dr/logger').getLogger('http-server');
 var http = require('http');
 var https = require('https');
 var fs = require('fs');
 
-var config;
+var config, log;
+
 exports.activate = function(api) {
+	log = require('@dr/logger').getLogger(api.packageName);
 	config = api.config;
 
 	if (config().ssl && config().ssl.enabled) {
@@ -14,11 +15,11 @@ exports.activate = function(api) {
 		if (!config().ssl.cert) {
 			config().ssl.cert = 'cert.pem';
 		}
-		if (!fileAccessable(config().ssl.key)) {
+		if (!fileAccessable(config.resolve('ssl.key'))) {
 			log.error('There is no file available referenced by config.yaml property "ssl"."key" ' + config().ssl.key);
 			return;
 		}
-		if (!fileAccessable(config().ssl.cert)) {
+		if (!fileAccessable(config.resolve('ssl.cert'))) {
 			log.error('There is no file available referenced by config.yaml property "ssl"."cert" ' + config().ssl.cert);
 			return;
 		}
@@ -43,8 +44,8 @@ exports.activate = function(api) {
 		log.info('start HTTPS');
 		var port = config().ssl.port ? config().ssl.port : 433;
 		var server = https.createServer({
-			key: fs.readFileSync(config().ssl.key),
-			cert: fs.readFileSync(config().ssl.cert)
+			key: fs.readFileSync(config.resolve('ssl.key')),
+			cert: fs.readFileSync(config.resolve('ssl.cert'))
 		}, app);
 		server.listen(port);
 		server.on('error', () => {
@@ -87,11 +88,11 @@ exports.activate = function(api) {
 		// handle specific listen errors with friendly messages
 		switch (error.code) {
 			case 'EACCES':
-				console.error(bind + ' requires elevated privileges');
+				log.error(bind + ' requires elevated privileges');
 				process.exit(1);
 				break;
 			case 'EADDRINUSE':
-				console.error(bind + ' is already in use');
+				log.error(bind + ' is already in use');
 				process.exit(1);
 				break;
 			default:

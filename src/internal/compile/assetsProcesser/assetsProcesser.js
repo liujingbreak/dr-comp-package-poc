@@ -31,20 +31,17 @@ function compile(api) {
 }
 
 function copyRootPackageFavicon() {
-	log.debug('copyRootPackageFavicon');
 	if (!config().packageContextPathMapping) {
 		return;
 	}
-	log.debug('copyRootPackageFavicon 2');
 	_.some(config().packageContextPathMapping, (path, pkName) => {
-		log.debug('copyRootPackageFavicon ' + path);
 		if (path === '/') {
 			packageUtils.lookForPackages(pkName, (fullName, entryPath, parsedName, json, packagePath) => {
 				var assetsFolder = json.dr ? (json.dr.assetsDir ? json.dr.assetsDir : 'assets') : 'assets';
 				var favicon = Path.join(packagePath, assetsFolder, 'favicon.ico');
 				if (fs.existsSync(favicon)) {
 					log.info('Copy favicon.ico from ' + favicon);
-					shell.cp('-f', Path.resolve(favicon), Path.join(config().staticDir));
+					shell.cp('-f', Path.resolve(favicon), Path.resolve(config().rootPath, config().staticDir));
 				}
 			});
 			return true;

@@ -28,7 +28,7 @@ function walkPackages(_config, _argv, _packageUtils, _compileNodePath) {
 	packageUtils = _packageUtils;
 	compileNodePath = _compileNodePath;
 
-	packageInfoCacheFile = Path.join(config().destDir, 'packageInfo.json');
+	packageInfoCacheFile = Path.join(config().rootPath, config().destDir, 'packageInfo.json');
 	var packageInfo;
 	if ( (argv.p || argv.b) && fs.existsSync(packageInfoCacheFile)) {
 		log.info('Reading build info cache from ' + packageInfoCacheFile);
@@ -37,7 +37,7 @@ function walkPackages(_config, _argv, _packageUtils, _compileNodePath) {
 	} else {
 		log.info('scan for packages info');
 		packageInfo = _walkPackages();
-		mkdirp.sync(config().destDir);
+		mkdirp.sync(Path.join(config().rootPath, config().destDir));
 		//saveCache(packageInfo);
 	}
 	return packageInfo;

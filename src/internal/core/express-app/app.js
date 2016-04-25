@@ -1,13 +1,14 @@
 var express = require('express');
 var path = require('path');
 //var favicon = require('serve-favicon');
-var logger = require('morgan');
+//var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var engines = require('consolidate');
 var swig = require('swig');
 var setupApi = require('./setupApi');
-var log = require('log4js').getLogger('express-app.app');
+var log4js = require('log4js');
+var log;
 var _ = require('lodash');
 var fs = require('fs');
 var Path = require('path');
@@ -15,6 +16,7 @@ var compression = require('compression');
 
 module.exports = {
 	activate: function(api, apiPrototype) {
+		log = log4js.getLogger(api.packageName);
 		var app = express();
 		setupApi(api, apiPrototype);
 		api.eventBus.on('packagesActivated', function(packageCache) {
@@ -39,7 +41,8 @@ function create(app, setting, packageCache) {
 
 	// uncomment after placing your favicon in /public
 	//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-	app.use(logger('dev'));
+	//app.use(logger('dev'));
+	app.use(log4js.connectLogger(log, {level: log4js.levels.INFO}));
 	app.use(bodyParser.json());
 	app.use(bodyParser.urlencoded({
 		extended: false
@@ -82,7 +85,7 @@ function create(app, setting, packageCache) {
 	});
 	// development error handler
 	// will print stacktrace
-	if (app.get('env') === 'development') {
+	if (setting.devMode || app.get('env') === 'development') {
 		app.use(function(err, req, res, next) {
 			res.status(err.status || 500);
 			log.error(err);

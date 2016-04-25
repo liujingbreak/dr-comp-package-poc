@@ -774,12 +774,12 @@ function _createBrowserifyBundle(b, bundle) {
 		})
 		.pipe(source(bundleBasename + '.js'))
 		.pipe(buffer())
-		.pipe(sourcemaps.init({
+		.pipe(gulpif(config().enableSourceMaps, sourcemaps.init({
 			loadMaps: true
-		}))
+		})))
 		.pipe(gulpif(!config().devMode, uglify()))
 		.pipe(gulpif(!config().devMode, rename(bundleBasename + '.min.js')))
-		.pipe(sourcemaps.write('./'))
+		.pipe(gulpif(config().enableSourceMaps, sourcemaps.write('./')))
 		.pipe(size({title: bundleBasename}))
 		.on('error', (er) => {
 			log.error('browserify bundle() sourcemaps failed', er);
