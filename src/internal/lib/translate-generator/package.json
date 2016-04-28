@@ -1,6 +1,6 @@
 {
   "name": "@dr/translate-generator",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A tool to scan source package files and generate translatable files",
   "main": "translate-generator.js",
   "dr": {

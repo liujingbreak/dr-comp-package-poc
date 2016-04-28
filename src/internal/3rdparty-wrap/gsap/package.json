@@ -43,9 +43,9 @@
     "url": "git+https://github.com/greensock/GreenSock-JS.git"
   },
   "scripts": {},
-  "version": "0.0.18",
+  "version": "0.0.19",
   "dr": {
-    "bundle": "ui-lib",
+    "bundle": "vendor-gsap",
     "noLint": true
   }
 }

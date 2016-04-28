@@ -1,21 +1,21 @@
 {
   "name": "@dr/internal-recipe",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "Recipe package of package-recipe",
   "dependencies": {
-    "@dr/angularjs": "1.0.25",
-    "@dr/gsap": "0.0.18",
-    "@dr-core/labjs": "0.0.18",
-    "@dr-core/build-util": "0.0.5",
-    "@dr-core/assets-processer": "0.0.18",
-    "@dr-core/browserify-builder": "0.0.25",
-    "@dr-core/browserify-builder-api": "0.0.21",
-    "@dr/parcelify-module-resolver": "0.0.18",
-    "@dr/environment": "0.0.19",
-    "@dr/logger": "0.0.21",
-    "@dr/translate-generator": "0.0.3",
-    "@dr/template-builder": "0.0.2",
-    "@dr-core/express-app": "0.0.27",
-    "@dr/http-server": "0.0.2"
+    "@dr/angularjs": "1.0.26",
+    "@dr/gsap": "0.0.19",
+    "@dr-core/labjs": "0.0.19",
+    "@dr-core/build-util": "0.0.6",
+    "@dr-core/assets-processer": "0.0.19",
+    "@dr-core/browserify-builder": "0.0.26",
+    "@dr-core/browserify-builder-api": "0.0.22",
+    "@dr/parcelify-module-resolver": "0.0.19",
+    "@dr/environment": "0.0.20",
+    "@dr/logger": "0.0.22",
+    "@dr/translate-generator": "0.0.4",
+    "@dr/template-builder": "0.0.3",
+    "@dr-core/express-app": "0.0.28",
+    "@dr/http-server": "0.0.3"
   }
 }
