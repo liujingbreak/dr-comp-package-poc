@@ -1,5 +1,10 @@
 Updates
 =======
+### 2016-4-29
+1. Node API new function\
+	`.joinContextPath(path)`
+2. config.yaml 增加了一个property `enableSourceMaps: false`
+
 ### 2016-4-23
 1. package.json 废弃`dr.priority`, 分为支持`"dr"."builderPriority"` 和 `dr.serverPriority`, `before|after package-name`的形式。
 2. 更完整的i18n, /i18n目录下的locale js文件可以require()另一个package, 可以有stylesheets，和其他普通package 一样复杂的resource。从而可以支持复杂的本地化，

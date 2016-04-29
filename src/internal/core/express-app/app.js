@@ -101,7 +101,7 @@ function create(app, setting, packageCache) {
 	app.use(function(err, req, res, next) {
 		res.status(err.status || 500);
 		log.error(err);
-		res.render('error.jade', {
+		res.render('error.html', {
 			message: err.message,
 			error: {}
 		});

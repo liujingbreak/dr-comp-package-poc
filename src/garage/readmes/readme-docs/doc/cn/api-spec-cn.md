@@ -54,6 +54,7 @@ console.log(__api.assetsUrl('some-picture.jpg'));
 | .packageShortName | 当前package name 不包含scope部分 e.g. `doc-home`
 | .packageInstance | packageInstance 对象,一些更复杂的当前package信息
 | .contextPath | 当前package Node 端运行作为Express router时的，http 访问根路径， 是根据config.yaml里面`nodeRoutePath + packageContextPathMapping`配置计算得，默认是`/<package short name>`, 比如`/doc-home`
+| .joinContextPath(path) | return `contextPath + '/' + path`， eliminate double ‘`//`’ if contextPath endsWith '`/`' or path begins with '`/`'
 | .eventBus | API prototype的属性, EventEmitter对象
 | .packageUtils | lib/packageMgr/packageUtils.js 查找其他package的工具
 | `.config()` | API prototype的属性, 获取config.yaml配置

@@ -23,6 +23,7 @@ module.exports = function(goFunc) {
 			}
 		}, {
 			label: $translate('API Specification'),
+			flag: 'new',
 			action: function() {
 				goFunc('api-spec-cn.md');
 			}
