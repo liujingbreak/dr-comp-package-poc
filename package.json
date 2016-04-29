@@ -1,12 +1,13 @@
 {
   "name": "web-fun-house",
-  "version": "0.0.28",
+  "version": "0.0.29-0",
   "description": "A company's web platform",
   "main": "lib/main.js",
   "bin": "bin/dr.js",
   "scripts": {
     "start": "node lib/main.js",
-    "check": "gulp lint"
+    "check": "gulp lint",
+	"e2e": "node e2etest/nightwatch.js -c e2etest/nightwatch.json"
   },
   "repository": {
     "type": "git",
@@ -76,6 +77,7 @@
   },
   "devDependencies": {
     "gulp": "^3.9.1",
-    "jasmine": "^2.4.1"
+    "jasmine": "^2.4.1",
+    "nightwatch": "^0.8.18"
   }
 }
