@@ -1,6 +1,6 @@
 {
   "name": "@dr/example-i18n",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Demo how we support i18n in browser side package",
   "browser": "index.js",
   "style": "style.less",

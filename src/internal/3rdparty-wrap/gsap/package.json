@@ -43,7 +43,7 @@
     "url": "git+https://github.com/greensock/GreenSock-JS.git"
   },
   "scripts": {},
-  "version": "0.0.19",
+  "version": "0.0.20",
   "dr": {
     "bundle": "vendor-gsap",
     "noLint": true
