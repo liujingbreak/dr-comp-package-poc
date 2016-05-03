@@ -45,6 +45,7 @@ function createTransform(swigOptions, absFile) {
 		var opt = _.assign(_.clone(defaultOptions), swigOptions);
 		opt.filename = absFile;
 		var compiled = swig.render(str, opt);
+		//log.debug(compiled);
 		this.push(compiled);
 		next();
 	});

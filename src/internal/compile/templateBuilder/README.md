@@ -55,26 +55,29 @@ If your `onCompileTemplate()` returns falsy value like `null`, then that specifi
 - File extension name is '.html'
 - In Browserify dependency graph, meaning it is `require('xxx.html')` in browser side JS file
 - The file you configured as `"dr"."entryPage"` in package.json
- > `"dr"."entryView"` file will not be considered as compilation template, because it is already as a express server side rendering template, so no need to do one more round compiling.
+ > `"dr"."entryView"` file will not be considered as compilation template, because it is already as express server side rendering template, so no need to do one more round compiling.
 
 ## Configure Swig
 If you want to set filter to Swig or call some other API on swig before compiling starts.
 
 Create a package, set its package.json `"dr.builderPriority"`'s value to "`before @dr/templateBuilder`".
-```
+
+```json
 	dr: {
 		"type": "builder",
-		"builderPriority": "before @dr/templateBuilder"
+		"builderPriority": "before @dr/template-builder"
 	}
 ```
+
 And the main entry file is like:
-```
+
+```javascript
 exports.compile = function() {
-	var swig = require('@dr/templateBuilder').swig;
+	var swig = require('@dr/template-builder').swig;
 	// or require('swig')
 	// Do things to swig instance
 }
 ```
 Now you can manipulate Swig instance.
 
-Yout can also obtain swig by `require('swig')` in that package, it will be the same instance returned from @dr/template-builder.
+Yout can also obtain swig by `require('swig')` in that package, it will be the same instance returned from `@dr/template-builder`.
