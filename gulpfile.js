@@ -17,6 +17,7 @@ var _ = require('lodash');
 var chalk = require('chalk');
 var fs = require('fs');
 var runSequence = require('run-sequence');
+//var buildUtils = require('./lib/gulp/buildUtils');
 
 var cli = require('shelljs-nodecli');
 
@@ -40,7 +41,8 @@ var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package
 	.command('unpublish', 'npm unpublish every pakages in source code folder including all mapped recipes of version number in current source code')
 	.command('bump', '[-v major|minor|patch|prerelease] bump version number of all package.json, useful to call this before publishing packages, default is increasing patch number by 1')
 	.command('flatten-recipe', 'flattern NPM v2 nodule_modules structure, install-recipe comamnd will execute this command')
-	.command('test', '[-p <package-short-name>] [-f <spec-file-path>] run Jasmine test for specific or all packages')
+	.command('test', '[-p <package-short-name>] [-f <spec-file-path>] run Jasmine for specific or all packages')
+	.command('e2e', '[-d <test-suit-dir] [-f <spec-file-path>] run Jasmine for end-to-end tests')
 	.describe('b', '<bundle-name> if used with command `compile` or `build`, it will only compile specific bundle, which is more efficient')
 	.alias('b', 'bundle')
 	.describe('p', '<package-short-name> if used with command `compile`, `build`, `lint`, it will only build and check style on specific package, which is more efficient')
@@ -183,7 +185,7 @@ gulp.task('check-dep', function() {
 
 gulp.task('lint', function() {
 	var i = 0;
-	return gulp.src(['*.js', 'lib/**/*.js']
+	return gulp.src(['*.js', 'lib/**/*.js', 'e2etest/**/*.js']
 	.concat(packageLintableSrc(argv.p)))
 	.pipe(jshint())
 	.pipe(jshint.reporter('jshint-stylish'))
@@ -329,8 +331,13 @@ gulp.task('unpublish', function() {
 });
 
 gulp.task('test', function() {
-	require('./lib/gulp/runTest')(argv);
+	require('./lib/gulp/testRunner').runUnitTest(argv);
 });
+
+gulp.task('e2e', function() {
+	require('./lib/gulp/testRunner').runE2eTest(argv);
+});
+
 
 function bumpVersion() {
 	var type = 'patch';

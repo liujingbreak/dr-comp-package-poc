@@ -104,3 +104,7 @@ browserSideConfigProp:
     - packageContextPathMapping
     - locales
     - devMode
+
+e2etest:
+    selenium:
+        chromeDriver: '../chromedriver'

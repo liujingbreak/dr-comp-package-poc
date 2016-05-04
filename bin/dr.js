@@ -8,6 +8,7 @@ var fs = require('fs');
 var Path = require('path');
 var yargs = require('yargs');
 var Promise = require('bluebird');
+var buildUtils = require('../lib/gulp/buildUtils');
 var os = require('os');
 var argv = yargs.usage('Usage: $0 <command> [-d <target_folder>]')
 	.command('init', 'Initialize environment, create gulpfile.js and other basic configuration')
@@ -74,6 +75,13 @@ function init(noSample) {
 			shell.chmod('-R', '+x', argv.d + '/.git/hooks/*');
 		}
 	}
+
+	if (!fileAccessable(Path.resolve('e2etest'))) {
+		shell.mkdir('-p', argv.d + '/e2etest/spec');
+		shell.mkdir('-p', argv.d + '/e2etest/pages');
+		shell.cp('-f', Path.resolve(__dirname, '..', 'e2etest', 'README.md'), argv.d + '/e2etest/');
+		console.info('e2etest/spec End-to-end test directory is created');
+	}
 	// to solve npm 2.0 nested node_modules folder issue
 	installDevDependencyAsync().then(()=> {
 		cli.exec(Path.join('node_modules', '.bin', 'gulp'), 'install-recipe', (code, output) => {
@@ -111,20 +119,24 @@ function installDevDependencyAsync() {
 	var devDeps = JSON.parse(fs.readFileSync(Path.resolve(__dirname + '/../package.json'), 'utf8')).devDependencies;
 	var promise = Promise.resolve();
 	_.forOwn(devDeps, (ver, name) => {
-		if (!fileAccessable(Path.resolve('node_modules/' + name))) {
-			console.log('npm install ' + name + '@' + ver);
-			promise = promise.then(() => {
-				return new Promise((resolve, reject) => {
-					cli.exec('npm', 'install', '--save-dev', name + '@' + ver, (code, output)=> {
-						if (code === 0) {
-							resolve(null);
-						} else {
-							reject(output);
-						}
-					});
-				});
-			});
+		if (fileAccessable(Path.resolve('node_modules/' + name))) {
+			return;
 		}
+		console.log('npm install ' + name + '@' + ver);
+		promise = promise.then(() => {
+			return buildUtils.promisifyExe('npm', ['install', '--save-dev', name + '@' + ver]);
+			// return new Promise((resolve, reject) => {
+			// 	cli.exec('npm', 'install', '--save-dev', name + '@' + ver, (code, output)=> {
+			// 		if (code === 0) {
+			// 			resolve(null);
+			// 		} else {
+			// 			reject(output);
+			// 		}
+			// 	});
+			// });
+		}).catch(err => {
+			throw new Error(err);
+		});
 	});
 	return promise;
 }

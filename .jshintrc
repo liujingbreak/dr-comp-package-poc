@@ -66,6 +66,8 @@
 	    "it": true,
 	    "beforeEach": true,
 	    "afterEach": true,
+        "beforeAll": true,
+	    "afterAll": true,
 	    "expect": true,
 	    "spyOn": true,
 	    "xit": true,
