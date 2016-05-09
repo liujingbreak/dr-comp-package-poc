@@ -63,6 +63,9 @@ exports.activate = function(api) {
 			res.end('');
 		});
 		redirectHttpServer.listen(config().port ? config().port : 80);
+		redirectHttpServer.on('error', () => {
+			onError(server, port);
+		});
 		redirectHttpServer.on('listening', () => { onListening(redirectHttpServer); });
 	}
 

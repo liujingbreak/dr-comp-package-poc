@@ -39,10 +39,16 @@ module.exports = function(goFunc) {
 				goFunc('how-does-it-work.md');
 			}
 		}, {
-			label: $translate('Test'),
+			label: $translate('Unit Test'),
 			flag: '',
 			action: function() {
 				goFunc('test.md');
+			}
+		}, {
+			label: $translate('End-to-end Test'),
+			flag: 'new',
+			action: function() {
+				goFunc('e2etest.md');
 			}
 		}, {
 			label: $translate('Updates'),

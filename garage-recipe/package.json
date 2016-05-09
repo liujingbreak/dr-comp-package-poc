@@ -10,6 +10,7 @@
     "@dr/readme": "0.0.20",
     "@dr/readme-docs": "0.0.22",
     "@dr/text-anim-ng": "0.0.20",
-    "@dr/doc-favicon-icon": "0.0.1"
+    "@dr/doc-favicon-icon": "0.0.1",
+    "@dr/respond-js": "0.0.1"
   }
 }

@@ -1,6 +1,7 @@
 require('@dr/angularjs');
 require('@dr/doc-ui');
 require('@dr/markdown-viewer');
+require('@dr/respond-js');
 
 var textAnim = require('@dr/text-anim-ng');
 

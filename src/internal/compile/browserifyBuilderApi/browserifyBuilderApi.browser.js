@@ -104,25 +104,37 @@ BrowserApi.prototype = {
 
 	getPrefLanguage: function() {
 		var availables = this.config().locales;
+
 		var chooseLang = [
-			navigator.languages[0],
 			navigator.language,
 			navigator.browserLanguage,
 			navigator.systemLanguage,
 			navigator.userLanguage
 		];
-		if (navigator.languages.length > 1) {
-			chooseLang = chooseLang.concat(navigator.languages.slice(1));
+		if (navigator.languages  && navigator.languages.length > 0) {
+			chooseLang.unshift(navigator.languages[0]);
 		}
 
+		if (navigator.languages && navigator.languages.length > 1) {
+			chooseLang = chooseLang.concat(navigator.languages.slice(1));
+		}
 		var pref;
-		_.some(chooseLang, function(language) {
+		if (!_.some(chooseLang, function(language) {
 			if (language && _.includes(availables, language)) {
 				pref = language;
 				return true;
 			}
 			return false;
-		});
+		})) {
+			_.some(chooseLang, function(language) {
+				var forbackLang = /[a-zA-Z]*/.exec(language);
+				forbackLang = forbackLang ? forbackLang[0] : false;
+				if (forbackLang && _.includes(availables, forbackLang)) {
+					pref = forbackLang;
+					return true;
+				}
+			});
+		}
 		pref = pref ? pref : 'en';
 		return pref;
 	},

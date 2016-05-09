@@ -1,0 +1,15 @@
+{
+  "name": "@dr/respond-js",
+  "version": "0.0.1",
+  "description": "Managing Javascript with CSS media queries",
+  "browser": "browser.js",
+  "style": "main.less",
+  "dr": {
+	  "bundle": "core"
+  },
+  "scripts": {
+    "test": "gulp test -p respond-js"
+  },
+  "author": "LJ",
+  "license": "MIT"
+}
