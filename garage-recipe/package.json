@@ -1,9 +1,9 @@
 {
   "name": "@dr/garage-recipe",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "Recipe package of garage-recipe",
   "dependencies": {
-    "@dr/doc-home": "0.0.22",
+    "@dr/doc-home": "0.0.23",
     "@dr/doc-less-var": "0.0.20",
     "@dr/doc-ui": "0.0.20",
     "@dr/markdown-viewer": "0.0.20",

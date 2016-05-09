@@ -1,6 +1,6 @@
 {
   "name": "@dr/internal-recipe",
-  "version": "0.0.23-0",
+  "version": "0.0.23",
   "description": "Recipe package of package-recipe",
   "dependencies": {
     "@dr/angularjs": "1.0.27",
@@ -9,7 +9,7 @@
     "@dr-core/build-util": "0.0.7",
     "@dr-core/assets-processer": "0.0.20",
     "@dr-core/browserify-builder": "0.0.27",
-    "@dr-core/browserify-builder-api": "0.0.23",
+    "@dr-core/browserify-builder-api": "0.0.24",
     "@dr/parcelify-module-resolver": "0.0.20",
     "@dr/environment": "0.0.21",
     "@dr/logger": "0.0.23",
