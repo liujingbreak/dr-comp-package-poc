@@ -3,3 +3,4 @@ dist
 dist2
 static*
 runtime
+e2etest

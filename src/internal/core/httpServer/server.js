@@ -24,9 +24,9 @@ exports.activate = function(api) {
 			return;
 		}
 		log.debug('SSL enabled');
-		api.eventBus.on('expressAppCreated', startHttpsServer);
+		api.eventBus.on('appCreated', startHttpsServer);
 	} else {
-		api.eventBus.on('expressAppCreated', startHttpServer);
+		api.eventBus.on('appCreated', startHttpServer);
 	}
 
 	function startHttpServer(app) {

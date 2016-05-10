@@ -54,7 +54,8 @@
 
 .sub-menu {
 	position: absolute;
-	left: @dr-navi-aside-width;
+	left: 0;
+	transform: translateX(@dr-navi-aside-width);
 	white-space: nowrap;
 	background-color: @dr-green-darker;
 	.dr-mixin-transition(background-color);

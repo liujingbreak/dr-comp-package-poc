@@ -3,7 +3,7 @@
   "version": "1.0.30",
   "description": "sample node package",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "gulp test -p example-entry"
   },
   "browser": "browser/js/index.js",
   "main": "server/main.js",
@@ -12,11 +12,12 @@
     "@dr/parcelify-module-resolver"
   ],
   "dr": {
+	"type": "server",
     "bundle": "example",
     "entryView": "index.html"
   },
   "author": "jing.liu.fe@d.com",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "lodash": "~4.6.1"
   }

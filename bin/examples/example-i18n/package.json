@@ -13,8 +13,8 @@
     "i18n": "i18n/locale-{locale}.yaml"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "gulp test -p example-i18n"
   },
-  "author": "",
-  "license": "ISC"
+  "author": "LJ",
+  "license": "MIT"
 }

@@ -3,7 +3,7 @@
   "version": "0.0.4",
   "description": "sample package demonstrates how compilation time template works",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "gulp test -p example-compile-template"
   },
   "browser": "browser.js",
   "main": "server.js",
@@ -12,7 +12,7 @@
     "entryPage": "index.html"
   },
   "author": "jing.liu.fe@d.com",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "lodash": "~4.6.1"
   }

@@ -15,6 +15,6 @@
     "compression": "^1.6.1"
   },
   "dr": {
-    "type": "core"
+    "type": ["core", "server"]
   }
 }

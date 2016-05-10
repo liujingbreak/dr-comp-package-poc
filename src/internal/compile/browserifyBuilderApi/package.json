@@ -5,7 +5,9 @@
   "browser": "browserifyBuilderApi.browser.js",
   "main": "browserifyBuilderApi.server.js",
   "dr": {
-    "bundle": "core"
+    "bundle": ["core"],
+	"type": ["server", "core", "builder"],
+    "builderPriority": 0
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

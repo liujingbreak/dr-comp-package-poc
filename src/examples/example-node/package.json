@@ -4,9 +4,9 @@
 	"description": "sample node package",
 	"main": "index.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "gulp test -p example-node"
 	},
-	"author": "",
+	"author": "LJ",
 	"license": "ISC",
 	"dependencies": {
 		"lodash": "4.6.1"

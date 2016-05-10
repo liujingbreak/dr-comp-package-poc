@@ -5,7 +5,8 @@
   "browser": "browser.js",
   "style": "main.less",
   "dr": {
-	  "bundle": "core"
+	  "bundle": "core",
+      "browserifyNoParse": "./modernizr-custom.js"
   },
   "scripts": {
     "test": "gulp test -p respond-js"

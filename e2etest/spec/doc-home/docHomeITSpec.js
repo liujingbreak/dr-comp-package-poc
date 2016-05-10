@@ -1,35 +1,31 @@
 var Path = require('path');
 var log = require('@dr/logger').getLogger(Path.basename(__filename, '.js'));
-var helper = require('../../webdriverHelper');
-var driver = helper.driver;
+var helper = require('@dr/e2etest-helper');
 var docHomePage = require('../../pages/docHomePage');
-//var _ = require('lodash');
+var _ = require('lodash');
 
 describe('When server is started', function() {
 	helper.setup();
 
+	beforeAll(helper.waitForServer);
+
 	it('the home page should be available', function(done) {
-		docHomePage.get();
-		driver.sleep(200).then(() => {
-			return driver.getCurrentUrl();
+		docHomePage.get().then(() => {
+			log.debug('get done');
+			return helper.driver.getCurrentUrl();
 		})
 		.then(url => {
 			log.debug(url);
-		});
-
-		driver.getPageSource().then(source => {
-			log.debug(source);
-			return driver.manage().getCookies();
-		})
-		.then(cookies => {
-			log.debug(cookies);
-			return driver.getCurrentUrl();
+			return helper.driver.getCurrentUrl();
 		})
 		.then(url => {
 			log.debug('current url: ' + url);
+			expect(_.endsWith(url, '/doc-home/index.html#/')).toBe(true);
 		})
-		.then(done);
-		//driver.waitForElementVisible('body');
+		.then(done)
+		.catch(e => {
+			log.error(e);
+			done.fail(e);
+		});
 	});
-
 });

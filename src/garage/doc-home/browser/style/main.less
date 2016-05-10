@@ -1,7 +1,7 @@
 @import "npm://@dr/doc-less-var";
 
 .doc-home {
-	overflow-x: auto;
+	//overflow-x: auto;
 	overflow-y: auto;
 	.loading-hide {
 		//opacity: 0;
@@ -22,5 +22,12 @@
 			top: 0;
 			position:static;
 		}
+	}
+}
+
+.size-mobile {
+	.doc-home {
+		@import "aside-mobile.less";
+		@import "docSection-mobile.less";
 	}
 }

@@ -9,6 +9,7 @@
     "@dr/parcelify-module-resolver"
   ],
   "dr": {
+	"type": "server",
     "bundle": "home",
     "entryPage": "index.html"
   },

@@ -1,8 +1,8 @@
 var env = {
-	activate: function(api, apiPrototype) {
+	activate: function(api) {
 		env.config = api.config;
-		env.api = apiPrototype;
-		env.packageUtils = apiPrototype.packageUtils;
+		env.api = Object.getPrototypeOf(api);
+		env.packageUtils = env.api.packageUtils;
 	},
 
 	/**

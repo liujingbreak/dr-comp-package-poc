@@ -81,6 +81,7 @@ internalRecipeFolder: internal-recipe
 recipeSrcMapping:
     garage-recipe: src/garage
     examples-recipe: src/examples
+    internal-tools-recipe: src/tools
 
 # Recipes which are installed from registry server, they are owned by other contributors,
 # add to this list to make them a part of you server.
@@ -107,4 +108,4 @@ browserSideConfigProp:
 
 e2etest:
     selenium:
-        chromeDriver: '../chromedriver'
+        driverPath: '..'

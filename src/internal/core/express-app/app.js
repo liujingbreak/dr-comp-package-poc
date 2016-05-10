@@ -22,7 +22,7 @@ module.exports = {
 		api.eventBus.on('packagesActivated', function(packageCache) {
 			process.nextTick(()=> {
 				create(app, api.config(), packageCache);
-				api.eventBus.emit('expressAppCreated', app);
+				api.eventBus.emit('appCreated', app);
 			});
 		});
 	}

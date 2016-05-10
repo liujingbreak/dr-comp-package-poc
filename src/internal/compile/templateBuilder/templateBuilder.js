@@ -1,5 +1,4 @@
 var through = require('through2');
-var browserifyBuilder = require('@dr-core/browserify-builder');
 var swig = require('swig');
 var Path = require('path');
 var _ = require('lodash');
@@ -10,7 +9,7 @@ var api;
 module.exports = {
 	compile: function(_api) {
 		api = _api;
-		browserifyBuilder.addTransform(transformFactory);
+		api.builder.addTransform(transformFactory);
 		return null;
 	},
 	swig: swig

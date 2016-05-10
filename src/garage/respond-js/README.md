@@ -1,3 +1,20 @@
+This package is a super light function that detects screen size and whether it supports touch event, and puts special CSS class names like `size-desktop`, `size-tablet`, `size-mobile` onto HTML element.
+
+Also Modernizr is used in this package to detect Touch events feature.
+```css
+CSS
+.no-touchevents .box { color: red; }
+.touchevents .box { color: green; }
+```
+```javascript
+JS
+if (Modernizr.touchevents) {
+  // supported
+} else {
+  // not-supported
+}
+```
+
 Copied idea from
 
 [Firing Responsive jQuery Functions based on CSS Media Queries Rather than Window Width](https://www.fourfront.us/blog/jquery-window-width-and-media-queries)

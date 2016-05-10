@@ -3,10 +3,11 @@
   "version": "0.0.21",
   "description": "Runtime object holds api and config object",
   "main": "index.js",
-  "browser": "browser.js",
   "dr": {
     "bundle": "core",
-    "type": "core"
+    "type": ["core", "server"],
+	"serverPriority": 0,
+	"builderPriority": 0
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

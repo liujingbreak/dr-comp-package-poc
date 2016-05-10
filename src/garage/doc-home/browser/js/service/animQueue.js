@@ -8,6 +8,7 @@ function AnimQueue() {
 }
 
 AnimQueue.prototype = {
+	/** @deprecated */
 	thenno: function(actionFunc) {
 		var self = this;
 		if (typeof actionFunc !== 'function') {

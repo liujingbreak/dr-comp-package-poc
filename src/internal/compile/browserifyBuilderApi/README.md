@@ -46,3 +46,9 @@ console.log(__api.packageName);
 | .loadPrefLocaleBundles(callback) | LABjs loads locale bundles based on browser prefered language, language choosing logic is in the order of: `navigator.languages[0], navigator.language, navigator.browserLanguage, navigator.systemLanguage, navigator.userLanguage, navigator.languages[1] ...`
 | .isLocaleBundleLoaded() | return boolean
 | .extend(obj) | monkey patch / override properties on API prototype `__api.__proto__`, so that you can extend API object, same as assigning property to __api.constructor.prototype
+
+Compile time API object
+------------
+| name | description
+| -- | --
+| .builder.addTransform(transforms) | `transforms` is a browserify Transform or an array of Transform, so that you can pre-process those files before browserify compiles them. Transforms are also applied to `dr.entryPage` which is configured in package.json.

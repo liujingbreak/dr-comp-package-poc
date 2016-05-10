@@ -42,7 +42,7 @@ var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package
 	.command('bump', '[-v major|minor|patch|prerelease] bump version number of all package.json, useful to call this before publishing packages, default is increasing patch number by 1')
 	.command('flatten-recipe', 'flattern NPM v2 nodule_modules structure, install-recipe comamnd will execute this command')
 	.command('test', '[-p <package-short-name>] [-f <spec-file-path>] run Jasmine for specific or all packages')
-	.command('e2e', '[-d <test-suit-dir] [-f <spec-file-path>] run Jasmine for end-to-end tests')
+	.command('e2e', '[-d <test-suit-dir] [-f <spec-file-path>] [--browser <chrome|firefox|ie|opera|edge|safari>]run Jasmine for end-to-end tests')
 	.describe('b', '<bundle-name> if used with command `compile` or `build`, it will only compile specific bundle, which is more efficient')
 	.alias('b', 'bundle')
 	.describe('p', '<package-short-name> if used with command `compile`, `build`, `lint`, it will only build and check style on specific package, which is more efficient')
@@ -54,6 +54,8 @@ var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package
 	.describe('v', 'major | minor | patch | prerelease, used with `bump`')
 	.describe('f', '<file-path> command `gulp test -f specFile1 [-f specFile2] ...`')
 	.alias('f', 'file')
+	.describe('browser', 'Used with command `e2e`')
+	.choices('browser', ['firefox', 'chrome', 'ie', 'safari', 'opera'])
 	.demand(1)
 	.help('h').alias('h', 'help')
 	.argv;
@@ -212,7 +214,8 @@ gulp.task('compile', ['link', 'flatten-recipe'], function(cb) {
 
 gulp.task('compile:dev', function(cb) {
 	require('./lib/packageMgr/packageCompiler')(argv)
-	.then(() => cb());
+	.then(() => {cb();})
+	.catch( e => { cb('failed'); });
 });
 
 gulp.task('watch', function() {
@@ -330,12 +333,16 @@ gulp.task('unpublish', function() {
 		});
 });
 
-gulp.task('test', function() {
-	require('./lib/gulp/testRunner').runUnitTest(argv);
+gulp.task('test', function(callback) {
+	return require('./lib/gulp/testRunner').runUnitTest(argv)
+	.then(()=> { callback(); })
+	.catch(e => { callback('Test failed'); });
 });
 
-gulp.task('e2e', function() {
-	require('./lib/gulp/testRunner').runE2eTest(argv);
+gulp.task('e2e', function(callback) {
+	require('./lib/gulp/testRunner').runE2eTest(argv)
+	.then(()=> { callback(); })
+	.catch(e => { callback('Test failed'); });
 });
 
 

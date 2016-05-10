@@ -5,7 +5,7 @@ module.exports = function($routeProvider) {
 		controller: 'IntroController',
 		controllerAs: 'introVm'
 	});
-	$routeProvider.when('/doc/:name', {
+	$routeProvider.when('/doc/:docPath*', {
 		template: require('../views/doc.html'),
 		controller: 'DocController',
 		controllerAs: 'docVm'

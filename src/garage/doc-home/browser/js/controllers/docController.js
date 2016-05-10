@@ -14,7 +14,7 @@ function controller($scope, $timeout, $routeParams) {
 
 	$scope.mainVm.selectedMenuIdx = 1;
 
-	var file = $routeParams.name.substring(0, $routeParams.name.lastIndexOf('.'));
+	var file = $routeParams.docPath.substring(0, $routeParams.docPath.lastIndexOf('.'));
 
 	docVm.docAddress = __api.assetsUrl('readme-docs', docName2Route(file));
 	$scope.mainVm.loaded = true;

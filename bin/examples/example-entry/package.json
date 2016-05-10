@@ -3,7 +3,7 @@
   "version": "1.0.12",
   "description": "sample node package",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "gulp test example-entry"
   },
   "browser": "browser/js/index.js",
   "main": "server/main.js",
@@ -12,6 +12,7 @@
     "@dr/parcelify-module-resolver"
   ],
   "dr": {
+	"type": "server",
     "bundle": "example",
     "entryView": "index.html"
   },

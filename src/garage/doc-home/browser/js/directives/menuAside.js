@@ -1,4 +1,6 @@
 var Promise = require('bluebird');
+var _ = require('lodash');
+var Modernizr = require('@dr/respond-js');
 
 module.exports = function(compileProvider) {
 	compileProvider.directive('drMenuAside', ['$timeout',
@@ -7,10 +9,12 @@ module.exports = function(compileProvider) {
 	factory]);
 };
 
-var OPENED = 1;
+var VISIBLE = 1;
 var EXPANDED = 2;
-var CLOSED = 0;
-var SUBMENU_EXP_LEFT = 66 - 240;
+var HIDDEN = 0;
+var SUBMENU_EXP_LEFT = 66;
+var ASIDE_MENU_WIDTH = 240;
+var SUBMENU_EXP_OPEN_LEFT = ASIDE_MENU_WIDTH - 33;
 /**
  * @attribute onMenuEnter angular expression
  * e.g.
@@ -36,24 +40,16 @@ function factory($timeout, $parse, $compile) {
 				var AnimQ = require('../service/animQueue');
 				var animQueue = new AnimQ();
 				scope.currSubMenus = [];
-				var subMenuState = CLOSED;
-				var subMenuEl, subMenuLeft, liList, hoverMenuIdx;
+				var mainMenuState = VISIBLE;
+				var subMenuState = HIDDEN;
+				var subMenuEl, subMenuLeft, liList, menu;
+				var html = angular.element('html');
 				var getMenuItem = $parse(iAttrs.drMenuAside);
 				var getMenuSelectedIdx = $parse(iAttrs.menuSelected);
 
-				iElement.find('.dr-menu').eq(0).delegate('button', 'click', function(evt) {
-					var i = parseInt(angular.element(evt.currentTarget).closest('li').attr('menu-item-index'), 10);
-					var item = getMenuItem(scope)[i];
-					if (item.action) {
-						item.action();
-					} else if (item.subMenu) {
-						subMenuEnter();
-					}
-					scope.$apply();
-				});
-				var selectedIdx;
+				var menuSelectedIdx;
 				$timeout(function() {
-					var menu = iElement.find('.dr-menu').eq(0);
+					menu = iElement.find('.dr-menu').eq(0);
 					subMenuEl = iElement.find('.sub-menu');
 					subMenuLeft = subMenuEl.position().left;
 					liList = menu.children();
@@ -61,84 +57,166 @@ function factory($timeout, $parse, $compile) {
 						highlightMenu(value);
 					});
 
-					menu.delegate('>li', 'mouseenter', function(evt) {
-						changeSubMenu(evt, function closePrev() {
-							animQueue.then(function(next) {
-								return new Promise(function(resolve) {
-									TweenMax.to(subMenuEl[0], 0.25, {x: 0, ease: 'Power2.easeOut', onComplete: resolve});
-								});
-							});
-							subMenuState = CLOSED;
-						},
-						function openNext(hoverIdx) {
-							//subMenuEl.off('mouseenter');
-							subMenuState = OPENED;
-							animQueue.then(function() {
-								return new Promise(function(resolve) {
-									if (hoverIdx === selectedIdx) {
-										subMenuEl.addClass('highlight');
-									} else {
-										subMenuEl.removeClass('highlight');
-									}
-									TweenMax.to(subMenuEl[0], 0.25, {x: -33, ease: 'Power2.easeOut', onComplete: resolve});
-								});
-							});
-						}, true);
-					});
-					subMenuEl.on('mouseenter', subMenuEnter);
+					if (Modernizr.touchevents) {
+						iElement.on('click', expandMenu);
+						menu.on('click', 'button', menuItemClicked);
+						subMenuEl.on('click', function(evt) {
+							if (subMenuState === VISIBLE) {
+								subMenuEnter();
+								evt.stopPropagation();
+							}
+						});
 
-					subMenuEl.delegate('button', 'click', selectSubMenuItem);
+						angular.element('body').on('click', clickOutside);
+						iElement.on('$destory', function() {
+							angular.element('body').off('click', clickOutside);
+						});
+					} else {
+						iElement.on('mouseenter', expandMenu);
+						iElement.on('mouseleave', collapseMenu);
+						menu.on('mouseenter', '>li', function(evt) {
+							switchSubmenu(evt, closePrevSubMenu, openNextSubMenu, false);
+						});
+						// menu.on('mouseleave', '>li', function(evt) {
+						// 	closePrevSubMenu();
+						// });
+						menu.on('click', 'button', menuItemClicked);
+						subMenuEl.on('mouseenter', subMenuEnter);
+						subMenuEl.on('mouseleave', subMenuLeave);
+					}
+					subMenuEl.on('click', 'button', selectSubMenuItem);
 				}, 0, false);
 
-				if (controller){
-					iElement.on('mouseenter', function(event) {
+				function expandMenu(evt) {
+					if (mainMenuState === VISIBLE) {
 						controller.menuEnter({width: subMenuLeft});
+						mainMenuState = EXPANDED;
+						var i = getMenuSelectedIdx(scope);
+						var item = getMenuItem(scope)[i];
+						if (item.subMenu && item.subMenu.length > 0) {
+							openNextSubMenu(i);
+						}
+
 						scope.$apply();
+					} else if (subMenuState === EXPANDED) {
+						//if (evt && angular.element(evt.target).closest().length === 0)
+						subMenuLeave();
+						switchSubmenu(getMenuSelectedIdx(scope), closePrevSubMenu, openNextSubMenu, false);
+					}
+				}
+
+				function menuItemClicked(evt) {
+					if (mainMenuState === VISIBLE) {
+						$timeout(expandMenu, 0, false);
+						evt.stopPropagation();
+					} else if (mainMenuState === EXPANDED) {
+						evt.stopPropagation();
+					}
+					var i = parseInt(angular.element(evt.currentTarget).closest('li').attr('menu-item-index'), 10);
+					var item = getMenuItem(scope)[i];
+					switchSubmenu(i, closePrevSubMenu, openNextSubMenu, mainMenuState === EXPANDED);
+
+					if (mainMenuState === EXPANDED) {
+						if (item.action) {
+							if (subMenuState === EXPANDED) {
+								subMenuLeave();
+								return;
+							}
+							item.action();
+							getMenuSelectedIdx.assign(scope, i);
+							scope.$apply();
+							closePrevSubMenu();
+							if (html.hasClass('size-mobile')) {
+								collapseMenu();
+							}
+						} else {
+							$timeout(subMenuEnter, 1, false);
+						}
+					}
+				}
+
+				function collapseMenu() {
+					if (mainMenuState === VISIBLE) {
+						return;
+					}
+					controller.menuLeave(scope);
+					animQueue.then(function() {
+						TweenMax.set(subMenuEl[0], {x: ASIDE_MENU_WIDTH});
+						return Promise.resolve();
 					});
-					iElement.on('mouseleave', function(event) {
-						controller.menuLeave(scope);
-						animQueue.then(function() {
-							TweenMax.set(subMenuEl[0], {x: 0});
-							return Promise.resolve();
+					scope.$apply();
+					mainMenuState = VISIBLE;
+					subMenuState = HIDDEN;
+				}
+
+				function closePrevSubMenu() {
+					if (subMenuState === HIDDEN) {
+						return;
+					}
+					animQueue.then(function(next) {
+						return new Promise(function(resolve) {
+							TweenMax.to(subMenuEl[0], 0.25, {x: ASIDE_MENU_WIDTH, ease: 'Power2.easeOut', onComplete: resolve});
 						});
-						scope.$apply();
-						subMenuState = CLOSED;
+					});
+					subMenuState = HIDDEN;
+				}
+
+				function openNextSubMenu(hoverIdx) {
+					if (subMenuState === VISIBLE) {
+						return;
+					}
+					subMenuState = VISIBLE;
+					animQueue.then(function() {
+						return new Promise(function(resolve) {
+							if (hoverIdx === menuSelectedIdx) {
+								subMenuEl.addClass('highlight');
+							} else {
+								subMenuEl.removeClass('highlight');
+							}
+							TweenMax.killTweensOf(subMenuEl[0]);
+							TweenMax.to(subMenuEl[0], 0.25, {x: SUBMENU_EXP_OPEN_LEFT, ease: 'Power2.easeOut', onComplete: resolve});
+						});
 					});
 				}
 
-				function subMenuEnter(evt) {
-					subMenuEl.off('mouseenter');
+				function subMenuEnter() {
+					if (subMenuState === EXPANDED) {
+						return;
+					}
+					//subMenuEl.off('mouseenter');
 					subMenuState = EXPANDED;
 					animQueue.then(function() {
 						subMenuEl.addClass('highlight');
 						var defer = Promise.defer();
+						TweenMax.killTweensOf(subMenuEl[0]);
 						TweenMax.to(subMenuEl[0], 0.25, {x: SUBMENU_EXP_LEFT, ease: 'Power2.easeOut', onComplete: defer.resolve});
-						highlightMenu(hoverMenuIdx);
+						highlightMenu(lastHover);
 						scope.$apply();
 						return defer.promise;
 					});
 					controller.menuExpand({width: subMenuEl.prop('offsetWidth') + 66});
 					scope.$apply();
-					subMenuEl.on('mouseleave', subMenuLeave);
+					//subMenuEl.on('mouseleave', subMenuLeave);
 				}
 
-				function subMenuLeave(evt) {
-					subMenuEl.off('mouseleave');
-					subMenuState = OPENED;
+				function subMenuLeave() {
+					if (subMenuState === HIDDEN) {
+						return;
+					}
+					subMenuState = HIDDEN;
 					animQueue.then(function() {
 						var defer = Promise.defer();
-						TweenMax.to(subMenuEl[0], 0.25, {x: -33, ease: 'Power2.easeOut', onComplete: defer.resolve});
-						var selectedIdx = getMenuSelectedIdx(scope);
-						if (lastHover !== selectedIdx) {
+						TweenMax.to(subMenuEl[0], 0.25, {x: ASIDE_MENU_WIDTH, ease: 'Power2.easeOut', onComplete: defer.resolve});
+						var menuSelectedIdx = getMenuSelectedIdx(scope);
+						if (lastHover !== menuSelectedIdx) {
 							subMenuEl.removeClass('highlight');
 						}
-						highlightMenu(selectedIdx);
+						highlightMenu(menuSelectedIdx);
 						scope.$apply();
 						return defer.promise;
 					});
 					controller.menuUnexpand({width: subMenuLeft});
 					scope.$apply();
-					subMenuEl.on('mouseenter', subMenuEnter);
 				}
 
 				function highlightMenu(sIndex) {
@@ -146,10 +224,10 @@ function factory($timeout, $parse, $compile) {
 						return;
 					}
 					liList.removeClass('dr-checked');
-					selectedIdx = parseInt(sIndex, 10);
-					var li = liList.eq(selectedIdx);
+					menuSelectedIdx = parseInt(sIndex, 10);
+					var li = liList.eq(menuSelectedIdx);
 					li.addClass('dr-checked');
-					scope.currSubMenus = getMenuItem(scope)[selectedIdx].subMenu;
+					scope.currSubMenus = getMenuItem(scope)[menuSelectedIdx].subMenu;
 					animQueue.then(function(next) {
 						subMenuEl.addClass('highlight');
 						return Promise.resolve();
@@ -157,30 +235,41 @@ function factory($timeout, $parse, $compile) {
 				}
 
 				var lastHover;
-				function changeSubMenu(evt, closePrev, openNext, isHover) {
-					hoverMenuIdx = parseInt(evt.currentTarget.getAttribute('menu-item-index'), 10);
-					if (subMenuState !== CLOSED && hoverMenuIdx === lastHover) {
+				function switchSubmenu(evt, closePrev, openNext, skipAnim) {
+					var hoverMenuIdx;
+					if (_.isNumber(evt)) {
+						hoverMenuIdx = evt;
+					} else {
+						hoverMenuIdx = parseInt(evt.currentTarget.getAttribute('menu-item-index'), 10);
+					}
+					if (subMenuState !== HIDDEN && hoverMenuIdx === lastHover) {
 						return;
 					}
 					var menuItems = getMenuItem(scope);
 					var lastItem = menuItems[lastHover];
 					var item = menuItems[hoverMenuIdx];
-					if (lastItem && lastItem.subMenu && lastItem.subMenu.length > 0) {
+					if (lastItem && lastItem.subMenu && lastItem.subMenu.length > 0 && !skipAnim) {
 						closePrev();
 					}
 					lastHover = hoverMenuIdx;
+
 					if (item.subMenu && item.subMenu.length > 0) {
 						scope.currHoverMenu = getMenuItem(scope)[hoverMenuIdx];
 						scope.currSubMenus = scope.currHoverMenu.subMenu;
 
 						scope.$apply();
-						$timeout(function() {
-							openNext(hoverMenuIdx);
-						}, 0, false);
+						if (!skipAnim) {
+							$timeout(function() {
+								openNext(hoverMenuIdx);
+							}, 0, false);
+						}
 					}
 				}
 
 				function selectSubMenuItem(evt) {
+					if (subMenuState !== EXPANDED) {
+						return;
+					}
 					var idx = angular.element(evt.currentTarget).closest('li').attr('submenu-item-index');
 					idx = parseInt(idx, 10);
 					var item = scope.currSubMenus[idx];
@@ -189,6 +278,18 @@ function factory($timeout, $parse, $compile) {
 					lis.eq(idx).addClass('checked');
 					item.action();
 					scope.$apply();
+					evt.stopPropagation();
+
+					if (html.hasClass('size-mobile')) {
+						collapseMenu();
+					}
+				}
+
+				function clickOutside(evt) {
+					var it = angular.element(evt.target).closest(iElement);
+					if (it.length === 0) {
+						collapseMenu();
+					}
 				}
 			};
 		}

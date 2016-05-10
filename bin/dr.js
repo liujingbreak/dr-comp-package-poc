@@ -79,7 +79,7 @@ function init(noSample) {
 	if (!fileAccessable(Path.resolve('e2etest'))) {
 		shell.mkdir('-p', argv.d + '/e2etest/spec');
 		shell.mkdir('-p', argv.d + '/e2etest/pages');
-		shell.cp('-f', Path.resolve(__dirname, '..', 'e2etest', 'README.md'), argv.d + '/e2etest/');
+		//shell.cp('-f', Path.resolve(__dirname, '..', 'e2etest', 'README.md'), argv.d + '/e2etest/');
 		console.info('e2etest/spec End-to-end test directory is created');
 	}
 	// to solve npm 2.0 nested node_modules folder issue
@@ -125,15 +125,6 @@ function installDevDependencyAsync() {
 		console.log('npm install ' + name + '@' + ver);
 		promise = promise.then(() => {
 			return buildUtils.promisifyExe('npm', ['install', '--save-dev', name + '@' + ver]);
-			// return new Promise((resolve, reject) => {
-			// 	cli.exec('npm', 'install', '--save-dev', name + '@' + ver, (code, output)=> {
-			// 		if (code === 0) {
-			// 			resolve(null);
-			// 		} else {
-			// 			reject(output);
-			// 		}
-			// 	});
-			// });
 		}).catch(err => {
 			throw new Error(err);
 		});
