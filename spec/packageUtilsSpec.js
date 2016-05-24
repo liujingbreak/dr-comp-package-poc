@@ -55,7 +55,8 @@ describe('packageUtils', function() {
 				'@dr/doc-home',
 				'@dr/example-entry',
 				'@dr/http-server',
-				'@dr-core/browserify-builder-api'
+				'@dr-core/browserify-builder-api',
+				'@dr-core/assets-processer'
 			];
 			var foundPackages = callback.calls.allArgs().map(row => { return row[0];});
 			log.debug(foundPackages);

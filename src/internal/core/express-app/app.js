@@ -9,9 +9,6 @@ var swig = require('swig');
 var setupApi = require('./setupApi');
 var log4js = require('log4js');
 var log;
-var _ = require('lodash');
-var fs = require('fs');
-var Path = require('path');
 var compression = require('compression');
 
 module.exports = {
@@ -60,19 +57,6 @@ function create(app, setting, packageCache) {
 	}));
 	app.get('/', function(req, res) {
 		res.render('index.html', {});
-	});
-
-	// package level assets folder router
-
-	_.forOwn(packageCache, function(packageInstance, name) {
-		var assetsDir = Path.resolve(setting.rootPath, packageInstance.path, 'assets');
-		if (fs.existsSync(assetsDir)) {
-			log.debug(name + ' -> ' + assetsDir);
-			app.use('/' + name, express.static(assetsDir, {
-				//maxAge: setting.cacheControlMaxAge,
-				setHeaders: setCORSHeader
-			}));
-		}
 	});
 
 	// error handlers

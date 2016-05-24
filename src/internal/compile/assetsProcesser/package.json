@@ -4,8 +4,9 @@
   "description": "Copy assets to destDir folder only when devMode is false",
   "main": "assetsProcesser.js",
   "dr": {
-    "type": "builder",
-    "builderPriority": 2000
+    "type": ["builder", "server"],
+    "builderPriority": 2000,
+    "serverPriority": 99999
   },
   "dependencies": {
     "through2": "^2.0.1",

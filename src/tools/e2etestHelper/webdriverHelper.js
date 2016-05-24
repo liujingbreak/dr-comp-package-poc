@@ -35,10 +35,17 @@ function startup() {
 }
 
 function teardown(done) {
-	log.info('driver close');
-	return driver.close()
-	.then(_.bind(driver.quit, driver))
-	.finally(done ? done : ()=> {});
+	if (driver) {
+		log.info('driver close');
+		return driver.close()
+		.then(_.bind(driver.quit, driver))
+		.finally(()=> {
+			driver = null;
+			done();
+		});
+	} else {
+		done();
+	}
 }
 
 exports.setBrowser = function(name) {

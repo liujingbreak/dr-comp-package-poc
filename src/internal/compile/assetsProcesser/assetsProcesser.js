@@ -14,6 +14,7 @@ var packageUtils, config;
 
 module.exports = {
 	compile: compile,
+	activate: activate,
 	replaceAssetsUrl: replaceAssetsUrl
 };
 
@@ -23,11 +24,30 @@ function compile(api) {
 	packageUtils = api.packageUtils;
 	config = api.config;
 	copyRootPackageFavicon();
-	if (config().devMode && (!argv.p || argv.p && argv.p !== 'assets')) {
+	if (config().devMode && !argv.copyAssets) {
 		log.info('DevMode enabled, skip copying assets to static folder');
 		return;
 	}
 	return copyAssets();
+}
+
+function activate(api) {
+	log = require('log4js').getLogger(api.packageName);
+
+	api.packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
+		var assetsFolder = json.dr ? (json.dr.assetsDir ? json.dr.assetsDir : 'assets') : 'assets';
+		var assetsDir = Path.join(packagePath, assetsFolder);
+		if (fs.existsSync(assetsDir)) {
+			var path = api.config().packageContextPathMapping[parsedName.name];
+			path = path != null ? path : '/' + parsedName.name;
+			log.debug('route ' + path + ' -> ' + assetsDir);
+			api.use(path + '/', api.express.static(assetsDir, {
+				setHeaders: function(res) {
+					res.setHeader('Access-Control-Allow-Origin', '*');
+				}
+			}));
+		}
+	});
 }
 
 function copyRootPackageFavicon() {
