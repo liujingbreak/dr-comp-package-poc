@@ -33,6 +33,7 @@ describe('packageUtils', function() {
 			packageUtils.findNodePackageByType('builder', callback);
 			var builders = [
 				'@dr-core/assets-processer',
+				'@dr-core/browserify-builder-api',
 				'@dr-core/browserify-builder',
 				'@dr/translate-generator',
 				'@dr/template-builder',
@@ -49,6 +50,7 @@ describe('packageUtils', function() {
 			var callback = jasmine.createSpy('found');
 			packageUtils.findNodePackageByType('server', callback);
 			var servers = [
+				'@dr/environment',
 				'@dr-core/express-app',
 				'@dr/doc-home',
 				'@dr/example-entry',

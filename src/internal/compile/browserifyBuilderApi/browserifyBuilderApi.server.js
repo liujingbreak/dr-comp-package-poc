@@ -20,7 +20,6 @@ exports.compile = function(api) {
 			// TODO
 		}
 	};
-
 };
 
 exports.resolveUrl = require('./resolveUrl');

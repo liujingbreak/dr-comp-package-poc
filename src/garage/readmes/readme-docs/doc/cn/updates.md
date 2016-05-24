@@ -1,5 +1,18 @@
 Updates
 =======
+### 2016-5-24
+**Breaking change!**
+- 所有自启动的Node runtime package， package.json文件需要标示`"dr"."type"`为 `"server"`
+
+- 支持多个`"dr"."type"`, 可以是Array型或String型
+	```json
+	"dr": {
+		"type": ["builder", "server", "core"]
+	}
+	```
+- 支持基于selenium-webdriver的end-to-end test
+
+
 ### 2016-4-29
 1. Node API new function\
 	`.joinContextPath(path)`

@@ -1,4 +1,3 @@
-/* global fail */
 var webdriver = require('selenium-webdriver');
 var config = require('@dr/environment').config;
 var Path = require('path');

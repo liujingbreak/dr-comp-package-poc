@@ -334,9 +334,13 @@ gulp.task('unpublish', function() {
 });
 
 gulp.task('test', function(callback) {
-	return require('./lib/gulp/testRunner').runUnitTest(argv)
-	.then(()=> { callback(); })
-	.catch(e => { callback('Test failed'); });
+	require('./lib/gulp/testRunner').runUnitTest(argv)
+	.then(()=> {
+		callback();
+	})
+	.catch(e => {
+		callback('Test failed');
+	});
 });
 
 gulp.task('e2e', function(callback) {

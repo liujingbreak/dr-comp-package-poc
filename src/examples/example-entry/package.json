@@ -1,6 +1,6 @@
 {
   "name": "@dr/example-entry",
-  "version": "1.0.30",
+  "version": "1.0.31",
   "description": "sample node package",
   "scripts": {
     "test": "gulp test -p example-entry"
@@ -12,7 +12,7 @@
     "@dr/parcelify-module-resolver"
   ],
   "dr": {
-	"type": "server",
+    "type": "server",
     "bundle": "example",
     "entryView": "index.html"
   },

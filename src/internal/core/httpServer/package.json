@@ -1,10 +1,13 @@
 {
   "name": "@dr/http-server",
   "description": "http and https server",
-  "version": "0.0.5-0",
+  "version": "0.0.5",
   "main": "server.js",
   "dr": {
-    "type": ["core", "server"],
+    "type": [
+      "core",
+      "server"
+    ],
     "serverPriority": 0
   }
 }

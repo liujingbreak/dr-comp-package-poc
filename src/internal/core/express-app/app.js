@@ -15,10 +15,10 @@ var Path = require('path');
 var compression = require('compression');
 
 module.exports = {
-	activate: function(api, apiPrototype) {
+	activate: function(api) {
 		log = log4js.getLogger(api.packageName);
 		var app = express();
-		setupApi(api, apiPrototype);
+		setupApi(api);
 		api.eventBus.on('packagesActivated', function(packageCache) {
 			process.nextTick(()=> {
 				create(app, api.config(), packageCache);
