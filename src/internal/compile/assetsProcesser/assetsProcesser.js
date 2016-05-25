@@ -5,6 +5,7 @@ var fs = require('fs');
 var es = require('event-stream');
 var _ = require('lodash');
 var shell = require('shelljs');
+var mkdirp = require('mkdirp');
 var log;
 var env = require('@dr/environment');
 var resolveStaticUrl = require('@dr-core/browserify-builder-api').resolveUrl;
@@ -23,15 +24,18 @@ function compile(api) {
 	var argv = api.argv;
 	packageUtils = api.packageUtils;
 	config = api.config;
-	copyRootPackageFavicon();
 	if (config().devMode && !argv.copyAssets) {
 		log.info('DevMode enabled, skip copying assets to static folder');
 		return;
 	}
+	copyRootPackageFavicon();
 	return copyAssets();
 }
 
 function activate(api) {
+	if (!api.config().devMode) {
+		return;
+	}
 	log = require('log4js').getLogger(api.packageName);
 
 	api.packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
@@ -46,6 +50,20 @@ function activate(api) {
 					res.setHeader('Access-Control-Allow-Origin', '*');
 				}
 			}));
+			if (path === '/') {
+				log.debug('found root package ' + parsedName.nam);
+				var favPath = Path.join(assetsDir, 'favicon.ico');
+				if (fs.existsSync(favPath)) {
+					log.debug('route favicon -> ' + favPath);
+					api.use('/favicon.ico', (req, res, next) => {
+						if (req.method !== 'GET') {
+							next();
+							return;
+						}
+						res.sendFile(favPath);
+					});
+				}
+			}
 		}
 	});
 }
@@ -61,7 +79,8 @@ function copyRootPackageFavicon() {
 				var favicon = Path.join(packagePath, assetsFolder, 'favicon.ico');
 				if (fs.existsSync(favicon)) {
 					log.info('Copy favicon.ico from ' + favicon);
-					shell.cp('-f', Path.resolve(favicon), Path.resolve(config().rootPath, config().staticDir));
+					mkdirp.sync(config.resolve('staticDir'));
+					shell.cp('-f', Path.resolve(favicon), Path.resolve(config().rootPath, config.resolve('staticDir')));
 				}
 			});
 			return true;
@@ -71,13 +90,12 @@ function copyRootPackageFavicon() {
 }
 
 function copyAssets() {
-	var src = [];
 	var streams = [];
 	packageUtils.findBrowserPackageByType(['*'], function(name, entryPath, parsedName, json, packagePath) {
 		var assetsFolder = json.dr ? (json.dr.assetsDir ? json.dr.assetsDir : 'assets') : 'assets';
 		var assetsDir = Path.join(packagePath, assetsFolder);
 		if (fs.existsSync(assetsDir)) {
-			src.push(Path.join(packagePath, assetsFolder, '**', '*'));
+			var src = [Path.join(packagePath, assetsFolder, '**', '*')];
 			var stream = gulp.src(src, {base: Path.join(packagePath, assetsFolder)})
 			.pipe(through.obj(function(file, enc, next) {
 				var pathInPk = Path.relative(assetsDir, file.path);
@@ -93,7 +111,7 @@ function copyAssets() {
 		return null;
 	}
 	return es.merge(streams)
-	.pipe(gulp.dest(Path.join(config().staticDir)))
+	.pipe(gulp.dest(config.resolve('staticDir')))
 	.on('end', function() {
 		log.debug('flush');
 		buildUtils.writeTimestamp('assets');

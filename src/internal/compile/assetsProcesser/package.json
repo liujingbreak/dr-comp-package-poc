@@ -10,11 +10,12 @@
   },
   "dependencies": {
     "through2": "^2.0.1",
-    "shelljs": "^0.3.0"
+    "shelljs": "^0.3.0",
+	"mkdirp": "^0.5.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "LJ",
-  "license": "ISC"
+  "license": "MIT"
 }

@@ -12,6 +12,7 @@ describe('When server is started', function() {
 	it('the home page should be available', function(done) {
 		docHomePage.get().then(() => {
 			log.debug('get done');
+			expect(docHomePage.faviconStatus).toBe(200);
 			return helper.driver.getCurrentUrl();
 		})
 		.then(url => {
