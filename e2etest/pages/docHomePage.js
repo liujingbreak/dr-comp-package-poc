@@ -1,5 +1,5 @@
-var Path = require('path');
-var log = require('@dr/logger').getLogger(Path.basename(__filename));
+// var Path = require('path');
+// var log = require('@dr/logger').getLogger(Path.basename(__filename));
 var util = require('util');
 var helper = require('@dr/e2etest-helper');
 var basePage = helper.basePage;

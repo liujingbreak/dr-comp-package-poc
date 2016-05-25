@@ -9,7 +9,6 @@ var bump = require('gulp-bump');
 var through = require('through2');
 var del = require('del');
 var jscs = require('gulp-jscs');
-var vps = require('vinyl-paths');
 var File = require('vinyl');
 var Q = require('q');
 Q.longStackSupport = true;
@@ -19,7 +18,7 @@ var fs = require('fs');
 var runSequence = require('run-sequence');
 //var buildUtils = require('./lib/gulp/buildUtils');
 
-var cli = require('shelljs-nodecli');
+var buildUtils = require('./lib/gulp/buildUtils');
 
 var findPackageJson = require('./lib/gulp/findPackageJson');
 var packageLintableSrc = require('./lib/gulp/packageLintableSrc');
@@ -43,6 +42,8 @@ var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package
 	.command('flatten-recipe', 'flattern NPM v2 nodule_modules structure, install-recipe comamnd will execute this command')
 	.command('test', '[-p <package-short-name>] [-f <spec-file-path>] run Jasmine for specific or all packages')
 	.command('e2e', '[-d <test-suit-dir] [-f <spec-file-path>] [--browser <chrome|firefox|ie|opera|edge|safari>]run Jasmine for end-to-end tests')
+	.command('check-dep', 'Print out dependency list of all your source code packages (according to `recipeSrcMapping` value in config.yaml),' +
+		' help you to check if there is conflict dependency version')
 	.describe('b', '<bundle-name> if used with command `compile` or `build`, it will only compile specific bundle, which is more efficient')
 	.alias('b', 'bundle')
 	.describe('p', '<package-short-name> if used with command `compile`, `build`, `lint`, it will only build and check style on specific package, which is more efficient')
@@ -113,21 +114,13 @@ gulp.task('compile-prod', (cb)=> {
 });
 
 function _npmInstallCurrFolder() {
-	return new Promise(function(resolve, reject) {
-		if (!config().dependencyMode) {
-			// Use asynchronous `ShellJS.exec()` for long-lived process,
-			// due to ShellJS's high CPU usage issue
-			cli.exec('npm', 'install', function(code, output) {
-				if (code === 0) {
-					resolve();
-				} else {
-					reject(output);
-				}
-			});
-		} else {
-			resolve();
-		}
-	});
+	if (!config().dependencyMode) {
+		// Use asynchronous `ShellJS.exec()` for long-lived process,
+		// due to ShellJS's high CPU usage issue
+		return buildUtils.promisifyExe('npm', 'install');
+	} else {
+		return Promise.resolve();
+	}
 }
 
 gulp.task('install-recipe', ['link'], function(cb) {
@@ -151,7 +144,7 @@ gulp.task('install-recipe', ['link'], function(cb) {
 		return new Promise((resolve, reject) => {
 			process.nextTick(() => {
 				// Put it in process.nextTick to hopefully solve a windows install random 'EPERM' error.
-				flattenRecipe();
+				packageInstaller.flattenInstalledRecipes();
 				resolve();
 			});
 		});
@@ -165,15 +158,17 @@ gulp.task('install-recipe', ['link'], function(cb) {
 		return packageInstaller.scanSrcDepsAsync(srcDirs);
 	}).then( () => {
 		return packageInstaller.installDependsAsync();
-	}).then(() => cb());
+	}).then(() => {
+		cb();
+	})
+	.catch(e => {
+		cb('Failed to install recipes');
+	});
 });
 
-gulp.task('flatten-recipe', flattenRecipe);
-
-function flattenRecipe() {
+gulp.task('flatten-recipe', function() {
 	packageInstaller.flattenInstalledRecipes();
-	return null;
-}
+});
 
 gulp.task('check-dep', function() {
 	var mgr = new PackageInstall();
@@ -192,7 +187,7 @@ gulp.task('lint', function() {
 	.pipe(jshint())
 	.pipe(jshint.reporter('jshint-stylish'))
 	.pipe(jshint.reporter('fail'))
-	.pipe(require('through2').obj(function(file, en, next) {
+	.pipe(through.obj(function(file, en, next) {
 		gutil.log(++i + ' ' + file.path);
 		next(null, file);
 	}))
@@ -275,61 +270,75 @@ gulp.task('bump', function(cb) {
 });
 
 
-gulp.task('publish', function() {
+gulp.task('publish', function(cb) {
 	var srcDirs = [];
 	recipeManager.eachRecipeSrc(function(src, recipe) {
 		srcDirs.push(src);
 	});
-	return gulp.src(srcDirs)
+	var promises = [];
+	gulp.src(srcDirs)
 		.pipe(findPackageJson())
 		.on('error', gutil.log)
-		.pipe(vps(function(paths) {
-			var data = JSON.parse(fs.readFileSync(paths, 'utf8'));
+		.on('data', file => {
+			var data = JSON.parse(fs.readFileSync(file.path, 'utf8'));
 			gutil.log('publish ' + data.name + '@' + data.version);
-			return new Promise(function(resolve, reject) {
-				cli.exec('npm', 'publish', Path.dirname(paths), {silent: true},
-					function(code, output) {
-						resolve(code);
-					});
-			});
-		})).on('end', function() {
+			promises.push( buildUtils.promisifyExe('npm', 'publish', Path.dirname(file.path), {silent: true})
+				.then(gutil.log));
+		})
+		.on('end', ()=> {
 			recipeManager.eachRecipeSrc(function(src, recipeDir) {
 				var data = JSON.parse(fs.readFileSync(Path.join(recipeDir, 'package.json'), 'utf8'));
 				gutil.log('publish ' + data.name + '@' + data.version);
-				cli.exec('npm', 'publish', recipeDir, {silent: true});
+				promises.push( buildUtils.promisifyExe('npm', 'publish', recipeDir, {silent: true})
+						.then(gutil.log));
 			});
 			var data = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 			gutil.log('publish ' + data.name + '@' + data.version);
-			cli.exec('npm', 'publish', process.cwd(), {silent: true});
+			promises.push(buildUtils.promisifyExe('npm', 'publish', process.cwd(), {silent: true})
+				.then(gutil.log));
+			Promise.all(promises)
+			.catch(()=> {})
+			.finally(() => {
+				cb();
+			});
 		});
 });
 
-gulp.task('unpublish', function() {
+gulp.task('unpublish', function(cb) {
 	var srcDirs = [];
+	var promises = [];
 	recipeManager.eachRecipeSrc(function(src, recipe) {
 		srcDirs.push(src);
 	});
-	return gulp.src(srcDirs)
+	var origOutMaxNum = process.stdout.getMaxListeners();
+	var origErrMaxNum = process.stderr.getMaxListeners();
+	process.stderr.setMaxListeners(9999);
+	process.stdout.setMaxListeners(9999);
+
+	gulp.src(srcDirs)
 		.pipe(findPackageJson())
 		.on('error', gutil.log)
-		.pipe(vps(function(paths) {
-			var data = JSON.parse(fs.readFileSync(paths, 'utf8'));
-			gutil.log('unpublish ' + data.name + '@' + data.version);
-			return new Promise(function(resolve, reject) {
-				cli.exec('npm', 'unpublish', data.name + '@' + data.version, {silent: false},
-					function(code, output) {
-						resolve(code);
-					});
-			});
-		})).on('end', function() {
+		.on('data', file => {
+			var data = JSON.parse(fs.readFileSync(file.path, 'utf8'));
+			gutil.log('unpublish src ' + data.name + '@' + data.version);
+			promises.push(buildUtils.promisifyExe('npm', 'unpublish', data.name + '@' + data.version));
+		})
+		.on('end', ()=> {
 			recipeManager.eachRecipeSrc(function(src, recipeDir) {
 				var data = JSON.parse(fs.readFileSync(Path.join(recipeDir, 'package.json'), 'utf8'));
-				gutil.log('unpublish ' + data.name + '@' + data.version);
-				cli.exec('npm', 'unpublish', data.name + '@' + data.version, {silent: false});
+				gutil.log('unpublish recipe ' + data.name + '@' + data.version);
+				promises.push(buildUtils.promisifyExe('npm', 'unpublish', data.name + '@' + data.version));
 			});
 			var data = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 			gutil.log('unpublish ' + data.name + '@' + data.version);
-			cli.exec('npm', 'unpublish', data.name + '@' + data.version, {silent: false});
+			promises.push(buildUtils.promisifyExe('npm', 'unpublish', data.name + '@' + data.version));
+			Promise.all(promises)
+			.catch(()=>{})
+			.finally(() => {
+				process.stderr.setMaxListeners(origErrMaxNum);
+				process.stdout.setMaxListeners(origOutMaxNum);
+				process.nextTick(cb);
+			});
 		});
 });
 
@@ -363,6 +372,15 @@ function bumpVersion() {
 		type: type
 	});
 }
+
+gulp.task('t', function(cb) {
+	buildUtils.promisifyExe('ls', '-ls')
+	.catch(()=>{})
+	.finally(() => {
+		setTimeout(cb, 1);
+		//cb();
+	});
+});
 
 uncaughtException();
 function uncaughtException() {

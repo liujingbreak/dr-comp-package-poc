@@ -11,11 +11,11 @@
     "@dr-core/browserify-builder": "0.0.28",
     "@dr-core/browserify-builder-api": "0.0.25",
     "@dr/parcelify-module-resolver": "0.0.21",
-    "@dr/environment": "0.0.22",
-    "@dr/logger": "0.0.24",
-    "@dr/translate-generator": "0.0.6",
     "@dr/template-builder": "0.0.5",
+    "@dr/environment": "0.0.22",
     "@dr-core/express-app": "0.0.31",
-    "@dr/http-server": "0.0.5"
+    "@dr/http-server": "0.0.5",
+    "@dr/logger": "0.0.24",
+    "@dr/translate-generator": "0.0.6"
   }
 }
