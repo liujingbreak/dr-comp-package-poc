@@ -30,6 +30,21 @@ exports.setup = function() {
 	afterAll(teardown);
 };
 
+exports.statusCodeOf = function(path) {
+	return new Promise((resolve, reject) => {
+		if (!_.startsWith(path, '/')) {
+			path = '/' + path;
+		}
+		request('http://localhost:' + config().port + path, (error, response, body)=> {
+			if (error) {
+				log.error(error);
+				return reject(error);
+			}
+			resolve(response.statusCode);
+		});
+	});
+};
+
 function startup() {
 	jasmine.DEFAULT_TIMEOUT_INTERVAL = 10 * 1000;
 }

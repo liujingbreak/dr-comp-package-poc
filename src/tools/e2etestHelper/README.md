@@ -89,3 +89,23 @@ module.exports = new YourPage();
 
 
 ```
+
+### Some help method on `e2etest-helper`
+
+| Name | description
+| - | -
+| .statusCodeOf(path) | return a Promise, resolved to a number type `statusCode`
+If you want to assert a response status code of a local HTTP Path, you may do like this,
+```javascript
+...
+it('"http://localhost:<port>/resource" Should return 200', (done)=> {
+	helper.statusCodeOf('/resource')
+	.then(statusCode => {
+		expect(statusCode).toBe(200);
+		done();
+	})
+	.catch(e => {
+		done.fail(e);
+	});
+});
+```
