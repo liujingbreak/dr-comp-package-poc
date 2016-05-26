@@ -210,7 +210,7 @@ gulp.task('compile', ['link', 'flatten-recipe'], function(cb) {
 gulp.task('compile:dev', function(cb) {
 	require('./lib/packageMgr/packageCompiler')(argv)
 	.then(() => {cb();})
-	.catch( e => { cb('failed'); });
+	.catch( e => { cb('failed ' + e); });
 });
 
 gulp.task('watch', function() {

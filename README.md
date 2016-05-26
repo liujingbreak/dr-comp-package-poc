@@ -1,6 +1,9 @@
 Frontend platform ~~PoC~~ Prototype
 =====================
-> This doc is outdated, this project has been moved to organization _dr-web-house_ 
+![travis-ci](https://travis-ci.org/dr-web-house/web-fun-house.svg)
+> This doc is outdated, this project has been moved to organization [_dr-web-house_](https://github.com/dr-web-house)
+
+
 
 
 The problem
