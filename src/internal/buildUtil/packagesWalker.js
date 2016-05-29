@@ -45,7 +45,7 @@ function walkPackages(_config, _argv, _packageUtils, _compileNodePath) {
 
 
 function saveCache(packageInfo) {
-	fs.writeFile(packageInfoCacheFile, JSON.stringify(cycle.decycle(packageInfo), null, '\t'));
+	fs.writeFileSync(packageInfoCacheFile, JSON.stringify(cycle.decycle(packageInfo), null, '\t'));
 }
 
 /**

@@ -1,5 +1,13 @@
 Updates
 =======
+### 2016-5-31
+### Support Webpack like **Code Splitting**
+Defining a split point
+```js
+require.ensure(dependencies, callback)
+```
+All JS, HTML and CSS files which are within require() dependency chain can be split downloaded.
+
 ### 2016-5-24
 **Breaking change!**
 - 所有自启动的Node runtime package， package.json文件需要标示`"dr"."type"`为 `"server"`

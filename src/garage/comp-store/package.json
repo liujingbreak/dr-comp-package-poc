@@ -1,0 +1,17 @@
+{
+  "name": "@dr/comp-store",
+  "version": "0.0.1",
+  "description": "Component store",
+  "browser": "browser.js",
+  "dr": {
+      "bundle": "component-store"
+  },
+  "transforms": [
+    "@dr/parcelify-module-resolver"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "LJ",
+  "license": "MIT"
+}

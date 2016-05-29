@@ -4,6 +4,7 @@ var stream = require('stream');
 var log = require('log4js').getLogger('browserifyBuilder.browserifyHelper');
 var swig = require('swig');
 var fs = require('fs');
+var esParser = require('./esParser');
 var assetsProcesser = require('@dr-core/assets-processer');
 var _ = require('lodash');
 swig.setDefaults({autoescape: false});
@@ -36,16 +37,27 @@ var BOOT_FUNCTION_PREFIX = '_deps_';
 var apiVariableTpl = swig.compileFile(Path.join(__dirname, 'templates', 'apiVariable.js.swig'),
 	{autoescape: false});
 
-function JsBundleEntryMaker(api, bundleName, packageBrowserInstances, locale) {
+function JsBundleEntryMaker(api, bundleName, packageBrowserInstances,
+	packageSplitPointMap) {
 	if (!(this instanceof JsBundleEntryMaker)) {
-		return new JsBundleEntryMaker(api, bundleName, packageBrowserInstances, locale);
+		return new JsBundleEntryMaker(api, bundleName, packageBrowserInstances,
+			packageSplitPointMap);
 	}
 	this.api = api;
 	this.packages = packageBrowserInstances;
 	this.bundleName = bundleName;
 	this.bundleFileName = bundleName + '_bundle_entry.js';
 	this.activeModules = {}; //key: bundle name, value: array of active module name
-	this.locale = locale;
+
+	this.packageSplitPointMap = packageSplitPointMap;
+	// clean split points cache
+	this.packages.forEach(packageIns => {
+		if (!_.has(this.packageSplitPointMap, packageIns.longName)) {
+			return;
+		}
+		//log.debug('clean split point cache for ' + packageIns.longName);
+		delete this.packageSplitPointMap[packageIns.longName];
+	});
 }
 
 var apiVarablePat = /(?:^|[^\w$\.])__api(?:$|[^\w$])/mg;
@@ -53,6 +65,10 @@ var requireI18nPat = /(^|[^\w$\.])require\s*\(([^)]*)\)/mg;
 
 JsBundleEntryMaker.prototype = {
 	entryBundleFileTpl: swig.compileFile(Path.join(__dirname, 'templates', 'bundle.js.swig'), {autoescape: false}),
+
+	setLocale: function(locale) {
+		this.locale = locale;
+	},
 
 	createPackageListFile: function() {
 		var bundleFileListFunction = this.entryBundleFileTpl({
@@ -63,7 +79,7 @@ JsBundleEntryMaker.prototype = {
 		return bundleFileListFunction;
 	},
 
-	jsTranformer: function() {
+	transform: function(locale) {
 		var self = this;
 		return function(file) {
 			var source = '';
@@ -75,22 +91,7 @@ JsBundleEntryMaker.prototype = {
 					source += chunk;
 					next();
 				}, function(cb) {
-					apiVarablePat.lastIndex = 0;
-					if (apiVarablePat.test(source)) {
-						log.debug('reference __api in ' + file);
-						var name = self.api.findBrowserPackageByPath(file);
-						source = apiVariableTpl({
-							bundle: self.bundleName,
-							packageName: name,
-							source: source,
-							packageNameAvailable: name !== null
-						});
-					}
-					source = source.replace(requireI18nPat, (match, leading, path) => {
-						path = path.replace(/\{locale\}/g, self.locale ? self.locale : 'en');
-						return leading + 'require(' + path + ')';
-					});
-					this.push(source);
+					this.push(self.transformJS(source, file, locale));
 					cb();
 				});
 			} else if (ext === '.html'){
@@ -114,16 +115,58 @@ JsBundleEntryMaker.prototype = {
 		};
 	},
 
+	transformJS: function(source, file, locale) {
+		var currPackageName;
+		var hasRequireEnsure = false;
+		var self = this;
+		apiVarablePat.lastIndex = 0;
+		if (apiVarablePat.test(source)) {
+			log.debug('reference __api in ' + file);
+			currPackageName = this.api.findBrowserPackageByPath(file);
+			source = apiVariableTpl({
+				bundle: this.bundleName,
+				packageName: currPackageName,
+				source: source,
+				packageNameAvailable: currPackageName !== null
+			});
+		}
+
+		esParser.parse(source, {
+			splitLoad: splitPoint => {
+				hasRequireEnsure = true;
+				if (!currPackageName) {
+					currPackageName = self.api.findBrowserPackageByPath(file);
+				}
+				if (!_.has(self.packageSplitPointMap, currPackageName)) {
+					self.packageSplitPointMap[currPackageName] = {};
+				}
+				self.packageSplitPointMap[currPackageName][splitPoint] = 1;
+			}
+		});
+		if (hasRequireEnsure) {
+			source = 'require.ensure = function(){return drApi.ensureRequire.apply(drApi, arguments)};\n' +
+				source;
+		}
+		source = source.replace(requireI18nPat, (match, leading, path) => {
+			path = path.replace(/\{locale\}/g, locale ? locale : 'en');
+			return leading + 'require(' + path + ')';
+		});
+
+		return source;
+	},
+
 	createPackageListFileStream: function(bundleName, packageInstances) {
 		return str2Stream(this.createPackageListFile.apply(this, arguments));
 	}
 };
 
-function JsBundleWithI18nMaker(api, bundleName, packageBrowserInstances, browserResolve) {
+function JsBundleWithI18nMaker(api, bundleName, packageBrowserInstances,
+	packageSplitPointMap, browserResolve) {
 	if (!(this instanceof JsBundleWithI18nMaker)) {
-		return new JsBundleWithI18nMaker(api, bundleName, packageBrowserInstances, browserResolve);
+		return new JsBundleWithI18nMaker(api, bundleName, packageBrowserInstances,
+			packageSplitPointMap, browserResolve);
 	}
-	JsBundleEntryMaker.apply(this, arguments);
+	JsBundleEntryMaker.call(this, api, bundleName, packageBrowserInstances, packageSplitPointMap);
 	this.browserResolve = browserResolve;
 	this.pk2LocaleModule = {};
 }

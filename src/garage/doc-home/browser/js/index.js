@@ -29,6 +29,7 @@ require('./controllers/mainController')(docHome);
 require('./controllers/introController')(docHome);
 require('./controllers/asideController')(docHome);
 require('./controllers/docController')(docHome);
+require('./controllers/splitLoadController')(docHome);
 require('./directives/animate')(docHome);
 require('./directives/menuAside')(docHome);
 require('./directives/docHome')(docHome);

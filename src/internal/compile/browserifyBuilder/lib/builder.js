@@ -19,7 +19,6 @@ var through = require('through2');
 var htmlTranform = require('html-browserify');
 var yamlify = require('yamlify');
 var RevAll = require('gulp-rev-all');
-var PrintNode = require('./printUtil');
 var File = require('vinyl');
 // var browserifyInc = require('browserify-incremental');
 // var xtend = require('xtend');
@@ -30,16 +29,15 @@ var chalk = require('chalk');
 
 var log;
 var helperFactor = require('./browserifyHelper');
-var FileCache = require('@dr-core/build-util').fileCache;
 var PageCompiler = require('./pageCompiler');
 var walkPackages = require('@dr-core/build-util').walkPackages;
+var depCtl = require('./dependencyControl');
 var packageBrowserInstance = require('@dr-core/build-util').packageInstance;
 var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
 var fileAccessAsync = Promise.promisify(fs.access, {context: fs});
 var packageUtils, config, jsBundleEntryMaker;
 
 var tasks = [];
-var fileCache;
 var addonTransforms = [];
 /**
  * JS and CSS file Build process based on browserify and parcelify
@@ -67,19 +65,16 @@ function compile(api) {
 	var argv = api.argv;
 	var helper = helperFactor(config);
 	//var jsTransform = helper.jsTransform;
-	fileCache = fileCache ? fileCache : new FileCache(config().destDir);
 	var buildCss = true;
 	var buildJS = true;
 	var cssPromises = [];
 	var jsStreams = [];
 	var staticDir = Path.resolve(config().staticDir);
-	var i18nModuleNameSet, pk2localeModule;
 	var packageInfo = walkPackages(config, argv, packageUtils, api.compileNodePath);
 	//monkey patch new API
-	api.__proto__.packageInfo = packageInfo;
+	Object.getPrototypeOf(api).packageInfo = packageInfo;
 	require('./compilerApi')(api);
 
-	var localeDepsMap;
 	var bundleStream;
 	var bundleNames = _.keys(packageInfo.bundleMap);
 	var bundlesTobuild;
@@ -107,10 +102,6 @@ function compile(api) {
 		buildJS = false;
 	}
 
-	// extra data returned from task, which will be injected to entry page.
-	// e.g. i18n information.
-
-
 	var cssStream = through.obj(function(path, enc, next) {
 		fileAccessAsync(path, fs.R_OK).then(()=> {
 			return readFileAsync(path, 'utf8');
@@ -129,31 +120,24 @@ function compile(api) {
 		})
 		.catch((err)=>{}).finally(()=> next());
 	});
-	return Promise.all([
-		fileCache.loadFromFile('bundleInfoCache.json'),
-		fileCache.loadFromFile('depsMap.json')
-	])
-	.then(buildStart)
-	.then(() => {
-		walkPackages.saveCache(packageInfo);
-		fileCache.tailDown();
-	})
-	.catch( err => {
-		log.error(err);
-		gutil.beep();
-		process.exit(1);
-	});
+	return depCtl.initAsync(api, packageInfo)
+		.then(buildStart)
+		.then(() => {
+			walkPackages.saveCache(packageInfo);
+			return depCtl.tailDown();
+		})
+		.catch( err => {
+			log.error(err);
+			gutil.beep();
+			process.exit(1);
+		});
 
-	function buildStart(results) {
-		var depsMap = results[1];
-		var bundleInfoCache = results[0];
-		initI18nBundleInfo(bundleInfoCache);
-
+	function buildStart() {
 		log.info('------- building bundles ---------');
 		bundleNames.forEach(function(bundle) {
 			log.info(chalk.inverse(bundle));
 			var buildObj = buildBundle(packageInfo.bundleMap[bundle],
-				bundle, config().staticDir, depsMap);
+				bundle, config().staticDir);
 			if (buildCss) {
 				buildObj.cssPromises.forEach(prom => {
 					cssPromises.push(prom.then(filePath => {
@@ -189,10 +173,10 @@ function compile(api) {
 					cb();
 				}, function flush(callback) {
 					// [ Entry page package A ]--depends on--> [ package B, C ]
-					var depsGraph = createEntryDepsData(depsMap, packageInfo);
-					printModuleDependencyGraph(depsGraph);
+					// {entries: {}, localeEntries: {}, splitPoints: {}}
+					var depsGraph = depCtl.createEntryPackageDepGraph();
 					// [ Entry page package A ]--depends on--> ( bundle X, Y )
-					var bundleGraph = createBundleDependencyGraph(depsGraph, packageInfo);
+					var bundleGraph = depCtl.createEntryBundleDepGraph();
 					_.assign(pageCompilerParam, {
 						config: config,
 						bundleDepsGraph: bundleGraph.bundleDepsGraph,
@@ -200,8 +184,15 @@ function compile(api) {
 						builtBundles: bundleNames
 					});
 					this.push(pageCompilerParam);
-					api.__proto__.bundleDepsGraph = bundleGraph.bundleDepsGraph;
-					api.__proto__.localeBundlesDepsGraph = bundleGraph.localeBundlesDepsGraph;
+					_.assign(Object.getPrototypeOf(api), {
+						packageDepsGraph: depsGraph,
+						bundleDepsGraph: bundleGraph.bundleDepsGraph,
+						localeBundlesDepsGraph: bundleGraph.localeBundlesDepsGraph,
+						splitPointDepsGraph: bundleGraph.splitPointDepsGraph
+					});
+					pageCompilerParam.getBundleMetadataForEntry = (entryPackage) => {
+						return getBundleMetadataForEntry(entryPackage, pageCompilerParam.revisionMeta);
+					};
 					runTasks().then(getDataFuncs => {
 						pageCompilerParam.entryDataProvider = function(entryPackageName) {
 							var browserApi = {};
@@ -222,226 +213,9 @@ function compile(api) {
 		});
 	}
 
-	function initI18nBundleInfo(bundleInfoCache) {
-		if (!bundleInfoCache.i18nModuleNameSet) {
-			bundleInfoCache.i18nModuleNameSet = {};
-		}
-		if (!bundleInfoCache.depsMap) {
-			bundleInfoCache.depsMap = {};
-		}
-		// package to locale module map Object.<{string} name, Object.<{string} locale, Object>>
-		if (!bundleInfoCache.pk2localeModule) {
-			bundleInfoCache.pk2localeModule = {};
-		}
-		i18nModuleNameSet = bundleInfoCache.i18nModuleNameSet;
-		pk2localeModule = bundleInfoCache.pk2localeModule;
-		localeDepsMap = bundleInfoCache.depsMap;
-	}
-	/**
-	 * create a map of entry module and depended modules
-	 * @param  {[type]} depsMap  [description]
-	 * @param  {[type]} entryMap [description]
-	 * @return {object<string, object<string, (boolean | string)>>} a map
-	 */
-	function createEntryDepsData(depsMap, packageInfo) {
-		//log.debug('createEntryDepsData() ' + JSON.stringify(depsMap, null, '  '));
-		var packageDeps = {entries: {}, localeEntries: {}};
-		_.forOwn(packageInfo.entryPageMap, function(pkInstance, moduleName) {
-			var entryDepsSet = packageDeps.entries[moduleName] = {};
-			_walkDeps(depsMap, moduleName, moduleName, entryDepsSet, true);
-		});
-		//log.debug('packageInfo.localeEntryMap: ' + JSON.stringify(packageInfo.localeEntryMap, null, '  '));
-		_.forOwn(packageInfo.localeEntryMap, (entryMap, locale) => {
-			var result = packageDeps.localeEntries[locale] = {};
-			_.forOwn(entryMap, function(pkInstance, moduleName) {
-				var entryDepsSet = result[moduleName] = {};
-				_walkDeps(localeDepsMap[locale], moduleName, moduleName, entryDepsSet, true, null, depsMap);
-			});
-		});
-		//log.debug('createEntryDepsData() packageDeps = ' + JSON.stringify(packageDeps, null, '  '))
-		function _walkDeps(depsMap, id, file, entryDepsSet, isParentOurs, lastDirectDeps, parentDepsMap) {
-			var deps;
-			if (!file) { // since for external module, the `file` is always `false`
-				deps = depsMap[id];
-				if (parentDepsMap && !deps) {
-					deps = parentDepsMap[id];
-				}
-			} else {
-				deps = depsMap[file];
-				deps = deps ? deps : depsMap[id];
-				if (parentDepsMap && !deps) {
-					deps = parentDepsMap[file] ? parentDepsMap[file] : parentDepsMap[id];
-				}
-			}
-			if (!deps && !{}.hasOwnProperty.call(i18nModuleNameSet, id)) {
-				log.error('Can not walk dependency tree for: ' + id +
-				', missing depended module or you may try rebuild all bundles');
-				log.info(parentDepsMap[id]);
-				log.info('i18nModuleNameSet: ' + JSON.stringify(i18nModuleNameSet, null, '  '));
-				gutil.beep();
-			}
-			if (!deps) {
-				return;
-			}
-			_.forOwn(deps, function(depsValue, depsKey) {
-				var isRelativePath = _.startsWith(depsKey, '.');
 
-				if (!isRelativePath) {
-					// require id is a module name
-					var isOurs = isParentOurs && !packageUtils.is3rdParty(depsKey);
-					if ({}.hasOwnProperty.call(entryDepsSet, depsKey)) {
-						return;
-					}
-					entryDepsSet[depsKey] = isParentOurs ? true : lastDirectDeps;
-					if (isOurs) {
-						_walkDeps(depsMap, depsKey, depsValue, entryDepsSet, true, null, parentDepsMap);
-					} else {
-						_walkDeps(depsMap, depsKey, depsValue, entryDepsSet, false, depsKey, parentDepsMap);
-					}
-				} else {
-					// require id is a local file path
-					_walkDeps(depsMap, depsKey, depsValue, entryDepsSet, isParentOurs, lastDirectDeps, parentDepsMap);
-				}
-			});
-		}
-		return packageDeps;
-	}
 
-	/**
-	 * @return object {bundleDepsGraph, localeBundlesDepsGraph: {moduleName, {locale, {bundle: boolean}}}
-	 */
-	function createBundleDependencyGraph(packageDepsGraph, packageInfo) {
-		var moduleMap = packageInfo.moduleMap;
-		var localeBundlesDepsGraph = {};
-		var bundleDepsGraph = createGraph(packageDepsGraph.entries);
-		printNode(toPrintModel());
-
-		function createGraph(entries) {
-			var bundleDepsGraph = {};
-			_.forOwn(entries, function(deps, moduleName) {
-				var currBundle = moduleMap[moduleName].bundle;
-				var depBundleSet = bundleDepsGraph[moduleName] = {};
-				var locDepBundleSet = localeBundlesDepsGraph[moduleName] = {};
-				depBundleSet[currBundle] = true;
-				_.forOwn(deps, function(isDirectDeps, dep) {
-					//log.debug('Is dep '+ dep +' our package ? ' + isVendor);
-					if (dep.substring(0, 1) === '_') {
-						// skip some browerify internal module like `_process`
-						return;
-					}
-					var bundle, msg;
-					if ({}.hasOwnProperty.call(i18nModuleNameSet, dep)) {
-						// it is i18n module like "@dr/angularjs/i18n" which is not belong to any initial bundle
-						config().locales.forEach(locale => {
-							var graph = locDepBundleSet[locale];
-							if (!graph) {
-								graph = locDepBundleSet[locale] = {};
-							}
-							var localeModuleName = pk2localeModule[dep][locale];
-							var localeDeps = packageDepsGraph.localeEntries[locale][localeModuleName];
-							graph[packageInfo.localeEntryMap[locale][localeModuleName].bundle] = true;
-							//log.debug('localeDeps: ' + JSON.stringify(localeDeps, null, '  '));
-							_.keys(localeDeps).forEach(moduleName => {
-								graph[moduleMap[moduleName].bundle] = true;
-							});
-						});
-						return;
-					}
-					if (!moduleMap[dep] || !(bundle = moduleMap[dep].bundle)) {
-						if (isDirectDeps === true) {
-							msg = 'Entry bundle "' + currBundle + '", module "' + dep + '" which is dependency of bundle "' +
-								currBundle + '" is not explicityly configured with any bundle, check out `vendorBundleMap` in config.yaml';
-							log.warn(msg);
-							throw new Error(msg);
-						} else {
-							msg = 'Entry bundle "' + currBundle + '", module "' + dep + '" which is dependency of "' +
-								isDirectDeps + '" is not explicityly configured with any bundle, check out `vendorBundleMap` in config.yaml';
-							log.warn(msg);
-							return;
-						}
-					}
-					depBundleSet[bundle] = true;
-				});
-				// Core bundle should always be depended by all entry page modules!
-				depBundleSet.core = true;
-				_.forOwn(depBundleSet, (whatever, initialBundle) => {
-					_.forOwn(locDepBundleSet, (localeBundleSet, locale) => {
-						// remove any locale bundle that are duplicate with initial bundles, we don't want to load them twice in browser.
-						delete localeBundleSet[initialBundle];
-					});
-				});
-			});
-			return bundleDepsGraph;
-		}
-
-		function toPrintModel() {
-			var node = new PrintNode({content: '------- Entry package -> bundle dependency ---------'});
-			_.forOwn(bundleDepsGraph, function(depBundleSet, entryModule) {
-				var subNode1 = PrintNode({content: chalk.inverse(entryModule), parent: node});
-				_.forOwn(depBundleSet, function(whatever, bundle) {
-					PrintNode({content: chalk.magenta(bundle), parent: subNode1});
-				});
-				_.forOwn(localeBundlesDepsGraph[entryModule], (depBundleSet, locale) => {
-					var subNode2 = PrintNode({content: '{locale: ' + chalk.cyan(locale) + '}', parent: subNode1});
-					_.forOwn(depBundleSet, function(whatever, bundle) {
-						PrintNode({content: chalk.magenta(bundle), parent: subNode2});
-					});
-				});
-			});
-			return node;
-		}
-
-		function printNode(node) {
-			log.info(node.prefix() + node.content);
-			_.each(node.children, child => {
-				printNode(child);
-			});
-		}
-		return {
-			bundleDepsGraph: bundleDepsGraph,
-			localeBundlesDepsGraph: localeBundlesDepsGraph
-		};
-	}
-
-	function printModuleDependencyGraph(packageDeps) {
-		log.info('------- Entry package -> package dependency ----------');
-		print(packageDeps.entries);
-
-		_.forOwn(packageDeps.localeEntries, (entries, locale) => {
-			log.info('------- locale package {' + locale + '} -> package dependency ----------');
-			var nameMap = {};
-			_.forOwn(pk2localeModule, (locales, name) => {
-				nameMap[locales[locale]] = name;
-			});
-			print(entries, nameMap);
-		});
-
-		function print(entries, moduleNameMap) {
-			var end = _.size(entries);
-			var entryIdx = 0;
-			_.forOwn(entries, function(deps, moduleName) {
-				entryIdx++;
-				var leading = entryIdx < end ? '├' : '└';
-				var leadingChr = entryIdx < end ? '|' : ' ';
-				log.info(leading + '─┬ ' + chalk.green(moduleNameMap ? moduleNameMap[moduleName] : moduleName));
-				var size = _.size(deps);
-				var row = 1;
-				_.forOwn(deps, function(file, dep) {
-					if (row === size) {
-						log.info(leadingChr + ' └─── ' + chalk.cyan(dep));
-					} else {
-						log.info(leadingChr + ' ├─── ' + chalk.cyan(dep));
-					}
-					row++;
-				});
-				if (size === 0) {
-					log.info(leadingChr + ' └─── <empty>');
-				}
-			});
-		}
-	}
-
-	function buildBundle(modules, bundle, destDir, depsMap) {
+	function buildBundle(modules, bundle, destDir) {
 		var browserifyOpt = {
 			debug: true,
 			paths: api.compileNodePath,
@@ -465,7 +239,7 @@ function compile(api) {
 			mIdx++;
 		});
 		var entryJsDir = Path.join(config().destDir, 'temp');
-		jsBundleEntryMaker = helper.JsBundleEntryMaker(api, bundle, modules );
+		jsBundleEntryMaker = helper.JsBundleEntryMaker(api, bundle, modules, depCtl.packageSplitPointMap);
 		var listFile = jsBundleEntryMaker.createPackageListFile();
 		mkdirp.sync(entryJsDir);
 		var entryFile = Path.join(entryJsDir, jsBundleEntryMaker.bundleFileName);
@@ -487,7 +261,7 @@ function compile(api) {
 		});
 		b.transform(htmlTranform, {global: true});
 		b.transform(yamlify, {global: true});
-		b.transform(jsBundleEntryMaker.jsTranformer(), {global: true});
+		b.transform(jsBundleEntryMaker.transform('{do not require localed package here}'), {global: true});
 
 		var excludeList = excludeModules(packageInfo.allModules, b, _.map(modules, function(module) {return module.longName;}));
 		excludeI18nModules(packageInfo.allModules, b);
@@ -496,10 +270,10 @@ function compile(api) {
 		var cssPromises = [buildCssBundle(b, bundle, destDir)];
 
 		// draw a cross bundles dependency map
-		browserifyDepsMap(b, depsMap);
+		depCtl.browserifyDepsMap(b, depCtl.depsMap);
 		var jsStream = _createBrowserifyBundle(b, bundle);
 
-		var i18nBuildRet = buildI18nBundles(browserifyOpt, modules, excludeList, bundle, entryJsDir, depsMap);
+		var i18nBuildRet = buildI18nBundles(browserifyOpt, modules, excludeList, bundle, entryJsDir);
 		if (i18nBuildRet) {
 			jsStream = es.merge([jsStream, i18nBuildRet[0]]);
 			cssPromises = cssPromises.concat(i18nBuildRet[1]);
@@ -510,14 +284,16 @@ function compile(api) {
 		};
 	}
 
-	function buildI18nBundles(browserifyOpt, modules, excludeList, bundle, entryJsDir, depsMap) {
+	function buildI18nBundles(browserifyOpt, modules, excludeList, bundle, entryJsDir) {
 		var streams = [];
 		var cssPromises = [];
-		var maker = helper.JsBundleWithI18nMaker(api, bundle, modules, resolve);
+		var maker = helper.JsBundleWithI18nMaker(api, bundle, modules, depCtl.packageSplitPointMap, resolve);
 
 		config().locales.forEach(locale => {
-			localeDepsMap[locale] = localeDepsMap[locale] ? localeDepsMap[locale] : {};
-			var ret = buildLocaleBundle(maker, browserifyOpt, locale, modules, excludeList, bundle, entryJsDir, localeDepsMap[locale]);
+			if (!_.has(depCtl.localeDepsMap, locale)) {
+				depCtl.localeDepsMap[locale] = {};
+			}
+			var ret = buildLocaleBundle(maker, browserifyOpt, locale, modules, excludeList, bundle, entryJsDir, depCtl.localeDepsMap[locale]);
 			if (ret) {
 				streams.push(ret[0]);
 				cssPromises.push(ret[1]);
@@ -534,8 +310,7 @@ function compile(api) {
 		if (!listFile) {
 			return null;
 		}
-
-		_.assign(pk2localeModule, maker.pk2LocaleModule);
+		depCtl.updatePack2localeModule(maker.pk2LocaleModule);
 
 		var localeBunleName = bundle + '_' + locale;
 
@@ -549,7 +324,7 @@ function compile(api) {
 				longName: expose.opts.expose + '{' + locale + '}',
 				shortName: expose.opts.expose + '{' + locale + '}',
 				file: expose.file
-				//isEntryJS: {}.hasOwnProperty.call(config().defaultEntrySet, moduleName)
+				//isEntryJS: _.has(config().defaultEntrySet, moduleName)
 			});
 			if (!packageInfo.localeEntryMap[locale]) {
 				packageInfo.localeEntryMap[locale] = {};
@@ -557,7 +332,7 @@ function compile(api) {
 			packageInfo.localeEntryMap[locale][localeModuleName] = pkInstance;
 			packageInfo.moduleMap[expose.opts.expose + '{' + locale + '}'] = pkInstance;
 			//log.debug('buildLocaleBundle() locale entry ' + localeModuleName);
-			i18nModuleNameSet[expose.opts.expose] = 1;
+			depCtl.addI18nModule(expose.opts.expose);
 		});
 		//var listFilePath = Path.resolve(maker.i18nBundleEntryFileName(locale));
 		// var listStream = through();
@@ -572,8 +347,9 @@ function compile(api) {
 		});
 		b.transform(htmlTranform, {global: true});
 		b.transform(yamlify, {global: true});
-		b.transform(jsBundleEntryMaker.jsTranformer(), {global: true});
-		browserifyDepsMap(b, depsMap);
+		//jsBundleEntryMaker.setLocale(locale);
+		b.transform(jsBundleEntryMaker.transform(locale), {global: true});
+		depCtl.browserifyDepsMap(b, depsMap);
 		var cssProm = buildCssBundle(b, bundle + '_' + locale, config().staticDir);
 		excludeList.forEach(b.exclude, b);
 		var out = _createBrowserifyBundle(b, localeBunleName);
@@ -581,52 +357,90 @@ function compile(api) {
 	}
 
 	function monkeyPatchBrowserApi(browserApi, entryPackage, revisionMeta) {
-		var localeBundleSet = api.localeBundlesDepsGraph[entryPackage];
-		var apiBundleLocaleMap = browserApi.localeBundlesMap = {};
-		config().locales.forEach(locale => {
-			var localBundles = _.keys(localeBundleSet[locale]);
-			apiBundleLocaleMap[locale] = {};
-			apiBundleLocaleMap[locale].js = localBundles.map(bundleName => {
-				var file = 'js/' + bundleName + (config().devMode ? '' : '.min') + '.js';
-				return revisionMeta[file];
-			});
-			localBundles.forEach(bundleName => {
-				var file = 'css/' + bundleName + (config().devMode ? '' : '.min') + '.css';
-				var destFile = revisionMeta[file];
-				if (destFile) {
-					if (!apiBundleLocaleMap[locale].css) {
-						apiBundleLocaleMap[locale].css = [];
-					}
-					apiBundleLocaleMap[locale].css.push(destFile);
-				}
-			});
-		});
-
+		// setup server side config setting to browser
 		browserApi._config = {
 			staticAssetsURL: config().staticAssetsURL,
 			serverURL: config().serverURL,
 			packageContextPathMapping: config().packageContextPathMapping,
-			locales: config().locales
+			locales: config().locales,
+			devMode: config().devMode
+		};
+		// setup locale bundles data
+		browserApi.localeBundlesMap = {};
+		var entryMetadata = depCtl.entryOrSplitPointMetadata(entryPackage);
+		_.each(entryMetadata.locales, (bundles, locale) => {
+			browserApi.localeBundlesMap[locale] = {
+				js: bundles2FilePaths(bundles, 'js', revisionMeta),
+				css: bundles2FilePaths(bundles, 'css', revisionMeta)
+			};
+		});
+		// setup split points bundles data
+
+		depCtl.allSplitPointsOfEntry(entryPackage).forEach(splitPoint => {
+			var metadata = depCtl.noDuplicateMetadata(splitPoint, entryPackage);
+			var loadingFiles = {};
+			// normal bundles
+			loadingFiles = {
+				js: bundles2FilePaths(metadata.bundles, 'js', revisionMeta),
+				css: bundles2FilePaths(metadata.bundles, 'css', revisionMeta),
+				locales: {}
+			};
+			if (_.size(loadingFiles.js) === 0) {
+				delete loadingFiles.js;
+			}
+			if (_.size(loadingFiles.css) === 0) {
+				delete loadingFiles.css;
+			}
+
+			// locale bundles
+			_.each(metadata.locales, (bundles, locale) => {
+				loadingFiles.locales[locale] = {
+					js: bundles2FilePaths(bundles, 'js', revisionMeta),
+					css: bundles2FilePaths(bundles, 'css', revisionMeta)
+				};
+				if (_.size(loadingFiles.locales[locale].js) === 0) {
+					delete loadingFiles.locales[locale].js;
+				}
+				if (_.size(loadingFiles.locales[locale].css) === 0) {
+					delete loadingFiles.locales[locale].css;
+				}
+			});
+			if (!_.has(browserApi, 'splitPoints')) {
+				browserApi.splitPoints = {};
+			}
+			browserApi.splitPoints[splitPoint] = loadingFiles;
+		});
+		var firstLoaded = getBundleMetadataForEntry(entryPackage, revisionMeta);
+
+		if (_.has(browserApi, 'splitPoints')) {
+			// there is no split points for this entry, no need to track loaded bundles
+			browserApi.loadedBundleFileSet = {};
+			firstLoaded.js.forEach(path => {
+				browserApi.loadedBundleFileSet[path] = 1;
+			});
+			firstLoaded.css.forEach(path => {
+				browserApi.loadedBundleFileSet[path] = 1;
+			});
+		}
+	}
+
+	function getBundleMetadataForEntry(entryPackage, revisionMeta) {
+		var entryMetadata = depCtl.entryOrSplitPointMetadata(entryPackage);
+		return {
+			js: bundles2FilePaths(entryMetadata.bundles, 'js', revisionMeta),
+			css: bundles2FilePaths(entryMetadata.bundles, 'css', revisionMeta)
 		};
 	}
 
-	/**
-	 * draw a cross bundles dependency map
-	 * @param  {object} b       browserify instance
-	 */
-	function browserifyDepsMap(b, depsMap) {
-		var rootPath = config().rootPath;
-		b.pipeline.get('deps').push(through.obj(function(chunk, encoding, callback) {
-			var shortFilePath = Path.isAbsolute(chunk.file) ? Path.relative(rootPath, chunk.file) : chunk.file;
-			var deps = _.clone(chunk.deps);
-			_.forOwn(chunk.deps, function(path, id) {
-				if (path && Path.isAbsolute(path)) {
-					deps[id] = Path.relative(rootPath, path);
-				}
-			});
-			depsMap[shortFilePath] = deps;
-			callback(null, chunk);
-		}));
+	function bundles2FilePaths(bundles, type, revisionMeta) {
+		var paths = [];
+		_.each(bundles, bundle => {
+			var file = type + '/' + bundle + (config().devMode ? '' : '.min') + '.' + type;
+			if (_.has(revisionMeta, file)) {
+				paths.push(revisionMeta[file]);
+			}
+		});
+		return paths;
 	}
 
 	function excludeModules(allModules, b, entryModules) {

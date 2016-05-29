@@ -42,11 +42,85 @@ BrowserApi.setup = function(obj) {
 	_.assign(BrowserApi.prototype, obj);
 };
 
+/**
+ * Code splitting
+ * @param  {string | string[]} bundlePaths  dependencies bundles
+ * @param  {function(function require())} callBack
+ */
+BrowserApi.ensureRequire = function(splitPoints, callBack) {
+	var self = BrowserApi.prototype;
+	console.log('BrowserApi.ensureRequire()');
+	var loadedBundleFileSet = self.loadedBundleFileSet;
+
+	var js = {}; // JS bundles need to be loaded
+	var css = {}; // CSS bundles need to be loaded
+	var allLoaded = true;
+	_.each(splitPoints, function(splitPoint) {
+		var jsBundles = self.splitPoints[splitPoint].js;
+		var cssBundles = self.splitPoints[splitPoint].css;
+		_.each(jsBundles, function(jsBundle) {
+			if (!_.has(loadedBundleFileSet, jsBundle)) {
+				allLoaded = false;
+				js[jsBundle] = 1;
+			}
+		});
+		_.each(cssBundles, function(cssBundle) {
+			if (!_.has(loadedBundleFileSet, cssBundle)) {
+				allLoaded = false;
+				css[cssBundle] = 1;
+			}
+		});
+		var localedBundles = self.splitPoints[splitPoint];
+		if (localedBundles) {
+			_.each(localedBundles.locales[self.lastLoadedLocale].js, function(bundle) {
+				if (!_.has(loadedBundleFileSet, bundle)) {
+					allLoaded = false;
+					js[bundle] = 1;
+				}
+			});
+			_.each(localedBundles.locales[self.lastLoadedLocale].css, function(bundle) {
+				if (!_.has(loadedBundleFileSet, bundle)) {
+					allLoaded = false;
+					css[bundle] = 1;
+				}
+			});
+		}
+	});
+	if (allLoaded) {
+		callBack(require);
+		return;
+	}
+	js = _.keys(js);
+	css = _.keys(css);
+	if (self.isDebug()) {
+		console.log('loading ' + css);
+	}
+	// load CSS
+	if (_.size(css) > 0) {
+		self._loadCssBundles(css);
+	}
+	if (self.isDebug()) {
+		console.log('loading ' + js);
+	}
+	// load JS
+	window.$LAB.script(_.map(js, function(jsPath) {
+		return self.config().staticAssetsURL + '/' + jsPath;
+	})).wait(function() {
+		self.markBundleLoaded(js);
+		self.markBundleLoaded(css);
+		callBack(require);
+	});
+};
+
 BrowserApi.prototype = {
 	i18nLoaded: false,
 
 	config: function() {
 		return BrowserApi.prototype._config;
+	},
+
+	isDebug: function() {
+		return this.config().devMode;
 	},
 
 	isBrowser: function() {
@@ -66,25 +140,34 @@ BrowserApi.prototype = {
 	},
 
 	loadLocaleBundles: function(locale, waitCallback) {
+		var self = this;
 		var prefix = this.config().staticAssetsURL;
 		var localeBundles = this.localeBundlesMap[locale];
 		var localeBundleJsUrls = _.map(localeBundles.js, function(bundle) {
 			return prefix + '/' + bundle;
 		});
 		if (localeBundles.css && localeBundles.css.length > 0) {
-			var h = window.document.getElementsByTagName('head')[0];
-			_.each(localeBundles.css, function(bundle) {
-				var cssDom = document.createElement('link');
-				cssDom.rel = 'stylesheet';
-				cssDom.href = prefix + '/' + bundle;
-				cssDom.type = 'text/css';
-				cssDom.id = bundle;
-				h.appendChild(cssDom);
-			});
+			this._loadCssBundles(localeBundles.css);
 		}
+		BrowserApi.prototype.lastLoadedLocale = locale;
 		window.$LAB.script(localeBundleJsUrls).wait(function() {
 			BrowserApi.prototype.i18nLoaded = true;
+			self.markBundleLoaded(localeBundles.js);
+			self.markBundleLoaded(localeBundles.css);
 			waitCallback();
+		});
+	},
+
+	_loadCssBundles: function(paths) {
+		var prefix = this.config().staticAssetsURL;
+		var h = window.document.getElementsByTagName('head')[0];
+		_.each(paths, function(bundle) {
+			var cssDom = document.createElement('link');
+			cssDom.rel = 'stylesheet';
+			cssDom.href = prefix + '/' + bundle;
+			cssDom.type = 'text/css';
+			cssDom.id = bundle;
+			h.appendChild(cssDom);
 		});
 	},
 
@@ -141,5 +224,22 @@ BrowserApi.prototype = {
 
 	extend: function(obj) {
 		_.assign(BrowserApi.prototype, obj);
+	},
+
+	isPackageLoaded: function(packageName) {
+		return _.has(this.loadedPackage, packageName);
+	},
+
+	markBundleLoaded: function(bundles) {
+		var self = this;
+		if (!self.loadedBundleFileSet) {
+			// if loadedBundleFileSet is undefined, it means that there is no
+			// split points, no need to track loaded bundles
+			return;
+		}
+		bundles = [].concat(bundles);
+		_.each(bundles, function(b) {
+			self.loadedBundleFileSet[b] = 1;
+		});
 	}
 };

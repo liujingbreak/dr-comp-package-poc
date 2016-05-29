@@ -16,6 +16,12 @@ module.exports = function(controllerProvider) {
 			{
 				label: $translate('Documentation'),
 				subMenu: readme.buildMenu(docName2Route)
+			},
+			{
+				label: $translate('Component Store'),
+				action: function() {
+					$location.path('/components');
+				}
 			}
 		];
 

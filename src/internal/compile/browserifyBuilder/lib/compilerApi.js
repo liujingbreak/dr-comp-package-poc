@@ -4,7 +4,7 @@ var log = require('log4js').getLogger(Path.basename(__filename, '.js'));
 var chalk = require('chalk');
 
 module.exports = function(api) {
-	var proto = api.__proto__;
+	var proto = Object.getPrototypeOf(api);
 	proto.findBrowserPackageByPath = findBrowserPackageByPath;
 	proto.findBrowserPackageInstanceByPath = findBrowserPackageInstanceByPath;
 	proto.packageNames2bundles = packageNames2bundles;

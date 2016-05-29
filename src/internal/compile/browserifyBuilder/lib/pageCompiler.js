@@ -77,7 +77,7 @@ PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageTyp
 	.then(function(content) {
 		content = compiler.transform(pathInfo.abs, content);
 		var $ = cheerio.load(content);
-		injectElements($, buildInfo.bundleDepsGraph[instance.longName], instance,
+		compiler.injectElements($, buildInfo.bundleDepsGraph[instance.longName], instance,
 			buildInfo.config, buildInfo.revisionMeta, buildInfo.entryDataProvider);
 		var hackedHtml = $.html();
 		hackedHtml = assetsProcesser.replaceAssetsUrl(hackedHtml, ()=> {
@@ -155,37 +155,28 @@ function needUpdateEntryPage(builtBundles, bundleSet) {
 
 var entryBootstrapTpl = swig.compileFile(Path.join(__dirname, 'templates', 'entryPageBootstrap.js.swig'), {autoescape: false});
 
-function injectElements($, bundleSet, pkInstance, config, revisionMeta, entryDataProvider) {
+PageCompiler.prototype.injectElements = function($, bundleSet, pkInstance, config, revisionMeta, entryDataProvider) {
 	var body = $('body');
 	var head = $('head');
 	_injectElementsByBundle($, head, body, 'labjs', config, revisionMeta);
 	delete bundleSet.labjs; // make sure there is no duplicate labjs bundle
-	var jsLinks = [];
+	var loadingData = this.buildInfo.getBundleMetadataForEntry(pkInstance.longName);
 	_.forOwn(bundleSet, function(v, bundleName) {
-		var file = 'js/' + bundleName + (config().devMode ? '' : '.min') + '.js';
-		var mappedFile = revisionMeta ? revisionMeta[file] : file;
-		if (!mappedFile) {
-			return null;
-		}
-		log.trace(file + ' -> ' + mappedFile);
-		var src = config().staticAssetsURL + '/' + mappedFile;
-		var rs = URL_PAT.exec(src);
-		src = (rs[1] ? rs[1] : '') + rs[2].replace(/\/\/+/g, '/');
-		jsLinks.push(src);
-
 		var bundleCss = createCssLinkElement($, bundleName, config, revisionMeta);
 		if (bundleCss) {
 			head.append(bundleCss);
 		}
 	});
 	var entryData = entryDataProvider(pkInstance.longName);
-	body.append($('<script>').html(entryBootstrapTpl({
-		jsLinks: jsLinks,
+	body.append($('<script>').text(entryBootstrapTpl({
+		jsPaths: JSON.stringify(loadingData.js),
+		staticAssetsURL: config().staticAssetsURL,
+		//jsLinks: jsLinks,
 		entryPackage: pkInstance.longName,
 		debug: !!config().devMode,
-		data: JSON.stringify(entryData)
+		data: config().devMode ? JSON.stringify(entryData, null, '  ') : JSON.stringify(entryData)
 	})));
-}
+};
 
 function _injectElementsByBundle($, head, body, bundleName, config, revisionMeta) {
 	var bundleScript = createScriptElement($, bundleName, config, revisionMeta);
