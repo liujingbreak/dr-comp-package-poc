@@ -3,7 +3,7 @@ var Path = require('path');
 var log = require('@dr/logger').getLogger(Path.basename(__filename));
 var _ = require('lodash');
 var Promise = require('bluebird');
-var config = require('@dr/environment').config;
+// var config = require('@dr/environment').config;
 
 module.exports = Page;
 
@@ -12,7 +12,9 @@ function Page(path) {
 		return new Page(path);
 	}
 	this.path = this.path ? this.path : '';
-	this.url = 'http://localhost:' + config().port + (_.startsWith(this.path, '/') ? '' : '/') + this.path;
+
+	var urlPrefix = require('./webdriverHelper').urlPrefix;
+	this.url = urlPrefix + (_.startsWith(this.path, '/') ? '' : '/') + this.path;
 	this.elements = {};
 	// lazy restart webdriver
 	Object.defineProperty(this, 'driver', {
@@ -23,20 +25,6 @@ function Page(path) {
 		}
 	});
 }
-
-// Page.create = function(properties, basePageInstance) {
-// 	var BasePage = basePageInstance ? basePageInstance.constructor : Page;
-//
-// 	function SubPage() {
-// 		BasePage.apply(this, arguments);
-// 		_.forOwn(properties.elements, (value, name) => {
-// 			this.el(name, value.css, value.required);
-// 		});
-// 	}
-// 	_.assign(properties.elements, BasePage.prototype.elements);
-// 	SubPage.prototype = Object.create(BasePage.prototype, properties);
-// 	return SubPage;
-// };
 
 Page.prototype = {
 

@@ -1,6 +1,11 @@
 Frontend platform ~~PoC~~ Prototype
 =====================
 ![travis-ci](https://travis-ci.org/dr-web-house/web-fun-house.svg)
+
+
+> Travis CI build status: [https://travis-ci.org/dr-web-house/web-fun-house](https://travis-ci.org/dr-web-house/web-fun-house)
+
+
 > This doc is outdated, this project has been moved to organization [_dr-web-house_](https://github.com/dr-web-house)
 
 

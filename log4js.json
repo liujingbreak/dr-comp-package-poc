@@ -3,9 +3,10 @@
 		"type": "console"
 	}],
 	"levels": {
-		"[all]": "DEBUG",
+		"[all]": "INFO",
+		"test": "DEBUG",
 		"rwPackageJson": "INFO",
-		"@dr-core/browserify-builder": "INFO",
+		"@dr-core/browserify-builder": "DEBUG",
 		"packageInstallMgr": "INFO",
 		"browserifyBuilder.pageCompiller": "DEBUG"
 	}

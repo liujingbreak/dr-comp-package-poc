@@ -9,3 +9,4 @@ script:
     - gulp lint
     - gulp build-prod
     - gulp test
+    # - "gulp e2e --server lib/main.js"

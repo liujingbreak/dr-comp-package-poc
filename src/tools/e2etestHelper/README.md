@@ -16,13 +16,21 @@ Ideally you should group your test specs in subdirectories like:
 ```
 
 ### Configure your test environment
-In `config.yaml` or `config.local.yaml`, add following lines:
-```yaml
-e2etest:
-    selenium:
-        driverPath: '..'
-```
-It is where you put your browser driver if you want to run test against browser other than Firefox.
+1. In `config.yaml` or `config.local.yaml`, add following lines:
+	```yaml
+    e2etest:
+       selenium:
+           driverPath: '..'
+	```
+	It is where you put your browser driver if you want to run test against browser other than Firefox.
+
+2. Optional setting
+	```yaml
+    e2etestHelper:
+       tryConnectTimes: 5
+	```
+	By default, end-to-end test waits for server starting, it tries to connect server for 15 times at 1 seconds interval, you can add this `tryConnectTimes` to override this default retry times.
+
 
 ### Run test
 Run test in Firefox
@@ -46,7 +54,6 @@ var _ = require('lodash');
 
 describe('When server is started', function() {
 	helper.setup(); // must call this to initialize WebDriver
-	beforeAll(helper.waitForServer);
 
 	it('the home page should be available', function(done) {
 		yourPage.get().then(() => {

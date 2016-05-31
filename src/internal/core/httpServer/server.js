@@ -34,8 +34,8 @@ exports.activate = function(api) {
 		var port = config().port ? config().port : 80;
 		var server = http.createServer(app);
 		server.listen(port);
-		server.on('error', () => {
-			onError(server, port);
+		server.on('error', err => {
+			onError(server, port, err);
 		});
 		server.on('listening', () => { onListening(server); });
 	}
@@ -48,8 +48,8 @@ exports.activate = function(api) {
 			cert: fs.readFileSync(config.resolve('ssl.cert'))
 		}, app);
 		server.listen(port);
-		server.on('error', () => {
-			onError(server, port);
+		server.on('error', (error) => {
+			onError(server, port, error);
 		});
 		server.on('listening', () => { onListening(server); });
 
@@ -63,8 +63,8 @@ exports.activate = function(api) {
 			res.end('');
 		});
 		redirectHttpServer.listen(config().port ? config().port : 80);
-		redirectHttpServer.on('error', () => {
-			onError(server, port);
+		redirectHttpServer.on('error', error => {
+			onError(server, port, error);
 		});
 		redirectHttpServer.on('listening', () => { onListening(redirectHttpServer); });
 	}
@@ -82,7 +82,8 @@ exports.activate = function(api) {
 	/**
 	 * Event listener for HTTP server "error" event.
 	 */
-	function onError(error, port) {
+	function onError(server, port, error) {
+		log.error(error);
 		if (error.syscall !== 'listen') {
 			throw error;
 		}

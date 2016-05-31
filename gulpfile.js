@@ -41,7 +41,7 @@ var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package
 	.command('bump', '[-v major|minor|patch|prerelease] bump version number of all package.json, useful to call this before publishing packages, default is increasing patch number by 1')
 	.command('flatten-recipe', 'flattern NPM v2 nodule_modules structure, install-recipe comamnd will execute this command')
 	.command('test', '[-p <package-short-name>] [-f <spec-file-path>] run Jasmine for specific or all packages')
-	.command('e2e', '[-d <test-suit-dir] [-f <spec-file-path>] [--browser <chrome|firefox|ie|opera|edge|safari>]run Jasmine for end-to-end tests')
+	.command('e2e', '[-d <test-suit-dir] [-f <spec-file-path>] [--server <start-js-file>] [--cwd <working directory>] [--browser <chrome|firefox|ie|opera|edge|safari>]run Jasmine for end-to-end tests')
 	.command('check-dep', 'Print out dependency list of all your source code packages (according to `recipeSrcMapping` value in config.yaml),' +
 		' help you to check if there is conflict dependency version')
 	.describe('b', '<bundle-name> if used with command `compile` or `build`, it will only compile specific bundle, which is more efficient')
@@ -57,6 +57,8 @@ var argv = require('yargs').usage('Usage: $0 <command> [-b <bundle>] [-p package
 	.alias('f', 'file')
 	.describe('browser', 'Used with command `e2e`')
 	.choices('browser', ['firefox', 'chrome', 'ie', 'safari', 'opera'])
+	.describe('server', '<start JS file>, optional, used with command `e2e`, automatically start test server')
+	.describe('cwd', '<working directory>, optional, used with command `e2e`, indicates which directory as test server start directory')
 	.demand(1)
 	.help('h').alias('h', 'help')
 	.argv;
@@ -155,9 +157,15 @@ gulp.task('install-recipe', ['link'], function(cb) {
 		srcDirs.push(src);
 	});
 	prom = prom.then(()=> {
-		return packageInstaller.scanSrcDepsAsync(srcDirs);
-	}).then( () => {
-		return packageInstaller.installDependsAsync();
+		return Promise.all([
+			packageInstaller.scanSrcDepsAsync(srcDirs),
+			buildUtils.npmMajorVersion()
+		]);
+	}).then( (resolved) => {
+		if (resolved[1] < 3) {
+			return packageInstaller.installDependsAsync();
+		}
+		return null;
 	}).then(() => {
 		cb();
 	})
@@ -310,10 +318,10 @@ gulp.task('unpublish', function(cb) {
 	recipeManager.eachRecipeSrc(function(src, recipe) {
 		srcDirs.push(src);
 	});
-	var origOutMaxNum = process.stdout.getMaxListeners();
-	var origErrMaxNum = process.stderr.getMaxListeners();
-	process.stderr.setMaxListeners(9999);
-	process.stdout.setMaxListeners(9999);
+	// var origOutMaxNum = process.stdout.getMaxListeners();
+	// var origErrMaxNum = process.stderr.getMaxListeners();
+	// process.stderr.setMaxListeners(9999);
+	// process.stdout.setMaxListeners(9999);
 
 	gulp.src(srcDirs)
 		.pipe(findPackageJson())
@@ -335,8 +343,8 @@ gulp.task('unpublish', function(cb) {
 			Promise.all(promises)
 			.catch(()=>{})
 			.finally(() => {
-				process.stderr.setMaxListeners(origErrMaxNum);
-				process.stdout.setMaxListeners(origOutMaxNum);
+				// process.stderr.setMaxListeners(origErrMaxNum);
+				// process.stdout.setMaxListeners(origOutMaxNum);
 				process.nextTick(cb);
 			});
 		});
@@ -348,14 +356,14 @@ gulp.task('test', function(callback) {
 		callback();
 	})
 	.catch(e => {
-		callback('Test failed');
+		callback('Test failed, ' + e);
 	});
 });
 
 gulp.task('e2e', function(callback) {
 	require('./lib/gulp/testRunner').runE2eTest(argv)
 	.then(()=> { callback(); })
-	.catch(e => { callback('Test failed'); });
+	.catch(e => { callback('Test failed, ' + e); });
 });
 
 

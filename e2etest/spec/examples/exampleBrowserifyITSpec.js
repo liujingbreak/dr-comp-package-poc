@@ -5,7 +5,6 @@ var helper = require('@dr/e2etest-helper');
 
 describe('example-browserify', ()=> {
 	helper.setup();
-	beforeAll(helper.waitForServer);
 
 	it('resource file in assets can be access', (done)=> {
 		helper.statusCodeOf('/example-browserify/resource.json')
