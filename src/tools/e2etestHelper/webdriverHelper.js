@@ -41,7 +41,7 @@ function run(theConfig, browser, serverModule, cwd, runTest) {
 	config = theConfig;
 	process.env.PATH = process.env.PATH + (isWindows ? ';' : ':') + Path.resolve(config.resolve('e2etest.selenium.driverPath'));
 	log.debug(process.env.PATH);
-	if (config().ssl && config().ssl.enabled) {
+	if (config.get('sl.enabled')) {
 		exports.urlPrefix = urlPrefix = 'https://localhost:' + config().ssl.port;
 	} else {
 		exports.urlPrefix = urlPrefix = 'http://localhost:' + config().port;
@@ -53,14 +53,19 @@ function run(theConfig, browser, serverModule, cwd, runTest) {
 	var serverProcess;
 	var serverStopProm = Promise.resolve();
 	if (serverModule) {
+		serverModule = Path.resolve(serverModule);
 		log.info('start server ' + serverModule);
-		var workDir = cwd ? cwd : process.cwd();
+		var workDir = cwd ? Path.resolve(cwd) : process.cwd();
 		serverProcess = fork(serverModule, {cwd: workDir});
 
 		serverStopProm = new Promise((resolve, reject) => {
 			serverProcess.on('exit', (code, signal) => {
 				log.info('server exits with ' + code + '-' + signal);
 				resolve();
+			});
+			serverProcess.on('error', err => {
+				log.error(err);
+				reject('Server encouters error: ' + err);
 			});
 		});
 	}
@@ -106,11 +111,11 @@ exports.statusCodeOf = function(path) {
 };
 
 exports.saveScreen = function(fileName) {
-	var file = config.resolve('destDir') + '/' + (fileName ? fileName : 'out.png');
-	driver.takeScreenshot().then(function(data){
+	var file = Path.resolve(config.resolve('destDir'), (fileName ? fileName : 'out.png'));
+	driver.takeScreenshot().then(function(data) {
 		var base64Data = data.replace(/^data:image\/png;base64,/, '');
 		fs.writeFile(file, base64Data, 'base64', function(err) {
-        	if (err) {
+			if (err) {
 				log.error(err);
 			}
 		});

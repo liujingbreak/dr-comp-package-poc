@@ -41,6 +41,10 @@ Run test in Chrome (You need to download Chrome driver and config its location i
 ```
 gulp e2e --browser chrome
 ```
+Run test and start server automatically
+```
+gulp e2e --server <your app.js>
+```
 
 ### Write your test spec
 Spec file name must ends with `Spec.js`
@@ -102,6 +106,7 @@ module.exports = new YourPage();
 | Name | description
 | - | -
 | .statusCodeOf(path) | return a Promise, resolved to a number type `statusCode`
+| .saveScreen(fileName) | Take a screenshot for browser and save to folder `dist` as `config.resolve('destDir')`
 If you want to assert a response status code of a local HTTP Path, you may do like this,
 ```javascript
 ...
