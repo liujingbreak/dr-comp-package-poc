@@ -1,12 +1,20 @@
 {
-	"appenders": [{
-		"type": "console"
-	}],
+	"appenders": [
+		{
+			"type": "console"
+		}, {
+			"type": "dateFile",
+		    "filename": "logs/dependencyControl.log",
+		    "pattern": "-dd",
+		    "alwaysIncludePattern": false,
+			"category": "@dr-core/browserify-builder"
+		}
+	],
 	"levels": {
 		"[all]": "INFO",
 		"test": "DEBUG",
 		"rwPackageJson": "INFO",
-		"@dr-core/browserify-builder": "DEBUG",
+		"@dr-core/browserify-builder": "INFO",
 		"packageInstallMgr": "INFO",
 		"browserifyBuilder.pageCompiller": "DEBUG"
 	}

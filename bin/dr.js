@@ -79,8 +79,16 @@ function init(noSample) {
 	if (!fileAccessable(Path.resolve('e2etest'))) {
 		shell.mkdir('-p', argv.d + '/e2etest/spec');
 		shell.mkdir('-p', argv.d + '/e2etest/pages');
-		//shell.cp('-f', Path.resolve(__dirname, '..', 'e2etest', 'README.md'), argv.d + '/e2etest/');
 		console.info('e2etest/spec End-to-end test directory is created');
+	}
+
+	if (!fileAccessable(Path.resolve('inject.js'))) {
+		shell.cp('-f', Path.resolve(__dirname, 'inject-template.js'), argv.d + '/inject.js');
+		console.info('inject.js is created');
+	}
+	if (!fileAccessable(Path.resolve('browserify-inject.js'))) {
+		shell.cp('-f', Path.resolve(__dirname, 'inject-template.js'), argv.d + '/browserify-inject.js');
+		console.info('inject.js is created');
 	}
 	// to solve npm 2.0 nested node_modules folder issue
 	installDevDependencyAsync().then(()=> {

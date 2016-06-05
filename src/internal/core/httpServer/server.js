@@ -43,6 +43,7 @@ exports.activate = function(api) {
 	function startHttpsServer(app) {
 		log.info('start HTTPS');
 		var port = config().ssl.port ? config().ssl.port : 433;
+		port = normalizePort(port);
 		var server = https.createServer({
 			key: fs.readFileSync(config.resolve('ssl.key')),
 			cert: fs.readFileSync(config.resolve('ssl.cert'))
@@ -67,6 +68,21 @@ exports.activate = function(api) {
 			onError(server, port, error);
 		});
 		redirectHttpServer.on('listening', () => { onListening(redirectHttpServer); });
+	}
+
+	function normalizePort(val) {
+		var port = parseInt(val, 10);
+
+		if (isNaN(port)) {
+			// named pipe
+			return val;
+		}
+
+		if (port >= 0) {
+			// port number
+			return port;
+		}
+		return false;
 	}
 
 	/**

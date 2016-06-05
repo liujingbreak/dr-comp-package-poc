@@ -3,10 +3,12 @@
   "version": "0.0.20",
   "description": "Recipe package of garage-recipe",
   "dependencies": {
+    "@dr/angularjs": "1.0.28",
     "@dr/comp-store": "0.0.1",
     "@dr/doc-home": "0.1.0",
     "@dr/doc-less-var": "0.0.21",
     "@dr/doc-ui": "0.0.21",
+    "@dr/gsap": "0.0.21",
     "@dr/markdown-viewer": "0.0.21",
     "@dr/readme": "0.0.22",
     "@dr/readme-docs": "0.0.23",

@@ -1,18 +1,19 @@
 var through = require('through2');
 var Path = require('path');
 var stream = require('stream');
-var log = require('log4js').getLogger('browserifyBuilder.browserifyHelper');
+var __api = require('__api');
+var log = require('@dr/logger').getLogger(__api.packageName + '.browserifyHelper');
 var swig = require('swig');
 var fs = require('fs');
 var esParser = require('./esParser');
 var assetsProcesser = require('@dr-core/assets-processer');
 var _ = require('lodash');
 swig.setDefaults({autoescape: false});
-var config;
+var config, injector;
 
-module.exports = function(_config) {
+module.exports = function(_config, _injector) {
 	config = _config;
-
+	injector = _injector;
 	var buildins = ['assert', 'buffer', 'child_process', 'cluster', 'console', 'constants', 'crypto', 'dgram', 'dns',
 	'domain', 'events', 'fs', 'http', 'https', 'module', 'net', 'os', 'path', 'punycode', 'querystring',
 	'readline', 'repl', 'stream', '_stream_duplex', '_stream_passthrough', '_stream_readable',
@@ -52,11 +53,9 @@ function JsBundleEntryMaker(api, bundleName, packageBrowserInstances,
 	this.packageSplitPointMap = packageSplitPointMap;
 	// clean split points cache
 	this.packages.forEach(packageIns => {
-		if (!_.has(this.packageSplitPointMap, packageIns.longName)) {
-			return;
+		if (_.has(this.packageSplitPointMap, packageIns.longName)) {
+			delete this.packageSplitPointMap[packageIns.longName];
 		}
-		//log.debug('clean split point cache for ' + packageIns.longName);
-		delete this.packageSplitPointMap[packageIns.longName];
 	});
 }
 
@@ -85,8 +84,7 @@ JsBundleEntryMaker.prototype = {
 			var source = '';
 			var ext = Path.extname(file).toLowerCase();
 			var basename = Path.basename(file);
-			if (ext === '.js' && basename !== 'browserifyBuilderApi.browser.js' &&
-				basename !== self.bundleFileName) {
+			if (ext === '.js' && basename !== self.bundleFileName) {
 				return through(function(chunk, enc, next) {
 					source += chunk;
 					next();
@@ -131,7 +129,7 @@ JsBundleEntryMaker.prototype = {
 			});
 		}
 
-		esParser.parse(source, {
+		var ast = esParser.parse(source, {
 			splitLoad: splitPoint => {
 				hasRequireEnsure = true;
 				if (!currPackageName) {
@@ -143,6 +141,8 @@ JsBundleEntryMaker.prototype = {
 				self.packageSplitPointMap[currPackageName][splitPoint] = 1;
 			}
 		});
+		//log.error(injector);
+		source = injector.injectToFile(file, source, ast);
 		if (hasRequireEnsure) {
 			source = 'require.ensure = function(){return drApi.ensureRequire.apply(drApi, arguments)};\n' +
 				source;

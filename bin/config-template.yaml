@@ -16,16 +16,13 @@ recipeSrcMapping:
 # will bundle them with every package that depends on them.
 vendorBundleMap:
   core: # bundle name
-      - lodash
-      - jquery
-      - bluebird
+#      - jquery
+#      - bluebird
 
 browserifyNoParse:
-    - q
     - lodash
     - jquery
-    - "@dr/gsap"
-    - "@dr/angularjs"
+    - "bluebird"
 # Recipes which are installed from registry server, they are owned by other contributors,
 # add to this list to make them a part of you server.
 #

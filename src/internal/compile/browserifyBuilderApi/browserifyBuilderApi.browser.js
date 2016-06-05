@@ -8,22 +8,6 @@ window.$translate = function(text) {
 	return text;
 };
 
-var Promise = require('bluebird');
-Promise.defer = defer;
-
-function defer() {
-	var resolve, reject;
-	var promise = new Promise(function() {
-		resolve = arguments[0];
-		reject = arguments[1];
-	});
-	return {
-		resolve: resolve,
-		reject: reject,
-		promise: promise
-	};
-}
-
 function BrowserApi(packageName, bundleName) {
 	if (!(this instanceof BrowserApi)) {
 		return new BrowserApi(packageName);

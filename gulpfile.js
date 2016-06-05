@@ -86,7 +86,7 @@ gulp.task('clean:dependency', function() {
 });
 
 gulp.task('clean:recipe', function() {
-	recipeManager.clean();
+	return recipeManager.clean();
 });
 
 gulp.task('clean:dist', function() {
@@ -218,7 +218,7 @@ gulp.task('compile', ['link', 'flatten-recipe'], function(cb) {
 gulp.task('compile:dev', function(cb) {
 	require('./lib/packageMgr/packageCompiler')(argv)
 	.then(() => {cb();})
-	.catch( e => { cb('failed ' + e); });
+	.catch( e => { cb('Error ' + e.stack); });
 });
 
 gulp.task('watch', function() {
@@ -307,6 +307,7 @@ gulp.task('publish', function(cb) {
 			Promise.all(promises)
 			.catch(()=> {})
 			.finally(() => {
+				gutil.log(promises.length + ' published');
 				cb();
 			});
 		});
@@ -396,5 +397,6 @@ function uncaughtException() {
 	process.on('uncaughtException', function(err) {
 		// handle the error safely
 		gutil.log(chalk.red('Uncaught exception: '), err, err.stack);
+		throw err;
 	});
 }

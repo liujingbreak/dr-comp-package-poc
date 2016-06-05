@@ -1,0 +1,17 @@
+{
+  "name": "@dr/light-lodash",
+  "version": "0.0.1",
+  "description": "Small subset of lodash API for Browser side only",
+  "browser": "index.js",
+  "main": "compile.js",
+  "dr": {
+      "bundle": "core",
+      "type": "builder",
+      "builderPriority": "before @dr-core/browserify-builder"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "LJ",
+  "license": "MIT"
+}

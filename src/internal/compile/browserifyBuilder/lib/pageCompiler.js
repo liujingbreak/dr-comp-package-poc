@@ -9,7 +9,8 @@ var gutil = require('gulp-util');
 var PluginError = gutil.PluginError;
 var File = require('vinyl');
 var swig = require('swig');
-var log = require('@dr/logger').getLogger('browserifyBuilder.pageCompiller');
+var api = require('__api');
+var log = require('@dr/logger').getLogger(api.packageName + '.pageCompiller');
 var packageUtils = require('@dr/environment').packageUtils;
 var assetsProcesser = require('@dr-core/assets-processer');
 

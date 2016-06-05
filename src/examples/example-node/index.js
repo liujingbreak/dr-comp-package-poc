@@ -1,13 +1,13 @@
 var log = require('log4js').getLogger('exampleNodePackage');
 var mafia = require('./gangsta');
 var Q = require('q');
-
+var api = require('__api');
 module.exports = mafia;
 module.exports.activate = activate;
 
 var mafiaPromis = mafia();
 
-function activate(api) {
+function activate() {
 	var quote;
 
 	// browser access http://localhost:14333/example-node to see result

@@ -40,7 +40,9 @@ function create(app, setting, packageCache) {
 	//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 	//app.use(logger('dev'));
 	app.use(log4js.connectLogger(log, {level: log4js.levels.INFO}));
-	app.use(bodyParser.json());
+	app.use(bodyParser.json({
+		limit: '50mb'
+	}));
 	app.use(bodyParser.urlencoded({
 		extended: false
 	}));

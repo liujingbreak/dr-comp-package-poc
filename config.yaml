@@ -44,17 +44,20 @@ serverURL: ""
 # Manually set bundle file name for 3rd-party libaraies, otherwise browserify
 # will bundle them to every package that depends on them.
 vendorBundleMap:
-  core: # bundle name
-      - lodash
+  core: # API bundle, always be loaded at first
+    # - lodash
+  ui-lib: # bundle name
       - jquery
       - bluebird
-
+  lodash:
+      - lodash
 # Global `browserify.bundle()` `noParse` option, there is also a package specific `dr.browserifyNoParse`
 # available option in individual package.json file
 browserifyNoParse:
     - q
     - lodash
     - jquery
+    - bluebird
     - "@dr/angularjs"
     - "@dr/gsap"
 

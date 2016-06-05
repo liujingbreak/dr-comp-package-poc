@@ -20,22 +20,22 @@ var htmlTranform = require('html-browserify');
 var yamlify = require('yamlify');
 var RevAll = require('gulp-rev-all');
 var File = require('vinyl');
-// var browserifyInc = require('browserify-incremental');
-// var xtend = require('xtend');
+
 var parcelify = require('parcelify');
 var mkdirp = require('mkdirp');
 var gutil = require('gulp-util');
 var chalk = require('chalk');
-
-var log;
+var api = require('__api');
+var log = require('@dr/logger').getLogger(api.packageName + '.builder');
 var helperFactor = require('./browserifyHelper');
 var PageCompiler = require('./pageCompiler');
 var walkPackages = require('@dr-core/build-util').walkPackages;
 var depCtl = require('./dependencyControl');
 var packageBrowserInstance = require('@dr-core/build-util').packageInstance;
+var rj = require('__injector');
 var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
 var fileAccessAsync = Promise.promisify(fs.access, {context: fs});
-var packageUtils, config, jsBundleEntryMaker;
+var packageUtils, config, jsBundleEntryMaker, injector;
 
 var tasks = [];
 var addonTransforms = [];
@@ -54,16 +54,29 @@ module.exports = {
 	}
 };
 
-function compile(api) {
+/**
+ * Initialize browser side package injector
+ */
+function initInjector(packageInfo) {
+	if (injector)
+		return;
+	injector = rj(null, true);
+	_.each(packageInfo.allModules, pack => {
+		if (pack.packagePath) // no vendor package's path information
+			injector.addPackage(pack.longName, pack.packagePath);
+	});
+	injector.fromAllPackages().value('__api', {replacement: '__api'});
+	injector.readInjectFile('browserify-inject.js');
+}
+
+function compile() {
 	gutil.log('Usage: gulp compile [-p <package name with or without scope part> -p <package name> ...]');
 	gutil.log('\tgulp compile [-b <bundle name> -b <bunle name> ...]');
 	gutil.log('\tbuild all JS and CSS bundles, if parameter <bundle name> is supplied, only that specific package or bundle will be rebuilt.');
 
-	log = require('@dr/logger').getLogger(api.packageName);
 	packageUtils = api.packageUtils;
 	config = api.config;
 	var argv = api.argv;
-	var helper = helperFactor(config);
 	//var jsTransform = helper.jsTransform;
 	var buildCss = true;
 	var buildJS = true;
@@ -71,6 +84,8 @@ function compile(api) {
 	var jsStreams = [];
 	var staticDir = Path.resolve(config().staticDir);
 	var packageInfo = walkPackages(config, argv, packageUtils, api.compileNodePath);
+	initInjector(packageInfo);
+	var helper = helperFactor(config, injector);
 	//monkey patch new API
 	Object.getPrototypeOf(api).packageInfo = packageInfo;
 	require('./compilerApi')(api);
@@ -270,7 +285,7 @@ function compile(api) {
 		var cssPromises = [buildCssBundle(b, bundle, destDir)];
 
 		// draw a cross bundles dependency map
-		depCtl.browserifyDepsMap(b, depCtl.depsMap);
+		depCtl.browserifyDepsMap(b, depCtl.depsMap, resolve);
 		var jsStream = _createBrowserifyBundle(b, bundle);
 
 		var i18nBuildRet = buildI18nBundles(browserifyOpt, modules, excludeList, bundle, entryJsDir);
@@ -349,7 +364,7 @@ function compile(api) {
 		b.transform(yamlify, {global: true});
 		//jsBundleEntryMaker.setLocale(locale);
 		b.transform(jsBundleEntryMaker.transform(locale), {global: true});
-		depCtl.browserifyDepsMap(b, depsMap);
+		depCtl.browserifyDepsMap(b, depsMap, resolve);
 		var cssProm = buildCssBundle(b, bundle + '_' + locale, config().staticDir);
 		excludeList.forEach(b.exclude, b);
 		var out = _createBrowserifyBundle(b, localeBunleName);
@@ -536,7 +551,7 @@ function compile(api) {
 		});
 		return new Promise(function(resolve, reject) {
 			parce.on('done', function() {
-				log.debug('buildCssBundle(): ' + fileName);
+				//log.debug('buildCssBundle(): ' + fileName);
 				resolve(fileName);
 			});
 
@@ -594,7 +609,11 @@ function _createBrowserifyBundle(b, bundle) {
 		.pipe(gulpif(!config().devMode, uglify()))
 		.pipe(gulpif(!config().devMode, rename(bundleBasename + '.min.js')))
 		.pipe(gulpif(config().enableSourceMaps, sourcemaps.write('./')))
-		.pipe(size({title: bundleBasename}))
+		.pipe(size({
+			showFiles: true,
+			gzip: true,
+			showTotal: false
+		}))
 		.on('error', (er) => {
 			log.error('browserify bundle() sourcemaps failed', er);
 			out.end();

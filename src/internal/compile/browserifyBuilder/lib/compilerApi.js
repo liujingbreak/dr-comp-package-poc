@@ -21,9 +21,11 @@ function initPackageListInfo(proto) {
 			return;
 		}
 		var path = Path.relative(proto.config().rootPath, instance.packagePath);
-		path = path.replace(/\\/g, '/');
-		if (_.endsWith(path, '/')) {
-			path = path.substring(0, path.length - 1);
+		if (Path.sep === '\\') {
+			path = path.replace(/\\/g, '/');
+		}
+		if (!_.endsWith(path, '/')) {
+			path = path + '/';
 		}
 		proto._packagePath2Name[path] = instance;
 		proto._packagePathList.push(path);
@@ -40,7 +42,7 @@ function findBrowserPackageInstanceByPath(file) {
 	file = Path.relative(this.config().rootPath, file);
 
 	var idx = _.sortedIndex(this._packagePathList, file);
-	if (idx === 0 || !file.startsWith(this._packagePathList[idx - 1] + '/')) {
+	if (idx === 0 || !file.startsWith(this._packagePathList[idx - 1])) {
 		log.error('file ' + file + ' doesn\'t belong to any of our private packages');
 		return null;
 	} else {

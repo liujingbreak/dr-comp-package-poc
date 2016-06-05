@@ -162,7 +162,6 @@ function vendorBundleMapConfig() {
 				longName: moduleName,
 				shortName: moduleName,
 				file: mainFile
-				//isEntryJS: {}.hasOwnProperty.call(config().defaultEntrySet, moduleName)
 			});
 			info.allModules.push(instance);
 			return instance;

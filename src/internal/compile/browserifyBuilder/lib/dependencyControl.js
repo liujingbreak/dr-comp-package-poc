@@ -6,16 +6,23 @@ var Path = require('path');
 var gutil = require('gulp-util');
 var PrintNode = require('./printUtil');
 var FileCache = require('@dr-core/build-util').fileCache;
+var api = require('__api');
+var log = require('@dr/logger').getLogger(api.packageName + '.dependencyControl');
 
 var inited = false;
-var fileCache, api, log, packageInfo;
+var fileCache, packageInfo;
+
 // Input Data
 var depsMap, i18nModuleNameSet, pk2localeModule, packageSplitPointMap, localeDepsMap;
+var resolvedPath2Module; // resolved absolute main path -> module name
 // Output Data
 var packageDepsGraph; // {entries: {}, localeEntries: {}, splitPoints: {}} by createEntryPackageDepGraph()
 var bundleDepsGraph; // Entry package -> depeneded bundles, by createEntryBundleDepGraph()
 var splitPointDepsGraph; // Split point package -> depeneded bundles,by createEntryBundleDepGraph()
 var localeBundlesDepsGraph; // by createEntryBundleDepGraph()
+
+var nodeFileDirPattern = /^(?:\.\/|\.\.\/|\/)/; // to test if a required id is not a module name.
+
 // functions for calculation
 exports.initAsync = initAsync;
 exports.browserifyDepsMap = browserifyDepsMap;
@@ -61,11 +68,9 @@ function initAsync(_api, _packageInfo) {
 		return Promise.resolve();
 	}
 	inited = true;
-	api = _api;
 	if (!fileCache) {
 		fileCache = new FileCache(_api.config().destDir);
 	}
-	log = require('@dr/logger').getLogger(api.packageName + '.dependencyControl');
 	packageInfo = _packageInfo;
 	return Promise.all([
 		fileCache.loadFromFile('bundleInfoCache.json'),
@@ -73,6 +78,9 @@ function initAsync(_api, _packageInfo) {
 	]).then(caches => {
 		depsMap = caches[1];
 		initI18nBundleInfo(caches[0]);
+		resolvedPath2Module = _.get(caches[0], 'resolvedPath2Module');
+		if (!resolvedPath2Module)
+			resolvedPath2Module = caches[0].resolvedPath2Module = {};
 	});
 }
 
@@ -81,15 +89,19 @@ function initAsync(_api, _packageInfo) {
  * draw a cross bundles dependency map
  * @param  {object} b       browserify instance
  */
-function browserifyDepsMap(b, depsMap) {
+function browserifyDepsMap(b, depsMap, resolve) {
 	var rootPath = api.config().rootPath;
 	b.pipeline.get('deps').push(through.obj(function(chunk, encoding, callback) {
-		var shortFilePath = Path.isAbsolute(chunk.file) ? Path.relative(rootPath, chunk.file) : chunk.file;
+		var shortFilePath = chunk.file;
+		shortFilePath = Path.isAbsolute(shortFilePath) ? Path.relative(rootPath, shortFilePath) : shortFilePath;
 		var deps = _.clone(chunk.deps);
 		_.forOwn(chunk.deps, function(path, id) {
 			if (path && Path.isAbsolute(path)) {
-				deps[id] = Path.relative(rootPath, path);
+				path = Path.relative(rootPath, path);
+				deps[id] = path;
 			}
+			if (!nodeFileDirPattern.test(id)) // Meaning id is a module name
+				resolvedPath2Module[path] = id;
 		});
 		depsMap[shortFilePath] = deps;
 		callback(null, chunk);
@@ -123,6 +135,10 @@ function updatePack2localeModule(map) {
 function addI18nModule(name) {
 	i18nModuleNameSet[name] = 1;
 }
+
+function DepsWalker() {
+	this.depPath = [];
+}
 /**
  * Create a map of entry module and depended modules.
  * @param  {[type]} depsMap  [description]
@@ -130,24 +146,28 @@ function addI18nModule(name) {
  * @return {entries: {}, localeEntries: {}, splitPoints: {}}
  */
 function createEntryPackageDepGraph() {
+	var walkContext = new DepsWalker();
+	walkContext.walkDeps = _walkDeps;
 	packageDepsGraph = {entries: {}, localeEntries: {}, splitPoints: {}};
+
 	_.forOwn(packageInfo.entryPageMap, function(pkInstance, moduleName) {
 		var entryDepsSet = packageDepsGraph.entries[moduleName] = {};
-		_walkDeps(depsMap, moduleName, false, entryDepsSet, true);
+		walkContext.walkDeps(depsMap, moduleName, false, entryDepsSet, true);
+		// API is always depended for entry package
+		walkContext.walkDeps(depsMap, '@dr-core/browserify-builder-api', false, entryDepsSet, true);
 	});
 	_.forOwn(packageInfo.splitPointMap, function(pkInstance, moduleName) {
 		var entryDepsSet = packageDepsGraph.splitPoints[moduleName] = {};
-		_walkDeps(depsMap, moduleName, false, entryDepsSet, true);
+		walkContext.walkDeps(depsMap, moduleName, false, entryDepsSet, true);
 	});
 	//log.debug('packageInfo.localeEntryMap: ' + JSON.stringify(packageInfo.localeEntryMap, null, '  '));
 	_.forOwn(packageInfo.localeEntryMap, (entryMap, locale) => {
 		var result = packageDepsGraph.localeEntries[locale] = {};
 		_.forOwn(entryMap, function(pkInstance, moduleName) {
 			var entryDepsSet = result[moduleName] = {};
-			_walkDeps(localeDepsMap[locale], moduleName, false, entryDepsSet, true, null, depsMap);
+			walkContext.walkDeps(localeDepsMap[locale], moduleName, false, entryDepsSet, true, null, depsMap);
 		});
 	});
-
 
 	toPrintModel(packageDepsGraph.entries, '------- Entry package -> package dependency ----------',
 		null, label => {
@@ -160,7 +180,9 @@ function createEntryPackageDepGraph() {
 	toPrintModel(packageDepsGraph.splitPoints, '------- Split Point -> package dependency ----------').print(log);
 	//printEntryDepsGraph(packageDepsGraph);
 	//log.debug('createEntryDepsData() packageDepsGraph = ' + JSON.stringify(packageDepsGraph, null, '  '))
+
 	function _walkDeps(depsMap, id, file, entryDepsSet, isParentOurs, lastDirectDeps, parentDepsMap) {
+		this.depPath.push(id + '(' + file + ')');
 		var deps;
 		if (!file) { // since for external module, the `file` is always `false`
 			deps = depsMap[id];
@@ -169,25 +191,28 @@ function createEntryPackageDepGraph() {
 			}
 		} else {
 			deps = depsMap[file];
-			deps = deps ? deps : depsMap[id];
+			deps = deps ? deps : depsMap[resolvedPath2Module[file]];
 			if (parentDepsMap && !deps) {
 				deps = parentDepsMap[file] ? parentDepsMap[file] : parentDepsMap[id];
 			}
 		}
 		if (!deps && !_.has(i18nModuleNameSet, id)) {
-			log.error('Can not walk dependency tree for: ' + id +
-			', missing depended module or you may try rebuild all bundles');
-			log.info(parentDepsMap[id]);
+			log.error(JSON.stringify(depsMap, null, '  '));
+			log.warn(JSON.stringify(resolvedPath2Module, null, ' '));
 			log.info('i18nModuleNameSet: ' + JSON.stringify(i18nModuleNameSet, null, '  '));
 			gutil.beep();
+			throw new Error('Can not walk dependency tree for: ' + this.depPath.join('\n\t-> ') +
+			', missing depended module or you may try rebuild all bundles');
 		}
 		if (!deps) {
+			this.depPath.pop();
 			return;
 		}
-		_.forOwn(deps, function(depsValue, depsKey) {
-			var isRelativePath = _.startsWith(depsKey, '.');
+		var self = this;
+		_.forOwn(deps, (depsValue, depsKey) => {
+			var isModuleName = !nodeFileDirPattern.test(depsKey);
 
-			if (!isRelativePath) {
+			if (isModuleName) {
 				// require id is a module name
 				var isOurs = isParentOurs && !api.packageUtils.is3rdParty(depsKey);
 				if (isOurs) {
@@ -195,7 +220,7 @@ function createEntryPackageDepGraph() {
 						api.findBrowserPackageByPath(file) : id;
 					var foundSplitPoint = _.has(packageSplitPointMap[currPackage], depsKey);
 					if (foundSplitPoint) {
-						log.info('Found pplit point: ' + depsKey);
+						log.info('Found split point: ' + depsKey);
 						entryDepsSet['sp:' + depsKey] = isParentOurs ? true : lastDirectDeps;
 						entryDepsSet = packageDepsGraph.splitPoints[depsKey] = {};
 					}
@@ -205,16 +230,17 @@ function createEntryPackageDepGraph() {
 				}
 				entryDepsSet[depsKey] = isParentOurs ? true : lastDirectDeps;
 				if (isOurs) {
-					_walkDeps(depsMap, depsKey, depsValue, entryDepsSet,
+					self.walkDeps(depsMap, depsKey, depsValue, entryDepsSet,
 						true, null, parentDepsMap);
 				} else {
-					_walkDeps(depsMap, depsKey, depsValue, entryDepsSet, false, depsKey, parentDepsMap);
+					self.walkDeps(depsMap, depsKey, depsValue, entryDepsSet, false, depsKey, parentDepsMap);
 				}
 			} else {
 				// require id is a local file path
-				_walkDeps(depsMap, depsKey, depsValue, entryDepsSet, isParentOurs, lastDirectDeps, parentDepsMap);
+				self.walkDeps(depsMap, depsKey, depsValue, entryDepsSet, isParentOurs, lastDirectDeps, parentDepsMap);
 			}
 		});
+		this.depPath.pop();
 	}
 
 	function toPrintModel(value, label, parent, modifier) {
@@ -283,12 +309,12 @@ function createEntryBundleDepGraph() {
 					return;
 				} else if (!moduleMap[dep] || !(bundle = moduleMap[dep].bundle)) {
 					if (isDirectDeps === true) {
-						msg = 'Entry bundle "' + currBundle + '", module "' + dep + '" which is dependency of bundle "' +
+						msg = 'Entry bundle "' + currBundle + ' (' + moduleName + ')", module "' + dep + '" which is dependency of bundle "' +
 							currBundle + '" is not explicityly configured with any bundle, check out `vendorBundleMap` in config.yaml';
 						log.warn(msg);
 						throw new Error(msg);
 					} else {
-						msg = 'Entry bundle "' + currBundle + '", module "' + dep + '" which is dependency of "' +
+						msg = 'Entry bundle "' + currBundle + ' (' + moduleName + ')", module "' + dep + '" which is dependency of "' +
 							isDirectDeps + '" is not explicityly configured with any bundle, check out `vendorBundleMap` in config.yaml';
 						log.warn(msg);
 						return;

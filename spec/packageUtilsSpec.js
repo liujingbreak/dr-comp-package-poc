@@ -37,7 +37,8 @@ describe('packageUtils', function() {
 				'@dr-core/browserify-builder',
 				'@dr/translate-generator',
 				'@dr/template-builder',
-				'@dr/readme-docs'
+				'@dr/readme-docs',
+				'@dr/light-lodash'
 			];
 			var foundPackages = callback.calls.allArgs().map(row => { return row[0];});
 			log.debug(foundPackages);
@@ -56,7 +57,8 @@ describe('packageUtils', function() {
 				'@dr/example-entry',
 				'@dr/http-server',
 				'@dr-core/browserify-builder-api',
-				'@dr-core/assets-processer'
+				'@dr-core/assets-processer',
+				'@dr/example-node'
 			];
 			var foundPackages = callback.calls.allArgs().map(row => { return row[0];});
 			log.debug(foundPackages);

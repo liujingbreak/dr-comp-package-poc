@@ -7,7 +7,9 @@ exports.parse = parse;
 /**
  * [parse description]
  * @param  {string} text    [description]
- * @param  {object} handler {splitLoad: function(packageName)}
+ * @param  {object} handler {
+ * @param  {function} handler.splitLoad(packageName)
+ * @param  {function} handler.Identifier(name)
  */
 function parse(text, handler) {
 	if (_.startsWith(text, '#!')) {
@@ -47,4 +49,5 @@ function parse(text, handler) {
 			//parser.handleAstLeave(node, parent);
 		}
 	});
+	return ast;
 }
