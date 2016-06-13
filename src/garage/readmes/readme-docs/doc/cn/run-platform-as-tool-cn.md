@@ -1,15 +1,14 @@
 Daily Work: 安装平台 & 开发组建
 ============
-_2016-3-29 更新_
-
-让工具变的更简单，如果可以用一天手工完成的工作，请一定花两天的时间用脚本来完成 :)
-
 > 建议安装全局的Gulp 命令行工具:
 > ```
 >	sudo npm install -g gulp-cli
 > ```
 > 如果你没有安装全局的Gulp 命令行工具也没有关系，以下文档所有提到 `gulp`命令的地方请替换使用`node_modules/.bin/gulp`
-
+### 0. 安装全局命令行工具
+```
+npm install -g web-fun-house-cli
+```
 ### 1. 安装平台
 
 创建一个空目录，一定要`npm init`一个package.json文件
@@ -39,7 +38,7 @@ project-dir/
 
 执行命令
 ```
-node_modules/.bin/web-fun-house init
+web-fun-house init
 ```
 _**这命令2016-3-26 做了简化**，自动生成样板源码和安装平台默认组件_:
 - 自动安装gulp
@@ -50,7 +49,7 @@ _**这命令2016-3-26 做了简化**，自动生成样板源码和安装平台�
 
 ### ~~3. 安装平台默认组件~~
 
-这个步骤已不再需要，已经在`node_modules/.bin/web-fun-house init`中完成了。
+这个步骤已不再需要，已经在`web-fun-house init`中完成了。
 
 ### 4. 编译运行！
 ```shell

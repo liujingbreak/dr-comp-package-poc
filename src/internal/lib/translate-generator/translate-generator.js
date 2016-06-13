@@ -1,5 +1,6 @@
 var Path = require('path');
-var log = require('log4js').getLogger('translate-generator');
+var api = require('__api');
+var log = require('log4js').getLogger(api.packageName);
 var glob = require('glob');
 var cheerio = require('cheerio');
 var fs = require('fs');
@@ -12,7 +13,7 @@ var jsParser = require('./jsParser');
 var config;
 
 module.exports = {
-	compile: function(api) {
+	compile: function() {
 		config = api.config;
 		if (!api.argv.translate) {
 			log.debug('skip');
@@ -64,10 +65,10 @@ function scanPackage(packagePath) {
 			log.debug('scan: ' + path);
 			var $ = cheerio.load(content);
 			$('.t').each((i, dom) => {
-				dirty = doElement($(dom), yamls, existings, trackExess);
+				dirty = doElement($(dom), yamls, existings, trackExess) || dirty;
 			});
 			$('[translate]').each((i, dom) => {
-				dirty = doElement($(dom), yamls, existings, trackExess);
+				dirty = doElement($(dom), yamls, existings, trackExess) || dirty;
 			});
 		});
 	});
@@ -76,23 +77,22 @@ function scanPackage(packagePath) {
 		return readFileAsync(path, 'utf8').then(content => {
 			log.debug('scan: ' + path);
 			jsParser(config, content, (key) => {
-				dirty = onKeyFound(key, yamls, existings, trackExess);
+				dirty = onKeyFound(key, yamls, existings, trackExess) || dirty;
 			});
 		});
 	});
 
 	return Promise.all(proms.concat(promJS)).then(() => {
+		log.debug('dirty=' + dirty);
 		if (!dirty) {
 			return printRedundant(trackExess);
 		}
-
 		return new Promise((resolve, reject) => {
 			mkdirp(i18nDir, (err) => {
 				var indexFile = Path.join(i18nDir, 'index.js');
 				if (!fileExists(indexFile)) {
 					fs.writeFileSync(indexFile, 'module.exports = require(\'./message-{locale}.yaml\');\n', 'utf8');
 				}
-
 				var writeProms = config().locales.map(locale => {
 					var fileToWrite = Path.join(i18nDir, 'message-' + locale + '.yaml');
 					log.debug('write to file ' + fileToWrite);
@@ -119,13 +119,16 @@ function doElement(el, yamls, existing, trackExess) {
 }
 
 function onKeyFound(key, yamls, existing, trackExess) {
+	log.debug('found key: ' + key);
 	var quote = JSON.stringify(key);
 	var newLine = quote + ': ' + quote + '\n';
 	var dirty = false;
 	_.forOwn(yamls, (content, locale) => {
-		delete trackExess[locale][key];
-		if (!existing[locale] || !{}.hasOwnProperty.call(existing[locale], key)) {
+		if (_.has(trackExess, locale))
+			delete trackExess[locale][key];
+		if (!existing[locale] || !_.has(existing[locale], key)) {
 			yamls[locale] += newLine;
+			log.debug('+ ' + newLine);
 			dirty = true;
 		}
 	});

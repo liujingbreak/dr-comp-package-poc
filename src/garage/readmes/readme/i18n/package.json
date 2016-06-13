@@ -1,6 +1,1 @@
-{
-  "description": "Doesn't matter what name or version it is, all your need to do is adding 'style' property in this file if you have locale based Stylesheets",
-  "transforms": [
-    "@dr/parcelify-module-resolver"
-  ]
-}
+{}

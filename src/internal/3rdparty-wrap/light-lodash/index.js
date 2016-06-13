@@ -2,6 +2,7 @@ module.exports = {
 	// array
 	sortedIndex: require('lodash/sortedIndex'),
 	sortedIndexOf: require('lodash/sortedIndexOf'),
+	reverse: require('lodash/reverse'),
 	// collection
 	assign: require('lodash/assign'),
 	each: require('lodash/each'),

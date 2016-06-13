@@ -12,7 +12,7 @@ function buildScenes(scrollControl, iElement, scope) {
 		startup: function(reverse, offset) {
 			if (!reverse) {
 				TweenMax.staggerTo(
-					_(slogon.children().eq(0).children()).reverse().value(), 0.7,
+					_.reverse(slogon.children().eq(0).children()), 0.7,
 					{className: '+=invisible', y: 300, rotation: 90,  ease: 'Power2.easeIn'},
 					0.07);
 			}

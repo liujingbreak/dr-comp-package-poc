@@ -187,12 +187,12 @@ function factory($timeout, $parse, $compile) {
 					subMenuState = EXPANDED;
 					animQueue.then(function() {
 						subMenuEl.addClass('highlight');
-						var defer = Promise.defer();
-						TweenMax.killTweensOf(subMenuEl[0]);
-						TweenMax.to(subMenuEl[0], 0.25, {x: SUBMENU_EXP_LEFT, ease: 'Power2.easeOut', onComplete: defer.resolve});
-						highlightMenu(lastHover);
-						scope.$apply();
-						return defer.promise;
+						return new Promise(function(resolve, reject) {
+							TweenMax.killTweensOf(subMenuEl[0]);
+							TweenMax.to(subMenuEl[0], 0.25, {x: SUBMENU_EXP_LEFT, ease: 'Power2.easeOut', onComplete: resolve});
+							highlightMenu(lastHover);
+							scope.$apply();
+						});
 					});
 					controller.menuExpand({width: subMenuEl.prop('offsetWidth') + 66});
 					scope.$apply();
@@ -205,15 +205,15 @@ function factory($timeout, $parse, $compile) {
 					}
 					subMenuState = HIDDEN;
 					animQueue.then(function() {
-						var defer = Promise.defer();
-						TweenMax.to(subMenuEl[0], 0.25, {x: ASIDE_MENU_WIDTH, ease: 'Power2.easeOut', onComplete: defer.resolve});
-						var menuSelectedIdx = getMenuSelectedIdx(scope);
-						if (lastHover !== menuSelectedIdx) {
-							subMenuEl.removeClass('highlight');
-						}
-						highlightMenu(menuSelectedIdx);
-						scope.$apply();
-						return defer.promise;
+						return new Promise(function(resolve, reject) {
+							TweenMax.to(subMenuEl[0], 0.25, {x: ASIDE_MENU_WIDTH, ease: 'Power2.easeOut', onComplete: resolve});
+							var menuSelectedIdx = getMenuSelectedIdx(scope);
+							if (lastHover !== menuSelectedIdx) {
+								subMenuEl.removeClass('highlight');
+							}
+							highlightMenu(menuSelectedIdx);
+							scope.$apply();
+						});
 					});
 					controller.menuUnexpand({width: subMenuLeft});
 					scope.$apply();

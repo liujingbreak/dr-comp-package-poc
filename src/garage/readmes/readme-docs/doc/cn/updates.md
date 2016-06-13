@@ -1,5 +1,15 @@
 Updates
 =======
+### 2016-6-13
+- browser和NodeJS统一的API获取方式：`require('__api')`
+- 新的解耦方式，新增两个配置JS文件，用于注入依赖或替换依赖
+	inject.js, browserify-inject.js。
+	采用了[require-injector](https://www.npmjs.com/package/require-injector)
+- 新增了light-lodash, minify后core bundle的gzip size减少 6k
+- 集成测试命令 gulp e2e --server 参数可以自动启动server
+- web-fun-house命令可以`npm install -g web-fun-house-cli`
+
+
 ### 2016-5-31
 ### Support Webpack like **Code Splitting**
 Defining a split point

@@ -1,3 +1,4 @@
+var msg = require('@dr/readme/i18n');
 module.exports = function(goFunc) {
 	return [
 		{
@@ -6,22 +7,28 @@ module.exports = function(goFunc) {
 				goFunc('readme-cn.md');
 			}
 		},  {
-			label: $translate('Daily Work: 安装平台 & 开发组建'),
+			label: $translate('Daily Work'),
+			flag: 'new',
 			action: function() {
 				goFunc('run-platform-as-tool-cn.md');
 			}
 		}, {
 			label: $translate('Package.json Specification'),
-			flag: 'new',
 			action: function() {
 				goFunc('package-spec-cn.md');
 			}
 		}, {
-			label: $translate('环境配置和gulp命令提示'),
+			label: $translate('Environment'),
 			action: function() {
 				goFunc('dev-env-hints.md');
 			}
 		}, {
+			label: $translate('Decoupling: dependency injection'),
+			flag: 'new',
+			action: function() {
+				goFunc('dependency-injection.md');
+			}
+		},{
 			label: $translate('API Specification'),
 			flag: 'new',
 			action: function() {
@@ -57,7 +64,7 @@ module.exports = function(goFunc) {
 				goFunc('updates.md');
 			}
 		}, {
-			label: $translate('Quick Start: I am platform developer'),
+			label: $translate('I am platform developer'),
 			action: function() {
 				goFunc('quickstart-cn.md');
 			}
@@ -69,3 +76,8 @@ module.exports = function(goFunc) {
 		}
 	];
 };
+
+function $translate(key) {
+	var value = msg[key];
+	return value ? value : key;
+}
