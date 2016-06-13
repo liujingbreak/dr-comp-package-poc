@@ -1,6 +1,6 @@
 {
   "name": "@dr/example-entry",
-  "version": "1.0.31",
+  "version": "1.0.32",
   "description": "sample node package",
   "scripts": {
     "test": "gulp test -p example-entry"

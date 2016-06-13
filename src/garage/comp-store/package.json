@@ -1,10 +1,10 @@
 {
   "name": "@dr/comp-store",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Component store",
   "browser": "browser.js",
   "dr": {
-      "bundle": "component-store"
+    "bundle": "component-store"
   },
   "transforms": [
     "@dr/parcelify-module-resolver"
