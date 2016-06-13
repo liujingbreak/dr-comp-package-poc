@@ -1,9 +1,10 @@
 var Path = require('path');
 var _ = require('lodash');
-var log = require('log4js').getLogger(Path.basename(__filename, '.js'));
+var api = require('__api');
+var log = require('log4js').getLogger(api.packageName + '.compilerApi');
 var chalk = require('chalk');
 
-module.exports = function(api) {
+module.exports = function() {
 	var proto = Object.getPrototypeOf(api);
 	proto.findBrowserPackageByPath = findBrowserPackageByPath;
 	proto.findBrowserPackageInstanceByPath = findBrowserPackageInstanceByPath;
@@ -43,8 +44,7 @@ function findBrowserPackageInstanceByPath(file) {
 
 	var idx = _.sortedIndex(this._packagePathList, file);
 	if (idx === 0 || !file.startsWith(this._packagePathList[idx - 1])) {
-		log.error('file ' + file + ' doesn\'t belong to any of our private packages');
-		return null;
+		throw new Error('file ' + file + ' doesn\'t belong to any of our private packages');
 	} else {
 		return this._packagePath2Name[this._packagePathList[idx - 1]];
 	}

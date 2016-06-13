@@ -88,7 +88,7 @@ function init(noSample) {
 	}
 	if (!fileAccessable(Path.resolve('browserify-inject.js'))) {
 		shell.cp('-f', Path.resolve(__dirname, 'inject-template.js'), argv.d + '/browserify-inject.js');
-		console.info('inject.js is created');
+		console.info('browserify-inject.js is created');
 	}
 	// to solve npm 2.0 nested node_modules folder issue
 	installDevDependencyAsync().then(()=> {
