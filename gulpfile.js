@@ -291,21 +291,21 @@ gulp.task('publish', function(cb) {
 			var data = JSON.parse(fs.readFileSync(file.path, 'utf8'));
 			gutil.log('publish ' + data.name + '@' + data.version);
 			promises.push( buildUtils.promisifyExe('npm', 'publish', Path.dirname(file.path), {silent: true})
-				.then(gutil.log));
+				.then(gutil.log).catch(()=>{}));
 		})
 		.on('end', ()=> {
 			recipeManager.eachRecipeSrc(function(src, recipeDir) {
 				var data = JSON.parse(fs.readFileSync(Path.join(recipeDir, 'package.json'), 'utf8'));
 				gutil.log('publish ' + data.name + '@' + data.version);
 				promises.push( buildUtils.promisifyExe('npm', 'publish', recipeDir, {silent: true})
-						.then(gutil.log));
+						.then(gutil.log).catch(()=>{}));
 			});
 			var data = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 			gutil.log('publish ' + data.name + '@' + data.version);
 			promises.push(buildUtils.promisifyExe('npm', 'publish', process.cwd(), {silent: true})
-				.then(gutil.log));
+				.then(gutil.log).catch(()=>{}));
 			Promise.all(promises)
-			.catch(()=> {})
+			.catch(gutil.log)
 			.finally(() => {
 				gutil.log(promises.length + ' published');
 				cb();
@@ -330,17 +330,17 @@ gulp.task('unpublish', function(cb) {
 		.on('data', file => {
 			var data = JSON.parse(fs.readFileSync(file.path, 'utf8'));
 			gutil.log('unpublish src ' + data.name + '@' + data.version);
-			promises.push(buildUtils.promisifyExe('npm', 'unpublish', data.name + '@' + data.version));
+			promises.push(buildUtils.promisifyExe('npm', 'unpublish', data.name + '@' + data.version).catch(()=>{}));
 		})
 		.on('end', ()=> {
 			recipeManager.eachRecipeSrc(function(src, recipeDir) {
 				var data = JSON.parse(fs.readFileSync(Path.join(recipeDir, 'package.json'), 'utf8'));
 				gutil.log('unpublish recipe ' + data.name + '@' + data.version);
-				promises.push(buildUtils.promisifyExe('npm', 'unpublish', data.name + '@' + data.version));
+				promises.push(buildUtils.promisifyExe('npm', 'unpublish', data.name + '@' + data.version).catch(()=>{}));
 			});
 			var data = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 			gutil.log('unpublish ' + data.name + '@' + data.version);
-			promises.push(buildUtils.promisifyExe('npm', 'unpublish', data.name + '@' + data.version));
+			promises.push(buildUtils.promisifyExe('npm', 'unpublish', data.name + '@' + data.version).catch(()=>{}));
 			Promise.all(promises)
 			.catch(()=>{})
 			.finally(() => {
