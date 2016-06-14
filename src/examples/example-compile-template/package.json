@@ -1,6 +1,6 @@
 {
   "name": "@dr/example-compile-template",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "sample package demonstrates how compilation time template works",
   "scripts": {
     "test": "gulp test -p example-compile-template"
@@ -12,8 +12,5 @@
     "entryPage": "index.html"
   },
   "author": "jing.liu.fe@d.com",
-  "license": "MIT",
-  "dependencies": {
-    "lodash": "~4.6.1"
-  }
+  "license": "MIT"
 }

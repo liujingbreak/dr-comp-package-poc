@@ -1,6 +1,6 @@
 {
 	"name": "@dr/example-node",
-	"version": "1.0.34",
+	"version": "1.0.35",
 	"description": "sample node package",
 	"main": "index.js",
 	"scripts": {
@@ -10,10 +10,7 @@
 		"type": "server"
 	},
 	"author": "LJ",
-	"license": "ISC",
-	"dependencies": {
-		"lodash": "4.6.1"
-	},
+	"license": "MIT",
 	"drConfig": {
 		"type": "router"
 	}

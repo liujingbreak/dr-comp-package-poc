@@ -1,6 +1,6 @@
 {
   "name": "@dr-core/assets-processer",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "description": "Copy assets to destDir folder only when devMode is false",
   "main": "assetsProcesser.js",
   "dr": {
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "through2": "^2.0.1",
-    "shelljs": "^0.3.0",
+    "shelljs": "^0.7.0",
     "mkdirp": "^0.5.1"
   },
   "scripts": {

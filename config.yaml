@@ -111,4 +111,4 @@ browserSideConfigProp:
 
 e2etest:
     selenium:
-        driverPath: '..'
+        driverPath: 'node_modules/@dr/chrome-driver/linux64'

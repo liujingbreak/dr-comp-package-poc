@@ -1,6 +1,6 @@
 {
   "name": "@dr/example-entry",
-  "version": "1.0.32",
+  "version": "1.0.33",
   "description": "sample node package",
   "scripts": {
     "test": "gulp test -p example-entry"
@@ -19,6 +19,6 @@
   "author": "jing.liu.fe@d.com",
   "license": "MIT",
   "dependencies": {
-    "lodash": "~4.6.1"
+    "lodash": "^4.13.1"
   }
 }
