@@ -11,7 +11,11 @@ describe('When server is started', function() {
 		docHomePage.get().then(() => {
 			log.debug('get done');
 			expect(docHomePage.faviconStatus).toBe(200);
-			return helper.driver.getCurrentUrl();
+			return new Promise(resolve => {
+				setTimeout(()=> {
+					helper.driver.getCurrentUrl().then(resolve);
+				}, 1000);
+			});
 		})
 		.then(url => {
 			log.debug('current url: ' + url);
