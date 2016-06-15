@@ -4,6 +4,7 @@
   "description": "A demo package that contains locale specific stuff",
   "browser": "index.js",
   "style": "zh-style.less",
+  "dr": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
