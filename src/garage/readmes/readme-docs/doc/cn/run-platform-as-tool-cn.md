@@ -115,23 +115,23 @@ gulp clean
 gulp install-recipe
 ```
 会删除所有dist和node_modules下的私有package，包括核心组建,
-恢复开发环境需要重新执行 `gulp install-recipe` 或者 `node_modules/.bin/web-fun-house update` 来安装核心package, 其他package都需要手动npm install
+恢复开发环境需要重新执行 `gulp install-recipe` 或者 `web-fun-house update` 来安装核心package, 其他package都需要手动npm install
 
 #### 7. 从git repo clone全新的项目
 由于新下载的项目通常会ignore node_modules目录，所以需要重新install web-fun-house和依赖
 ```
 npm install web-fun-house
-./node_modules/.bin/web-fun-house update
+web-fun-house update
 ```
 > `web-fun-house update`和`web-fun-house init`区别是后者会copy example目录, 所以已有的项目不需要再init，
-> 执行`./node_modules/.bin/web-fun-house`查看帮助
+> 执行`web-fun-house`查看帮助
 
 #### 8. 升级
 _平台本身和其他组建一定会一直有更新，当别的同学维护的package publish了新版本时，需要更新本地的package_
 - 当有新版本web-fun-house发布后, 在项目根目录下再一次执行
 	```
 	npm install web-fun-house
-	./node_modules/.bin/web-fun-house update
+	web-fun-house update
 	```
 - 更新某个recipe 或者单独更新某个package
 	```
