@@ -53,15 +53,15 @@ function saveCache(packageInfo) {
  */
 function _walkPackages() {
 	var info = {
-		allModules: null,
-		moduleMap: {},
+		allModules: null, // array
+		moduleMap: null, // object
 		bundleMap: null,
 		entryPageMap: {},
 		localeEntryMap: {}
 	};
 	var vendorConfigInfo = vendorBundleMapConfig();
 	var map = info.bundleMap = vendorConfigInfo.bundleMap;
-	info.allModules = vendorConfigInfo.allModules;
+	info.moduleMap = vendorConfigInfo.moduleMap;
 
 	packageUtils.findBrowserPackageByType('*', function(
 		name, entryPath, parsedName, pkJson, packagePath) {
@@ -78,8 +78,14 @@ function _walkPackages() {
 			if (config().bundlePerPackage === true && parsedName.name !== 'browserify-builder-api') {
 				bundle = parsedName.name;
 			} else {
-				bundle = pkJson.dr.bundle || pkJson.dr.chunk;
-				bundle = bundle ? bundle : parsedName.name;
+				if (_.has(vendorConfigInfo.moduleMap, name)) {
+					bundle = vendorConfigInfo.moduleMap[name].bundle;
+					//delete vendorConfigInfo.moduleMap[name];
+					log.debug('vendorBundleMap overrides bundle setting for ' + name);
+				} else {
+					bundle = pkJson.dr.bundle || pkJson.dr.chunk;
+					bundle = bundle ? bundle : parsedName.name;
+				}
 			}
 			if (pkJson.dr.entryPage) {
 				isEntryServerTemplate = false;
@@ -117,7 +123,7 @@ function _walkPackages() {
 			isEntryServerTemplate: isEntryServerTemplate,
 			i18n: pkJson.dr ? (pkJson.dr.i18n ? pkJson.dr.i18n : null) : null
 		});
-		info.allModules.push(instance);
+		info.moduleMap[name] = instance;
 
 		if (!{}.hasOwnProperty.call(map, bundle)) {
 			map[bundle] = [];
@@ -125,12 +131,7 @@ function _walkPackages() {
 		map[bundle].push(instance);
 	});
 
-	info.allModules.forEach(function(instance) {
-		if (!instance.longName) {
-			log.debug('no long name? ' + JSON.stringify(instance, null, '\t'));
-		}
-		info.moduleMap[instance.longName] = instance;
-	});
+	info.allModules = _.values(info.moduleMap);
 
 	return info;
 }
@@ -142,6 +143,7 @@ function _walkPackages() {
 function vendorBundleMapConfig() {
 	var info = {
 		allModules: [],
+		moduleMap: {},
 		bundleMap: null
 	};
 	var vendorMap = config().vendorBundleMap;
@@ -164,6 +166,7 @@ function vendorBundleMapConfig() {
 				file: mainFile
 			});
 			info.allModules.push(instance);
+			info.moduleMap[moduleName] = instance;
 			return instance;
 		});
 		map[bundle] = modules;

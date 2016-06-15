@@ -41,8 +41,8 @@ staticAssetsURL: ""
 
 serverURL: ""
 
-# Manually set bundle file name for 3rd-party libaraies, otherwise browserify
-# will bundle them to every package that depends on them.
+# Override bundle file name for installed components (including 3rd-party library),
+# otherwise browserify will bundle them with every package that depends on them.
 vendorBundleMap:
   core: # API bundle, always be loaded at first
     # - lodash
