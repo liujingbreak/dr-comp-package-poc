@@ -86,6 +86,8 @@ _2016-3-28 更新_
 	```
 	gulp watch  -p <package-short-name>  -p <package-short-name>
 	```
+- ### gulp check-deps
+	列出所有组件package的dependencies, 方便查看组件的第三方依赖有没有版本不一致
 
 - ### gulp build-prod
 	gulp build，但是忽略config.local.yaml配置，用于production环境的build: uglify, revisioning bundles等

@@ -1,5 +1,5 @@
 {
-  "name": "@dr/example-local-zh",
+  "name": "@dr/example-locale-zh",
   "version": "0.0.7",
   "description": "A demo package that contains locale specific stuff",
   "browser": "index.js",

@@ -1,6 +1,6 @@
 {
   "name": "@dr/example-i18n",
-  "version": "0.0.1",
+  "version": "0.0.10",
   "description": "Demo how we support i18n in browser side package",
   "browser": "index.js",
   "style": "style.less",
@@ -8,13 +8,13 @@
     "@dr/parcelify-module-resolver"
   ],
   "dr": {
-	"bundle": "example",
-	"entryPage": "index.html",
-    "i18n": "i18n/locale-{locale}.yaml"
+    "bundle": "example",
+    "entryPage": "index.html",
+    "i18n": "i18n/{locale}.js"
   },
   "scripts": {
-    "test": "gulp test -p example-i18n"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "LJ",
-  "license": "MIT"
+  "author": "",
+  "license": "ISC"
 }

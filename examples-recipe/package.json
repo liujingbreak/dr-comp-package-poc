@@ -9,6 +9,6 @@
     "@dr/example-node": "1.0.35",
     "@dr/example-browserify": "0.0.26",
     "@dr/example-i18n": "0.0.10",
-    "@dr/example-local-zh": "0.0.7"
+    "@dr/example-locale-zh": "0.0.7"
   }
 }

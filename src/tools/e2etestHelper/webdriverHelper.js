@@ -39,7 +39,7 @@ exports.run = run;
  */
 function run(theConfig, browser, serverModule, cwd, runTest) {
 	config = theConfig;
-	process.env.PATH = process.env.PATH + (isWindows ? ';' : ':') + Path.resolve(config.resolve('e2etest.selenium.driverPath'));
+	process.env.PATH = process.env.PATH + (isWindows ? ';' : ':') + Path.resolve(config.resolve('e2etestHelper.selenium.driverPath'));
 	log.debug(process.env.PATH);
 	if (config.get('sl.enabled')) {
 		exports.urlPrefix = urlPrefix = 'https://localhost:' + config().ssl.port;

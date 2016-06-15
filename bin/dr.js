@@ -56,9 +56,10 @@ function init(noSample) {
 	if (!noSample) {
 		shell.cp('-R', [
 			Path.resolve(__dirname, 'examples', 'example-entry'),
-			Path.resolve(__dirname, 'examples', 'example-i18n'),
+			Path.resolve(__dirname, 'examples', 'i18n'),
 			Path.resolve(__dirname, 'examples', 'example-node'),
 		], argv.d + '/src/examples/');
+		buildUtils.promisifyExe('npm', 'install', '--save',  '@dr/angularjs');
 	}
 	if (!fs.existsSync(argv.d + '/.jscsrc')) {
 		shell.cp(Path.resolve(__dirname, '..', '.jscsrc'), argv.d + '/');

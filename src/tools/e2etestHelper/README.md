@@ -18,7 +18,7 @@ Ideally you should group your test specs in subdirectories like:
 ### Configure your test environment
 1. In `config.yaml` or `config.local.yaml`, add following lines:
 	```yaml
-    e2etest:
+    e2etestHelper:
        selenium:
            driverPath: '..'
 	```

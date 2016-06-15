@@ -109,6 +109,6 @@ browserSideConfigProp:
     - locales
     - devMode
 
-e2etest:
+e2etestHelper:
     selenium:
         driverPath: 'node_modules/@dr/chrome-driver/linux64'

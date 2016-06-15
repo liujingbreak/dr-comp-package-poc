@@ -1,9 +1,10 @@
 var mafia = require('@dr/example-node');
 var log = require('log4js').getLogger(__filename);
 var Path = require('path');
+var api = require('__api');
 
 module.exports = {
-	activate: function(api) {
+	activate: function() {
 		api.router().get('/', function(req, res) {
 			res.render(api.getCompiledViewPath('index.html'),
 				{contextPath: api.contextPath});
