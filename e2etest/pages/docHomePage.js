@@ -3,7 +3,8 @@
 var util = require('util');
 var helper = require('@dr/e2etest-helper');
 var basePage = helper.basePage;
- var _ = require('lodash');
+var _ = require('lodash');
+var Promise = require('bluebird');
 
 util.inherits(DocHomePage, basePage);
 
@@ -15,13 +16,11 @@ function DocHomePage() {
 
 _.assign(DocHomePage.prototype, {
 	check: function() {
-		return helper.statusCodeOf('/favicon.ico')
-			.then(code => {
-				this.faviconStatus = code;
-			})
-			.then(()=> {
-				return DocHomePage.super_.prototype.check.apply(this, arguments);
-			});
+		var self = this;
+		return Promise.coroutine(function*() {
+			self.faviconStatus = yield helper.statusCodeOf('/favicon.ico');
+			return yield DocHomePage.super_.prototype.check.apply(self, arguments);
+		})();
 	}
 });
 

@@ -48,7 +48,7 @@ function init(noSample) {
 	}
 	content = content.replace('<plateformFolder>', relativePath.replace(/\\/g, '/'));
 	fs.writeFileSync(Path.join(argv.d, 'gulpfile.js'), content, 'utf8');
-	shell.mkdir('-p', 'src/examples');
+
 	if (!fileAccessable(Path.resolve(argv.d, 'config.yaml')))
 		shell.cp(Path.resolve(__dirname, 'config-template.yaml'), argv.d + '/config.yaml');
 	if (!fileAccessable(Path.resolve(argv.d, 'config.local.yaml')))
@@ -58,6 +58,7 @@ function init(noSample) {
 	if (!fileAccessable(Path.resolve(argv.d, 'app.js')))
 		shell.cp(Path.resolve(__dirname, 'app-template.js'), argv.d + '/app.js');
 	if (!noSample) {
+		shell.mkdir('-p', 'src/examples');
 		shell.cp('-R', [
 			Path.resolve(__dirname, 'examples', 'example-entry'),
 			Path.resolve(__dirname, 'examples', 'i18n'),

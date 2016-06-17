@@ -3,30 +3,23 @@ var log = require('@dr/logger').getLogger('test.' + Path.basename(__filename, '.
 var helper = require('@dr/e2etest-helper');
 var docHomePage = require('../../pages/docHomePage');
 var _ = require('lodash');
+var Promise = require('bluebird');
 
 describe('When server is started', function() {
 	helper.setup();
 
 	it('the home page should be available', function(done) {
-		docHomePage.get().then(() => {
-			log.debug('get done');
+		Promise.coroutine(function*() {
+			yield docHomePage.get();
 			expect(docHomePage.faviconStatus).toBe(200);
-			return new Promise(resolve => {
-				setTimeout(()=> {
-					helper.driver.getCurrentUrl().then(resolve);
-				}, 1000);
-			});
-		})
-		.then(url => {
-			log.debug('current url: ' + url);
+			yield Promise.delay(1000);
+			var url = yield helper.driver.getCurrentUrl();
+			log.info('current url: ' + url);
 			expect(_.endsWith(url, '/doc-home/index.html#/')).toBe(true);
-			return new Promise((resolve)=> {
-				setTimeout(resolve, 2000);
-			}).then(() => {
-				helper.saveScreen('doc-home.png');
-			});
-		})
-		.then(done)
+			yield Promise.delay(1500);
+			helper.saveScreen('doc-home.png');
+			done();
+		})()
 		.catch(e => {
 			log.error(e);
 			done.fail(e);

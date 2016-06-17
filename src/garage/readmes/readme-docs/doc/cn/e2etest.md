@@ -121,14 +121,14 @@ module.exports = new YourPage();
 If you want to assert a response status code of a local HTTP Path, you may do like this,
 ```javascript
 ...
+var Promise = require('bluebird');
 it('"http://localhost:<port>/resource" Should return 200', (done)=> {
-	helper.statusCodeOf('/resource')
-	.then(statusCode => {
+	Promise.coroutine(function*() {
+		var statusCode = yield helper.statusCodeOf('/resource')
 		expect(statusCode).toBe(200);
 		done();
-	})
+	})()
 	.catch(e => {
 		done.fail(e);
 	});
 });
-```
