@@ -27,14 +27,14 @@ module.exports = function(injector) {
 	// (function() {
 	//	return window.jQuery;
 	// })();
-	inject.fromAllPackages().factory('jquery', function() {
+	inject.fromAllComponents().factory('jquery', function() {
 		return window.jQuery;
 	})
 }
 ```
 
 ### Injector API
-- `inject.fromAllPackages()`
+- `inject.fromAllComponents()`
 - `inject.fromPackage(packageNames)`
 - `.factory(oldPackageName, factoryFunction)`
 - `.value(oldPackageName, newValue)`

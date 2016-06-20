@@ -21,7 +21,7 @@ module.exports = function(injector) {
 	 * But you have a CDN library script link already on entry page, you don't want
 	 * this "angularjs" package get packed to bundle file anymore:
 	 *
-	 * 	injector.fromAllPackages().factory('@dr/angularjs',
+	 * 	injector.fromAllComponents().factory('@dr/angularjs',
 	 * 		function() {return window.angular;});
 	 */
 	injector.notFromPackages('lodash').substitute('lodash', '@dr/light-lodash');

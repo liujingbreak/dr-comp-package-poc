@@ -11,7 +11,7 @@ module.exports = function(injector) {
 	 *
 	 *  // Inject to all component packages:
 	 *
-	 *  injector.fromAllPackage()
+	 *  injector.fromAllComponents()
 	 *  	.substitue('depenency-package', 'another-package');
 	 */
 };
