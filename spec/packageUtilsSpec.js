@@ -41,16 +41,14 @@ describe('packageUtils', function() {
 				'@dr/light-lodash'
 			];
 			var foundPackages = callback.calls.allArgs().map(row => { return row[0];});
-			log.debug(foundPackages);
-			console.log(callback.calls.count());
-			expect(foundPackages.length).toBe(builders.length);
-			expect(_.intersection(foundPackages, builders).length).toBe(builders.length);
+			expect(_.difference(builders, foundPackages)).toEqual([]);
+			expect(_.difference(foundPackages, builders)).toEqual([]);
 		});
 
 		it('should return proper number of packages for type "server"', function() {
 			var callback = jasmine.createSpy('found');
 			packageUtils.findNodePackageByType('server', callback);
-			var servers = [
+			var allServerPackages = [
 				'@dr/environment',
 				'@dr-core/express-app',
 				'@dr/doc-home',
@@ -61,10 +59,9 @@ describe('packageUtils', function() {
 				'@dr/example-node'
 			];
 			var foundPackages = callback.calls.allArgs().map(row => { return row[0];});
-			log.debug(foundPackages);
-			console.log(callback.calls.count());
-			expect(foundPackages.length).toBe(servers.length);
-			expect(_.intersection(foundPackages, servers).length).toBe(servers.length);
+
+			expect(_.difference(allServerPackages, foundPackages)).toEqual([]);
+			expect(_.difference(foundPackages, allServerPackages)).toEqual([]);
 		});
 	});
 
