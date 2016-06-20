@@ -8,12 +8,12 @@ var engines = require('consolidate');
 var swig = require('swig');
 var setupApi = require('./setupApi');
 var log4js = require('log4js');
-var log;
+var api = require('__api');
+var log = log4js.getLogger(api.packageName);;
 var compression = require('compression');
 
 module.exports = {
-	activate: function(api) {
-		log = log4js.getLogger(api.packageName);
+	activate: function() {
 		var app = express();
 		setupApi(api);
 		api.eventBus.on('packagesActivated', function(packageCache) {
@@ -35,6 +35,7 @@ function create(app, setting, packageCache) {
 
 	app.set('views', [path.join(__dirname, 'views'), setting.rootPath]);
 	app.set('view engine', 'html');
+	app.set('env', api.config().devMode ? 'development' : 'production' );
 
 	// uncomment after placing your favicon in /public
 	//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));

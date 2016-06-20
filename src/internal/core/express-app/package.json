@@ -1,7 +1,7 @@
 {
   "name": "@dr-core/express-app",
   "description": "express app",
-  "version": "0.0.32",
+  "version": "0.1.0",
   "main": "app.js",
   "dependencies": {
     "body-parser": "~1.13.2",

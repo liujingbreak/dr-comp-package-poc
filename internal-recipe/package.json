@@ -1,6 +1,6 @@
 {
   "name": "@dr/internal-recipe",
-  "version": "0.0.31",
+  "version": "0.0.32",
   "description": "Recipe package of package-recipe",
   "dependencies": {
     "@dr-core/labjs": "0.0.22",
@@ -12,7 +12,7 @@
     "@dr/parcelify-module-resolver": "0.0.23",
     "@dr/template-builder": "0.0.6",
     "@dr/environment": "0.0.23",
-    "@dr-core/express-app": "0.0.32",
+    "@dr-core/express-app": "0.1.0",
     "@dr/http-server": "0.0.7",
     "@dr/logger": "0.0.25",
     "@dr/translate-generator": "0.0.8"
