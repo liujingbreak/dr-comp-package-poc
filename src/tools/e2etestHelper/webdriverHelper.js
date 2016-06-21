@@ -6,6 +6,7 @@ var request = require('request');
 var Promise = require('bluebird');
 var fs = require('fs');
 var fork = require('child_process').fork;
+var basePage = require('./basePage');
 
 var isWindows = process.platform.indexOf('win32') >= 0;
 var driver, config, urlPrefix;
@@ -47,7 +48,8 @@ function run(theConfig, browser, serverModule, cwd, runTest) {
 		exports.urlPrefix = urlPrefix = 'http://localhost:' + config().port;
 	}
 	// `basePage` relies on `urlPrefix`
-	exports.basePage = require('./basePage');
+	exports.basePage = basePage;
+	basePage.prototype._urlPrefix = urlPrefix;
 
 	setBrowser(browser);
 	var serverProcess;
@@ -79,15 +81,6 @@ function run(theConfig, browser, serverModule, cwd, runTest) {
 		}
 		return serverStopProm;
 	});
-	// .catch(e => {
-	// 	if (serverProcess) {
-	// 		log.info('stop server');
-	// 		serverProcess.kill('SIGINT');
-	// 	}
-	// 	return serverStopProm.then(() => {
-	// 		throw new Error(e);
-	// 	});
-	// });
 }
 
 exports.setup = function() {

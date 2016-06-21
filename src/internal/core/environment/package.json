@@ -1,7 +1,7 @@
 {
   "name": "@dr/environment",
-  "version": "0.0.23",
-  "description": "Runtime object holds api and config object",
+  "version": "0.0.24",
+  "description": "Deprecated",
   "main": "index.js",
   "dr": {
     "bundle": "core",

@@ -3,7 +3,6 @@ var Path = require('path');
 var log = require('@dr/logger').getLogger(Path.basename(__filename));
 var _ = require('lodash');
 var Promise = require('bluebird');
-// var config = require('@dr/environment').config;
 
 module.exports = Page;
 
@@ -13,8 +12,7 @@ function Page(path) {
 	}
 	this.path = this.path ? this.path : '';
 
-	var urlPrefix = require('./webdriverHelper').urlPrefix;
-	this.url = urlPrefix + (_.startsWith(this.path, '/') ? '' : '/') + this.path;
+	this.url = this._urlPrefix + (_.startsWith(this.path, '/') ? '' : '/') + this.path;
 	this.elements = {};
 	// lazy restart webdriver
 	Object.defineProperty(this, 'driver', {
@@ -27,7 +25,7 @@ function Page(path) {
 }
 
 Page.prototype = {
-
+	_urlPrefix: null,
 	get: function() {
 		var self = this;
 		log.debug('get ' + this.url);

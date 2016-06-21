@@ -9,7 +9,7 @@ var swig = require('swig');
 var setupApi = require('./setupApi');
 var log4js = require('log4js');
 var api = require('__api');
-var log = log4js.getLogger(api.packageName);;
+var log = log4js.getLogger(api.packageName);
 var compression = require('compression');
 
 module.exports = {
