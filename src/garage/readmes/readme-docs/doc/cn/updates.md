@@ -1,5 +1,10 @@
 Updates
 =======
+### 2016-6-23
+为升级主站，增加灵活性，新加了express-app API
+- api.swig
+- api.expressAppSet({function(app, express)} callback)
+
 ### 2016-6-13
 - browser和NodeJS统一的API获取方式：`require('__api')`
 - 新的解耦方式，新增两个配置JS文件，用于注入依赖或替换依赖

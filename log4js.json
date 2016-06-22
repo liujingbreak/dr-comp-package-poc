@@ -4,10 +4,16 @@
 			"type": "console"
 		}, {
 			"type": "dateFile",
-		    "filename": "logs/dependencyControl.log",
+		    "filename": "logs/server.log",
 		    "pattern": "-dd",
 		    "alwaysIncludePattern": false,
-			"category": "@dr-core/browserify-builder"
+			"category": "[all]"
+		}, {
+			"type": "file",
+			"filename": "logs/dependencyControl.log",
+			"category": "@dr-core/browserify-builder",
+			"maxLogSize": 512000,
+			"numBackups": 1
 		}
 	],
 	"levels": {

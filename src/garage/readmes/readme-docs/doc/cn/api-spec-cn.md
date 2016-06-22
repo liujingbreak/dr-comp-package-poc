@@ -88,7 +88,7 @@ console.log(__api.assetsUrl('some-picture.jpg'));
 
 ### 一些内置API providers
 
-##### @dr-core/express-server (src/core/server)
+##### @dr-core/express-app (src/core/express-app)
 增加了设置expresso router功能的API
 Node API methods
 | Name | Description
@@ -97,6 +97,8 @@ Node API methods
 | .use() | Express use() method, to bind middleware
 | .param() | Express param() method
 | .express | Express instance, 这样你就可以使用一些特殊的middleware 比如express.static
+| .expressAppSet(callback) | callback: function(app, express), 在express app初始化之前覆盖默认的设置，比如`app.set('view', ...)`
+| .swig | express view engines: `require('swig')`, 如果需要对swig做特殊设置，比如添加filters之类
 
 > 必须在module.exports.activate(api) function内调用
 
@@ -113,12 +115,25 @@ e.g.
 package 根目录下有一个index.html
 
 ```javascript
-module.exports = {
-	activate: function(api) {
-		api.router().get('/', function(req, res) {
-			res.render(api.getCompiledViewPath('index.html'),
-				{greeting: 'Hellow world'});
-		});
-	}
-}
+var api = require('__api');
+
+exports.activate = function(){
+	api.router().get('/', function(req, res) {
+		res.render(api.getCompiledViewPath('index.html'),
+			{greeting: 'Hellow world'});
+	});
+};
+
+```
+
+e.g. expressAppSet(callback)
+```js
+var api = require('__api');
+
+exports.activate = function(){
+ 	api.expressAppSet((app, express) => {
+ 		app.set('trust proxy', true);
+		app.set('views', Path.resolve(__dirname, 'web/views/'));
+	});
+};
 ```

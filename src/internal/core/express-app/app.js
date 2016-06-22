@@ -12,10 +12,11 @@ var api = require('__api');
 var log = log4js.getLogger(api.packageName);
 var compression = require('compression');
 
+var app;
 module.exports = {
 	activate: function() {
-		var app = express();
-		setupApi(api);
+		app = express();
+		setupApi(api, app);
 		api.eventBus.on('packagesActivated', function(packageCache) {
 			process.nextTick(()=> {
 				create(app, api.config(), packageCache);
@@ -25,10 +26,25 @@ module.exports = {
 	}
 };
 
+Object.defineProperties(module.exports, {
+	/**
+	 * Express app instance.
+	 * Assign another express app instance instead of a default one,
+	 * otherwise a default express app instance will be created.
+	 * @type {Object}
+	 */
+	app: {
+		enumerable: true,
+		set: expressApp => app = expressApp,
+		get: ()=> app
+	}
+});
+
 function create(app, setting, packageCache) {
 	// view engine setup
 	swig.setDefaults({
-		varControls: ['{=', '=}']
+		varControls: ['{=', '=}'],
+		cache: setting.devMode ? false : 'memory'
 	});
 	app.engine('html', engines.swig);
 	app.engine('jade', engines.jade);
@@ -36,7 +52,7 @@ function create(app, setting, packageCache) {
 	app.set('views', [path.join(__dirname, 'views'), setting.rootPath]);
 	app.set('view engine', 'html');
 	app.set('env', api.config().devMode ? 'development' : 'production' );
-
+	setupApi.applyPackageDefinedAppSetting(app);
 	// uncomment after placing your favicon in /public
 	//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 	//app.use(logger('dev'));

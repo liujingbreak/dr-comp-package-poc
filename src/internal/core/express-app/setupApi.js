@@ -2,9 +2,11 @@ var express = require('express');
 var log = require('log4js').getLogger('express-app.setApi');
 var _ = require('lodash');
 var Path = require('path');
+var swig = require('swig');
 
 var routerSetupFuncs = [];
 var middlewares = [];
+var appSets = [];
 
 module.exports = setupApi;
 
@@ -32,9 +34,16 @@ module.exports.createPackageDefinedRouters = function(app) {
 	app.use(revertRenderFunctionForError);//important
 };
 
-function setupApi(api) {
+module.exports.applyPackageDefinedAppSetting = function(app) {
+	appSets.forEach(callback => {
+		callback(app, express);
+	});
+};
+
+function setupApi(api, app) {
 	var apiPrototype = Object.getPrototypeOf(api);
 	apiPrototype.express = express;
+	apiPrototype.swig = swig;
 	/**
 	 * setup a router under package context path
 	 * same as app.use('/<package-path>', router);
@@ -59,7 +68,7 @@ function setupApi(api) {
 				// TODO: Maybe performanc can be improved here, a brand
 				// new res.render() function will be created againts every request handling
 				res.render = function() {
-					log.debug('in hacked res.render()');
+					// log.debug('in hacked res.render()');
 					var args = [].slice.call(arguments);
 					if (_.startsWith(args[0], '/')) {
 						args[0] = args[0].substring(1);
@@ -70,7 +79,7 @@ function setupApi(api) {
 				};
 				next();
 			});
-			log.debug(self.packageName + ': app.use context path = ' + contextPath);
+			// log.debug(self.packageName + ': app.use context path = ' + contextPath);
 			app.use(contextPath, router);
 		}
 		setupRouter.packageName = self.packageName;
@@ -108,6 +117,17 @@ function setupApi(api) {
 			middlewares.push(setupMiddleware);
 		};
 	});
+
+	/**
+	 * Callback functions will be called after express app being created
+	 * @param  {Function} callback function(app, express)
+	 * e.g.
+	 * 	api.expressAppSet((app, express) => {
+ 	 * 		app.set('trust proxy', true);
+ 	 * 		app.set('views', Path.resolve(api.config().rootPath, '../web/views/'));
+ 	 * 	});
+	 */
+	apiPrototype.expressAppSet = (callback) => appSets.push(callback);
 }
 
 function revertRenderFunction(req, res, next) {
