@@ -32,6 +32,9 @@ module.exports = function(injector) {
 	})
 }
 ```
+### 预先已经被注入的fake module
+- `require('__api')` 获取API object
+- `require('__injector')` 获取injector对象本身
 
 ### Injector API
 - `inject.fromAllComponents()`
