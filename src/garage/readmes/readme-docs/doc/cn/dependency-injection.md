@@ -33,8 +33,10 @@ module.exports = function(injector) {
 }
 ```
 ### 预先已经被注入的fake module
+当gulp compile, app.js运行时，可以获取以下预先注入的依赖
 - `require('__api')` 获取API object
-- `require('__injector')` 获取injector对象本身
+- `require('__injectorFactory')` 获取injector对象构造器
+- `require('__injector')` 获取当前node injector对象本身
 
 ### Injector API
 - `inject.fromAllComponents()`

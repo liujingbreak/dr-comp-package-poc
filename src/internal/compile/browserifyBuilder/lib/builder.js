@@ -32,7 +32,7 @@ var PageCompiler = require('./pageCompiler');
 var walkPackages = require('@dr-core/build-util').walkPackages;
 var depCtl = require('./dependencyControl');
 var packageBrowserInstance = require('@dr-core/build-util').packageInstance;
-var rj = require('__injector');
+var rj = require('__injectorFactory');
 var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
 var fileAccessAsync = Promise.promisify(fs.access, {context: fs});
 var packageUtils, config, jsBundleEntryMaker, injector;
