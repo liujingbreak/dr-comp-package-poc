@@ -24,5 +24,4 @@ _.assign(DocHomePage.prototype, {
 	}
 });
 
-
 module.exports = new DocHomePage();

@@ -1,5 +1,12 @@
 Updates
 =======
+### 2016-6-24
+新gulp命令, 可以列出所有会被运行的package, 包括installed package
+```
+gulp ls
+```
+当前有多少package和运行优先级一目了然
+
 ### 2016-6-23
 为升级主站，增加灵活性，新加了express-app API
 - api.swig

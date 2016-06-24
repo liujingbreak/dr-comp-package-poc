@@ -26,10 +26,10 @@ function Page(path) {
 
 Page.prototype = {
 	_urlPrefix: null,
-	get: function() {
+	get: function(path) {
 		var self = this;
 		log.debug('get ' + this.url);
-		return this.driver.get(this.url)
+		return this.driver.get(this.url + (path ? path : ''))
 		.then(() => {
 			return self.check();
 		});
@@ -42,14 +42,25 @@ Page.prototype = {
 		var all = [];
 		_.forOwn(this.elements, (prop, name) => {
 			//log.debug('check: ' + this.elements[name].selector);
-			var proms = this.driver.isElementPresent({css: this.elements[name].selector})
-			.then(presents => {
+			var self = this;
+			var proms = Promise.coroutine(function*() {
+				if (!prop.required)
+					return;
+				var presents = yield self.driver.isElementPresent({css: prop.selector});
 				if (!presents) {
 					return Promise.reject('Page object has a required element "' +
 						name + '[' + this.elements[name].selector + ']' + '" which is not available');
 				}
 				expect(presents).toBe(true);
-			})
+			})()
+			// var proms = this.driver.isElementPresent({css: prop.selector})
+			// .then(presents => {
+			// 	if (!presents) {
+			// 		return Promise.reject('Page object has a required element "' +
+			// 			name + '[' + this.elements[name].selector + ']' + '" which is not available');
+			// 	}
+			// 	expect(presents).toBe(true);
+			// })
 			.catch(e => {
 				fail(e);
 				throw e;

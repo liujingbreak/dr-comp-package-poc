@@ -47,6 +47,31 @@ _**这命令2016-3-26 做了简化**，自动生成样板源码和安装平台�
 
 你还需要手工添加适合你项目的 `.gitignore`, `.npmignore` 文件。
 
+##### 查看当前有多少组件package
+```shell
+gulp ls
+```
+例如会显示
+```
+[16:59:52] -- Server Package list  --
+[16:59:52] 1. @dr/environment                    activate priority: 0
+[16:59:52] 2. @dr/http-server                    activate priority: 0
+[16:59:52] 3. @dr-core/browserify-builder-api    activate priority: 5000
+[16:59:52] 4. @dr-core/express-app               activate priority: 5000
+[16:59:52] 5. @dr/doc-home                       activate priority: 5000
+[16:59:52] 6. @dr/example-entry                  activate priority: 5000
+[16:59:52] 7. @dr/example-node                   activate priority: 5000
+[16:59:52] 8. @dr-core/assets-processer          activate priority: 99999
+[16:59:52]
+[16:59:52] -- Builder Package list  --
+[16:59:52] 1. @dr-core/browserify-builder-api    compile priority: 0
+[16:59:52] 2. @dr-core/assets-processer          compile priority: 2000
+[16:59:52] 3. @dr/light-lodash                   compile priority: before @dr-core/browserify-builder
+[16:59:52] 4. @dr/template-builder               compile priority: before @dr-core/browserify-builder
+[16:59:52] 5. @dr/readme-docs                    compile priority: before @dr-core/browserify-builder
+[16:59:52] 6. @dr-core/browserify-builder        compile priority: 3000
+[16:59:52] 7. @dr/translate-generator            compile priority: 5000
+```
 ### 3. 编译运行！
 ```shell
 gulp compile

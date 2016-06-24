@@ -19,12 +19,12 @@ module.exports = function(goFunc) {
 			}
 		}, {
 			label: $translate('Environment'),
+			flag: 'new',
 			action: function() {
 				goFunc('dev-env-hints.md');
 			}
 		}, {
 			label: $translate('Decoupling: dependency injection'),
-			flag: 'new',
 			action: function() {
 				goFunc('dependency-injection.md');
 			}

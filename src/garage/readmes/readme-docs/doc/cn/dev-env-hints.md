@@ -22,6 +22,26 @@ _2016-3-28 更新_
 	```
 
 ### Gulp 常用
+- #### gulp ls
+	列出当前组件列表和运行优先级
+	```
+	[17:09:34] -- Server Package list  --
+	[17:09:34] 1. @dr/environment                    activate priority: 0
+	[17:09:34] 2. @dr/http-server                    activate priority: 0
+	[17:09:34] 3. @dr-core/browserify-builder-api    activate priority: 5000
+	[17:09:34] 4. @dr-core/express-app               activate priority: 5000
+	[17:09:34] 6. @dr/example-entry                  activate priority: 5000
+	[17:09:34] 7. @dr/example-node                   activate priority: 5000
+	[17:09:34] 8. @dr-core/assets-processer          activate priority: 99999
+	[17:09:34]
+	[17:09:34] -- Builder Package list  --
+	[17:09:34] 1. @dr-core/browserify-builder-api    compile priority: 0
+	[17:09:34] 2. @dr-core/assets-processer          compile priority: 2000
+	[17:09:34] 3. @dr/light-lodash                   compile priority: before @dr-core/browserify-builder
+	[17:09:34] 4. @dr/template-builder               compile priority: before @dr-core/browserify-builder
+	[17:09:34] 6. @dr-core/browserify-builder        compile priority: 3000
+	[17:09:34] 7. @dr/translate-generator            compile priority: 5000
+	```
 
 - #### gulp build
 

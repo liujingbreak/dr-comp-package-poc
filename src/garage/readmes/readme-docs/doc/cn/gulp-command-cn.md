@@ -9,6 +9,8 @@ Gulp command usage
 - `gulp watch [-p package]` 当发现js, less代码改动时，自动rebuild browser package， 但是不会刷新浏览器，需要手工刷新浏览器查看改动效果
 > 为了性能考虑，gulp watch 是正对每一个package单独处理的,改动一个package只会自动重新build那一个package, 所以gulp watch 不能察觉package目录和新增和减少，任何对package.json的改动后都需要手工执行`gulp link`, `gulp compile`, 然后重新运行`gulp watch`
 
+- 查看当前有多少组件 `gulp ls`
+
 ```
 Usage: gulp <command> [-b <bundle>] [-p package]
 gulp link [-r <recipe folder>] [-d <src folder>]
@@ -21,6 +23,9 @@ Commands:
                   node_modules folder
   clean:dist      only cleanup dist/static folder, do not cleanup private
                   packages in node_modules
+  ls              If you want to know how many packages will actually run, this
+                  command prints out a list and the priorities, including
+                  installed packages
   compile         link recipe, compile package into static browser bundles
   lint            source code style check
   install-recipe  link newly changed package.json files to recipe folder and

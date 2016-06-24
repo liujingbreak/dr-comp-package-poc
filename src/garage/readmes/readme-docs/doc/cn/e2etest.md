@@ -96,8 +96,8 @@ var _ = require('lodash');
 util.inherits(YourPage, basePage);
 
 function YourPage() {
-	YourPage.super_.call(this, '');
-	// define your page elements
+	YourPage.super_.call(this, '/login');
+	// define your page elements in constructor
 	this.el('body', '.doc-home', true);
 	this.el('mainSection', '.main-section', true);
 }
@@ -108,9 +108,16 @@ _.assign(YourPage.prototype, {
 
 
 module.exports = new YourPage();
-
-
 ```
+
+#### helper.basePage API
+| Name | description
+| - | -
+| {constructor} helper.basePage(contextPath) | e.g. `''`, `'/login'`
+| this.get(path) | Send get request to load current Page object. `path` is optional, if not empty it will be add to page's `contextPath`, e.g. `page.get('?lang=zh')` if page's context is '/login', the actual URL will be `http://localhost/login?lang=zh`
+| this.el(elementName, selector, isRequired) | Define a page element, if `isRequired` is true, that element be be tested when `.get()` is called on Page object
+| this[elementName] | {`ElementPromise`} Get defined page element, it calls `driver.indElement(selector)` lazily
+| this.el(elementName) | same as `this[elementName]`
 
 ### Some help method on `e2etest-helper`
 
