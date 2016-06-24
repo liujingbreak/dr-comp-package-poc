@@ -450,7 +450,7 @@ function compile() {
 	function bundles2FilePaths(bundles, type, revisionMeta) {
 		var paths = [];
 		_.each(bundles, bundle => {
-			var file = type + '/' + bundle + (config().devMode ? '' : '.min') + '.' + type;
+			var file = type + '/' + bundle + ((config().devMode || type === 'css') ? '' : '.min') + '.' + type;
 			if (_.has(revisionMeta, file)) {
 				paths.push(revisionMeta[file]);
 			}

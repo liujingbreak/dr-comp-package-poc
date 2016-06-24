@@ -68,16 +68,6 @@ function create(app, setting, packageCache) {
 	setupApi.createPackageDefinedMiddleware(app);
 	setupApi.createPackageDefinedRouters(app);
 
-	var staticFolder = path.resolve(setting.rootPath, setting.staticDir);
-	log.debug('express static path: ' + staticFolder);
-	app.use('/', express.static(staticFolder, {
-		maxAge: setting.cacheControlMaxAge,
-		setHeaders: setCORSHeader
-	}));
-	app.get('/', function(req, res) {
-		res.render('index.html', {});
-	});
-
 	// error handlers
 	// catch 404 and forward to error handler
 	app.use(function(req, res, next) {
@@ -110,8 +100,4 @@ function create(app, setting, packageCache) {
 		});
 	});
 	return app;
-}
-
-function setCORSHeader(res) {
-	res.setHeader('Access-Control-Allow-Origin', '*');
 }

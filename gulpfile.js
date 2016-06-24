@@ -321,14 +321,16 @@ gulp.task('test', function(callback) {
 		callback();
 	})
 	.catch(e => {
-		callback('Test failed, ' + e);
+		callback('Test failed, ' + (e.stack || e));
 	});
 });
 
 gulp.task('e2e', function(callback) {
 	require('./lib/gulp/testRunner').runE2eTest(argv)
 	.then(()=> { callback(); })
-	.catch(e => { callback('Test failed, ' + e); });
+	.catch(e => {
+		callback('Test failed, ' + (e.stack || e));
+	});
 });
 
 gulp.task('ls', ['link'], function(callback) {

@@ -6,7 +6,6 @@ module.exports = {
 	 * @return swigOptions the returned value 'swigOptions' is passed to swig.render(templateContent, swigOptions)
 	 */
 	onCompileTemplate: function(relativeFilePath) {
-		console.log(relativeFilePath);
 		return {
 			locals: locals[relativeFilePath]
 		};

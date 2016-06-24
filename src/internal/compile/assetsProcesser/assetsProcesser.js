@@ -6,7 +6,8 @@ var es = require('event-stream');
 var _ = require('lodash');
 var shell = require('shelljs');
 var mkdirp = require('mkdirp');
-var log;
+var api = require('__api');
+var log = require('log4js').getLogger(api.packageName);
 var env = require('@dr/environment');
 var resolveStaticUrl = require('@dr-core/browserify-builder-api').resolveUrl;
 var buildUtils = env.buildUtils;
@@ -20,7 +21,6 @@ module.exports = {
 };
 
 function compile(api) {
-	log = require('log4js').getLogger(api.packageName);
 	var argv = api.argv;
 	packageUtils = api.packageUtils;
 	config = api.config;
@@ -33,10 +33,19 @@ function compile(api) {
 }
 
 function activate(api) {
+	var staticFolder = api.config.resolve('staticDir');
+	log.debug('express static path: ' + staticFolder);
+	api.use('/', api.express.static(staticFolder, {
+		maxAge: api.config().cacheControlMaxAge,
+		setHeaders: setCORSHeader
+	}));
+	// api.get('/', function(req, res) {
+	// 	res.render('index.html', {});
+	// });
+
 	if (!api.config().devMode) {
 		return;
 	}
-	log = require('log4js').getLogger(api.packageName);
 
 	api.packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
 		var assetsFolder = json.dr ? (json.dr.assetsDir ? json.dr.assetsDir : 'assets') : 'assets';
@@ -131,4 +140,8 @@ function replaceAssetsUrl(str, getCurrPackage) {
 			log.debug('-> ' + resolvedTo);
 			return resolvedTo;
 		});
+}
+
+function setCORSHeader(res) {
+	res.setHeader('Access-Control-Allow-Origin', '*');
 }

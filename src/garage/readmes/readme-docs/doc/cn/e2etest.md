@@ -82,6 +82,15 @@ describe('When server is started', function() {
 	});
 });
 ```
+##### Those objects injected to `e2etest` directory
+You can access them in your test spec or Page object.
+- `require('__config')`
+	The global config object, e.g.
+	```js
+	var devMode = require('__config')().devMode;
+	```
+- `require('__injector')`
+
 ### Write your Page Object
 
 ```javascript
