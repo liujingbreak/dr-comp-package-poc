@@ -24,17 +24,26 @@ describe('packagePriorityHelper', function() {
 				longName: 'E'
 			}
 		];
-		var run = jasmine.createSpy('run');
-		priorityHelper.orderPackages(packages, run)
+		var idx = 0;
+		var packageIndexMap = {};
+		var foo = {
+			run: function(pk) {
+				packageIndexMap[pk.longName] = idx++;
+			}
+		};
+		var run = spyOn(foo, 'run').and.callThrough();
+		priorityHelper.orderPackages(packages, foo.run)
 		.then(() => {
+			_.times(5, i => console.log(run.calls.argsFor(i)));
+			//console.log(packageIndexMap);
 			expect(run.calls.count()).toEqual(5);
-			// _.times(5, (i) => {
-			// 	console.log(run.calls.argsFor(i));
-			// });
-			expect(run.calls.argsFor(0)[0].longName).toEqual('E');
-			expect(run.calls.argsFor(3)[0].longName).toEqual('A');
-			expect(run.calls.argsFor(4)[0].longName).toEqual('D');
+			expect(packageIndexMap.E).toBeLessThan(packageIndexMap.D);
+			expect(packageIndexMap.A).toBeGreaterThan(packageIndexMap.B);
+			expect(packageIndexMap.C).toBeLessThan(packageIndexMap.D);
+			expect(packageIndexMap.B).toBeLessThan(packageIndexMap.D);
 			done();
+		}).catch(e => {
+			done.fail(e);
 		});
 	});
 
@@ -64,14 +73,43 @@ describe('packagePriorityHelper', function() {
 		priorityHelper.orderPackages(packages, run)
 		.then(() => {
 			expect(run.calls.count()).toEqual(5);
-			_.times(5, (i) => {
-				console.log(run.calls.argsFor(i));
-			});
+			_.times(5, i => console.log(run.calls.argsFor(i)));
 			expect(run.calls.argsFor(0)[0].longName).toEqual('C');
 			expect(run.calls.argsFor(1)[0].longName).toEqual('B');
 			expect(run.calls.argsFor(2)[0].longName).toEqual('D');
 			expect(run.calls.argsFor(3)[0].longName).toEqual('A');
 			expect(run.calls.argsFor(4)[0].longName).toEqual('E');
+			done();
+		})
+		.catch(e => {
+			done.fail(e);
+		});
+	});
+
+	it('should throw error if before or after package does not exist', (done)=> {
+		var packages = [
+			{
+				longName: 'A',
+				priority: 'after B'
+			}, {
+				longName: 'B',
+				priority: 'before D'
+			}, {
+				longName: 'C',
+				priority: 5001
+			}
+		];
+		var idx = 0;
+		var packageIndexMap = {};
+		var foo = {
+			run: function(pk) {
+				packageIndexMap[pk.longName] = idx++;
+			}
+		};
+		priorityHelper.orderPackages(packages, foo.run)
+		.then(()=> done.fail('there should be error thrown'))
+		.catch(e => {
+			console.log(e);
 			done();
 		});
 	});
