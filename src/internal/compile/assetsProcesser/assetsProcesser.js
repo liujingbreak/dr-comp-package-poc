@@ -9,6 +9,7 @@ var mkdirp = require('mkdirp');
 var api = require('__api');
 var log = require('log4js').getLogger(api.packageName);
 var env = require('@dr/environment');
+var serverFavicon = require('serve-favicon');
 var resolveStaticUrl = require('@dr-core/browserify-builder-api').resolveUrl;
 var buildUtils = env.buildUtils;
 
@@ -35,6 +36,10 @@ function compile(api) {
 function activate(api) {
 	var staticFolder = api.config.resolve('staticDir');
 	log.debug('express static path: ' + staticFolder);
+
+	var favicon = findFavicon();
+	if (favicon)
+		require().app.serverFavicon(favicon);
 	api.use('/', api.express.static(staticFolder, {
 		maxAge: api.config().cacheControlMaxAge,
 		setHeaders: setCORSHeader
@@ -81,21 +86,31 @@ function copyRootPackageFavicon() {
 	if (!config().packageContextPathMapping) {
 		return;
 	}
+	var favicon = findFavicon();
+	log.info('Copy favicon.ico from ' + favicon);
+	mkdirp.sync(config.resolve('staticDir'));
+	shell.cp('-f', Path.resolve(favicon), Path.resolve(config().rootPath, config.resolve('staticDir')));
+}
+
+function findFavicon() {
+	if (!config().packageContextPathMapping) {
+		return null;
+	}
+	var faviconFile = null;
 	_.some(config().packageContextPathMapping, (path, pkName) => {
 		if (path === '/') {
 			packageUtils.lookForPackages(pkName, (fullName, entryPath, parsedName, json, packagePath) => {
 				var assetsFolder = json.dr ? (json.dr.assetsDir ? json.dr.assetsDir : 'assets') : 'assets';
 				var favicon = Path.join(packagePath, assetsFolder, 'favicon.ico');
 				if (fs.existsSync(favicon)) {
-					log.info('Copy favicon.ico from ' + favicon);
-					mkdirp.sync(config.resolve('staticDir'));
-					shell.cp('-f', Path.resolve(favicon), Path.resolve(config().rootPath, config.resolve('staticDir')));
+					faviconFile = Path.resolve(favicon);
 				}
 			});
 			return true;
 		}
 		return false;
 	});
+	return faviconFile;
 }
 
 function copyAssets() {
