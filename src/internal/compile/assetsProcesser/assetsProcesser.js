@@ -13,7 +13,8 @@ var serverFavicon = require('serve-favicon');
 var resolveStaticUrl = require('@dr-core/browserify-builder-api').resolveUrl;
 var buildUtils = env.buildUtils;
 
-var packageUtils, config;
+var packageUtils = api.packageUtils;
+var config = api.config;
 
 module.exports = {
 	compile: compile,
@@ -39,7 +40,7 @@ function activate(api) {
 
 	var favicon = findFavicon();
 	if (favicon)
-		require().app.serverFavicon(favicon);
+		require('@dr-core/express-app').app.use(serverFavicon(favicon));
 	api.use('/', api.express.static(staticFolder, {
 		maxAge: api.config().cacheControlMaxAge,
 		setHeaders: setCORSHeader
@@ -93,7 +94,7 @@ function copyRootPackageFavicon() {
 }
 
 function findFavicon() {
-	if (!config().packageContextPathMapping) {
+	if (!api.config().packageContextPathMapping) {
 		return null;
 	}
 	var faviconFile = null;
