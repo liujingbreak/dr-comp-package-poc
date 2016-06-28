@@ -29,7 +29,7 @@ var argv = require('./lib/gulp/showHelp')(require('yargs'));
 
 var config = require('./lib/config');
 require('./lib/logConfig')(config().rootPath);
-require('log4js').configure(Path.join(__dirname, 'log4js.json'));
+//var log = require('log4js').getLogger('gulp');
 
 var packageInstaller = PackageInstall();
 
@@ -249,6 +249,13 @@ gulp.task('publish', function(cb) {
 		srcDirs.push(src);
 	});
 	var promises = [];
+	var count = 0;
+
+	var data = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+	gutil.log('publish ' + data.name + '@' + data.version);
+	promises.push(buildUtils.promisifyExe('npm', 'publish', '.', {silent: true})
+		.then(sucess).catch(handleExption));
+
 	gulp.src(srcDirs)
 		.pipe(findPackageJson())
 		.on('error', gutil.log)
@@ -256,26 +263,32 @@ gulp.task('publish', function(cb) {
 			var data = JSON.parse(fs.readFileSync(file.path, 'utf8'));
 			gutil.log('publish ' + data.name + '@' + data.version);
 			promises.push( buildUtils.promisifyExe('npm', 'publish', Path.dirname(file.path), {silent: true})
-				.then(gutil.log).catch(()=>{}));
+				.then(sucess).catch(handleExption));
 		})
 		.on('end', ()=> {
 			recipeManager.eachRecipeSrc(function(src, recipeDir) {
 				var data = JSON.parse(fs.readFileSync(Path.join(recipeDir, 'package.json'), 'utf8'));
 				gutil.log('publish ' + data.name + '@' + data.version);
 				promises.push( buildUtils.promisifyExe('npm', 'publish', recipeDir, {silent: true})
-						.then(gutil.log).catch(()=>{}));
+						.then(sucess).catch(handleExption));
 			});
-			var data = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-			gutil.log('publish ' + data.name + '@' + data.version);
-			promises.push(buildUtils.promisifyExe('npm', 'publish', process.cwd(), {silent: true})
-				.then(gutil.log).catch(()=>{}));
+
 			Promise.all(promises)
 			.catch(gutil.log)
 			.finally(() => {
-				gutil.log(promises.length + ' published');
+				gutil.log(count + ' published');
 				cb();
 			});
 		});
+
+	function sucess(m) {
+		count++;
+		gutil.log(m);
+	}
+
+	function handleExption(e) {
+		//log.warn(e);
+	}
 });
 
 gulp.task('unpublish', function(cb) {
@@ -322,7 +335,9 @@ gulp.task('test', function(callback) {
 		callback();
 	})
 	.catch(e => {
-		callback('Test failed, ' + (e.stack || e));
+		if (e)
+			gutil.log(e.stack || e);
+		callback('Test failed');
 	});
 });
 
@@ -330,7 +345,9 @@ gulp.task('e2e', function(callback) {
 	require('./lib/gulp/testRunner').runE2eTest(argv)
 	.then(()=> { callback(); })
 	.catch(e => {
-		callback('Test failed, ' + (e.stack || e));
+		if (e)
+			gutil.log(e.stack || e);
+		callback('Test failed');
 	});
 });
 
