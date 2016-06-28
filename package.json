@@ -1,13 +1,13 @@
 {
   "name": "web-fun-house",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "A company's web platform",
   "main": "lib/main.js",
   "bin": "bin/dr.js",
   "scripts": {
     "start": "node lib/main.js",
     "check": "gulp lint",
-    "e2e": "gulp e2e"
+    "e2e": "gulp e2e --browser chrome"
   },
   "repository": {
     "type": "git",

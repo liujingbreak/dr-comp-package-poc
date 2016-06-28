@@ -1,6 +1,9 @@
 # Full configuration:
 #   https://github.com/dr-web-house/web-fun-house/blob/master/config.yaml
 
+# Default log4js reload interval is 5 min
+log4jsReloadSeconds: 300
+
 # Package short name - route path map, used by express server.
 # By default, every package's is mapped to a route context path "/<package short name>"
 # e.g.

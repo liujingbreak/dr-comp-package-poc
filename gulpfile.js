@@ -28,6 +28,7 @@ var PackageInstall = require('./lib/gulp/packageInstallMgr');
 var argv = require('./lib/gulp/showHelp')(require('yargs'));
 
 var config = require('./lib/config');
+require('./lib/logConfig')(config().rootPath);
 require('log4js').configure(Path.join(__dirname, 'log4js.json'));
 
 var packageInstaller = PackageInstall();

@@ -15,7 +15,7 @@ describe('When server is started', function() {
 			yield Promise.delay(1000);
 			var url = yield helper.driver.getCurrentUrl();
 			log.info('current url: ' + url);
-			expect(_.endsWith(url, '/doc-home/index.html#/')).toBe(true);
+			expect(_.endsWith(url, '#/')).toBe(true);
 			yield Promise.delay(1500);
 			helper.saveScreen('doc-home.png');
 			done();
