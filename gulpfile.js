@@ -248,6 +248,13 @@ gulp.task('publish', function(cb) {
 		srcDirs.push(src);
 	});
 	var promises = [];
+	var count = 0;
+
+	var data = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+	gutil.log('publish ' + data.name + '@' + data.version);
+	promises.push(buildUtils.promisifyExe('npm', 'publish', '.', {silent: true})
+		.then(sucess).catch(handleExption));
+
 	gulp.src(srcDirs)
 		.pipe(findPackageJson())
 		.on('error', gutil.log)
@@ -255,26 +262,32 @@ gulp.task('publish', function(cb) {
 			var data = JSON.parse(fs.readFileSync(file.path, 'utf8'));
 			gutil.log('publish ' + data.name + '@' + data.version);
 			promises.push( buildUtils.promisifyExe('npm', 'publish', Path.dirname(file.path), {silent: true})
-				.then(gutil.log).catch(()=>{}));
+				.then(sucess).catch(handleExption));
 		})
 		.on('end', ()=> {
 			recipeManager.eachRecipeSrc(function(src, recipeDir) {
 				var data = JSON.parse(fs.readFileSync(Path.join(recipeDir, 'package.json'), 'utf8'));
 				gutil.log('publish ' + data.name + '@' + data.version);
 				promises.push( buildUtils.promisifyExe('npm', 'publish', recipeDir, {silent: true})
-						.then(gutil.log).catch(()=>{}));
+						.then(sucess).catch(handleExption));
 			});
-			var data = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-			gutil.log('publish ' + data.name + '@' + data.version);
-			promises.push(buildUtils.promisifyExe('npm', 'publish', process.cwd(), {silent: true})
-				.then(gutil.log).catch(()=>{}));
+
 			Promise.all(promises)
 			.catch(gutil.log)
 			.finally(() => {
-				gutil.log(promises.length + ' published');
+				gutil.log(count + ' published');
 				cb();
 			});
 		});
+
+	function sucess(m) {
+		count++;
+		gutil.log(m);
+	}
+
+	function handleExption(e) {
+		//log.warn(e);
+	}
 });
 
 gulp.task('unpublish', function(cb) {
