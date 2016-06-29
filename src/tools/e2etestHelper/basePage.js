@@ -1,4 +1,3 @@
-/* global fail */
 var Path = require('path');
 var log = require('@dr/logger').getLogger(Path.basename(__filename));
 var _ = require('lodash');
@@ -26,11 +25,14 @@ function Page(path) {
 
 Page.prototype = {
 	_urlPrefix: null,
-	get: function(path) {
+	get: function(path, maxWaitTime) {
 		var self = this;
-		log.debug('get ' + this.url);
-		return this.driver.get(this.url + (path ? path : ''))
-		.then(() => {
+		log.debug('get ' + this.url + (path ? path : ''));
+		var getProm = this.driver.get(this.url + (path ? path : ''));
+		var bothProm = [getProm, Promise.delay(maxWaitTime ? maxWaitTime : 1000)];
+		// Sometimes the page can't finish loading, like trying to connect to google adv
+		return Promise.any(bothProm).then(() => {
+			log.debug('page loaded');
 			return self.check();
 		});
 	},
@@ -38,35 +40,30 @@ Page.prototype = {
 	 * check if page is properly renderred
 	 * @return {[type]} [description]
 	 */
-	check: function() {
+	check: function(done) {
 		var all = [];
 		_.forOwn(this.elements, (prop, name) => {
-			//log.debug('check: ' + this.elements[name].selector);
 			var self = this;
 			var proms = Promise.coroutine(function*() {
 				if (!prop.required)
 					return;
+				log.debug('check element : ' + prop.selector);
 				var presents = yield self.driver.isElementPresent({css: prop.selector});
+				log.debug('presents:', presents);
 				if (!presents) {
 					return Promise.reject('Page object has a required element "' +
 						name + '[' + this.elements[name].selector + ']' + '" which is not available');
 				}
 				expect(presents).toBe(true);
 			})()
-			// var proms = this.driver.isElementPresent({css: prop.selector})
-			// .then(presents => {
-			// 	if (!presents) {
-			// 		return Promise.reject('Page object has a required element "' +
-			// 			name + '[' + this.elements[name].selector + ']' + '" which is not available');
-			// 	}
-			// 	expect(presents).toBe(true);
-			// })
 			.catch(e => {
-				fail(e);
-				throw e;
+				log.error('Failed to locate element ', name, ' ', prop.selector);
+				throw new Error(e);
 			});
 			all.push(proms);
 		});
+		if (all.length === 0)
+			return Promise.resolve();
 		return Promise.all(all);
 	},
 
@@ -77,7 +74,6 @@ Page.prototype = {
 		}
 
 		if (!_.has(this.elements, name)) {
-			fail('Page element is not defined: ' + name);
 			throw new Error('Page element is not defined: ' + name);
 		}
 		log.debug('element ' + this.elements[name].selector);

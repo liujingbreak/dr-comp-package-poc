@@ -29,7 +29,6 @@ var argv = require('./lib/gulp/showHelp')(require('yargs'));
 
 var config = require('./lib/config');
 require('./lib/logConfig')(config().rootPath);
-require('log4js').configure(Path.join(__dirname, 'log4js.json'));
 
 var packageInstaller = PackageInstall();
 
@@ -322,7 +321,9 @@ gulp.task('test', function(callback) {
 		callback();
 	})
 	.catch(e => {
-		callback('Test failed, ' + (e.stack || e));
+		if (e)
+			gutil.log(e.stack || e);
+		callback('Test failed');
 	});
 });
 
@@ -330,7 +331,9 @@ gulp.task('e2e', function(callback) {
 	require('./lib/gulp/testRunner').runE2eTest(argv)
 	.then(()=> { callback(); })
 	.catch(e => {
-		callback('Test failed, ' + (e.stack || e));
+		if (e)
+			gutil.log(e.stack || e);
+		callback('Test failed');
 	});
 });
 

@@ -1,6 +1,6 @@
 {
   "name": "web-fun-house",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "A company's web platform",
   "main": "lib/main.js",
   "bin": "bin/dr.js",
