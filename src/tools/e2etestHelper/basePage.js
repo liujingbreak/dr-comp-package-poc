@@ -29,7 +29,7 @@ Page.prototype = {
 		var self = this;
 		log.debug('get ' + this.url + (path ? path : ''));
 		var getProm = this.driver.get(this.url + (path ? path : ''));
-		var bothProm = [getProm, Promise.delay(maxWaitTime ? maxWaitTime : 1000)];
+		var bothProm = [getProm, Promise.delay(maxWaitTime ? maxWaitTime : 7000)];
 		// Sometimes the page can't finish loading, like trying to connect to google adv
 		return Promise.any(bothProm).then(() => {
 			log.debug('page loaded');
@@ -57,7 +57,7 @@ Page.prototype = {
 				expect(presents).toBe(true);
 			})()
 			.catch(e => {
-				log.error('Failed to locate element ', name, ' ', prop.selector);
+				log.error('Failed to locate element ', name, ' ', prop.selector, e ? e.stack : '');
 				throw new Error(e);
 			});
 			all.push(proms);
