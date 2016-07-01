@@ -4,7 +4,6 @@ var Path = require('path');
 var _ = require('lodash');
 var defaultOptions = require('./defaultSwigOptions');
 var api = require('__api');
-var injector = require('__injector');
 var log = require('log4js').getLogger(api.packageName);
 
 
@@ -21,15 +20,17 @@ var packageCache = {};
 function transformFactory(file) {
 	var ext = Path.extname(file).toLowerCase();
 	if (ext === '.html' || ext === '.swig') {
-		var packageIns = api.findBrowserPackageInstanceByPath(file);
-		var packageExports = runPackage(packageIns, file);
-		if (packageExports && _.isFunction(packageExports.onCompileTemplate)) {
-			log.debug('found file: ' + file);
-			var swigOptions = packageExports.onCompileTemplate(
-				Path.relative(packageIns.packagePath, file).replace(/\\/g, '/'),
-				swig);
-			if (swigOptions) {
-				return createTransform(swigOptions, file);
+		var browserPackage = api.findBrowserPackageInstanceByPath(file);
+		if (browserPackage) {
+			var packageExports = runPackage(browserPackage, file);
+			if (packageExports && _.isFunction(packageExports.onCompileTemplate)) {
+				log.debug('is template: ', file);
+				var swigOptions = packageExports.onCompileTemplate(
+					Path.relative(browserPackage.packagePath, file).replace(/\\/g, '/'),
+					swig);
+				if (swigOptions) {
+					return createTransform(swigOptions, file);
+				}
 			}
 		}
 	}
@@ -51,15 +52,17 @@ function createTransform(swigOptions, absFile) {
 	});
 }
 
-function runPackage(packageIns, file) {
-	if (!_.has(packageCache, packageIns.longName)) {
+function runPackage(browserPackage, file) {
+	if (!_.has(packageCache, browserPackage.longName)) {
 		try {
-			var exports = require(packageIns.longName);
-			packageCache[packageIns.longName] = exports;
+			var exports = require(browserPackage.longName);
+			packageCache[browserPackage.longName] = exports;
 		} catch (err) {
-			log.warn(err, err.stack);
+			// MODULE_NOT_FOUND meaning the package has no `main` entry module, skip it
+			if (err.code !== 'MODULE_NOT_FOUND')
+				log.warn('require ', browserPackage.longName, err, err.stack);
 			return null;
 		}
 	}
-	return packageCache[packageIns.longName];
+	return packageCache[browserPackage.longName];
 }
