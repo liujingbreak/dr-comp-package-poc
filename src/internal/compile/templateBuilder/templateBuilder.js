@@ -3,12 +3,13 @@ var swig = require('swig');
 var Path = require('path');
 var _ = require('lodash');
 var defaultOptions = require('./defaultSwigOptions');
-var log = require('log4js').getLogger(Path.basename(__filename, '.js'));
-var api;
+var api = require('__api');
+var injector = require('__injector');
+var log = require('log4js').getLogger(api.packageName);
+
 
 module.exports = {
-	compile: function(_api) {
-		api = _api;
+	compile: function() {
 		api.builder.addTransform(transformFactory);
 		return null;
 	},
@@ -51,11 +52,12 @@ function createTransform(swigOptions, absFile) {
 }
 
 function runPackage(packageIns, file) {
-	if (!{}.hasOwnProperty.call(packageCache, packageIns.longName)) {
+	if (!_.has(packageCache, packageIns.longName)) {
 		try {
 			var exports = require(packageIns.longName);
 			packageCache[packageIns.longName] = exports;
 		} catch (err) {
+			log.warn(err, err.stack);
 			return null;
 		}
 	}

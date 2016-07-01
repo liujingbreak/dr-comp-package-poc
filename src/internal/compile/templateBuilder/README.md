@@ -10,10 +10,23 @@ If you have some initial pages contains configurable data, or your web app runs 
 As long as your data is not so much dynamic like fetching from database and result changes based on per request, you may consider giving up server side runtime rendering like calling express's  `request.render()`. With no runtime rendering
 involve, your compiled HTML file can be served by CMS, CDN to be accelerated.
 
-## Set Local variables for template file
-Under the hood, there is a *Swig* template engine.
+## Setup package.json
+First of all, the package must act as a Browser side package,
+package.json
+```json
+{
+	...
+	"browser": "browser.js",
+	"main": "server.js"
+}
+```
+Not matter what content `browser.js` has, it could be empty file, but the file must exist,
+so that Browserify builder can consider this package as compile target.
 
-Your package's main node entry JS file
+## Set Local variables for template file
+Under the hood, there is a *Swig* template engine runs as a Browserify transform.
+
+Your package's main node entry JS file `server.js`
 ```javascript
 exports.onCompileTemplate = function(relativeHtmlFilePath, swig) {
 	var locals = getLocalVariablesForFile(relativeHtmlFilePath);
