@@ -40,7 +40,7 @@ function findBrowserPackageByPath(file) {
 }
 
 function findBrowserPackageInstanceByPath(file) {
-	file = Path.relative(this.config().rootPath, file);
+	file = Path.relative(this.config().rootPath, file).replace(/\\/g, '/');
 
 	var idx = _.sortedIndex(this._packagePathList, file);
 	if (idx === 0 || !file.startsWith(this._packagePathList[idx - 1])) {

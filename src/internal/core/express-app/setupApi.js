@@ -5,25 +5,27 @@ var Path = require('path');
 var swig = require('swig');
 
 var routerSetupFuncs = [];
-var middlewares = [];
+//var middlewares = [];
 var appSets = [];
 
 module.exports = setupApi;
 
-module.exports.createPackageDefinedMiddleware = function(app) {
-	middlewares.forEach(function(func) {
-		try {
-			func(app);
-		} catch (er) {
-			log.error('package ' + func.packageName + ' middleware, original stack: ' + func.stack, er);
-			throw er;
-		}
-	});
-};
+// module.exports.createPackageDefinedMiddleware = function(app) {
+// 	middlewares.forEach(function(func) {
+// 		try {
+// 			log.debug(func.packageName, 'defines middleware');
+// 			func(app);
+// 		} catch (er) {
+// 			log.error('package ' + func.packageName + ' middleware, original stack: ' + func.stack, er);
+// 			throw er;
+// 		}
+// 	});
+// };
 
 module.exports.createPackageDefinedRouters = function(app) {
 	routerSetupFuncs.forEach(function(routerDef) {
 		try {
+			log.debug(routerDef.packageName, 'defines router/middleware');
 			routerDef(app);
 		} catch (er) {
 			log.error('package ' + routerDef.packageName + ' router, original stack: ' + routerDef.stack, er);
@@ -59,36 +61,39 @@ function setupApi(api, app) {
 		var packageRelPath = Path.relative(self.config().rootPath, self.packageInstance.path);
 		log.debug('package relative path: ' + packageRelPath);
 		packageRelPath += '/';
-
+		var oldRender;
 		function setupRouter(app) {
 			app.use(contextPath, function(req, res, next) {
-				log.debug('in package level middleware, res.render will be hijacked');
-				var oldRender = res.__origRender ? res.__origRender : res.render;
-				res.__origRender = oldRender;
-				// TODO: Maybe performanc can be improved here, a brand
-				// new res.render() function will be created againts every request handling
-				res.render = function() {
-					// log.debug('in hacked res.render()');
-					var args = [].slice.call(arguments);
-					if (_.startsWith(args[0], '/')) {
-						args[0] = args[0].substring(1);
-					} else {
-						args[0] = packageRelPath + arguments[0];
-					}
-					return oldRender.apply(res, args);
-				};
+				log.debug('in package', self.packageName, 'middleware customized res.render');
+				if (!oldRender)
+					oldRender = Object.getPrototypeOf(res).render;
+				res.render = customizedRender;
 				next();
 			});
 			// log.debug(self.packageName + ': app.use context path = ' + contextPath);
 			app.use(contextPath, router);
+			app.use(contextPath, function(req, res, next) {
+				delete res.render;
+				next();
+			});
 		}
 		setupRouter.packageName = self.packageName;
 		// this function will be
-		// cached in array and executed later, the current stack information
-		// won't be shown if there is error in later execution progress.
+		// cached in array and executed later.
 		// Thus save current stack for later debug.
 		setupRouter.stack = new Error().stack;
 		routerSetupFuncs.push(setupRouter);
+
+		function customizedRender() {
+			var args = [].slice.call(arguments);
+			if (_.startsWith(args[0], '/')) {
+				args[0] = args[0].substring(1);
+			} else {
+				args[0] = packageRelPath + arguments[0];
+			}
+			return oldRender.apply(this, args);
+		}
+
 		return router;
 	};
 
@@ -114,7 +119,7 @@ function setupApi(api, app) {
 			// won't be shown if there is error in later execution progress.
 			// Thus save current stack for later debug.
 			setupMiddleware.stack = new Error().stack;
-			middlewares.push(setupMiddleware);
+			routerSetupFuncs.push(setupMiddleware);
 		};
 	});
 

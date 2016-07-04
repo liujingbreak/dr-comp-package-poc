@@ -65,7 +65,7 @@ function create(app, setting, packageCache) {
 	}));
 	app.use(cookieParser());
 	app.use(compression());
-	setupApi.createPackageDefinedMiddleware(app);
+	//setupApi.createPackageDefinedMiddleware(app);
 	setupApi.createPackageDefinedRouters(app);
 
 	// error handlers
@@ -81,7 +81,7 @@ function create(app, setting, packageCache) {
 	if (setting.devMode || app.get('env') === 'development') {
 		app.use(function(err, req, res, next) {
 			res.status(err.status || 500);
-			log.error(err);
+			log.error(req.originalUrl, err);
 			res.render('error.html', {
 				message: err.message,
 				error: err
@@ -93,7 +93,7 @@ function create(app, setting, packageCache) {
 	// no stacktraces leaked to user
 	app.use(function(err, req, res, next) {
 		res.status(err.status || 500);
-		log.error(err);
+		log.error(req.originalUrl, err);
 		res.render('error.html', {
 			message: err.message,
 			error: {}

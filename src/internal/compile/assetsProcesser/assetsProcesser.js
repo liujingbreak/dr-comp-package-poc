@@ -98,18 +98,20 @@ function findFavicon() {
 		return null;
 	}
 	var faviconFile = null;
-	_.some(config().packageContextPathMapping, (path, pkName) => {
+	var faviconPackage;
+	_.each(config().packageContextPathMapping, (path, pkName) => {
 		if (path === '/') {
 			packageUtils.lookForPackages(pkName, (fullName, entryPath, parsedName, json, packagePath) => {
 				var assetsFolder = json.dr ? (json.dr.assetsDir ? json.dr.assetsDir : 'assets') : 'assets';
 				var favicon = Path.join(packagePath, assetsFolder, 'favicon.ico');
 				if (fs.existsSync(favicon)) {
+					if (faviconFile) {
+						log.warn('Found duplicate favicon file in', fullName, 'existing', faviconPackage);
+					}
 					faviconFile = Path.resolve(favicon);
 				}
 			});
-			return true;
 		}
-		return false;
 	});
 	return faviconFile;
 }
