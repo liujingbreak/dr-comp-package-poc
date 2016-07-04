@@ -3,16 +3,20 @@ var swig = require('swig');
 var Path = require('path');
 var _ = require('lodash');
 var defaultOptions = require('./defaultSwigOptions');
+var patchText = require('patch-text');
 var api = require('__api');
 var log = require('log4js').getLogger(api.packageName);
-
+var parser = require('./template-parser').parser;
 
 module.exports = {
 	compile: function() {
 		api.builder.addTransform(transformFactory);
 		return null;
 	},
-	swig: swig
+	swig: swig,
+	testable: {
+		preParseTemplate: preParseTemplate
+	}
 };
 
 var packageCache = {};
@@ -44,8 +48,9 @@ function createTransform(swigOptions, absFile) {
 		next();
 	}, function(next) {
 		var opt = _.assign(_.clone(defaultOptions), swigOptions);
-		opt.filename = absFile;
-		var compiled = swig.render(str, opt);
+		//opt.filename = absFile;
+		swig.setDefaults(opt);
+		var compiled = swig.render(str, {filename: absFile});
 		//log.debug(compiled);
 		this.push(compiled);
 		next();
@@ -65,4 +70,34 @@ function runPackage(browserPackage, file) {
 		}
 	}
 	return packageCache[browserPackage.longName];
+}
+
+/**
+ * @Deprecated
+ * [preParseTemplate description]
+ * @param  {string} str            template content
+ * @param  {function} replaceHandler function(toReplacePath, templatePath)
+ * @return {string}                new template content
+ */
+function preParseTemplate(templatePath, str, replaceHandler) {
+	parser.lexer.options.ranges = true;
+	var nodes = parser.parse(str);
+	var textPatches = [];
+	nodes.forEach(node => {
+		if (node.name === 'include' || node.name === 'import') {
+			var value = node.attr.value;
+			value = (_.startsWith(value, '"') || _.startsWith(value, '\'')) ?
+				value.substring(1, value.length - 1) : value;
+			var replaced = replaceHandler(value, templatePath);
+			if (replaced !== undefined && replaced !== null) {
+				textPatches.push({
+					start: node.attr.loc.range[0],
+					end: node.attr.loc.range[1],
+					replacement: '"' + replaced + '"'
+				});
+				log.debug('line: ', node.loc.lineno, ' replace ', node.name, ' file path ', node.attr.value, ' to ', replaced);
+			}
+		}
+	});
+	return patchText(str, textPatches);
 }

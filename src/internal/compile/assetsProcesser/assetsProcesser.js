@@ -57,7 +57,7 @@ function activate(api) {
 		var assetsFolder = json.dr ? (json.dr.assetsDir ? json.dr.assetsDir : 'assets') : 'assets';
 		var assetsDir = Path.join(packagePath, assetsFolder);
 		if (fs.existsSync(assetsDir)) {
-			var path = api.config().packageContextPathMapping[parsedName.name];
+			var path = _.get(api.config(), 'packageContextPathMapping[' + parsedName.name + ']');
 			path = path != null ? path : '/' + parsedName.name;
 			log.debug('route ' + path + ' -> ' + assetsDir);
 			api.use(path + '/', api.express.static(assetsDir, {

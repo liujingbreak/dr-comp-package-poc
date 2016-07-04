@@ -1,3 +1,5 @@
+var api = require('__api');
+var log = require('log4js').getLogger(api.packageName);
 module.exports = {
 	/**
 	 * This method is called by @dr/template-builder
@@ -6,6 +8,7 @@ module.exports = {
 	 * @return swigOptions the returned value 'swigOptions' is passed to swig.render(templateContent, swigOptions)
 	 */
 	onCompileTemplate: function(relativeFilePath) {
+		log.info('relativeFilePath', relativeFilePath);
 		return {
 			locals: locals[relativeFilePath]
 		};

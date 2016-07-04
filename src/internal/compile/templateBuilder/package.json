@@ -1,11 +1,14 @@
 {
   "name": "@dr/template-builder",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "A swig based template transform and builder",
   "main": "templateBuilder.js",
   "dr": {
     "type": "builder",
     "builderPriority": "before @dr-core/browserify-builder"
+  },
+  "dependencies": {
+	"patch-text": "^1.0.2"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
