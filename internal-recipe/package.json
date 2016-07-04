@@ -6,7 +6,7 @@
     "@dr-core/labjs": "0.0.22",
     "@dr/light-lodash": "0.0.2",
     "@dr-core/build-util": "0.1.0",
-    "@dr-core/assets-processer": "0.1.2",
+    "@dr-core/assets-processer": "0.1.3",
     "@dr-core/browserify-builder": "0.2.3",
     "@dr-core/browserify-builder-api": "0.1.1",
     "@dr/parcelify-module-resolver": "0.0.23",
