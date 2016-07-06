@@ -1,5 +1,6 @@
 var express = require('express');
-var log = require('log4js').getLogger('express-app.setApi');
+var api = require('__api');
+var log = require('log4js').getLogger(api.packageName + '.setApi');
 var _ = require('lodash');
 var Path = require('path');
 var swig = require('swig');
@@ -53,6 +54,7 @@ function setupApi(api, app) {
 	 */
 	apiPrototype.router = function() {
 		var self = this;
+		var calleePackageName = this.packageName;
 		if (self._router) {
 			return self._router;
 		}
@@ -64,7 +66,7 @@ function setupApi(api, app) {
 		var oldRender;
 		function setupRouter(app) {
 			app.use(contextPath, function(req, res, next) {
-				log.debug('in package', self.packageName, 'middleware customized res.render');
+				log.debug('in package', calleePackageName, self.packageName, 'middleware customized res.render');
 				if (!oldRender)
 					oldRender = Object.getPrototypeOf(res).render;
 				res.render = customizedRender;
@@ -75,6 +77,12 @@ function setupApi(api, app) {
 			app.use(contextPath, function(req, res, next) {
 				delete res.render;
 				next();
+			});
+			// If an error encountered in previous middlewares, we still need to cleanup render method
+			app.use(contextPath, function(err, req, res, next) {
+				delete res.render;
+				log.error(err);
+				next(err);
 			});
 		}
 		setupRouter.packageName = self.packageName;

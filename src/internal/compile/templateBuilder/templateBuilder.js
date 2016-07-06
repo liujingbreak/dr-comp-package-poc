@@ -3,13 +3,16 @@ var swig = require('swig');
 var Path = require('path');
 var _ = require('lodash');
 var defaultOptions = require('./defaultSwigOptions');
-var patchText = require('patch-text');
+var patchText = require('./patch-text.js');
 var api = require('__api');
 var log = require('log4js').getLogger(api.packageName);
+var swigInjectLoader = require('swig-package-tmpl-loader');
 var parser = require('./template-parser').parser;
 
 module.exports = {
 	compile: function() {
+		var injector = require('__injector');
+		swigInjectLoader.swigSetup(swig, {injector: injector});
 		api.builder.addTransform(transformFactory);
 		return null;
 	},

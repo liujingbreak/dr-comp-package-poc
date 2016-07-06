@@ -1,5 +1,17 @@
 Updates
 =======
+### 2016-7-6
+Support referencing package name from Swig template tags:
+```
+{% include "npm://packageA/views/template"}
+{% import "npm://packageA/views/common" as common %}
+```
+任何Express res.render(view) 或者是预编译@dr/template-builder的template文件都支持`npm://`
+
+并且可以通过修改 injector.js, 依赖注入式的替换package name:
+[swig-package-tmpl-loader](https://www.npmjs.com/package/swig-package-tmpl-loader#injection)
+
+
 ### 2016-6-24
 新gulp命令, 可以列出所有会被运行的package, 包括installed package
 ```

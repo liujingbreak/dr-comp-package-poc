@@ -11,6 +11,7 @@ var log4js = require('log4js');
 var api = require('__api');
 var log = log4js.getLogger(api.packageName);
 var compression = require('compression');
+var swigInjectLoader = require('swig-package-tmpl-loader');
 
 var app;
 module.exports = {
@@ -46,6 +47,9 @@ function create(app, setting, packageCache) {
 		varControls: ['{=', '=}'],
 		cache: setting.devMode ? false : 'memory'
 	});
+	var injector = require('__injector');
+	swigInjectLoader.swigSetup(swig, {injector: injector});
+
 	app.engine('html', engines.swig);
 	app.engine('jade', engines.jade);
 
