@@ -1,0 +1,12 @@
+{% include "header.html"%}
+<ul>
+Greeting from {= api.packageName =}
+<li>api.entryJsHtmlFile('views/body.html') : {= api.entryJsHtmlFile('views/body.html') =} <br/>
+<li>api.entryStyleHtmlFile('views/body.html') : {= api.entryStyleHtmlFile('views/body.html') =} <br/>
+<!--
+<li>api.entryJsHtml('views/body.html') : {= api.entryJsHtml('views/body.html') =} <br/>
+<li>api.entryStyleHtml('views/body.html') : {= api.entryStyleHtml('views/body.html') =} <br/>
+-->
+</ul>
+{= api.entryJsHtml('views/body.html') =}
+{% include "footer.html"%}

@@ -224,6 +224,8 @@ function compile() {
 			.pipe(gulp.dest(Path.join(config().destDir, 'server')))
 			.pipe(pageCompiler.compile('static'))
 			.pipe(gulp.dest(config().staticDir))
+			.pipe(pageCompiler.dependencyApiData())
+			.pipe(gulp.dest(config().destDir))
 			.on('finish', resolve);
 		});
 	}

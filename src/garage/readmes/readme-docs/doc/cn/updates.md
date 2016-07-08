@@ -1,5 +1,9 @@
 Updates
 =======
+### 2016-7-8
+[Server side rendering entry page API](/#/doc/entry-page.md)
+
+
 ### 2016-7-6
 Support referencing package name from Swig template tags:
 ```

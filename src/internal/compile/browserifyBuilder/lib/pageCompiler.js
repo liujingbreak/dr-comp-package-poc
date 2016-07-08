@@ -20,6 +20,7 @@ function PageCompiler(addonTransforms) {
 	this.builderInfo = null;
 	this.rootPackage = null;
 	this.addonTransforms = addonTransforms;
+	this.entryFragmentFiles = [];
 }
 
 /**
@@ -73,18 +74,18 @@ var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
 PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageType, through) {
 	var compiler = this;
 	var pathInfo = resolvePagePath(page, instance, buildInfo.packageInfo.moduleMap);
-	var pagePath = Path.resolve(instance.shortName, pathInfo.path);
+
 	return readFileAsync(pathInfo.abs, 'utf-8')
 	.then(function(content) {
 		content = compiler.transform(pathInfo.abs, content);
 		var $ = cheerio.load(content);
 		compiler.injectElements($, buildInfo.bundleDepsGraph[instance.longName], instance,
-			buildInfo.config, buildInfo.revisionMeta, buildInfo.entryDataProvider);
+			buildInfo.config, buildInfo.revisionMeta, buildInfo.entryDataProvider, pathInfo);
 		var hackedHtml = $.html();
 		hackedHtml = assetsProcesser.replaceAssetsUrl(hackedHtml, ()=> {
 			return pathInfo.packageName;
 		});
-
+		var pagePath = Path.resolve(instance.shortName, pathInfo.path);
 		log.info('Entry page processed: ' + pagePath);
 		through.push(new File({
 			path: pagePath,
@@ -156,27 +157,61 @@ function needUpdateEntryPage(builtBundles, bundleSet) {
 
 var entryBootstrapTpl = swig.compileFile(Path.join(__dirname, 'templates', 'entryPageBootstrap.js.swig'), {autoescape: false});
 
-PageCompiler.prototype.injectElements = function($, bundleSet, pkInstance, config, revisionMeta, entryDataProvider) {
+PageCompiler.prototype.injectElements = function($, bundleSet, pkInstance, config, revisionMeta, entryDataProvider, pathInfo) {
 	var body = $('body');
 	var head = $('head');
+	// $cssPrinter, $jsPrinter are used to output these bootstrap HTML fragment to seperate files, which
+	// can be read by server-side rendering program, e.g. express res.render()
+	var $cssPrinter = cheerio.load('<div></div>');
+	var $jsPrinter = cheerio.load('<div></div>');
+
+	var cssPrinterDiv = $cssPrinter('div');
 	_injectElementsByBundle($, head, body, 'labjs', config, revisionMeta);
+	_injectElementsByBundle($, cssPrinterDiv, $jsPrinter('div'), 'labjs', config, revisionMeta);
 	delete bundleSet.labjs; // make sure there is no duplicate labjs bundle
+
 	var loadingData = this.buildInfo.getBundleMetadataForEntry(pkInstance.longName);
 	_.forOwn(bundleSet, function(v, bundleName) {
 		var bundleCss = createCssLinkElement($, bundleName, config, revisionMeta);
 		if (bundleCss) {
-			head.append(bundleCss);
+			cssPrinterDiv.append(bundleCss);
+			head.append(bundleCss.clone());
 		}
 	});
+	log.debug('head', $cssPrinter.html());
 	var entryData = entryDataProvider(pkInstance.longName);
-	body.append($('<script>').text(entryBootstrapTpl({
+
+	var jsDependencyDom = $('<script>').text(entryBootstrapTpl({
 		jsPaths: JSON.stringify(loadingData.js),
 		staticAssetsURL: config().staticAssetsURL,
 		//jsLinks: jsLinks,
 		entryPackage: pkInstance.longName,
 		debug: !!config().devMode,
 		data: config().devMode ? JSON.stringify(entryData, null, '  ') : JSON.stringify(entryData)
-	})));
+	}));
+
+	$jsPrinter('div').append(jsDependencyDom);
+	this.entryFragmentFiles.push(new File({
+		path: 'entryFragment/' + pkInstance.longName + '/' + pathInfo.path + '.js.html',
+		contents: new Buffer($jsPrinter.html('div *'))
+	}));
+	this.entryFragmentFiles.push(new File({
+		path: 'entryFragment/' + pkInstance.longName + '/' + pathInfo.path + '.style.html',
+		contents: new Buffer($cssPrinter.html('div *'))
+	}));
+	body.append(jsDependencyDom.clone());
+};
+
+PageCompiler.prototype.dependencyApiData = function() {
+	var self = this;
+	return through.obj(function(param, encoding, cb) {
+		cb();
+	}, function(cb) {
+		var entryFragmentFiles = self.entryFragmentFiles;
+		self.entryFragmentFiles = [];
+		entryFragmentFiles.forEach(file => this.push(file));
+		cb();
+	});
 };
 
 function _injectElementsByBundle($, head, body, bundleName, config, revisionMeta) {

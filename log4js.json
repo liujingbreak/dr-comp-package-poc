@@ -17,10 +17,10 @@
 		}
 	],
 	"levels": {
-		"[all]": "INFO",
+		"[all]": "DEBUG",
 		"test": "DEBUG",
 		"rwPackageJson": "INFO",
-		"@dr-core/browserify-builder": "INFO",
+		"@dr-core/browserify-builder": "DEBUG",
 		"packageInstallMgr": "INFO",
 		"@dr/translate-generator": "DEBUG"
 	}

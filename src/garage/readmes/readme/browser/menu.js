@@ -8,7 +8,6 @@ module.exports = function(goFunc) {
 			}
 		},  {
 			label: $translate('Daily Work'),
-			flag: 'new',
 			action: function() {
 				goFunc('run-platform-as-tool-cn.md');
 			}
@@ -17,9 +16,15 @@ module.exports = function(goFunc) {
 			action: function() {
 				goFunc('package-spec-cn.md');
 			}
-		}, {
-			label: $translate('Environment'),
+		},  {
+			label: $translate('Entry Page'),
 			flag: 'new',
+			action: function() {
+				goFunc('entry-page.md');
+			}
+		},{
+			label: $translate('Environment'),
+			flag: '',
 			action: function() {
 				goFunc('dev-env-hints.md');
 			}
@@ -30,7 +35,7 @@ module.exports = function(goFunc) {
 			}
 		},{
 			label: $translate('API Specification'),
-			flag: 'new',
+			flag: '',
 			action: function() {
 				goFunc('api-spec-cn.md');
 			}
