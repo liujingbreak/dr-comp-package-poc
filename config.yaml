@@ -87,6 +87,7 @@ recipeSrcMapping:
     garage-recipe: src/garage
     examples-recipe: src/examples
     internal-tools-recipe: src/tools
+    wfh-admin-recipe: src/admin
 
 # Recipes which are installed from registry server, they are owned by other contributors,
 # add to this list to make them a part of you server.

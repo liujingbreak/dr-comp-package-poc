@@ -1,0 +1,14 @@
+{
+  "name": "@dr/wfh-admin-home",
+  "version": "1.0.0",
+  "description": "web-fun-house Admin tool home page ",
+  "browser": "browers.js",
+  "dr": {
+	  "bundle": "wfh-admin"
+  },
+  "scripts": {
+    "test": "gulp -p wfh-admin-home"
+  },
+  "author": "LJ",
+  "license": "MIT"
+}

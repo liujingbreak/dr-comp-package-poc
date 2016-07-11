@@ -67,9 +67,9 @@ function factory($timeout, $parse, $compile) {
 							}
 						});
 
-						angular.element('body').on('click', clickOutside);
+						angular.element('body').on('click touchstart', clickOutside);
 						iElement.on('$destory', function() {
-							angular.element('body').off('click', clickOutside);
+							angular.element('body').off('click touchstart', clickOutside);
 						});
 					} else {
 						iElement.on('mouseenter', expandMenu);

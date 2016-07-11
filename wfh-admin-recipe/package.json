@@ -1,0 +1,8 @@
+{
+  "name": "@dr/wfh-admin-recipe",
+  "version": "0.0.0",
+  "description": "Recipe package of wfh-admin-recipe",
+  "dependencies": {
+    "@dr/wfh-admin-home": "1.0.0"
+  }
+}
