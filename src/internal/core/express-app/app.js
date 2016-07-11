@@ -55,6 +55,7 @@ function create(app, setting, packageCache) {
 
 	app.set('views', [path.join(__dirname, 'views'), setting.rootPath]);
 	app.set('view engine', 'html');
+	app.set('x-powered-by', false);
 	app.set('env', api.config().devMode ? 'development' : 'production' );
 	setupApi.applyPackageDefinedAppSetting(app);
 	// uncomment after placing your favicon in /public
