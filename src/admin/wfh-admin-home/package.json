@@ -2,7 +2,7 @@
   "name": "@dr/wfh-admin-home",
   "version": "1.0.0",
   "description": "web-fun-house Admin tool home page ",
-  "browser": "browers.js",
+  "browser": "loader.js",
   "dr": {
 	  "bundle": "wfh-admin"
   },
