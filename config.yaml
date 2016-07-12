@@ -80,14 +80,14 @@ bundlePerPackage: false
 # If you are about to read this property programatically, read `internalRecipeFolderPath`
 # instead, it will be resolved to relative path to this platform package folder,
 # even it is under node_modules folder loaded as dependency
-internalRecipeFolder: internal-recipe
+internalRecipeFolder: recipes/internal-recipe
 
 # If you want to split your source code to different recipes
 recipeSrcMapping:
-    garage-recipe: src/garage
-    examples-recipe: src/examples
-    internal-tools-recipe: src/tools
-    wfh-admin-recipe: src/admin
+    recipes/garage-recipe: src/garage
+    recipes/examples-recipe: src/examples
+    recipes/internal-tools-recipe: src/tools
+    recipes/wfh-admin-recipe: src/admin
 
 # Recipes which are installed from registry server, they are owned by other contributors,
 # add to this list to make them a part of you server.

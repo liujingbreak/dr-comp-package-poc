@@ -31,10 +31,10 @@ e.g. <package-sample>/views/body.html
 <html>
 <head>
 	<title>Entry page</title>
-	{= api.entryStyleHtml('views/body.html') =}
+	{= entryStyleHtml() =}
 </head>
 <body>
-	{= api.entryJsHtml('views/body.html') =}
+	{= entryJsHtml() =}
 </body>
 ```
 
@@ -44,7 +44,14 @@ var api = require('__api');
 
 exports.activate = function() {
 	api.router().get('/', (req, res) => {
-		res.render('views/body.html', {api: api});
+		res.render('views/body.html', {
+			entryStyleHtml: function() {
+				return api.entryStyleHtml('views/body.html');
+			},
+			entryJsHtml: function() {
+				return api.entryJsHtml('views/body.html');
+			}
+		});
 	});
 };
 
@@ -59,6 +66,31 @@ exports.activate = function() {
 | .entryJsHtmlFile(entryViewPath) | 返回保存有`<script>`代码片段的dist文件路径
 | .entryStyleHtmlFile(entryViewPath) | 返回保存有`<link>`代码片段的dist文件路径
 
+##### 注意：
+ 由于Swig `autoescape` default value 是true（[Swig variables](http://paularmstrong.github.io/swig/docs/#variables)）, 所以你不可以使用模板变量，必须使用Function。
+ 比如, 你**不可以**：
+ ```html
+ <!doctype html>
+ <html>
+ <head>
+ 	<title>Entry page</title>
+ 	{= entryStyleHtml =} <!-- Not working -->
+ </head>
+ <body>
+ 	{= entryJsHtml =} <!-- Not working -->
+ </body>
+ ```
+
+ ```js
+ exports.activate = function() {
+ 	api.router().get('/', (req, res) => {
+ 		res.render('views/body.html', {
+ 			entryStyleHtml: api.entryStyleHtml('views/body.html'),
+ 			entryJsHtml: api.entryJsHtml('views/body.html')
+ 		});
+ 	});
+ };
+ ```
 
 #### 编译的入口页面模板
 
