@@ -67,7 +67,7 @@ function factory($timeout, $parse, $compile) {
 							}
 						});
 
-						angular.element('body').on('click touchstart', clickOutside);
+						angular.element('body').on('touchstart', clickOutside);
 						iElement.on('$destory', function() {
 							angular.element('body').off('click touchstart', clickOutside);
 						});
@@ -286,6 +286,8 @@ function factory($timeout, $parse, $compile) {
 				}
 
 				function clickOutside(evt) {
+					if (subMenuState === HIDDEN && mainMenuState !== EXPANDED)
+						return;
 					var it = angular.element(evt.target).closest(iElement);
 					if (it.length === 0) {
 						collapseMenu();
