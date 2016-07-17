@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "description": "web-fun-house Admin tool home page ",
   "browser": "loader.js",
+  "main": "server.js",
   "dr": {
-	  "bundle": "wfh-admin"
+	  "bundle": "wfh-admin",
+	  "type": "server",
+	  "entryPage": "index.html"
   },
   "scripts": {
     "test": "gulp -p wfh-admin-home"

@@ -1,1 +1,3 @@
-require('./componentListCtl.js');
+module.exports = function(m) {
+	require('./mainCtl.js')(m);
+};
