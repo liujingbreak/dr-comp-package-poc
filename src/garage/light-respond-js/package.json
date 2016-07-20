@@ -10,7 +10,7 @@
     "noLint": true
   },
   "scripts": {
-    "test": "gulp test -p light-respond-js"
+    "test": "gulp test -p respond-js"
   },
   "author": "LJ",
   "license": "MIT"

@@ -135,50 +135,56 @@ function compile() {
 		})
 		.catch((err)=>{}).finally(()=> next());
 	});
-	return depCtl.initAsync(api, packageInfo)
-		.then(buildStart)
-		.then(() => {
-			walkPackages.saveCache(packageInfo);
-			return depCtl.tailDown();
-		})
-		.catch( err => {
-			log.error(err);
-			gutil.beep();
-			process.exit(1);
-		});
+
+	var rejectOnError;
+
+	return Promise.coroutine(function*() {
+		yield depCtl.initAsync(api, packageInfo);
+		yield buildStart();
+		walkPackages.saveCache(packageInfo);
+		return depCtl.tailDown();
+	})()
+	.catch( err => {
+		log.error(err);
+		gutil.beep();
+		throw new Error(err);
+		//process.exit(1);
+	});
 
 	function buildStart() {
-		log.info('------- building bundles ---------');
-		bundleNames.forEach(function(bundle) {
-			log.info(chalk.inverse(bundle));
-			var buildObj = buildBundle(packageInfo.bundleMap[bundle],
-				bundle, config().staticDir);
+		return new Promise(function(resolve, reject) {
+			rejectOnError = reject;
+			log.info('------- building bundles ---------');
+			bundleNames.forEach(function(bundle) {
+				log.info(chalk.inverse(bundle));
+				var buildObj = buildBundle(packageInfo.bundleMap[bundle],
+					bundle, config().staticDir);
+				if (buildCss) {
+					buildObj.cssPromises.forEach(prom => {
+						cssPromises.push(prom.then(filePath => {
+							cssStream.write(filePath);
+							return null;
+						}));
+					});
+				}
+				jsStreams.push(buildObj.jsStream);
+			});
+			var pageCompiler = new PageCompiler(addonTransforms);
+			var outStreams = jsStreams;
 			if (buildCss) {
-				buildObj.cssPromises.forEach(prom => {
-					cssPromises.push(prom.then(filePath => {
-						cssStream.write(filePath);
-						return null;
-					}));
+				outStreams.push(cssStream);
+				Promise.all(cssPromises).then(()=> {
+					cssStream.end();
 				});
 			}
-			jsStreams.push(buildObj.jsStream);
-		});
-		var pageCompiler = new PageCompiler(addonTransforms);
-		var outStreams = jsStreams;
-		if (buildCss) {
-			outStreams.push(cssStream);
-			Promise.all(cssPromises).then(()=> {
-				cssStream.end();
+			bundleStream = es.merge(outStreams)
+			.on('error', function(er) {
+				log.error('merged bundle stream error', er);
+				gutil.beep();
 			});
-		}
-		bundleStream = es.merge(outStreams)
-		.on('error', function(er) {
-			log.error('merged bundle stream error', er);
-			gutil.beep();
-		});
 
-		var pageCompilerParam = {};
-		return new Promise(function(resolve, reject) {
+			var pageCompilerParam = {};
+
 			revisionBundleFile(bundleStream)
 			.pipe(
 				through.obj(function transform(file, encoding, cb) {
@@ -288,7 +294,7 @@ function compile() {
 
 		// draw a cross bundles dependency map
 		depCtl.browserifyDepsMap(b, depCtl.depsMap, resolve);
-		var jsStream = _createBrowserifyBundle(b, bundle);
+		var jsStream = _createBrowserifyBundle(b, bundle, rejectOnError);
 
 		var i18nBuildRet = buildI18nBundles(browserifyOpt, modules, excludeList, bundle, entryJsDir);
 		if (i18nBuildRet) {
@@ -369,7 +375,7 @@ function compile() {
 		depCtl.browserifyDepsMap(b, depsMap, resolve);
 		var cssProm = buildCssBundle(b, bundle + '_' + locale, config().staticDir);
 		excludeList.forEach(b.exclude, b);
-		var out = _createBrowserifyBundle(b, localeBunleName);
+		var out = _createBrowserifyBundle(b, localeBunleName, rejectOnError);
 		return [out, cssProm];
 	}
 
@@ -595,13 +601,14 @@ function compile() {
 	}
 }
 
-function _createBrowserifyBundle(b, bundle) {
+function _createBrowserifyBundle(b, bundle, handleError) {
 	var bundleBasename = 'js/' + bundle;
 	var out = b.bundle()
 		.on('error', (er) => {
 			log.error('browserify bundle() for bundle "' + bundle + '" failed', er);
 			gutil.beep();
 			out.end();
+			handleError(er);
 		})
 		.pipe(source(bundleBasename + '.js'))
 		.pipe(buffer())
@@ -619,6 +626,7 @@ function _createBrowserifyBundle(b, bundle) {
 		.on('error', (er) => {
 			log.error('browserify bundle() sourcemaps failed', er);
 			out.end();
+			handleError(er);
 		});
 	return out;
 }

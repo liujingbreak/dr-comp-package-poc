@@ -60,8 +60,8 @@ function _walkPackages() {
 		localeEntryMap: {}
 	};
 	var vendorConfigInfo = vendorBundleMapConfig();
-	var map = info.bundleMap = vendorConfigInfo.bundleMap;
-	info.moduleMap = vendorConfigInfo.moduleMap;
+	var bundleMap = info.bundleMap = vendorConfigInfo.bundleMap;
+	info.moduleMap = _.clone(vendorConfigInfo.moduleMap);
 
 	packageUtils.findBrowserPackageByType('*', function(
 		name, entryPath, parsedName, pkJson, packagePath) {
@@ -125,12 +125,19 @@ function _walkPackages() {
 		});
 		info.moduleMap[name] = instance;
 
-		if (!{}.hasOwnProperty.call(map, bundle)) {
-			map[bundle] = [];
+		if (!_.has(bundleMap, bundle)) {
+			bundleMap[bundle] = {};
 		}
-		map[bundle].push(instance);
+		if (_.has(vendorConfigInfo.moduleMap, instance.longName)) {
+			var newBundle = _.get(vendorConfigInfo.moduleMap, instance.longName).bundle;
+			log.info('Set vendorBundleMap setting of', instance.longName, ':', instance.bundle, '->', newBundle);
+			instance.bundle = newBundle;
+		}
+		bundleMap[bundle][instance.longName] = instance;
 	});
-
+	_.each(bundleMap, (packageMap, bundle) => {
+		bundleMap[bundle] = _.values(packageMap);
+	});
 	info.allModules = _.values(info.moduleMap);
 
 	return info;
@@ -149,7 +156,8 @@ function vendorBundleMapConfig() {
 	var vendorMap = config().vendorBundleMap;
 	var map = info.bundleMap = {};
 	_.forOwn(vendorMap, function(moduleNames, bundle) {
-		var modules = _.map(moduleNames, function(moduleName) {
+		var modules = {};
+		_.each(moduleNames, function(moduleName) {
 			var mainFile;
 			try {
 				mainFile = bResolve.sync(moduleName, {paths: compileNodePath});
@@ -167,7 +175,7 @@ function vendorBundleMapConfig() {
 			});
 			info.allModules.push(instance);
 			info.moduleMap[moduleName] = instance;
-			return instance;
+			modules[moduleName] = instance;
 		});
 		map[bundle] = modules;
 	});
