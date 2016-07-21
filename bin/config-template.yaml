@@ -13,7 +13,7 @@ log4jsReloadSeconds: 300
 #    doc-home: /
 
 recipeSrcMapping:
-    hellow-world-recipe: src
+    recipes/hellow-world-recipe: src
 
 # Override bundle file name for installed components (including 3rd-party library),
 # otherwise browserify will bundle them with every package that depends on them.
@@ -39,4 +39,5 @@ installedRecipes:
     - node_modules/@dr/*-recipe
     - node_modules/@dr/recipe-*
 
+enableSourceMaps: false
 port: 14334
