@@ -7,12 +7,12 @@
     "@dr/comp-store": "0.0.2",
     "@dr/doc-home": "0.1.2",
     "@dr/doc-less-var": "0.0.22",
-    "@dr/gsap": "0.0.22",
-    "@dr/markdown-viewer": "0.0.22",
     "@dr/doc-ui": "0.0.22",
+    "@dr/gsap": "0.0.22",
+    "@dr/light-respond-js": "0.0.3",
+    "@dr/markdown-viewer": "0.0.22",
     "@dr/readme": "0.0.25",
     "@dr/readme-docs": "0.1.7",
-    "@dr/respond-js": "0.0.3",
     "@dr/text-anim-ng": "0.0.22"
   }
 }

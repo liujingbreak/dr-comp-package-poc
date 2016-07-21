@@ -24,5 +24,6 @@ module.exports = function(injector) {
 	 * 	injector.fromAllComponents().factory('@dr/angularjs',
 	 * 		function() {return window.angular;});
 	 */
-	injector.notFromPackages('lodash').substitute('lodash', '@dr/light-lodash');
+	// Use light-lodash instead of lodash will only reduce around 7kb of gzipped bundle size
+	// injector.notFromPackages('lodash').substitute('lodash', '@dr/light-lodash');
 };

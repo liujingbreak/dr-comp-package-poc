@@ -47,12 +47,12 @@ serverURL: ""
 # otherwise browserify will bundle them with every package that depends on them.
 vendorBundleMap:
   core: # API bundle, always be loaded at first
-    # - lodash
+    - lodash
   ui-lib: # bundle name
       - jquery
       - bluebird
-  lodash:
-      - lodash
+  alt-lib:
+      - "@dr/light-lodash"
 # Global `browserify.bundle()` `noParse` option, there is also a package specific `dr.browserifyNoParse`
 # available option in individual package.json file
 browserifyNoParse:
@@ -87,7 +87,6 @@ recipeSrcMapping:
     recipes/garage-recipe: src/garage
     recipes/examples-recipe: src/examples
     recipes/internal-tools-recipe: src/tools
-    recipes/wfh-admin-recipe: src/admin
 
 # Recipes which are installed from registry server, they are owned by other contributors,
 # add to this list to make them a part of you server.

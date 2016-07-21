@@ -1,6 +1,6 @@
 var Promise = require('bluebird');
 var _ = require('lodash');
-var Modernizr = require('@dr/respond-js');
+var Modernizr = require('@dr/light-respond-js');
 
 module.exports = function(compileProvider) {
 	compileProvider.directive('drMenuAside', ['$timeout',
