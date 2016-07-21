@@ -22,7 +22,13 @@ module.exports = function(goFunc) {
 			action: function() {
 				goFunc('entry-page.md');
 			}
-		},{
+		}, {
+			label: $translate('Configuration'),
+			flag: 'new',
+			action: function() {
+				goFunc('config.md');
+			}
+		}, {
 			label: $translate('Environment'),
 			flag: '',
 			action: function() {
@@ -33,7 +39,7 @@ module.exports = function(goFunc) {
 			action: function() {
 				goFunc('dependency-injection.md');
 			}
-		},{
+		}, {
 			label: $translate('API Specification'),
 			flag: '',
 			action: function() {
