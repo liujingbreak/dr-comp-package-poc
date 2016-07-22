@@ -1,6 +1,6 @@
 {
   "name": "@dr/light-lodash",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Small subset of lodash API for Browser side only",
   "browser": "index.js",
   "main": "compile.js",
