@@ -39,7 +39,7 @@ gulp.task('default', function() {
 	gutil.log('\tbuild clean, link, compile [-b <bundle> ...], bump, publish');
 });
 
-gulp.task('clean:dependency', function() {
+gulp.task('clean:installed', function() {
 	var dirs = [];
 	_.each(config().packageScopes, function(packageScope) {
 		var npmFolder = Path.resolve('node_modules', '@' + packageScope);

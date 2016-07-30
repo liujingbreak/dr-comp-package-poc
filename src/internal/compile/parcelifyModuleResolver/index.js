@@ -2,11 +2,14 @@ var through = require('through');
 var less = require('less');
 var LessPluginAutoPrefix = require('less-plugin-autoprefix');
 var NpmImportPlugin = require('less-plugin-npm-import');
-var log = require('@dr/logger').getLogger('parcelifyModuleResolver');
+var api = require('__api');
+var log = require('log4js').getLogger(api.packageName);
 var env = require('@dr/environment');
+
 var resolveStaticUrl = require('@dr-core/browserify-builder-api').resolveUrl;
 
 module.exports = function(file, options) {
+	log.debug(file);
 	var buf = '';
 	var currPackage;
 	var transform = function(buffer) {

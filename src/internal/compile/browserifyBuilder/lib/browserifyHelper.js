@@ -81,6 +81,7 @@ JsBundleEntryMaker.prototype = {
 	transform: function(locale) {
 		var self = this;
 		return function(file) {
+			log.debug('transform %s', file);
 			var source = '';
 			var ext = Path.extname(file).toLowerCase();
 			var basename = Path.basename(file);
@@ -89,7 +90,11 @@ JsBundleEntryMaker.prototype = {
 					source += chunk;
 					next();
 				}, function(cb) {
-					this.push(self.transformJS(source, file, locale));
+					try {
+						this.push(self.transformJS(source, file, locale));
+					} catch (e) {
+						this.emit('error', e);
+					}
 					cb();
 				});
 			} else if (ext === '.html'){
@@ -98,13 +103,17 @@ JsBundleEntryMaker.prototype = {
 					next();
 				}, function(cb) {
 					var currPackage;
-					source = assetsProcesser.replaceAssetsUrl(source, ()=> {
-						if (!currPackage) {
-							currPackage = self.api.findBrowserPackageByPath(file);
-						}
-						return currPackage;
-					});
-					this.push(source);
+					try {
+						source = assetsProcesser.replaceAssetsUrl(source, ()=> {
+							if (!currPackage) {
+								currPackage = self.api.findBrowserPackageByPath(file);
+							}
+							return currPackage;
+						});
+						this.push(source);
+					} catch (e) {
+						this.emit('error', e);
+					}
 					cb();
 				});
 			} else {
@@ -128,19 +137,24 @@ JsBundleEntryMaker.prototype = {
 				packageNameAvailable: currPackageName !== null
 			});
 		}
-
-		var ast = esParser.parse(source, {
-			splitLoad: splitPoint => {
-				hasRequireEnsure = true;
-				if (!currPackageName) {
-					currPackageName = self.api.findBrowserPackageByPath(file);
+		var ast;
+		try {
+			ast = esParser.parse(source, {
+				splitLoad: splitPoint => {
+					hasRequireEnsure = true;
+					if (!currPackageName) {
+						currPackageName = self.api.findBrowserPackageByPath(file);
+					}
+					if (!_.has(self.packageSplitPointMap, currPackageName)) {
+						self.packageSplitPointMap[currPackageName] = {};
+					}
+					self.packageSplitPointMap[currPackageName][splitPoint] = 1;
 				}
-				if (!_.has(self.packageSplitPointMap, currPackageName)) {
-					self.packageSplitPointMap[currPackageName] = {};
-				}
-				self.packageSplitPointMap[currPackageName][splitPoint] = 1;
-			}
-		});
+			});
+		} catch (e) {
+			log.error('Failed to parse %s', file);
+			throw e;
+		}
 		//log.error(injector);
 		source = injector.injectToFile(file, source, ast);
 		if (hasRequireEnsure) {

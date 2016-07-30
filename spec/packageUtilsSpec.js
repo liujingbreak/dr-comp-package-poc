@@ -33,7 +33,6 @@ describe('packageUtils', function() {
 			packageUtils.findNodePackageByType('builder', callback);
 			var builders = [
 				'@dr-core/assets-processer',
-				'@dr-core/browserify-builder-api',
 				'@dr-core/browserify-builder',
 				'@dr/translate-generator',
 				'@dr/template-builder',

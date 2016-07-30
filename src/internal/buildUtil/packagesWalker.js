@@ -115,6 +115,7 @@ function _walkPackages() {
 			file: bResolve.sync(name),
 			parsedName: parsedName,
 			packagePath: packagePath,
+			realPackagePath: fs.realpathSync(packagePath),
 			active: pkJson.dr ? pkJson.dr.active : false,
 			entryPages: entryPages,
 			entryViews: entryViews,

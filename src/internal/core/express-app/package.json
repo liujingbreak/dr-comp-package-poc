@@ -13,7 +13,7 @@
     "consolidate": "^0.13.1",
     "jade": "1.11.0",
     "compression": "^1.6.1",
-	"swig-package-tmpl-loader": "^1.0.2"
+	"swig-package-tmpl-loader": "^1.0.3"
   },
   "dr": {
     "type": [

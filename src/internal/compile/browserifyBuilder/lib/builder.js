@@ -571,14 +571,16 @@ function compile() {
 			// this is a work around for a bug introduced in Parcelify
 			// check this out, https://github.com/rotundasoftware/parcelify/issues/30
 			b.pipeline.get('dedupe').push( through.obj( function( row, enc, next ) {
-				if (fs.existsSync(row.file)) {
+				if (Path.isAbsolute(row.file)) {
 					if (fs.lstatSync(row.file).isDirectory()) {
 						// most likely it is an i18n folder
 						row.file = resolve(row.file);
 					}
 				} else {
 					// row.file is a package name
-					var resolved = packageInfo.moduleMap[row.id] ? packageInfo.moduleMap[row.id].file : null;
+					// Use fs.realpathSync to make sure those symbolic link directories
+					// can work with Parcelify
+					var resolved = packageInfo.moduleMap[row.id] ? fs.realpathSync(packageInfo.moduleMap[row.id].file) : null;
 					row.file = resolved ? resolved : resolve(row.file);
 				}
 				this.push(row);

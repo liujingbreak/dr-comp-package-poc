@@ -9,7 +9,7 @@
     "builderPriority": "before @dr-core/browserify-builder"
   },
   "dependencies": {
-	"swig-package-tmpl-loader": "^1.0.2"
+	"swig-package-tmpl-loader": "^1.0.3"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

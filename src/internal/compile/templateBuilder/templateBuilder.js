@@ -13,7 +13,7 @@ module.exports = {
 	compile: function() {
 		var injector = require('__injector');
 		swigInjectLoader.swigSetup(swig, {injector: injector});
-		api.builder.addTransform(transformFactory);
+		require('@dr-core/browserify-builder').addTransform(transformFactory);
 		return null;
 	},
 	swig: swig,
@@ -51,11 +51,15 @@ function createTransform(swigOptions, absFile) {
 		next();
 	}, function(next) {
 		var opt = _.assign(_.clone(defaultOptions), swigOptions);
-		//opt.filename = absFile;
 		swig.setDefaults(opt);
-		var compiled = swig.render(str, {filename: absFile});
-		//log.debug(compiled);
-		this.push(compiled);
+		try {
+			var compiled = swig.render(str, {filename: absFile});
+			//log.debug(compiled);
+			this.push(compiled);
+		} catch (e) {
+			log.error('failed to compile %s:\n%s', absFile, str);
+			this.emit('error', e);
+		}
 		next();
 	});
 }

@@ -91,11 +91,12 @@ function initAsync(_api, _packageInfo) {
  */
 function browserifyDepsMap(b, depsMap, resolve) {
 	var rootPath = api.config().rootPath;
-	b.pipeline.get('deps').push(through.obj(function(chunk, encoding, callback) {
-		var shortFilePath = chunk.file;
+	b.pipeline.get('deps').push(through.obj(function(row, encoding, callback) {
+		var shortFilePath = row.file;
 		shortFilePath = Path.isAbsolute(shortFilePath) ? Path.relative(rootPath, shortFilePath) : shortFilePath;
-		var deps = _.clone(chunk.deps);
-		_.forOwn(chunk.deps, function(path, id) {
+		var deps = _.clone(row.deps);
+		_.forOwn(row.deps, function(path, id) {
+			//row.deps[id] = path = fs.realpathSync(path);
 			if (path && Path.isAbsolute(path)) {
 				path = Path.relative(rootPath, path);
 				deps[id] = path;
@@ -104,7 +105,7 @@ function browserifyDepsMap(b, depsMap, resolve) {
 				resolvedPath2Module[path] = id;
 		});
 		depsMap[shortFilePath] = deps;
-		callback(null, chunk);
+		callback(null, row);
 	}));
 }
 

@@ -21,15 +21,20 @@ function initPackageListInfo(proto) {
 		if (!instance.packagePath) {
 			return;
 		}
-		var path = Path.relative(proto.config().rootPath, instance.packagePath);
-		if (Path.sep === '\\') {
-			path = path.replace(/\\/g, '/');
+		function storePath(packagePath) {
+			var path = Path.relative(proto.config().rootPath, packagePath);
+			if (Path.sep === '\\') {
+				path = path.replace(/\\/g, '/');
+			}
+			if (!_.endsWith(path, '/')) {
+				path = path + '/';
+			}
+			proto._packagePath2Name[path] = instance;
+			proto._packagePathList.push(path);
 		}
-		if (!_.endsWith(path, '/')) {
-			path = path + '/';
-		}
-		proto._packagePath2Name[path] = instance;
-		proto._packagePathList.push(path);
+		storePath(instance.packagePath);
+		if (instance.realPackagePath !== instance.packagePath)
+			storePath(instance.realPackagePath);
 	});
 	proto._packagePathList.sort();
 }

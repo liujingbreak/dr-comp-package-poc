@@ -10,8 +10,7 @@
     ],
     "type": [
       "server",
-      "core",
-      "builder"
+      "core"
     ],
     "builderPriority": 0
   },
