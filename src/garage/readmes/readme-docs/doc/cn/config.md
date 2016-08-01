@@ -11,16 +11,13 @@
 	├── node_modules/
 	|      └── web-fun-house/
 	|              └── config.yaml
-<<<<<<< HEAD
 	├── .gitignore
 	├── README.md
 	├── app.js
 	├── browserify-inject.js
 	├── inject.js
 	├── log4js.json
-=======
 	├── ...
->>>>>>> wip
 	├── package.json
 	├── config.local.yaml
 	└── config.yaml
@@ -37,9 +34,6 @@ config.yaml 和 config.local.yaml 是当前项目的全局配置文件.
 
 config.local.yaml 应该被放入.gitignore, 不作为生产环境的配置内容，例如`devMode: true`之类的配置项都写入config.local.yaml 以方便本地开发调试。
 
-<<<<<<< HEAD
-[github上的完整配置文件](https://github.com/dr-web-house/web-fun-house/blob/master/config.yaml)
-=======
 可以配置的属性很多，具体说明请看[github上的完整配置文件](https://github.com/dr-web-house/web-fun-house/blob/master/config.yaml)，例如:
 - 和开发相关的
 	- destDir： 	临时文件和静态文件目录
@@ -71,7 +65,6 @@ var value = api.config()[api.packageName].propertyX;
 // Or
 value = api.config.get([api.packageName, 'propertyX']);
 ```
->>>>>>> wip
 
 ### 用API获取配置内容
 config API source code: [lib/config.js](https://github.com/dr-web-house/web-fun-house/blob/master/lib/config.js)
@@ -111,11 +104,7 @@ e2etestHelper:
 ```
 获取绝对路径
 ```js
-<<<<<<< HEAD
-var absolutePath = api.config.resolve('e2etestHelper.selenium.driverPath', 'chromedriver');
-=======
 var absolutePath = api.config.resolve('e2etestHelper.selenium.driverPath', 'linux64', 'chromedriver');
->>>>>>> wip
 // "/Users/liujing/projectA/chrome-driver/linux64/chromedriver"
 //
 ```
