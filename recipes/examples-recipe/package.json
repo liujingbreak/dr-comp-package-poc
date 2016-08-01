@@ -1,15 +1,15 @@
 {
   "name": "@dr/examples-recipe",
-  "version": "0.0.25",
+  "version": "0.0.26",
   "description": "Recipe package of examples-recipe",
   "dependencies": {
-    "@dr/example-common": "1.0.26",
-    "@dr/example-compile-template": "0.0.7",
-    "@dr/example-entry": "1.0.33",
-    "@dr/example-node": "1.0.35",
-    "@dr/example-server-swig-entry": "1.0.0",
-    "@dr/example-browserify": "0.0.26",
-    "@dr/example-i18n": "0.0.10",
-    "@dr/example-locale-zh": "0.0.7"
+    "@dr/example-common": "1.0.27",
+    "@dr/example-compile-template": "0.0.8",
+    "@dr/example-entry": "1.0.34",
+    "@dr/example-node": "1.0.36",
+    "@dr/example-server-swig-entry": "1.0.1",
+    "@dr/example-browserify": "0.0.27",
+    "@dr/example-i18n": "0.0.11",
+    "@dr/example-locale-zh": "0.0.8"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@dr/readme-docs",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "All readme markdown files",
   "main": "lib/compiler.js",
   "scripts": {
@@ -10,7 +10,7 @@
     "cheerio": "^0.20.0",
     "markdown-it": "6.0.0",
     "highlight.js": "~9.2.0",
-	"gulp-rev-all": "^0.8.22"
+    "gulp-rev-all": "^0.8.22"
   },
   "author": "LJ",
   "dr": {
