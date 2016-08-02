@@ -181,8 +181,11 @@ gulp.task('compile', ['link', 'flatten-recipe'], function(cb) {
 
 gulp.task('compile:dev', function(cb) {
 	require('./lib/packageMgr/packageCompiler')(argv)
-	.then(() => {cb();})
-	.catch( e => { cb('Error ' + e.stack); });
+	.then(() => cb())
+	.catch( e => {
+		cb('Error ' + e.stack);
+		process.nextTick(()=> process.exit(1));
+	});
 });
 
 gulp.task('watch', function() {

@@ -1,7 +1,7 @@
 {
   "name": "@dr/angularjs",
-  "version": "1.0.30",
-  "description": "wrapper of angularjs v1.4.5",
+  "version": "1.0.31",
+  "description": "wrapper of angularjs v1.4.5 and jquery as dependency",
   "browser": "main.js",
   "dr": {
     "bundle": "ui-lib",
@@ -19,6 +19,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+	  "jquery": "^1.12.0"
   },
   "author": "",
   "license": "ISC"

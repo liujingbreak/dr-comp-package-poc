@@ -81,7 +81,6 @@ JsBundleEntryMaker.prototype = {
 	transform: function(locale) {
 		var self = this;
 		return function(file) {
-			log.debug('transform %s', file);
 			var source = '';
 			var ext = Path.extname(file).toLowerCase();
 			var basename = Path.basename(file);

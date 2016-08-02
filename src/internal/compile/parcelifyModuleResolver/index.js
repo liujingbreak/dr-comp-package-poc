@@ -9,7 +9,6 @@ var env = require('@dr/environment');
 var resolveStaticUrl = require('@dr-core/browserify-builder-api').resolveUrl;
 
 module.exports = function(file, options) {
-	log.debug(file);
 	var buf = '';
 	var currPackage;
 	var transform = function(buffer) {

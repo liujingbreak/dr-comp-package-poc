@@ -6,3 +6,5 @@ config.local.yaml
 /dist
 dist
 /logs
+/certificate
+
