@@ -38,7 +38,7 @@ if (argv._ && argv._[0]) {
 	}
 }
 
-function init(noSample) {
+function init(noExample) {
 	_checkFolder();
 	//var projectName = JSON.parse(fs.readFileSync(Path.join(__dirname, '..', 'package.json'), 'utf8')).name;
 	var content = fs.readFileSync(Path.join(__dirname, 'gulpfile-template.js'), 'utf8');
@@ -49,15 +49,16 @@ function init(noSample) {
 	content = content.replace('<plateformFolder>', relativePath.replace(/\\/g, '/'));
 	fs.writeFileSync(Path.join(argv.d, 'gulpfile.js'), content, 'utf8');
 
-	if (!fileAccessable(Path.resolve(argv.d, 'config.yaml')))
-		shell.cp(Path.resolve(__dirname, 'config-template.yaml'), argv.d + '/config.yaml');
+	if (!fileAccessable(Path.resolve(argv.d, 'config.yaml'))) {
+		shell.cp(Path.resolve(__dirname, noExample ? 'config-template.yaml' : 'config-template-example.yaml'), argv.d + '/config.yaml');
+	}
 	if (!fileAccessable(Path.resolve(argv.d, 'config.local.yaml')))
 		shell.cp(Path.resolve(__dirname, 'config.local-template.yaml'), argv.d + '/config.local.yaml');
 	if (!fileAccessable(Path.resolve(argv.d, 'log4js.json')))
 		shell.cp(Path.resolve(__dirname, '..', 'log4js.json'), argv.d + '/log4js.json');
 	if (!fileAccessable(Path.resolve(argv.d, 'app.js')))
 		shell.cp(Path.resolve(__dirname, 'app-template.js'), argv.d + '/app.js');
-	if (!noSample) {
+	if (!noExample) {
 		shell.mkdir('-p', 'src/examples');
 		shell.cp('-R', [
 			Path.resolve(__dirname, 'examples', 'example-entry'),

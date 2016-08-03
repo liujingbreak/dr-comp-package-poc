@@ -2,7 +2,6 @@ var _ = require('lodash');
 var fs = require('fs');
 var cheerio = require('cheerio');
 var Path = require('path');
-var Q = require('q');
 var Promise = require('bluebird');
 var through = require('through2');
 var gutil = require('gulp-util');
@@ -60,7 +59,7 @@ PageCompiler.prototype.compile = function(pageType) {
 				}));
 			}
 		});
-		Q.all(promises).then(function() {
+		Promise.all(promises).then(function() {
 			cb();
 		}).catch(function(err) {
 			log.error(err);

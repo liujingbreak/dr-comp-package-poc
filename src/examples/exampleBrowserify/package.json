@@ -12,8 +12,5 @@
     "bundle": "example",
     "entryPage": "index.html"
   },
-  "license": "MIT",
-  "dependencies": {
-    "q": "^1.4.1"
-  }
+  "license": "MIT"
 }

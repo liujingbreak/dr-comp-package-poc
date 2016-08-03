@@ -1,7 +1,7 @@
 var log = require('log4js').getLogger('exampleNodePackage');
 var mafia = require('./gangsta');
-var Q = require('q');
 var api = require('__api');
+var Promise = require('bluebird');
 module.exports = mafia;
 module.exports.activate = activate;
 
@@ -21,15 +21,14 @@ function activate() {
 }
 
 function haveFun(api) {
-	var def = Q.defer();
-
-	api.eventBus.on('serverStarted', function() {
-		mafiaPromis.then(function(res) {
-			log.info('\n   "' + res + '"\n' +
-				'\t\\   ^__^\n\t \\  (oo)\\_______\n\t    (__)\\       )\\/\\\n\t        ||----w |\n\t        ||     ||');
-			def.resolve(res);
-			return res;
+	return new Promise((resolve) => {
+		api.eventBus.on('serverStarted', function() {
+			mafiaPromis.then(function(res) {
+				log.info('\n   "' + res + '"\n' +
+					'\t\\   ^__^\n\t \\  (oo)\\_______\n\t    (__)\\       )\\/\\\n\t        ||----w |\n\t        ||     ||');
+				resolve(res);
+				return res;
+			});
 		});
 	});
-	return def.promise;
 }

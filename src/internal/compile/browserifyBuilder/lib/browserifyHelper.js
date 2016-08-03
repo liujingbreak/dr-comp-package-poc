@@ -259,7 +259,7 @@ JsBundleWithI18nMaker.prototype = _.create(JsBundleEntryMaker.prototype, {
 JsBundleWithI18nMaker.prototype.constructor = JsBundleWithI18nMaker;
 
 function safeBundleNameOf(bundleName) {
-	return bundleName.replace(/-/g, '_');
+	return bundleName.replace(/[-\.&#@]/g, '_');
 }
 
 function str2Stream(str) {
