@@ -13,7 +13,11 @@ destDir: dist
 staticDir: dist/static
 
 port: 14333 # read by @dr/http-server
-sslPort: 14433
+# ssl:
+#     enabled: true
+#     port: 13043
+#     key: "ssl/key.pem"
+#     cert: "ssl/cert.pem"
 # set max-age property of the Cache-Control header in `ms` format, see https://github.com/expressjs/serve-static
 # unit convention reference to github.com/guille/ms.js
 cacheControlMaxAge: "365 days"
