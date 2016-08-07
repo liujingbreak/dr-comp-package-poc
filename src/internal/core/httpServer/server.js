@@ -1,7 +1,8 @@
 var http = require('http');
 var https = require('https');
 var fs = require('fs');
-
+var Url = require('url');
+var Promise = require('bluebird');
 var config, log;
 
 exports.activate = function(api) {
@@ -37,11 +38,15 @@ exports.activate = function(api) {
 		server.on('error', err => {
 			onError(server, port, err);
 		});
-		server.on('listening', () => { onListening(server); });
+		server.on('listening', () => {
+			onListening(server, 'HTTP Server');
+			api.eventBus.emit('serverStarted', {});
+		});
 	}
 
 	function startHttpsServer(app) {
 		log.info('start HTTPS');
+		var startPromises = [];
 		var port = config().ssl.port ? config().ssl.port : 433;
 		port = normalizePort(port);
 		var server = https.createServer({
@@ -52,22 +57,37 @@ exports.activate = function(api) {
 		server.on('error', (error) => {
 			onError(server, port, error);
 		});
-		server.on('listening', () => { onListening(server); });
+		startPromises.push(new Promise(resolve => {
+			server.on('listening', () => resolve(server));
+		}));
 
-		var redirectHttpServer = http.createServer((req, res) => {
-			var url = 'https://' + /([^:]*)(:.*)?/.exec(req.headers.host)[1] + ':' + port;
-			log.debug('redirect to ' + url);
-			res.writeHead(307, {
-				Location: url,
-				'Content-Type': 'text/plain'
+		if (api.config().ssl.httpForward !== false) {
+			var redirectHttpServer = http.createServer((req, res) => {
+				log.debug('req.headers.host: %j', req.headers.host);
+				var url = 'https://' + /([^:]+)(:[0-9]+)?/.exec(req.headers.host)[1] + ':' + port;
+				log.debug('redirect to ' + url);
+				res.writeHead(307, {
+					Location: url,
+					'Content-Type': 'text/plain'
+				});
+				res.end('');
 			});
-			res.end('');
+			redirectHttpServer.listen(config().port ? config().port : 80);
+			redirectHttpServer.on('error', error => {
+				onError(server, port, error);
+			});
+
+			startPromises.push(new Promise(resolve => {
+				redirectHttpServer.on('listening', () => resolve(redirectHttpServer));
+			}));
+		}
+		Promise.all(startPromises)
+		.then(servers => {
+			onListening(servers[0], 'HTTPS server');
+			if (servers.length > 1)
+				onListening(servers[1], 'HTTP Forwarding server');
+			api.eventBus.emit('serverStarted', {});
 		});
-		redirectHttpServer.listen(config().port ? config().port : 80);
-		redirectHttpServer.on('error', error => {
-			onError(server, port, error);
-		});
-		redirectHttpServer.on('listening', () => { onListening(redirectHttpServer); });
 	}
 
 	function normalizePort(val) {
@@ -88,11 +108,10 @@ exports.activate = function(api) {
 	/**
 	 * Event listener for HTTP server "listening" event.
 	 */
-	function onListening(server) {
+	function onListening(server, title) {
 		var addr = server.address();
-		var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
-		log.info('Listening on ' + bind);
-		api.eventBus.emit('serverStarted', {});
+		var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + JSON.stringify(addr, null, '\t');
+		log.info('%s is listening on %s', title ? title : '', bind);
 	}
 
 	/**

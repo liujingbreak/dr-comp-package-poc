@@ -5,8 +5,8 @@
   "dependencies": {
     "@dr/example-common": "1.0.27",
     "@dr/example-compile-template": "0.0.8",
-    "@dr/example-entry": "1.0.35",
     "@dr/example-node": "1.0.37",
+    "@dr/example-entry": "1.0.35",
     "@dr/example-server-swig-entry": "1.0.1",
     "@dr/example-browserify": "0.0.27",
     "@dr/example-i18n": "0.0.12",
