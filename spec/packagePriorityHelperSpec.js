@@ -113,4 +113,80 @@ describe('packagePriorityHelper', function() {
 			done();
 		});
 	});
+
+	it('should stop running when any of Run() throws error', (done) => {
+		var packages = [
+			{
+				longName: 'A',
+				run: function() { console.log('running %s', this.longName); }
+			},
+			{
+				longName: 'B',
+				priority: 'before A',
+				run: function() { console.log('running %s', this.longName); }
+			},
+			{
+				longName: 'C',
+				priority: 'before B',
+				run: function() { console.log('running %s', this.longName);}
+			},
+			{
+				longName: 'D',
+				priority: 'after B',
+				run: function() {
+					console.log('running %s', this.longName);
+					throw new Error('Mock a run error here!');
+				}
+			},
+			{
+				longName: 'E',
+				priority: 5001,
+				run: function() { console.log('running %s', this.longName); }
+			}
+		];
+		priorityHelper.orderPackages(packages, pk => pk.run())
+		.then(()=> done.fail('there should be error thrown'))
+		.catch(e => {
+			console.log(e);
+			done();
+		});
+	});
+
+	it('should stop running when any of Run() returns rejection', (done) => {
+		var packages = [
+			{
+				longName: 'A',
+				run: function() { console.log('running %s', this.longName); }
+			},
+			{
+				longName: 'B',
+				priority: 'before A',
+				run: function() { console.log('running %s', this.longName); }
+			},
+			{
+				longName: 'C',
+				priority: 'before B',
+				run: function() { console.log('running %s', this.longName);}
+			},
+			{
+				longName: 'D',
+				priority: 'after B',
+				run: function() {
+					console.log('running %s', this.longName);
+					return Promise.reject('Mock a Promise rejection here!');
+				}
+			},
+			{
+				longName: 'E',
+				priority: 5001,
+				run: function() { console.log('running %s', this.longName); }
+			}
+		];
+		priorityHelper.orderPackages(packages, pk => pk.run())
+		.then(()=> done.fail('there should be error thrown'))
+		.catch(e => {
+			console.log(e);
+			done();
+		});
+	});
 });
