@@ -53,7 +53,6 @@
     "less-css-stream": "^1.0.0",
     "lodash": "^4.13.1",
     "log4js": "^0.6.29",
-    "longjohn": "^0.2.11",
     "main-bower-files": "^2.11.0",
     "mkdirp": "^0.5.1",
     "parcelify": "^2.1.0",
