@@ -88,6 +88,8 @@ function copyRootPackageFavicon() {
 		return;
 	}
 	var favicon = findFavicon();
+	if (!favicon)
+		return;
 	log.info('Copy favicon.ico from ' + favicon);
 	mkdirp.sync(config.resolve('staticDir'));
 	shell.cp('-f', Path.resolve(favicon), Path.resolve(config().rootPath, config.resolve('staticDir')));

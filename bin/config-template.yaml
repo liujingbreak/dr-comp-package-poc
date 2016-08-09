@@ -9,8 +9,8 @@ log4jsReloadSeconds: 300
 # e.g.
 #   if package name is "@dr/example-dr", default route root path will be `/example-dr`
 # If you want change this rule, config route path here.
-#packageContextPathMapping:
-#    doc-home: /
+packageContextPathMapping:
+    #your-root-package: /
 
 recipeSrcMapping:
     recipes/hellow-world-recipe: src
