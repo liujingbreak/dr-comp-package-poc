@@ -9,11 +9,11 @@ var log = require('log4js').getLogger(api.packageName);
 var swigInjectLoader = require('swig-package-tmpl-loader');
 var parser = require('./template-parser').parser;
 
+require('@dr-core/browserify-builder').addTransform(transformFactory);
 module.exports = {
 	compile: function() {
 		var injector = require('__injector');
 		swigInjectLoader.swigSetup(swig, {injector: injector});
-		require('@dr-core/browserify-builder').addTransform(transformFactory);
 		return null;
 	},
 	swig: swig,
@@ -35,9 +35,9 @@ function transformFactory(file) {
 				var swigOptions = packageExports.onCompileTemplate(
 					Path.relative(browserPackage.packagePath, file).replace(/\\/g, '/'),
 					swig);
-				if (swigOptions) {
-					return createTransform(swigOptions, file);
-				}
+				if (!swigOptions)
+					swigOptions = {locals: {}};
+				return createTransform(_.assign({cache: false}, swigOptions), file);
 			}
 		}
 	}
