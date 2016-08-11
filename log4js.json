@@ -17,7 +17,7 @@
 		}
 	],
 	"levels": {
-		"[all]": "debug",
+		"[all]": "info",
 		"test": "DEBUG",
 		"rwPackageJson": "INFO",
 		"@dr-core/browserify-builder": "INFO",

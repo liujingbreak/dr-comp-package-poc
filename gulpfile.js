@@ -1,4 +1,4 @@
-require('./lib/nodeSearchPath');
+var nodeSearchPath = require('./lib/nodeSearchPath');
 var gulp = require('gulp');
 var Promise = require('bluebird');
 var Path = require('path');
@@ -356,13 +356,30 @@ gulp.task('ls', ['link'], function(callback) {
 	require('log4js').getLogger('packagePriorityHelper').setLevel('warn');
 
 	Promise.coroutine(function*() {
-		gutil.log('-- Server Package list  --');
+		var browserCompInfo = require('@dr-core/build-util').walkPackages.listBundleInfo(
+			config, argv, require('./lib/packageMgr/packageUtils'), nodeSearchPath.browserifyPaths);
+		console.log('\n--[ BROWSER COMPONENTS ]--\n');
+		var index = 0;
+
+		var sorted = browserCompInfo.allModules.slice(0).sort((a, b) => b.longName.length - a.longName.length);
+		var maxNameLen = sorted[0].longName.length;
+
+		_.each(browserCompInfo.bundleMap, (packages, bundle) => {
+			console.log('BUNDLE: ' + bundle);
+			_.each(packages, pk => {
+				var path = pk.realPackagePath ? pk.realPackagePath : pk.packagePath;
+				console.log(' ' + (++index) + '. ' + pk.longName +
+					(path ? _.fill(new Array(maxNameLen + 3 - pk.longName.length - (index + '').length), ' ').join('') +
+					'(' + Path.relative(config().rootPath, path) + ')' : ''));
+			});
+		});
+		console.log('\n--[ SERVER COMPONENTS ]--\n');
 		var list = yield require('./lib/packageMgr/packageRunner').listPackages();
-		list.forEach(row => gutil.log(row.desc));
-		gutil.log('');
-		gutil.log('-- Builder Package list  --');
+		list.forEach(row => console.log(' ' + row.desc + '   (' + Path.relative(config().rootPath, row.pk.path) + ')'));
+		console.log('');
+		console.log('\n--[ BUILDER COMPONENTS ]--\n');
 		list = yield require('./lib/packageMgr/packageCompiler').listPackages();
-		list.forEach(row => gutil.log(row.desc));
+		list.forEach(row => console.log(' ' + row.desc + '   (' + Path.relative(config().rootPath, row.pk.path) + ')'));
 		callback();
 	})()
 	.catch(e => callback(e));

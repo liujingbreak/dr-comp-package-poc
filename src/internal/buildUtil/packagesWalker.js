@@ -10,6 +10,7 @@ var log = require('log4js').getLogger('buildUtil.' + Path.basename(__filename, '
 
 module.exports = walkPackages;
 module.exports.saveCache = saveCache;
+module.exports.listBundleInfo = listBundleInfo;
 
 var config, argv, packageUtils, compileNodePath, packageInfoCacheFile;
 
@@ -22,7 +23,7 @@ var config, argv, packageUtils, compileNodePath, packageInfoCacheFile;
  * @property {Object.<string, packageBrowserInstance[]>} bundleMap key is bundle name
  * @property {Object.<string, packageBrowserInstance>} entryPageMap key is module name
  */
-function walkPackages(_config, _argv, _packageUtils, _compileNodePath) {
+function walkPackages(_config, _argv, _packageUtils, _compileNodePath, ignoreCache) {
 	config = _config;
 	argv = _argv;
 	packageUtils = _packageUtils;
@@ -30,7 +31,7 @@ function walkPackages(_config, _argv, _packageUtils, _compileNodePath) {
 
 	packageInfoCacheFile = Path.join(config().rootPath, config().destDir, 'packageInfo.json');
 	var packageInfo;
-	if ( (argv.p || argv.b) && fs.existsSync(packageInfoCacheFile)) {
+	if (!ignoreCache && (argv.p || argv.b) && fs.existsSync(packageInfoCacheFile)) {
 		log.info('Reading build info cache from ' + packageInfoCacheFile);
 		packageInfo = JSON.parse(fs.readFileSync(packageInfoCacheFile, {encoding: 'utf8'}));
 		packageInfo = cycle.retrocycle(packageInfo);
@@ -41,6 +42,15 @@ function walkPackages(_config, _argv, _packageUtils, _compileNodePath) {
 		//saveCache(packageInfo);
 	}
 	return packageInfo;
+}
+
+/**
+ * `Gulp ls` command calls this function to print out browser components
+ * @return {PackageInfo} packageInfo
+ */
+function listBundleInfo(_config, _argv, _packageUtils, _compileNodePath) {
+	_config.set('bundlePerPackage', false);
+	return walkPackages(_config, _argv, _packageUtils, _compileNodePath, true);
 }
 
 
