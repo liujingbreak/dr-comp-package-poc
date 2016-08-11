@@ -19,8 +19,8 @@ npm install -g web-fun-house-cli
 执行
 ```shell
 
-npm set registry http://10.9.14.9:4873
-
+npm set registry http://npm.dianrong.com
+# For user from Shanghai Office, you may also use http://npm501.dc.dianrong.com:4873
 npm install --save web-fun-house
 ```
 你的目录会是
