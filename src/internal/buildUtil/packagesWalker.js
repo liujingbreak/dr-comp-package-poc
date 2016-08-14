@@ -4,6 +4,7 @@ var cycle = require('cycle');
 var mkdirp = require('mkdirp');
 var packageBrowserInstance = require('./packageBrowserInstance');
 var _ = require('lodash');
+var api = require('__api');
 var bResolve = require('browser-resolve');
 var chalk = require('chalk');
 var log = require('log4js').getLogger('buildUtil.' + Path.basename(__filename, '.js'));
@@ -122,7 +123,7 @@ function _walkPackages() {
 			isVendor: false,
 			bundle: bundle,
 			longName: name,
-			file: bResolve.sync(name),
+			file: bResolve.sync(name, {paths: api.compileNodePath}),
 			parsedName: parsedName,
 			packagePath: packagePath,
 			realPackagePath: fs.realpathSync(packagePath),

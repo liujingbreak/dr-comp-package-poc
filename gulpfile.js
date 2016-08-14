@@ -89,50 +89,39 @@ function _npmInstallCurrFolder() {
 
 gulp.task('install-recipe', ['link'], function(cb) {
 	//var lookingForDeps = configuredVendors();
-	var prom = Promise.resolve();
-	if (config().dependencyMode) {
-		prom = prom
-		.then(function() {
+	Promise.coroutine(function*() {
+		if (config().dependencyMode) {
 			var currPkJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 			var savedVer = currPkJson.dependencies ? currPkJson.dependencies['@dr/internal-recipe'] :
 				(currPkJson.devDependencies ? currPkJson.devDependencies['@dr/internal-recipe'] : false);
 			if (savedVer) {
-				return packageInstaller.installRecipeAsync('@dr/internal-recipe@' + savedVer);
+				yield packageInstaller.installRecipeAsync('@dr/internal-recipe@' + savedVer);
 			} else {
-				return packageInstaller.installRecipeAsync(config().internalRecipeFolderPath);
+				yield packageInstaller.installRecipeAsync(config().internalRecipeFolderPath);
 			}
-		});
-	}
+		}
 
-	prom = prom.then(() => {
-		return new Promise((resolve, reject) => {
+		yield new Promise((resolve, reject) => {
 			process.nextTick(() => {
 				// Put it in process.nextTick to hopefully solve a windows install random 'EPERM' error.
 				packageInstaller.flattenInstalledRecipes();
 				resolve();
 			});
 		});
-	});
 
-	var srcDirs = [];
-	recipeManager.eachRecipeSrc(function(src, recipe) {
-		srcDirs.push(src);
-	});
-	prom = prom.then(()=> {
-		return Promise.all([
+		var srcDirs = [];
+		recipeManager.eachRecipeSrc(function(src, recipe) {
+			srcDirs.push(src);
+		});
+		yield Promise.all([
 			packageInstaller.scanSrcDepsAsync(srcDirs),
 			buildUtils.npmMajorVersion()
 		]);
-	}).then( (resolved) => {
-		if (resolved[1] < 3) {
-			return packageInstaller.installDependsAsync();
-		}
-		return null;
-	}).then(() => {
+		yield packageInstaller.installDependsAsync();
 		cb();
-	})
+	})()
 	.catch(e => {
-		cb('Failed to install recipes');
+		cb(e);
 	});
 });
 
@@ -354,6 +343,12 @@ gulp.task('e2e', function(callback) {
 gulp.task('ls', ['link'], function(callback) {
 	require('log4js').getLogger('lib.injector').setLevel('warn');
 	require('log4js').getLogger('packagePriorityHelper').setLevel('warn');
+	var rj = require('./lib/injectorFactory');
+	var injector = rj(require.resolve);
+	injector.fromPackage('@dr-core/build-util')
+	.factory('__api', function() {
+		return {compileNodePath: require('./lib/nodeSearchPath').browserifyPaths};
+	});
 
 	Promise.coroutine(function*() {
 		var browserCompInfo = require('@dr-core/build-util').walkPackages.listBundleInfo(
