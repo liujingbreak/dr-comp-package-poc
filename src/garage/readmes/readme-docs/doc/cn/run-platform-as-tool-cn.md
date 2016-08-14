@@ -28,9 +28,9 @@ npm install --save web-fun-house
 ```
 project-dir/
 	├─ node_modules
-	|		├─ web-fun-house
-	|		└─ .bin
-	|		
+	│		├─ web-fun-house
+	│		└─ .bin
+	│		
 	└─ package.json
 
 ```
