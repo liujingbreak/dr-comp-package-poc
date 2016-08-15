@@ -17,7 +17,7 @@ module.exports = function(injector) {
 	var resolve = require('resolve');
 	var nodeSearchPath = require('./lib/nodeSearchPath.js');
 
-	injector.fromPackage(['parcelify', 'less-plugin-npm-import'])
+	injector.fromPackage(['parcelify', 'less-plugin-npm-import', '@dr/parcelify-module-resolver'])
 	.factory('resolve', function(sourceFilePath) {
 		function _resolve(id, opts, cb) {
 			if (opts.paths)

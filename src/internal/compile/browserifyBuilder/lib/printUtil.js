@@ -50,7 +50,7 @@ function printNodePrefix() {
 	s.push(node.hasChild() ? '┬ ' : '─ ');
 	for (var i = 1; i < level; i++) {
 		node = node.parent;
-		s.unshift(node.isLast() ? '  ' : '| ' );
+		s.unshift(node.isLast() ? '  ' : '│ ' );
 	}
 	return s.join('');
 };

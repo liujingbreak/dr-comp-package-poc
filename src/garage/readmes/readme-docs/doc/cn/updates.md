@@ -1,5 +1,8 @@
 Updates
 =======
+### 2016-8-15
+- Support NPM v3.10, folder `dist/links` caches symbolic links to all the packages in `src` folder during build process.
+- `gulp ls` will show a list of all components of current project, including Browser packages, node server and compiler packages.
 ### 2016-7-8
 [Server side rendering entry page API](/#/doc/entry-page.md)
 

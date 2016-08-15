@@ -98,18 +98,20 @@ function init(noExample) {
 		console.info('browserify-inject.js is created');
 	}
 	// to solve npm 2.0 nested node_modules folder issue
-	installDevDependencyAsync().then(()=> {
-		cli.exec(Path.join('node_modules', '.bin', 'gulp'), 'install-recipe', (code, output) => {
-			if (code === 0) {
-				console.log(chalk.magenta('   -------------------------------------------------------'));
-				console.log(chalk.magenta(' < Congrads! Remember, all your packages are belong to us! >'));
-				console.log(chalk.magenta('   -------------------------------------------------------'));
-				console.log(chalk.magenta('\t\\   ^__^\n\t \\  (oo)\\_______\n\t    (__)\\       )\\/\\\n\t        ||----w |\n\t        ||     ||'));
-				console.log('Now you may run commands `npm install <package or recipe name>` `gulp compile` `node app.js`');
-			} else {
-				console.error(chalk.red(output));
-			}
-		});
+	Promise.coroutine(function*() {
+		yield installDevDependencyAsync();
+		yield buildUtils.promisifyExe(Path.join('node_modules', '.bin', process.platform === 'win32' ? 'gulp.cmd' : 'gulp'), 'install-recipe');
+		console.log(chalk.magenta('   -------------------------------------------------------'));
+		console.log(chalk.magenta(' < Congrads! Remember, all your packages are belong to us! >'));
+		console.log(chalk.magenta('   -------------------------------------------------------'));
+		console.log(chalk.magenta('\t\\   ^__^\n\t \\  (oo)\\_______\n\t    (__)\\       )\\/\\\n\t        ||----w |\n\t        ||     ||'));
+		console.log('Now you may run commands `npm install <package or recipe name>` `gulp compile` `node app.js`');
+	})()
+	.catch((err) => {
+		if (err) {
+			console.error(chalk.red(output));
+		} else
+			console.error(chalk.red('Failed to execute: node_modules/.bin/gulp install-recipe'));
 	});
 }
 
