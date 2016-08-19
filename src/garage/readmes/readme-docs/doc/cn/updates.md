@@ -1,5 +1,10 @@
 Updates
 =======
+### 2016-8-19
+- No longer supporting writing Assets URL syntax without specifying exact package name like `assets:///`,
+it is problematic when an external package file is "imported" or "included" via LESS or Swig into another
+package, the ommitted `packageName` is acturally resolved to importer package name instead of importee package.
+
 ### 2016-8-15
 - Support NPM v3.10, folder `dist/links` caches symbolic links to all the packages in `src` folder during build process.
 - `gulp ls` will show a list of all components of current project, including Browser packages, node server and compiler packages.
