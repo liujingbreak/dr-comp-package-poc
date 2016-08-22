@@ -179,15 +179,15 @@ PageCompiler.prototype.injectElements = function($, bundleSet, pkInstance, confi
 	});
 	log.debug('head', $cssPrinter.html());
 	var entryData = entryDataProvider(pkInstance.longName);
-
-	var jsDependencyDom = $('<script>').text(entryBootstrapTpl({
-		jsPaths: JSON.stringify(loadingData.js),
+	var bootstrapCode = entryBootstrapTpl({
+		jsPaths: JSON.stringify(loadingData.js, null, '  '),
 		staticAssetsURL: config().staticAssetsURL,
-		//jsLinks: jsLinks,
 		entryPackage: pkInstance.longName,
 		debug: !!config().devMode,
-		data: config().devMode ? JSON.stringify(entryData, null, '  ') : JSON.stringify(entryData)
-	}));
+		data: JSON.stringify(entryData, null, '  ')
+	});
+	var jsDependencyDom = $('<script>').text(config().devMode ?
+		bootstrapCode : require('uglify-js').minify(bootstrapCode, {fromString: true}).code);
 
 	$jsPrinter('div').append(jsDependencyDom);
 	this.entryFragmentFiles.push(new File({

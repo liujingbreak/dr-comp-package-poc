@@ -1,6 +1,6 @@
 {
   "name": "@dr-core/browserify-builder",
-  "version": "0.2.11",
+  "version": "0.2.12",
   "description": "The default browser side stuff builder module based on browserify",
   "main": "lib/builder.js",
   "scripts": {
@@ -12,7 +12,8 @@
     "esprima": "^2.7.1",
     "esprima-walk": "^0.1.0",
     "gulp-rev-all": "^0.8.22",
-    "gulp-filter": "^4.0.0"
+    "gulp-filter": "^4.0.0",
+    "uglify-js": "^2.6.4"
   },
   "author": "LJ",
   "license": "MIT",

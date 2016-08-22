@@ -1,8 +1,9 @@
 {
   "name": "@dr/angularjs",
-  "version": "1.0.31",
+  "version": "1.4.5",
   "description": "wrapper of angularjs v1.4.5 and jquery as dependency",
   "browser": "main.js",
+  "style": "angular-1.4.5/angular-csp.css",
   "dr": {
     "bundle": "ui-lib",
     "browserifyNoParse": [

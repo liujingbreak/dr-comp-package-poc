@@ -88,7 +88,8 @@ BrowserApi.ensureRequire = function(splitPoints, callBack) {
 	}
 	// load JS
 	window.$LAB.script(_.map(js, function(jsPath) {
-		return self.config().staticAssetsURL + '/' + jsPath;
+		var prefix = (jsPath.charAt(0) === '/' || jsPath.length >= 7 && (jsPath.substring(0, 7) === 'http://' || jsPath.substring(0, 8) === 'https://')) ? '' : self.config().staticAssetsURL;
+		return prefix + '/' + jsPath;
 	})).wait(function() {
 		self.markBundleLoaded(js);
 		self.markBundleLoaded(css);
