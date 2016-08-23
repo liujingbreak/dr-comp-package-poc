@@ -138,8 +138,35 @@ function addI18nModule(name) {
 }
 
 function DepsWalker() {
-	this.depPath = [];
+	this.depPath = new UniqStringArray();
 }
+
+function UniqStringArray() {
+	Array.apply(this, arguments);
+	this.set = {};
+}
+
+UniqStringArray.prototype = Object.create(Array.prototype, {
+	has: {
+		value: function(s) {
+			return _.has(this.set, s);
+		}
+	},
+	push: {
+		value: function(s) {
+			this.set[s] = 1;
+			Array.prototype.push.apply(this, arguments);
+		}
+	},
+
+	pop: {
+		value: function() {
+			var last = Array.prototype.pop.apply(this, arguments);
+			delete this.set[last];
+		}
+	}
+});
+
 /**
  * Create a map of entry module and depended modules.
  * @param  {[type]} depsMap  [description]
@@ -151,24 +178,29 @@ function createEntryPackageDepGraph() {
 	walkContext.walkDeps = _walkDeps;
 	packageDepsGraph = {entries: {}, localeEntries: {}, splitPoints: {}};
 
-	_.forOwn(packageInfo.entryPageMap, function(pkInstance, moduleName) {
-		var entryDepsSet = packageDepsGraph.entries[moduleName] = {};
-		walkContext.walkDeps(depsMap, moduleName, false, entryDepsSet, true);
-		// API is always depended for entry package
-		walkContext.walkDeps(depsMap, '@dr-core/browserify-builder-api', false, entryDepsSet, true);
-	});
-	_.forOwn(packageInfo.splitPointMap, function(pkInstance, moduleName) {
-		var entryDepsSet = packageDepsGraph.splitPoints[moduleName] = {};
-		walkContext.walkDeps(depsMap, moduleName, false, entryDepsSet, true);
-	});
-	//log.debug('packageInfo.localeEntryMap: ' + JSON.stringify(packageInfo.localeEntryMap, null, '  '));
-	_.forOwn(packageInfo.localeEntryMap, (entryMap, locale) => {
-		var result = packageDepsGraph.localeEntries[locale] = {};
-		_.forOwn(entryMap, function(pkInstance, moduleName) {
-			var entryDepsSet = result[moduleName] = {};
-			walkContext.walkDeps(localeDepsMap[locale], moduleName, false, entryDepsSet, true, null, depsMap);
+	try {
+		_.forOwn(packageInfo.entryPageMap, function(pkInstance, moduleName) {
+			var entryDepsSet = packageDepsGraph.entries[moduleName] = {};
+			walkContext.walkDeps(depsMap, moduleName, false, entryDepsSet, true);
+			// API is always depended for entry package
+			walkContext.walkDeps(depsMap, '@dr-core/browserify-builder-api', false, entryDepsSet, true);
 		});
-	});
+		_.forOwn(packageInfo.splitPointMap, function(pkInstance, moduleName) {
+			var entryDepsSet = packageDepsGraph.splitPoints[moduleName] = {};
+			walkContext.walkDeps(depsMap, moduleName, false, entryDepsSet, true);
+		});
+		//log.debug('packageInfo.localeEntryMap: ' + JSON.stringify(packageInfo.localeEntryMap, null, '  '));
+		_.forOwn(packageInfo.localeEntryMap, (entryMap, locale) => {
+			var result = packageDepsGraph.localeEntries[locale] = {};
+			_.forOwn(entryMap, function(pkInstance, moduleName) {
+				var entryDepsSet = result[moduleName] = {};
+				walkContext.walkDeps(localeDepsMap[locale], moduleName, false, entryDepsSet, true, null, depsMap);
+			});
+		});
+	} catch (e) {
+		log.error('walked dependecy path: %s', walkContext.depPath.join('\n\t-> '));
+		throw e;
+	}
 
 	toPrintModel(packageDepsGraph.entries, '------- Entry package -> package dependency ----------',
 		null, label => {
@@ -183,7 +215,13 @@ function createEntryPackageDepGraph() {
 	//log.debug('createEntryDepsData() packageDepsGraph = ' + JSON.stringify(packageDepsGraph, null, '  '))
 
 	function _walkDeps(depsMap, id, file, entryDepsSet, isParentOurs, lastDirectDeps, parentDepsMap) {
-		this.depPath.push(id + '(' + file + ')');
+		var depPathKey = id + '(' + file + ')';
+		if (this.depPath.has(depPathKey)) {
+			// This dependency have already been walked, skip cycle dependency
+			log.debug('cycle dependency %s in path: %s', depPathKey, this.depPath.join('\n\t-> '));
+			return;
+		}
+		this.depPath.push(depPathKey);
 		var deps;
 		if (!file) { // since for external module, the `file` is always `false`
 			deps = depsMap[id];

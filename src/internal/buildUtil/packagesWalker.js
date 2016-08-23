@@ -1,3 +1,4 @@
+'use strict';
 var Path = require('path');
 var fs = require('fs');
 var cycle = require('cycle');
@@ -101,9 +102,6 @@ function _walkPackages() {
 			if (pkJson.dr.entryPage) {
 				isEntryServerTemplate = false;
 				entryPages = [].concat(pkJson.dr.entryPage);
-				entryPages = _.map(entryPages, path => {
-					return path;
-				});
 				info.entryPageMap[name] = instance;
 			} else if (pkJson.dr.entryView){
 				isEntryServerTemplate = true;
@@ -127,25 +125,39 @@ function _walkPackages() {
 			parsedName: parsedName,
 			packagePath: packagePath,
 			realPackagePath: fs.realpathSync(packagePath),
-			active: pkJson.dr ? pkJson.dr.active : false,
+			//active: pkJson.dr ? pkJson.dr.active : false,
 			entryPages: entryPages,
 			entryViews: entryViews,
-			//isEntryJS: pkJson.dr && pkJson.dr.isEntryJS !== undefined ? (!!pkJson.dr.isEntryJS) : {}.hasOwnProperty.call(config().defaultEntrySet, name),
 			browserifyNoParse: noParseFiles,
 			isEntryServerTemplate: isEntryServerTemplate,
 			i18n: pkJson.dr ? (pkJson.dr.i18n ? pkJson.dr.i18n : null) : null
 		});
-		info.moduleMap[name] = instance;
-
-		if (!_.has(bundleMap, bundle)) {
-			bundleMap[bundle] = {};
+		addPackageToBundle(instance, info, bundle, vendorConfigInfo);
+		var otherEntries = _.get(pkJson.dr, 'otherEntries');
+		if (otherEntries) {
+			otherEntries = [].concat(otherEntries);
+			for (let otherEntry of otherEntries) {
+				if (otherEntry.startsWith('./'))
+					otherEntry = otherEntry.substring(2);
+				let pk = packageBrowserInstance(config());
+				pk.init({
+					isVendor: false,
+					bundle: bundle,
+					longName: name + '/' + otherEntry,
+					file: bResolve.sync(name + '/' + otherEntry, {paths: api.compileNodePath}),
+					parsedName: {scope: parsedName.scope, name: parsedName.name +  '/' + otherEntry},
+					packagePath: packagePath,
+					realPackagePath: fs.realpathSync(packagePath),
+					//active: pkJson.dr ? pkJson.dr.active : false,
+					// entryPages: null,
+					// entryViews: null,
+					browserifyNoParse: noParseFiles,
+					isEntryServerTemplate: isEntryServerTemplate,
+					i18n: pkJson.dr ? (pkJson.dr.i18n ? pkJson.dr.i18n : null) : null
+				});
+				addPackageToBundle(pk, info, bundle, vendorConfigInfo);
+			}
 		}
-		if (_.has(vendorConfigInfo.moduleMap, instance.longName)) {
-			var newBundle = _.get(vendorConfigInfo.moduleMap, instance.longName).bundle;
-			log.info('Set vendorBundleMap setting of', instance.longName, ':', instance.bundle, '->', newBundle);
-			instance.bundle = newBundle;
-		}
-		bundleMap[bundle][instance.longName] = instance;
 	});
 	_.each(bundleMap, (packageMap, bundle) => {
 		bundleMap[bundle] = _.values(packageMap);
@@ -153,6 +165,20 @@ function _walkPackages() {
 	info.allModules = _.values(info.moduleMap);
 
 	return info;
+}
+
+function addPackageToBundle(instance, info, bundle, vendorConfigInfo) {
+	info.moduleMap[instance.longName] = instance;
+
+	if (!_.has(info.bundleMap, bundle)) {
+		info.bundleMap[bundle] = {};
+	}
+	if (_.has(vendorConfigInfo.moduleMap, instance.longName)) {
+		var newBundle = _.get(vendorConfigInfo.moduleMap, instance.longName).bundle;
+		log.info('Set vendorBundleMap setting of', instance.longName, ':', instance.bundle, '->', newBundle);
+		instance.bundle = newBundle;
+	}
+	info.bundleMap[bundle][instance.longName] = instance;
 }
 
 /**
