@@ -143,6 +143,7 @@ function _walkPackages() {
 				pk.init({
 					isVendor: false,
 					bundle: bundle,
+					isOtherEntry: true, // the entry file is part of another package
 					longName: name + '/' + otherEntry,
 					file: bResolve.sync(name + '/' + otherEntry, {paths: api.compileNodePath}),
 					parsedName: {scope: parsedName.scope, name: parsedName.name +  '/' + otherEntry},

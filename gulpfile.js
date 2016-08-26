@@ -362,6 +362,8 @@ gulp.task('ls', ['link'], function(callback) {
 		_.each(browserCompInfo.bundleMap, (packages, bundle) => {
 			console.log('BUNDLE: ' + bundle);
 			_.each(packages, pk => {
+				if (pk.isOtherEntry)
+					return;
 				var path = pk.realPackagePath ? pk.realPackagePath : pk.packagePath;
 				console.log(' ' + (++index) + '. ' + pk.longName +
 					(path ? _.fill(new Array(maxNameLen + 3 - pk.longName.length - (index + '').length), ' ').join('') +
