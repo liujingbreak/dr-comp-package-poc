@@ -1,6 +1,6 @@
 {
   "name": "@dr/example-browserify",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "description": "Test browserify",
   "browser": "exampleBrowserify.browser.js",
   "main": "exampleBrowserify.server.js",
@@ -10,7 +10,8 @@
   "author": "LJ",
   "dr": {
     "bundle": "example",
-    "entryPage": "index.html"
+    "entryPage": "index.html",
+	"type": "server"
   },
   "license": "MIT"
 }

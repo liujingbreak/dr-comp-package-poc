@@ -8,10 +8,9 @@ var shell = require('shelljs');
 var mkdirp = require('mkdirp');
 var api = require('__api');
 var log = require('log4js').getLogger(api.packageName);
-var env = require('@dr/environment');
 var serverFavicon = require('serve-favicon');
 var resolveStaticUrl = require('@dr-core/browserify-builder-api').resolveUrl;
-var buildUtils = env.buildUtils;
+var buildUtils = api.buildUtils;
 
 var packageUtils = api.packageUtils;
 var config = api.config;
@@ -156,7 +155,7 @@ function replaceAssetsUrl(str, getCurrPackage) {
 			if (packageName) {
 				log.info('resolve assets to ' + packageName);
 			}
-			var resolvedTo = leading + resolveStaticUrl(env.config, packageName, path) + tail;
+			var resolvedTo = leading + resolveStaticUrl(api.config, packageName, path) + tail;
 			log.debug('-> ' + resolvedTo);
 			return resolvedTo;
 		});

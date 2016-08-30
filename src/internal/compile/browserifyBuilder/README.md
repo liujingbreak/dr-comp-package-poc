@@ -70,13 +70,6 @@ module.exports = {
 | `.findBrowserPackageByPath(filePath)` | returns package name, it tells you which package a file belongs to
 | `packageNames2bundles(packageNames)` | parameter `packageNames` is an array of package names, it returns corresponding bundle name that packages are belong to
 
-### @dr/environment
-Useful method that monkey patched to object of `require('@dr/environment')`, so that you can call them anywhere as long as no one cleans up `require.cache`.
-
-| name | description
-| -- | --
-| `packageNames2bundles(packageNames)` | parameter `packageNames` is an array of package names, it returns corresponding bundle name that packages are belong to
-
 **PackageInfo type**:
 
 ```

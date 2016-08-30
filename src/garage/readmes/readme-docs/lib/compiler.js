@@ -10,7 +10,7 @@ var cheerio = require('cheerio');
 var RevAll = require('gulp-rev-all');
 var Promise = require('bluebird');
 var File = require('vinyl');
-var buildUtils = require('@dr/environment').buildUtils;
+var buildUtils = require('__api').buildUtils;
 
 module.exports = compile;
 

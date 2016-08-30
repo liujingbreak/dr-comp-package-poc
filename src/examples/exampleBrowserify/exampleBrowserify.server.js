@@ -1,6 +1,7 @@
 
-module.exports.activate = function(api) {
-	api.router().get('/', function(req, res) {
-		res.redirect(api.assetsUrl('/index.html'));
+exports.activate = function(api) {
+	api.router().get('/server', function(req, res) {
+		console.log('here');
+		res.send(api.assetsUrl('/resource.json'));
 	});
 };

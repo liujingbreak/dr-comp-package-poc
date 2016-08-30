@@ -48,7 +48,6 @@ describe('packageUtils', function() {
 			var callback = jasmine.createSpy('found');
 			packageUtils.findNodePackageByType('server', callback);
 			var allServerPackages = [
-				'@dr/environment',
 				'@dr-core/express-app',
 				'@dr/doc-home',
 				'@dr/example-entry',

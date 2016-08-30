@@ -10,7 +10,7 @@ var File = require('vinyl');
 var swig = require('swig');
 var api = require('__api');
 var log = require('@dr/logger').getLogger(api.packageName + '.pageCompiller');
-var packageUtils = require('@dr/environment').packageUtils;
+var packageUtils = api.packageUtils;
 var assetsProcesser = require('@dr-core/assets-processer');
 
 module.exports = PageCompiler;

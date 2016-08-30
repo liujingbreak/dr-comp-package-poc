@@ -9,7 +9,6 @@ module.exports = function() {
 	proto.findBrowserPackageByPath = findBrowserPackageByPath;
 	proto.findBrowserPackageInstanceByPath = findBrowserPackageInstanceByPath;
 	proto.packageNames2bundles = packageNames2bundles;
-	require('@dr/environment').findBrowserPackageByPath = findBrowserPackageByPath.bind(proto);
 	initPackageListInfo(proto);
 };
 
