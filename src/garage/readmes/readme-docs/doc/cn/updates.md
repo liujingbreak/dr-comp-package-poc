@@ -1,5 +1,31 @@
 Updates
 =======
+### 2016-8-31
+- #### 新配置属性 config.yaml
+```yaml
+entryPageMapping:
+    # For static browser entry pages, the default entry page is compiled to
+    #   dist/static/<package-short-name>/<entry-page-path>
+    # so for example when you access page with browser, the URL is like
+    #  "http://<host>:<port>/<package-short-name>/<replative-page-path>/index.html"
+    #
+    # If you want to change the URL to another folder like "http://<host>:<port>/<another-path>/<replative-page-path>/index.html",
+    # do add a key-value pair <package-short/full-name>: <new-folder-path> like,
+    #   package-A: /
+    #   package-B: /entriesB
+    #   package-C: entriesC
+    # It doesn't matter whether the "value" part startsWith or endsWith slash "/",
+    # but if the value is only a slash "/", it means the root folder "dist/static"
+```
+默认的entry page 的固定路径是`dist/static/<package-short-name>/<entry-page-path>`
+现在这个`<package-short-name>` 可以配置成另一个路径或者是root '/'
+
+- #### New builder and server side package API
+
+`api.entryPageUrl: function(packageName, relativePagePath)`
+返回entryPage的访问URL
+
+
 ### 2016-8-19
 - No longer supporting writing Assets URL syntax without specifying exact package name like `assets:///`,
 it is problematic when an external package file is "imported" or "included" via LESS or Swig into another

@@ -55,7 +55,8 @@ describe('packageUtils', function() {
 				'@dr-core/browserify-builder-api',
 				'@dr-core/assets-processer',
 				'@dr/example-node',
-				'@dr/example-server-swig-entry'
+				'@dr/example-server-swig-entry',
+				'@dr/example-browserify'
 			];
 			var foundPackages = callback.calls.allArgs().map(row => { return row[0];});
 

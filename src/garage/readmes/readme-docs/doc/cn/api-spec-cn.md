@@ -53,6 +53,7 @@ console.log(__api.assetsUrl('some-picture.jpg'));
 | .packageUtils | lib/packageMgr/packageUtils.js 查找其他package的工具
 | `.config()` | API prototype的属性, 获取config.yaml配置
 | `.assetsUrl(packageName, path)` | 获取packageName对应的静态资源/assets目录下的文件的浏览器访问路径, `packageName` 为可选参数, 默认是当前package
+| `entryPageUrl(packageName, relativePagePath)` | 返回指定package的某个entryPage URL
 | `.isBrowser()` | false
 | `.isNode()` | true
 
@@ -85,6 +86,7 @@ console.log(__api.assetsUrl('some-picture.jpg'));
 | .packageInfo | monkey patched by `@dr-core/browserify-builder`
 | .findBrowserPackageByPath(filePath) | monkey patched by `@dr-core/browserify-builder`, 返回package source code对应的package name
 | .**loadLocaleBundles(locale, callback)** | 利用LABjs 预先load locale bundle, locale值是 'zh', 'en', 'en-us'等language country code, callback内执行加载完后的逻辑
+| `entryPageUrl(packageName, relativePagePath)` | 返回指定package的某个entryPage URL
 
 ### 一些内置API providers
 

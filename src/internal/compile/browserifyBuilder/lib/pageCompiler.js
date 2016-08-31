@@ -14,7 +14,9 @@ var packageUtils = api.packageUtils;
 var assetsProcesser = require('@dr-core/assets-processer');
 
 module.exports = PageCompiler;
-
+/**
+ * Entry Page Compilation transform
+ */
 function PageCompiler(addonTransforms) {
 	this.builderInfo = null;
 	this.rootPackage = null;
@@ -34,7 +36,7 @@ PageCompiler.prototype.compile = function(pageType) {
 
 		if (!compiler.buildInfo) {
 			compiler.buildInfo  = param;
-			var contextPathMapping = compiler.buildInfo.config().packageContextPathMapping;
+			var contextPathMapping = api.config().packageContextPathMapping;
 			if (contextPathMapping) {
 				compiler.rootPackage = findRootContextPackage(contextPathMapping);
 			}
@@ -69,7 +71,15 @@ PageCompiler.prototype.compile = function(pageType) {
 };
 
 var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
-
+/**
+ * [doEntryFile description]
+ * @param  {[type]} page      [description]
+ * @param  {[type]} instance  PackageBrowserInstance
+ * @param  {[type]} buildInfo [description]
+ * @param  {[type]} pageType  [description]
+ * @param  {[type]} through   [description]
+ * @return {[type]}           [description]
+ */
 PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageType, through) {
 	var compiler = this;
 	var pathInfo = resolvePagePath(page, instance, buildInfo.packageInfo.moduleMap);
@@ -84,7 +94,19 @@ PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageTyp
 		hackedHtml = assetsProcesser.replaceAssetsUrl(hackedHtml, ()=> {
 			return pathInfo.packageName;
 		});
-		var pagePath = Path.resolve(instance.shortName, pathInfo.path);
+
+		var pagePath;
+		var mappedTo = _.get(api.config(), ['entryPageMapping', instance.shortName]) || _.get(api.config(), ['entryPageMapping', instance.longName]);
+		if (mappedTo) {
+			if (mappedTo === '/')
+				pagePath = Path.resolve(pathInfo.path);
+			else {
+				mappedTo = mappedTo.startsWith('/') ? mappedTo.substring(1) : mappedTo;
+				pagePath = Path.resolve(mappedTo, pathInfo.path);
+			}
+		} else {
+			pagePath = Path.resolve(instance.shortName, pathInfo.path);
+		}
 		log.info('Entry page processed: ' + pagePath);
 		through.push(new File({
 			path: pagePath,

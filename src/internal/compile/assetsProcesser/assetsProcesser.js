@@ -95,12 +95,16 @@ function copyRootPackageFavicon() {
 }
 
 function findFavicon() {
-	if (!api.config().packageContextPathMapping) {
+	return _findFaviconInConfig('packageContextPathMapping') || _findFaviconInConfig('entryPageMapping');
+}
+
+function _findFaviconInConfig(property) {
+	if (!api.config()[property]) {
 		return null;
 	}
 	var faviconFile = null;
 	var faviconPackage;
-	_.each(config().packageContextPathMapping, (path, pkName) => {
+	_.each(config()[property], (path, pkName) => {
 		if (path === '/') {
 			packageUtils.lookForPackages(pkName, (fullName, entryPath, parsedName, json, packagePath) => {
 				var assetsFolder = json.dr ? (json.dr.assetsDir ? json.dr.assetsDir : 'assets') : 'assets';

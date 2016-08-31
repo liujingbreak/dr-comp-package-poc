@@ -68,12 +68,26 @@ browserifyNoParse:
     - "@dr/gsap"
 
 packageContextPathMapping:
-    # Package short name - route path map, used by express server.
+    # Package short name - route path map, used by Express server.
     # By default, every package's is mapped to a route context path "/<package short name>"
     # e.g.
     #   if package name is "@dr/example-dr", default route root path will be `/example-dr`
     # If you want change this rule, config route path here.
     doc-home: /
+
+entryPageMapping:
+    # For static browser entry pages, the default entry page is compiled to
+    #   dist/static/<package-short-name>/<entry-page-path>
+    # so for example when you access page with browser, the URL is like
+    #  "http://<host>:<port>/<package-short-name>/<replative-page-path>/index.html"
+    #
+    # If you want to change the URL to another folder like "http://<host>:<port>/<another-path>/<replative-page-path>/index.html",
+    # do add a key-value pair <package-short/full-name>: <new-folder-path> like,
+    #   package-A: /
+    #   package-B: /entriesB
+    #   package-C: entriesC
+    # It doesn't matter whether the "value" part startsWith or endsWith slash "/",
+    # but if the value is only a slash "/", it means the root folder "dist/static"
 
 # During developing, you can set this to `true` to make every package to a single bundle
 bundlePerPackage: false
@@ -114,6 +128,7 @@ browserSideConfigProp:
     - packageContextPathMapping
     - locales
     - devMode
+    - entryPageMapping
 
 e2etestHelper:
     selenium:
