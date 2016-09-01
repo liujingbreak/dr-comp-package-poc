@@ -349,12 +349,12 @@ function createEntryBundleDepGraph() {
 				} else if (!moduleMap[dep] || !(bundle = moduleMap[dep].bundle)) {
 					if (isDirectDeps === true) {
 						msg = 'Entry bundle "' + currBundle + ' (' + moduleName + ')", module "' + dep + '" which is dependency of bundle "' +
-							currBundle + '" is not explicityly configured with any bundle, check out `vendorBundleMap` in config.yaml';
+							currBundle + '" is not explicityly configured with any bundle, it will be copyied in the dependent bundle';
 						log.warn(msg);
-						throw new Error(msg);
+						//throw new Error(msg);
 					} else {
 						msg = 'Entry bundle "' + currBundle + ' (' + moduleName + ')", module "' + dep + '" which is dependency of "' +
-							isDirectDeps + '" is not explicityly configured with any bundle, check out `vendorBundleMap` in config.yaml';
+							isDirectDeps + '" is not explicityly configured with any bundle, , it will be copyied in the dependent bundle，check out `vendorBundleMap` in config.yaml';
 						log.warn(msg);
 						return;
 					}
