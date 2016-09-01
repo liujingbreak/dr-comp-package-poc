@@ -37,7 +37,8 @@ describe('packageUtils', function() {
 				'@dr/translate-generator',
 				'@dr/template-builder',
 				'@dr/readme-docs',
-				'@dr/light-lodash'
+				'@dr/light-lodash',
+				'@dr/handlebars-tmpl-builder'
 			];
 			var foundPackages = callback.calls.allArgs().map(row => { return row[0];});
 			expect(_.difference(builders, foundPackages)).toEqual([]);

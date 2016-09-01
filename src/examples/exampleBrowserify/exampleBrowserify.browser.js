@@ -1,4 +1,5 @@
 var log = require('@dr/logger').getLogger('example.exampleBrowserify');
+require('@dr/example-partial');
 var angular = require('@dr/angularjs');
 
 var sampleHtml = require('./browser');

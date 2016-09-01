@@ -195,7 +195,7 @@ JsBundleWithI18nMaker.prototype = _.create(JsBundleEntryMaker.prototype, {
 			var i18nPath = this.i18nPath(pkInstance, locale);
 			var i18nModuleName = pkInstance.longName + '/i18n';
 			if (i18nPath) {
-				var shoftI18nPath = Path.relative(Path.resolve(), i18nPath);
+				var relI18nPath = Path.relative(__api.config().rootPath, i18nPath);
 				i18nModules.push({
 					longName: i18nModuleName
 				});
@@ -204,13 +204,14 @@ JsBundleWithI18nMaker.prototype = _.create(JsBundleEntryMaker.prototype, {
 					opts: {
 						expose: i18nModuleName
 					},
-					id: shoftI18nPath
+					id: relI18nPath
 				});
+				log.debug(`i18nPath = ${i18nPath}`);
 				this.createI18nPackageJson(i18nPath, i18nModuleName, locale);
 				if (!this.pk2LocaleModule[i18nModuleName]) {
 					this.pk2LocaleModule[i18nModuleName] = {};
 				}
-				this.pk2LocaleModule[i18nModuleName][locale] = shoftI18nPath;
+				this.pk2LocaleModule[i18nModuleName][locale] = relI18nPath;
 			}
 		});
 		if (i18nModules.length === 0) {
@@ -240,7 +241,7 @@ JsBundleWithI18nMaker.prototype = _.create(JsBundleEntryMaker.prototype, {
 			log.error('i18n not found: ' + pkInstance.i18n + ' in ' + pkInstance.longName);
 			return null;
 		}
-		return this.browserResolve(i18nPath);
+		return fs.realpathSync(this.browserResolve(i18nPath));
 	},
 
 	createI18nPackageJson: function(i18nPath, i18nModuleName, locale) {

@@ -10,6 +10,7 @@
     "@dr/example-server-swig-entry": "1.0.1",
     "@dr/example-browserify": "0.0.28",
     "@dr/example-i18n": "0.0.12",
-    "@dr/example-locale-zh": "0.0.8"
+    "@dr/example-locale-zh": "0.0.8",
+    "@dr/example-partial": "1.0.0"
   }
 }

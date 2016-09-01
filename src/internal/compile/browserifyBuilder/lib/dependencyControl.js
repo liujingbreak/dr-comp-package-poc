@@ -89,7 +89,7 @@ function initAsync(_api, _packageInfo) {
  * draw a cross bundles dependency map
  * @param  {object} b       browserify instance
  */
-function browserifyDepsMap(b, depsMap, resolve) {
+function browserifyDepsMap(b, depsMap) {
 	var rootPath = api.config().rootPath;
 	b.pipeline.get('deps').push(through.obj(function(row, encoding, callback) {
 		var shortFilePath = row.file;
@@ -236,9 +236,10 @@ function createEntryPackageDepGraph() {
 			}
 		}
 		if (!deps && !_.has(i18nModuleNameSet, id)) {
-			log.error(JSON.stringify(depsMap, null, '  '));
-			log.warn(JSON.stringify(resolvedPath2Module, null, ' '));
-			log.info('i18nModuleNameSet: ' + JSON.stringify(i18nModuleNameSet, null, '  '));
+			log.warn('id=%s', id);
+			log.warn(`depsMap=${JSON.stringify(depsMap, null, '  ')}`);
+			log.warn(`resolvedPath2Module=${JSON.stringify(resolvedPath2Module, null, ' ')}`);
+			log.warn('i18nModuleNameSet: %s', JSON.stringify(i18nModuleNameSet, null, '  '));
 			gutil.beep();
 			throw new Error('Can not walk dependency tree for: ' + this.depPath.join('\n\t-> ') +
 			', missing depended module or you may try rebuild all bundles');
@@ -339,7 +340,8 @@ function createEntryBundleDepGraph() {
 						graph[packageInfo.localeEntryMap[locale][localeModuleName].bundle] = true;
 						//log.debug('localeDeps: ' + JSON.stringify(localeDeps, null, '  '));
 						_.keys(localeDeps).forEach(moduleName => {
-							graph[moduleMap[moduleName].bundle] = true;
+							if (moduleMap[moduleName].bundle)
+								graph[moduleMap[moduleName].bundle] = true;
 						});
 					});
 					return;
@@ -349,15 +351,18 @@ function createEntryBundleDepGraph() {
 				} else if (!moduleMap[dep] || !(bundle = moduleMap[dep].bundle)) {
 					if (isDirectDeps === true) {
 						msg = 'Entry bundle "' + currBundle + ' (' + moduleName + ')", module "' + dep + '" which is dependency of bundle "' +
-							currBundle + '" is not explicityly configured with any bundle, it will be copyied in the dependent bundle';
+							currBundle + '" is not explicityly configured with any bundle, it will be copyied to the dependent bundle';
 						log.warn(msg);
+						return;
 						//throw new Error(msg);
 					} else {
 						msg = 'Entry bundle "' + currBundle + ' (' + moduleName + ')", module "' + dep + '" which is dependency of "' +
-							isDirectDeps + '" is not explicityly configured with any bundle, , it will be copyied in the dependent bundle，check out `vendorBundleMap` in config.yaml';
+							isDirectDeps + '" is not explicityly configured with any bundle, , it will be copyied to the dependent bundle';
 						log.warn(msg);
 						return;
 					}
+				} else {
+					log.debug(`dep: ${dep}, bundle: ${bundle}`);
 				}
 				depBundleSet[bundle] = true;
 			});

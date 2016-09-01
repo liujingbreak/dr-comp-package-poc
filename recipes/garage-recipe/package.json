@@ -14,6 +14,7 @@
     "@dr/markdown-viewer": "0.0.23",
     "@dr/readme": "0.0.28",
     "@dr/readme-docs": "0.1.13",
-    "@dr/text-anim-ng": "0.0.23"
+    "@dr/text-anim-ng": "0.0.23",
+    "@dr/handlebars-tmpl-builder": "1.0.0"
   }
 }

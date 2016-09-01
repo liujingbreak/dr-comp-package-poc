@@ -286,7 +286,7 @@ function compile() {
 		b.transform(yamlify, {global: true});
 		b.transform(jsBundleEntryMaker.transform('{do not require localed package here}'), {global: true});
 
-		var excludeList = excludeModules(packageInfo.allModules, b, _.map(modules, function(module) {return module.longName;}));
+		var excludeList = excludeModules(packageInfo, b, _.map(modules, function(module) {return module.longName;}));
 		excludeI18nModules(packageInfo.allModules, b);
 		//browserifyInc(b, {cacheFile: Path.resolve(config().destDir, 'browserify-cache.json')});
 
@@ -466,10 +466,10 @@ function compile() {
 		return paths;
 	}
 
-	function excludeModules(allModules, b, entryModules) {
+	function excludeModules(info, b, entryModules) {
 		var excludeList = [];
-		allModules.forEach(function(pkModule) {
-			if (!_.includes(entryModules, pkModule.longName)) {
+		info.allModules.forEach(function(pkModule) {
+			if (!_.includes(entryModules, pkModule.longName) && !_.has(info.noBundlePackageMap, pkModule.longName)) {
 				b.exclude(pkModule.longName);
 				excludeList.push(pkModule.longName);
 			}
@@ -551,11 +551,13 @@ function compile() {
 		// addonTransforms.forEach(addonTransform => {
 		// 	appTransforms.push(addonTransform);
 		// });
+		log.debug('parcelify css bundle: %s', bundle);
 		var parce = parcelify(b, {
 			bundles: {
 				style: fileName
 			},
-			appTransforms: appTransforms
+			appTransforms: appTransforms,
+			logLevel: api.config().devMode ? 'verbose' : 'info'
 		});
 		return new Promise(function(resolve, reject) {
 			parce.on('done', function() {

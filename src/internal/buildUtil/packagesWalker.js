@@ -67,6 +67,7 @@ function _walkPackages() {
 	var info = {
 		allModules: null, // array
 		moduleMap: null, // object
+		noBundlePackageMap: {},
 		bundleMap: null,
 		entryPageMap: {},
 		localeEntryMap: {}
@@ -88,7 +89,9 @@ function _walkPackages() {
 		}
 		if (!pkJson.dr.builder || pkJson.dr.builder === 'browserify') {
 			if (config().bundlePerPackage === true && parsedName.name !== 'browserify-builder-api') {
-				bundle = parsedName.name;
+				bundle = pkJson.dr.bundle || pkJson.dr.chunk;
+				if (bundle)
+					bundle = parsedName.name;// force bundle name to be same as package name
 			} else {
 				if (_.has(vendorConfigInfo.moduleMap, name)) {
 					bundle = vendorConfigInfo.moduleMap[name].bundle;
@@ -96,7 +99,10 @@ function _walkPackages() {
 					log.debug('vendorBundleMap overrides bundle setting for ' + name);
 				} else {
 					bundle = pkJson.dr.bundle || pkJson.dr.chunk;
-					bundle = bundle ? bundle : parsedName.name;
+					if (!bundle && ( pkJson.dr.entryPage || pkJson.dr.entryView)) {
+						// Entry package must belongs to a bundle
+						bundle = parsedName.name;
+					}
 				}
 			}
 			if (pkJson.dr.entryPage) {
@@ -106,9 +112,6 @@ function _walkPackages() {
 			} else if (pkJson.dr.entryView){
 				isEntryServerTemplate = true;
 				entryViews = [].concat(pkJson.dr.entryView);
-				entryViews = _.map(entryViews, path => {
-					return path;
-				});
 				info.entryPageMap[name] = instance;
 			}
 			if (pkJson.dr.browserifyNoParse) {
@@ -170,7 +173,10 @@ function _walkPackages() {
 
 function addPackageToBundle(instance, info, bundle, vendorConfigInfo) {
 	info.moduleMap[instance.longName] = instance;
-
+	if (!bundle && !_.get(vendorConfigInfo.moduleMap, [instance.longName, 'bundle'])) {
+		info.noBundlePackageMap[instance.longName] = instance;
+		return;
+	}
 	if (!_.has(info.bundleMap, bundle)) {
 		info.bundleMap[bundle] = {};
 	}

@@ -365,11 +365,22 @@ gulp.task('ls', ['link'], function(callback) {
 				if (pk.isOtherEntry)
 					return;
 				var path = pk.realPackagePath ? pk.realPackagePath : pk.packagePath;
-				console.log(' ' + (++index) + '. ' + pk.longName +
-					(path ? _.fill(new Array(maxNameLen + 3 - pk.longName.length - (index + '').length), ' ').join('') +
-					'(' + Path.relative(config().rootPath, path) + ')' : ''));
+				console.log(' ' + (++index) + '. ' + _.padEnd(pk.longName, maxNameLen + 3) +
+					(path ? '(' + Path.relative(config().rootPath, path) + ')' : ''));
 			});
 		});
+
+		if (_.size(browserCompInfo.noBundlePackageMap) > 0) {
+			console.log('No bundle setting packages: ');
+			_.each(browserCompInfo.noBundlePackageMap, pk => {
+				if (pk.isOtherEntry)
+					return;
+				var path = pk.realPackagePath ? pk.realPackagePath : pk.packagePath;
+				console.log(' ' + (++index) + '. ' + _.padEnd(pk.longName, maxNameLen + 3) +
+					(path ? '(' + Path.relative(config().rootPath, path) + ')' : ''));
+			});
+		}
+
 		console.log('\n--[ SERVER COMPONENTS ]--\n');
 		var list = yield require('./lib/packageMgr/packageRunner').listPackages();
 		list.forEach(row => console.log(' ' + row.desc + '   (' + Path.relative(config().rootPath, row.pk.path) + ')'));
