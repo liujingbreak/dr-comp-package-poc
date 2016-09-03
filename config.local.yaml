@@ -1,4 +1,5 @@
 devMode: true
+enableSourceMaps: true
 bundlePerPackage: true
 cacheControlMaxAge: 0
 packageScopes:
@@ -6,4 +7,3 @@ packageScopes:
   # dr-core is considered as special packages which will be loaded before other packages
   - dr-core
   - lj
-  

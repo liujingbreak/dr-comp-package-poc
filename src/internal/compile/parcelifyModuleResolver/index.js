@@ -20,6 +20,9 @@ module.exports = function(file, options) {
 		var lessOptions = {
 			compress: !api.config().devMode,
 			paths: [],
+			// sourceMap: {
+			// 	sourceMapFileInline: api.config().enableSourceMaps
+			// },
 			plugins: [
 				new LessPluginAutoPrefix({browsers: ['last 3 versions']}),
 				new NpmImportPlugin()

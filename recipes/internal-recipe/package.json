@@ -1,12 +1,12 @@
 {
   "name": "@dr/internal-recipe",
-  "version": "0.0.59",
+  "version": "0.0.60",
   "description": "Recipe package of package-recipe",
   "dependencies": {
     "@dr-core/labjs": "0.0.23",
-    "@dr-core/build-util": "0.1.5",
+    "@dr-core/build-util": "0.1.6",
     "@dr-core/assets-processer": "0.1.8",
-    "@dr-core/browserify-builder": "0.2.15",
+    "@dr-core/browserify-builder": "0.3.0",
     "@dr-core/browserify-builder-api": "0.1.4",
     "@dr/parcelify-module-resolver": "0.0.25",
     "@dr/template-builder": "0.0.16",

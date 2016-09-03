@@ -8,7 +8,7 @@ var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var uglify = require('gulp-uglify');
-var sourcemaps = require('gulp-sourcemaps');
+//var sourcemaps = require('gulp-sourcemaps');
 var size = require('gulp-size');
 var gulp = require('gulp');
 var gulpif = require('gulp-if');
@@ -52,6 +52,19 @@ module.exports = {
 	function(transforms) {
 		addonTransforms = addonTransforms.concat(transforms);
 	}
+};
+
+
+var log4jsToNpmLogLevel = {
+	OFF: 'error',
+	MARK: 'error',
+	FATAL: 'error',
+	ERROR: 'error',
+	WARN: 'warn',
+	INFO: 'info',
+	DEBUG: 'verbose',
+	TRACE: 'silly',
+	ALL: 'silly'
 };
 
 /**
@@ -240,7 +253,7 @@ function compile() {
 
 	function buildBundle(modules, bundle, destDir) {
 		var browserifyOpt = {
-			debug: true,
+			debug: config().enableSourceMaps,
 			paths: api.compileNodePath,
 			basedir: process.cwd(),
 			noParse: config().browserifyNoParse ? config().browserifyNoParse : []
@@ -557,7 +570,7 @@ function compile() {
 				style: fileName
 			},
 			appTransforms: appTransforms,
-			logLevel: api.config().devMode ? 'verbose' : 'info'
+			logLevel: log4jsToNpmLogLevel[log.level.levelStr]
 		});
 		return new Promise(function(resolve, reject) {
 			parce.on('done', function() {
@@ -616,12 +629,12 @@ function _createBrowserifyBundle(b, bundle, handleError) {
 		})
 		.pipe(source(bundleBasename + '.js'))
 		.pipe(buffer())
-		.pipe(gulpif(config().enableSourceMaps, sourcemaps.init({
-			loadMaps: true
-		})))
+		//.pipe(gulpif(config().enableSourceMaps, sourcemaps.init()))
 		.pipe(gulpif(!config().devMode, uglify()))
 		.pipe(gulpif(!config().devMode, rename(bundleBasename + '.min.js')))
-		.pipe(gulpif(config().enableSourceMaps, sourcemaps.write('./')))
+		//.pipe(gulpif(config().enableSourceMaps, sourcemaps.write('./sourcemaps', {
+			//sourceMappingURLPrefix: config().staticAssetsURL
+		//})))
 		.pipe(size({
 			showFiles: true,
 			gzip: true,

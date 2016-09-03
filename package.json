@@ -1,6 +1,6 @@
 {
   "name": "web-fun-house",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A company's web platform",
   "main": "lib/main.js",
   "bin": "bin/dr.js",
@@ -42,7 +42,6 @@
     "gulp-jshint": "^2.0.0",
     "gulp-rename": "^1.2.2",
     "gulp-size": "^2.0.0",
-    "gulp-sourcemaps": "^1.6.0",
     "gulp-uglify": "^1.5.1",
     "gulp-util": "^3.0.7",
     "html-browserify": "0.0.6",

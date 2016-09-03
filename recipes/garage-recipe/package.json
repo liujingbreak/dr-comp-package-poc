@@ -10,11 +10,11 @@
     "@dr/doc-home": "0.1.4",
     "@dr/doc-less-var": "0.0.23",
     "@dr/doc-ui": "0.0.23",
+    "@dr/handlebars-tmpl-builder": "1.0.0",
     "@dr/light-respond-js": "0.0.4",
     "@dr/markdown-viewer": "0.0.23",
     "@dr/readme": "0.0.28",
     "@dr/readme-docs": "0.1.13",
-    "@dr/text-anim-ng": "0.0.23",
-    "@dr/handlebars-tmpl-builder": "1.0.0"
+    "@dr/text-anim-ng": "0.0.23"
   }
 }
