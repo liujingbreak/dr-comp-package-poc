@@ -8,7 +8,8 @@
     "browserifyNoParse": [
       "./LAB.src.js"
     ],
-    "noLint": true
+    "noLint": true,
+	"noWatch": true
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

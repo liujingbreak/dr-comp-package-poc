@@ -16,7 +16,8 @@
       "./angular-1.4.5/angular-sanitize"
     ],
     "i18n": "angular-1.4.5/i18n/angular-locale_{locale}.js",
-    "noLint": true
+    "noLint": true,
+	"noWatch": true
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

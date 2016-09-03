@@ -31,7 +31,7 @@ function walkPackages(_config, _argv, _packageUtils, _compileNodePath, ignoreCac
 	packageUtils = _packageUtils;
 	compileNodePath = _compileNodePath;
 
-	packageInfoCacheFile = Path.join(config().rootPath, config().destDir, 'packageInfo.json');
+	packageInfoCacheFile = config.resolve('destDir', 'packageInfo.json');
 	var packageInfo;
 	if (!ignoreCache && (argv.p || argv.b) && fs.existsSync(packageInfoCacheFile)) {
 		log.info('Reading build info cache from ' + packageInfoCacheFile);

@@ -171,7 +171,7 @@ gulp.task('compile:dev', function(cb) {
 	.then(() => cb())
 	.catch( e => {
 		cb('Error ' + e.stack);
-		process.nextTick(()=> process.exit(1));
+		//process.nextTick(()=> process.exit(1));
 	});
 });
 

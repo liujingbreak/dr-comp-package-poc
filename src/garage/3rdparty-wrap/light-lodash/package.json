@@ -7,6 +7,7 @@
   "dr": {
     "bundle": "alt-lib",
     "type": "builder",
+	"noWatch": true,
     "builderPriority": "before @dr-core/browserify-builder"
   },
   "scripts": {

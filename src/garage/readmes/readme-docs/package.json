@@ -15,6 +15,7 @@
   "author": "LJ",
   "dr": {
     "type": "builder",
+	"noWatch": true,
     "builderPriority": "before @dr-core/browserify-builder"
   }
 }
