@@ -12,6 +12,8 @@
 	{% include "includedPage.html" %}
 	<br/>
 	{% include "npm://@dr/example-common/commonView.html"%}
+	{% set repeatRenderMsg = "Swig is dead" %}
+	{= __renderFile(toRenderFile) =}
 </body>
 
 </html>

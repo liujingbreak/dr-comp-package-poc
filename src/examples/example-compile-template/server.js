@@ -17,7 +17,9 @@ module.exports = {
 
 var locals = {
 	'index.html': {
-		message: 'This page file is compiled by @dr/template-builder during compilation time'
+		message: 'This page file is compiled by @dr/template-builder during compilation time',
+		toRenderFile: 'npm://@dr/example-partial/repeatablePartial.html',
+		repeatRenderMsg: 'swig is dead, shame'
 	},
 
 	'browser-render.html': {

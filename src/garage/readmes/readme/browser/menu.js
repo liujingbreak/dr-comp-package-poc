@@ -46,6 +46,12 @@ module.exports = function(goFunc) {
 				goFunc('api-spec-cn.md');
 			}
 		}, {
+			label: $translate('Server side template: Swig'),
+			flag: 'new',
+			action: function() {
+				goFunc('swig-template.md');
+			}
+		}, {
 			label: $translate('i18n'),
 			flag: '',
 			action: function() {

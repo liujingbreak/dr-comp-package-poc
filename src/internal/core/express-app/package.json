@@ -1,7 +1,7 @@
 {
   "name": "@dr-core/express-app",
   "description": "express app",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "main": "app.js",
   "dependencies": {
     "body-parser": "~1.13.2",
@@ -13,7 +13,7 @@
     "consolidate": "^0.13.1",
     "jade": "1.11.0",
     "compression": "^1.6.1",
-	"swig-package-tmpl-loader": "^1.0.4"
+	"swig-package-tmpl-loader": "^1.0.7"
   },
   "dr": {
     "type": [

@@ -1,6 +1,7 @@
 var through = require('through2');
 var swig = require('swig');
 var Path = require('path');
+var fs = require('fs');
 var _ = require('lodash');
 var defaultOptions = require('./defaultSwigOptions');
 var patchText = require('./patch-text.js');
@@ -8,11 +9,12 @@ var api = require('__api');
 var log = require('log4js').getLogger(api.packageName);
 var swigInjectLoader = require('swig-package-tmpl-loader');
 var parser = require('./template-parser').parser;
+var injector;
 
 require('@dr-core/browserify-builder').addTransform(transformFactory);
 module.exports = {
 	compile: function() {
-		var injector = require('__injector');
+		injector = require('__injector');
 		swigInjectLoader.swigSetup(swig, {injector: injector});
 		return null;
 	},
@@ -37,6 +39,12 @@ function transformFactory(file) {
 					swig);
 				if (!swigOptions)
 					swigOptions = {locals: {}};
+				if (!swigOptions.locals)
+					swigOptions.locals = {};
+				swigOptions.locals.__api = api;
+				swigOptions.locals.__renderFile = (targetFile) => {
+					return renderFile(targetFile, file, swigOptions);
+				};
 				return createTransform(_.assign({cache: false}, swigOptions), file);
 			}
 		}
@@ -77,6 +85,26 @@ function runPackage(browserPackage, file) {
 		}
 	}
 	return packageCache[browserPackage.longName];
+}
+
+var includeTemplCache = {};
+/**
+ * Unlike Swig include tag, this function accept file path as variable
+ */
+function renderFile(filePath, fromFile, swigOptions) {
+	if (filePath.startsWith('npm://')) {
+		filePath = swigInjectLoader.resolveTo(filePath, fromFile, injector);
+	}
+	if (!filePath) {
+		log.warn('Empty __renderFile() file path in %s', fromFile);
+		return;
+	}
+	var str = fs.readFileSync(Path.resolve(Path.dirname(fromFile), filePath), 'utf8');
+	var absFile = Path.resolve(fromFile);
+	var template = includeTemplCache[absFile];
+	if (!template)
+		template = swig.compile(str, {filename: Path.resolve(fromFile)}, {autoescape: false});
+	return template(swigOptions.locals);
 }
 
 /**
