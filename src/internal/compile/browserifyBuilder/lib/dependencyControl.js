@@ -364,7 +364,8 @@ function createEntryBundleDepGraph() {
 				} else {
 					log.debug(`dep: ${dep}, bundle: ${bundle}`);
 				}
-				depBundleSet[bundle] = true;
+				if (bundle)
+					depBundleSet[bundle] = true;
 			});
 			if (isSplitPoint) {
 				delete depBundleSet.core; // No need for duplicate core bundle

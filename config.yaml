@@ -114,7 +114,7 @@ installedRecipes:
 
 gulp:
     watchTimeout: 20000 # gulp watch on change which triggers `gulp compile` with a timeout check
-    watchDebounceDelay: 3800 # gulp watch change event will not trigger `gulp compile` within this duration
+    watchDebounceDelay: 800 # gulp watch change event will not trigger `gulp compile` within this duration
 
 # Following is a list of current configuration property names of which property
 # are visible to browser side environment, meaning those properties will be stringified

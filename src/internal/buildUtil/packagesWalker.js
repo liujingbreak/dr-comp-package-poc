@@ -88,22 +88,19 @@ function _walkPackages() {
 			// gutil.beep();
 		}
 		if (!pkJson.dr.builder || pkJson.dr.builder === 'browserify') {
-			if (config().bundlePerPackage === true && parsedName.name !== 'browserify-builder-api') {
-				bundle = pkJson.dr.bundle || pkJson.dr.chunk;
-				if (bundle)
-					bundle = parsedName.name;// force bundle name to be same as package name
+			if (_.has(vendorConfigInfo.moduleMap, name)) {
+				bundle = vendorConfigInfo.moduleMap[name].bundle;
+				//delete vendorConfigInfo.moduleMap[name];
+				log.debug('vendorBundleMap overrides bundle setting for ' + name);
 			} else {
-				if (_.has(vendorConfigInfo.moduleMap, name)) {
-					bundle = vendorConfigInfo.moduleMap[name].bundle;
-					//delete vendorConfigInfo.moduleMap[name];
-					log.debug('vendorBundleMap overrides bundle setting for ' + name);
-				} else {
-					bundle = pkJson.dr.bundle || pkJson.dr.chunk;
-					if (!bundle && ( pkJson.dr.entryPage || pkJson.dr.entryView)) {
-						// Entry package must belongs to a bundle
-						bundle = parsedName.name;
-					}
+				bundle = pkJson.dr.bundle || pkJson.dr.chunk;
+				if (!bundle && ( pkJson.dr.entryPage || pkJson.dr.entryView)) {
+					// Entry package must belongs to a bundle
+					bundle = parsedName.name;
 				}
+			}
+			if (bundle && config().bundlePerPackage === true && parsedName.name !== 'browserify-builder-api') {
+				bundle = parsedName.name;// force bundle name to be same as package name
 			}
 			if (pkJson.dr.entryPage) {
 				isEntryServerTemplate = false;
