@@ -3,6 +3,7 @@ var less = require('less');
 var LessPluginAutoPrefix = require('less-plugin-autoprefix');
 var NpmImportPlugin = require('less-plugin-npm-import');
 var api = require('__api');
+var _ = require('lodash');
 var log = require('log4js').getLogger(api.packageName);
 
 var resolveStaticUrl = require('@dr-core/browserify-builder-api').resolveUrl;
@@ -28,7 +29,7 @@ module.exports = function(file, options) {
 				new NpmImportPlugin()
 			]
 		};
-
+		buf = injectReplace(buf, file);
 		// Injects the path of the current file.
 		lessOptions.filename = file;
 		less.render(buf, lessOptions)
@@ -63,6 +64,25 @@ module.exports = function(file, options) {
 				return match;
 			}
 		});
+	}
+
+	var npmUrlPat = /npm:\/\/((?:@[^\/]+\/)?[^\/]+\/).*/;
+
+	function injectReplace(content, file) {
+		content.replace(/@import\s+["']([^'"]+)["']/g, (match, p1, offset, whole) => {
+			if (p1.startsWith('npm://')) {
+				var factoryMap = api.browserInjector.factoryMapForFile(file);
+				if (factoryMap) {
+					var ij = factoryMap.getInjector(npmUrlPat.exec(p1)[1]);
+					if (ij && _.has(ij, 'substitute')) {
+						log.debug(`Found less import target: ${p1}, replaced to ${ij.substitute}`);
+						return ij.substitute;
+					}
+				}
+			}
+			return p1;
+		});
+		return content;
 	}
 
 	function getErrorMessage(err) {

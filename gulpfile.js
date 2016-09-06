@@ -182,6 +182,10 @@ gulp.task('watch', function() {
  * TODO: bump dependencies version
  */
 gulp.task('bump', function(cb) {
+	if (argv.d) {
+		bumpDirs([].concat(argv.d));
+		return cb();
+	}
 	var srcDirs = [];
 	var recipes = [];
 	recipeManager.eachRecipeSrc(function(src, recipe) {
@@ -210,7 +214,8 @@ gulp.task('bump', function(cb) {
 				contents: new Buffer(fs.readFileSync(packageJsonPath, 'utf8'))
 			}));
 			next();
-		})).pipe(through.obj(function(file, enc, next) {
+		}))
+		.pipe(through.obj(function(file, enc, next) {
 			file.base = config().rootPath;
 			gutil.log('bump: ' + file.path);
 			next(null, file);
@@ -392,6 +397,26 @@ gulp.task('ls', ['link'], function(callback) {
 	})()
 	.catch(e => callback(e));
 });
+
+function bumpDirs(dirs) {
+	var stream = gulp.src('')
+	.pipe(through.obj(function(file, enc, next) {next();},
+		function(next) {
+			for (var d of dirs) {
+				gutil.log(d);
+				var packageJsonPath = Path.resolve(d, 'package.json');
+				this.push(new File({
+					base: Path.resolve(),
+					path: packageJsonPath,
+					contents: new Buffer(fs.readFileSync(packageJsonPath, 'utf8'))
+				}));
+				next();
+			}
+		}))
+	.pipe(bumpVersion())
+	.pipe(gulp.dest(Path.resolve()));
+	return stream;
+}
 
 function bumpVersion() {
 	var type = 'patch';

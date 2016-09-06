@@ -1,6 +1,6 @@
 {
   "name": "web-fun-house",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "A company's web platform",
   "main": "lib/main.js",
   "bin": "bin/dr.js",
@@ -58,7 +58,7 @@
     "require-injector": "^0.4.5",
     "resolve": "^1.1.7",
     "run-sequence": "^1.1.5",
-    "semver": "^5.1.0",
+    "semver": "^5.3.0",
     "shelljs": "^0.7.0",
     "shelljs-nodecli": "^0.1.1",
     "swig": "^1.4.2",

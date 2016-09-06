@@ -80,6 +80,7 @@ function initInjector(packageInfo) {
 	});
 	injector.fromAllPackages().value('__api', {replacement: '__api'});
 	injector.readInjectFile('browserify-inject.js');
+	Object.getPrototypeOf(api).browserInjector = injector;
 }
 
 function compile() {
