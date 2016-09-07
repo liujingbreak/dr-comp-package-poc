@@ -19,7 +19,7 @@ module.exports = {
 		app = express();
 		setupApi(api, app);
 		api.eventBus.on('packagesActivated', function(packageCache) {
-			process.nextTick(()=> {
+			process.nextTick(() => {
 				create(app, api.config(), packageCache);
 				api.eventBus.emit('appCreated', app);
 			});
@@ -37,7 +37,7 @@ Object.defineProperties(module.exports, {
 	app: {
 		enumerable: true,
 		set: expressApp => app = expressApp,
-		get: ()=> app
+		get: () => app
 	}
 });
 
@@ -48,7 +48,9 @@ function create(app, setting, packageCache) {
 		cache: setting.devMode ? false : 'memory'
 	});
 	var injector = require('__injector');
-	swigInjectLoader.swigSetup(swig, {injector: injector});
+	swigInjectLoader.swigSetup(swig, {
+		injector: injector
+	});
 
 	app.engine('html', engines.swig);
 	app.engine('jade', engines.jade);
@@ -56,12 +58,14 @@ function create(app, setting, packageCache) {
 	app.set('views', [path.join(__dirname, 'views'), setting.rootPath]);
 	app.set('view engine', 'html');
 	app.set('x-powered-by', false);
-	app.set('env', api.config().devMode ? 'development' : 'production' );
+	app.set('env', api.config().devMode ? 'development' : 'production');
 	setupApi.applyPackageDefinedAppSetting(app);
 	// uncomment after placing your favicon in /public
 	//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 	//app.use(logger('dev'));
-	app.use(log4js.connectLogger(log, {level: log4js.levels.INFO}));
+	app.use(log4js.connectLogger(log, {
+		level: log4js.levels.INFO
+	}));
 	app.use(bodyParser.json({
 		limit: '50mb'
 	}));

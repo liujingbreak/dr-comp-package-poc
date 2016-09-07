@@ -134,3 +134,17 @@ browserSideConfigProp:
 e2etestHelper:
     selenium:
         driverPath: 'node_modules/@dr/chrome-driver/linux64'
+
+
+# To enable HTTP access control (CORS), you may set `enableCORS` to `true` or
+# a white list for allowed origins
+#
+# enableCORS: false
+# Or
+# enableCORS:
+#   - http://www.example.com
+#   - http://other-allowed-origin.com
+# Also call
+#   api.router().use('/api', api.cors());
+# in server javascript
+express-app-enableCORS: false

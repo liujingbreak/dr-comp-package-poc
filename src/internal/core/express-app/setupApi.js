@@ -81,7 +81,6 @@ function setupApi(api, app) {
 			// If an error encountered in previous middlewares, we still need to cleanup render method
 			app.use(contextPath, function(err, req, res, next) {
 				delete res.render;
-				log.error(err);
 				next(err);
 			});
 		}
@@ -141,6 +140,30 @@ function setupApi(api, app) {
  	 * 	});
 	 */
 	apiPrototype.expressAppSet = (callback) => appSets.push(callback);
+
+	/**
+	 * e.g.
+	 * 	api.router().options('/api', api.cors());
+	 * 	api.router().get('/api', api.cors());
+	 * Or
+	 *  api.router().use('/api', api.cors());
+	 */
+	apiPrototype.cors = function() {
+		var setting = api.config();
+		var corsOpt = _.get(setting, api.packageShortName + '-enableCORS') || _.get(setting, 'enableCORS');
+		var cors = require('cors');
+		var whiteOriginSet = {};
+		if (_.isArray(corsOpt)) {
+			corsOpt.forEach(domain => whiteOriginSet[domain] = true);
+		}
+		var corsOptions = {
+			origin: function(origin, callback) {
+				var pass = corsOpt === true || _.has(whiteOriginSet, origin);
+				callback(pass ? null : {status: 400, message: 'Bad Request (CORS) for origin: ' + origin}, pass);
+			}
+		};
+		return cors(corsOptions);
+	};
 }
 
 function revertRenderFunction(req, res, next) {
