@@ -82,6 +82,7 @@ var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
  */
 PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageType, through) {
 	var compiler = this;
+	this.currentFile = page;
 	var pathInfo = resolvePagePath(page, instance, buildInfo.packageInfo.moduleMap);
 
 	return readFileAsync(pathInfo.abs, 'utf-8')
@@ -192,10 +193,15 @@ PageCompiler.prototype.injectElements = function($, bundleSet, pkInstance, confi
 	delete bundleSet.labjs; // make sure there is no duplicate labjs bundle
 
 	var loadingData = this.buildInfo.getBundleMetadataForEntry(pkInstance.longName);
+	var self = this;
 	_.forOwn(bundleSet, function(v, bundleName) {
 		var bundleCss = createCssLinkElement($, bundleName, config, revisionMeta);
 		if (bundleCss) {
 			cssPrinterDiv.append(bundleCss);
+			if (head.length === 0)
+				log.warn(`Invalid Entry HTML page :${pkInstance.longName} ${self.currentFile},
+					missing HEAD element, CSS bundle can not be inserted automatically.
+					You will need to insert CSS links yourself`);
 			head.append(bundleCss.clone());
 		}
 	});
