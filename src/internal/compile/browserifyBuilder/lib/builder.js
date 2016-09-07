@@ -159,7 +159,6 @@ function compile() {
 		return depCtl.tailDown();
 	})()
 	.catch( err => {
-		log.error(err);
 		gutil.beep();
 		throw new Error(err);
 		//process.exit(1);
@@ -623,7 +622,7 @@ function _createBrowserifyBundle(b, bundle, handleError) {
 	var bundleBasename = 'js/' + bundle;
 	var out = b.bundle()
 		.on('error', (er) => {
-			log.error('browserify bundle() for bundle "' + bundle + '" failed', er);
+			log.error('browserify bundle() for bundle "' + bundle + '" failed');
 			gutil.beep();
 			out.end();
 			handleError(er);
@@ -642,7 +641,7 @@ function _createBrowserifyBundle(b, bundle, handleError) {
 			showTotal: false
 		}))
 		.on('error', (er) => {
-			log.error('browserify bundle() sourcemaps failed', er);
+			log.error('browserify bundle() sourcemaps failed');
 			out.end();
 			handleError(er);
 		});
