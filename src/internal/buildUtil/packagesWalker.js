@@ -203,21 +203,21 @@ function vendorBundleMapConfig() {
 			var mainFile;
 			try {
 				mainFile = bResolve.sync(moduleName, {paths: compileNodePath});
+				var instance = packageBrowserInstance(config(), {
+					isVendor: true,
+					bundle: bundle,
+					longName: moduleName,
+					shortName: moduleName,
+					file: mainFile
+				});
+				info.allModules.push(instance);
+				info.moduleMap[moduleName] = instance;
+				modules[moduleName] = instance;
 			} catch (err) {
 				log.warn('This might be a problem:\n' +
 				' browser-resolve can\'t resolve on vendor bundle package: ' + chalk.red(moduleName) +
 				', remove it from ' + chalk.yellow('vendorBundleMap') + ' of config.yaml or `npm install it`');
 			}
-			var instance = packageBrowserInstance(config(), {
-				isVendor: true,
-				bundle: bundle,
-				longName: moduleName,
-				shortName: moduleName,
-				file: mainFile
-			});
-			info.allModules.push(instance);
-			info.moduleMap[moduleName] = instance;
-			modules[moduleName] = instance;
 		});
 		map[bundle] = modules;
 	});

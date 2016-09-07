@@ -1,10 +1,10 @@
 {
   "name": "@dr/internal-recipe",
-  "version": "0.0.65",
+  "version": "0.0.66",
   "description": "Recipe package of package-recipe",
   "dependencies": {
     "@dr-core/labjs": "0.0.23",
-    "@dr-core/build-util": "0.1.8",
+    "@dr-core/build-util": "0.1.9",
     "@dr-core/assets-processer": "0.1.8",
     "@dr-core/browserify-builder": "0.3.2",
     "@dr-core/browserify-builder-api": "0.1.4",
