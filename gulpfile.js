@@ -410,8 +410,8 @@ function bumpDirs(dirs) {
 					path: packageJsonPath,
 					contents: new Buffer(fs.readFileSync(packageJsonPath, 'utf8'))
 				}));
-				next();
 			}
+			next();
 		}))
 	.pipe(bumpVersion())
 	.pipe(gulp.dest(Path.resolve()));

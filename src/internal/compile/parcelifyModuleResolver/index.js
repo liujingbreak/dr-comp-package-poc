@@ -8,6 +8,9 @@ var log = require('log4js').getLogger(api.packageName);
 
 var resolveStaticUrl = require('@dr-core/browserify-builder-api').resolveUrl;
 
+var packagePathPat = /assets:\/\/((?:@[^\/]+\/)?[^\/]+)?(\/.*)/;
+var npmUrlPat = /npm:\/\/((?:@[^\/]+\/)?[^\/]+\/).*/;
+
 module.exports = function(file, options) {
 	var buf = '';
 	var currPackage;
@@ -34,56 +37,13 @@ module.exports = function(file, options) {
 		lessOptions.filename = file;
 		less.render(buf, lessOptions)
 		.then(function(output) {
-			self.push(replaceUrl(output.css));
+			self.push(replaceUrl(output.css, currPackage, file));
 			self.push(null);
 		}, function(err) {
 			log.error('parcelifyModuleResolver, error in parsing less ' + err.stack);
 			self.emit('error', new Error(getErrorMessage(err), file, err.line));
 		});
 	};
-
-
-	function replaceUrl(css) {
-		return css.replace(/(\W)url\(['"]?\s*assets:\/\/((?:@[^\/]+\/)?[^\/]+)?(\/.*?)['"]?\s*\)/g,
-		function(match, preChar, packageName, path) {
-			if (!packageName || packageName === '') {
-				if (!currPackage) {
-					currPackage = api.findBrowserPackageByPath(file);
-				}
-				packageName = currPackage;
-			}
-			if (packageName) {
-				log.info('resolve assets: ' + match.substring(1));
-			}
-			try {
-				var resolvedTo = preChar + 'url(' + resolveStaticUrl(api.config, packageName, path) + ')';
-				log.debug('-> ' + resolvedTo);
-				return resolvedTo;
-			} catch (e) {
-				log.error(e);
-				return match;
-			}
-		});
-	}
-
-	var npmUrlPat = /npm:\/\/((?:@[^\/]+\/)?[^\/]+\/).*/;
-
-	function injectReplace(content, file) {
-		content.replace(/@import\s+["']([^'"]+)["']/g, (match, p1, offset, whole) => {
-			if (p1.startsWith('npm://')) {
-				var factoryMap = api.browserInjector.factoryMapForFile(file);
-				if (factoryMap) {
-					var ij = factoryMap.getInjector(npmUrlPat.exec(p1)[1]);
-					if (ij && _.has(ij, 'substitute')) {
-						log.debug(`Found less import target: ${p1}, replaced to ${ij.substitute}`);
-						return ij.substitute;
-					}
-				}
-			}
-			return p1;
-		});
-		return content;
-	}
 
 	function getErrorMessage(err) {
 		var msg = err.message;
@@ -103,3 +63,65 @@ module.exports = function(file, options) {
 	}
 	return through(transform, flush);
 };
+
+function replaceUrl(css, currPackage, file) {
+	return css.replace(/(\W)url\(\s*['"]?\s*([^'"]*)['"]?\s*\)/g,
+	function(match, preChar, url) {
+		var assetsUrlMatch = packagePathPat.exec(url);
+		if (assetsUrlMatch) {
+			var packageName = assetsUrlMatch[1];
+			var path = assetsUrlMatch[2];
+			if (!packageName || packageName === '') {
+				if (!currPackage) {
+					currPackage = api.findBrowserPackageByPath(file);
+				}
+				packageName = currPackage;
+			}
+			if (packageName) {
+				log.info('resolve assets: ' + match.substring(1));
+			}
+			try {
+				var injectedPackageName = getInjectedPackage(packageName, file);
+				var resolvedTo = preChar + 'url(' + resolveStaticUrl(api.config, injectedPackageName ? injectedPackageName : packageName, path) + ')';
+				log.info('-> ' + resolvedTo);
+				return resolvedTo;
+			} catch (e) {
+				log.error(e);
+				return match;
+			}
+		} else if (!url.startsWith('http://') &&
+			!url.startsWith('https://') &&
+			!url.startsWith('//') &&
+			!url.startsWith('data:')){
+			log.error(`Problematic assets URL format:${url} in file ${file}, \nshould start with "assets://<package-name>", "//", "http://", "https://", "data:"`);
+			return match;
+		} else
+			return match;
+	});
+}
+
+function injectReplace(content, file) {
+	content.replace(/@import\s+["']([^'"]+)["']/g, (match, p1, offset, whole) => {
+		if (p1.startsWith('npm://')) {
+			var newPackage = getInjectedPackage(file, npmUrlPat.exec(p1)[1]);
+			if (newPackage) {
+				log.info(`Found less import target: ${p1}, replaced to ${newPackage}`);
+				return newPackage;
+			}
+		}
+		return p1;
+	});
+	return content;
+}
+
+function getInjectedPackage(file, origPackageName) {
+	var factoryMap = api.browserInjector.factoryMapForFile(file);
+	if (factoryMap) {
+		var ij = factoryMap.getInjector(origPackageName);
+		if (ij && _.has(ij, 'substitute')) {
+			//log.debug(`Found less import target: ${origPackageName}, replaced to ${ij.substitute}`);
+			return ij.substitute;
+		}
+	}
+	return null;
+}

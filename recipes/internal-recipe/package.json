@@ -1,18 +1,18 @@
 {
   "name": "@dr/internal-recipe",
-  "version": "0.0.70",
+  "version": "0.0.73",
   "description": "Recipe package of package-recipe",
   "dependencies": {
-    "@dr-core/labjs": "0.0.24",
-    "@dr-core/build-util": "0.1.10",
-    "@dr-core/assets-processer": "0.1.9",
-    "@dr-core/browserify-builder": "0.3.4",
-    "@dr-core/browserify-builder-api": "0.1.5",
-    "@dr/parcelify-module-resolver": "0.0.28",
-    "@dr/template-builder": "0.0.18",
+    "@dr-core/labjs": "0.0.23",
+    "@dr-core/build-util": "0.1.9",
+    "@dr-core/assets-processer": "0.1.8",
+    "@dr-core/browserify-builder": "0.3.3",
+    "@dr-core/browserify-builder-api": "0.1.4",
+    "@dr/parcelify-module-resolver": "0.0.29",
+    "@dr/template-builder": "0.0.17",
     "@dr-core/express-app": "0.2.8",
-    "@dr/http-server": "0.0.10",
-    "@dr/logger": "0.0.27",
-    "@dr/translate-generator": "0.0.10"
+    "@dr/http-server": "0.0.9",
+    "@dr/logger": "0.0.26",
+    "@dr/translate-generator": "0.0.9"
   }
 }
