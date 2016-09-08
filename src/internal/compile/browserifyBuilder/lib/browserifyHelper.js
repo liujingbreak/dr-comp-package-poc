@@ -6,8 +6,8 @@ var log = require('@dr/logger').getLogger(__api.packageName + '.browserifyHelper
 var swig = require('swig');
 var fs = require('fs');
 var esParser = require('./esParser');
-var assetsProcesser = require('@dr-core/assets-processer');
 var _ = require('lodash');
+var api = require('__api');
 swig.setDefaults({autoescape: false});
 var config, injector;
 
@@ -44,7 +44,7 @@ function JsBundleEntryMaker(api, bundleName, packageBrowserInstances,
 		return new JsBundleEntryMaker(api, bundleName, packageBrowserInstances,
 			packageSplitPointMap);
 	}
-	this.api = api;
+	this.api = api; // same as require('__api');
 	this.packages = packageBrowserInstances;
 	this.bundleName = bundleName;
 	this.bundleFileName = bundleName + '_bundle_entry.js';
@@ -101,14 +101,8 @@ JsBundleEntryMaker.prototype = {
 					source += chunk;
 					next();
 				}, function(cb) {
-					var currPackage;
 					try {
-						source = assetsProcesser.replaceAssetsUrl(source, ()=> {
-							if (!currPackage) {
-								currPackage = self.api.findBrowserPackageByPath(file);
-							}
-							return currPackage;
-						});
+						source = api.replaceAssetsUrl(source, file);
 						this.push(source);
 					} catch (e) {
 						this.emit('error', e);

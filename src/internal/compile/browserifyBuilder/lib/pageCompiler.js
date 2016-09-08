@@ -11,7 +11,6 @@ var swig = require('swig');
 var api = require('__api');
 var log = require('@dr/logger').getLogger(api.packageName + '.pageCompiller');
 var packageUtils = api.packageUtils;
-var assetsProcesser = require('@dr-core/assets-processer');
 
 module.exports = PageCompiler;
 /**
@@ -92,9 +91,7 @@ PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageTyp
 		compiler.injectElements($, buildInfo.bundleDepsGraph[instance.longName], instance,
 			buildInfo.config, buildInfo.revisionMeta, buildInfo.entryDataProvider, pathInfo);
 		var hackedHtml = $.html();
-		hackedHtml = assetsProcesser.replaceAssetsUrl(hackedHtml, ()=> {
-			return pathInfo.packageName;
-		});
+		hackedHtml = api.replaceAssetsUrl(hackedHtml, pathInfo.abs);
 
 		var pagePath;
 		var mappedTo = _.get(api.config(), ['entryPageMapping', instance.shortName]) || _.get(api.config(), ['entryPageMapping', instance.longName]);
@@ -198,10 +195,11 @@ PageCompiler.prototype.injectElements = function($, bundleSet, pkInstance, confi
 		var bundleCss = createCssLinkElement($, bundleName, config, revisionMeta);
 		if (bundleCss) {
 			cssPrinterDiv.append(bundleCss);
-			if (head.length === 0)
-				log.warn(`Invalid Entry HTML page :${pkInstance.longName} ${self.currentFile},
+			if (head.length === 0) {
+				log.warn(`Invalid Entry HTML page: ${pkInstance.longName}/${self.currentFile},
 					missing HEAD element, CSS bundle can not be inserted automatically.
-					You will need to insert CSS links yourself`);
+					You will need to insert CSS links by yourself`);
+			}
 			head.append(bundleCss.clone());
 		}
 	});

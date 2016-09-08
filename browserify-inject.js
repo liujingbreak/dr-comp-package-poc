@@ -26,4 +26,6 @@ module.exports = function(injector) {
 	 */
 	// Use light-lodash instead of lodash will only reduce around 7kb of gzipped bundle size
 	// injector.notFromPackages('lodash').substitute('lodash', '@dr/light-lodash');
+	if (process.cwd() === __dirname)
+		injector.fromPackage('@dr/example-browserify').substitute('__self', '@dr/example-browserify');
 };

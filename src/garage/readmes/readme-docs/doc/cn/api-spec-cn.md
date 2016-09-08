@@ -85,6 +85,7 @@ console.log(__api.assetsUrl('some-picture.jpg'));
 | .buildUtils | lib/gulp.buildUtils.js
 | .packageInfo | monkey patched by `@dr-core/browserify-builder`
 | .findBrowserPackageByPath(filePath) | monkey patched by `@dr-core/browserify-builder`, 返回package source code对应的package name
+| `replaceAssetsUrl(str, sourceFile)` | Replace all text `assets://...` to exact URL string, `str` is the text content, `sourceFile` is absolute file path of that text content, replacement involves setting from "browser-injector.js", so you must provide `sourceFile` path as parameter. Return replaced content.
 | .**loadLocaleBundles(locale, callback)** | 利用LABjs 预先load locale bundle, locale值是 'zh', 'en', 'en-us'等language country code, callback内执行加载完后的逻辑
 | `entryPageUrl(packageName, relativePagePath)` | 返回指定package的某个entryPage URL
 

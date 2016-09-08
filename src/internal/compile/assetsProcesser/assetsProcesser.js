@@ -9,7 +9,6 @@ var mkdirp = require('mkdirp');
 var api = require('__api');
 var log = require('log4js').getLogger(api.packageName);
 var serverFavicon = require('serve-favicon');
-var resolveStaticUrl = require('@dr-core/browserify-builder-api').resolveUrl;
 var buildUtils = api.buildUtils;
 
 var packageUtils = api.packageUtils;
@@ -17,8 +16,7 @@ var config = api.config;
 
 module.exports = {
 	compile: compile,
-	activate: activate,
-	replaceAssetsUrl: replaceAssetsUrl
+	activate: activate
 };
 
 function compile(api) {
@@ -148,21 +146,6 @@ function copyAssets() {
 		log.debug('flush');
 		buildUtils.writeTimestamp('assets');
 	});
-}
-
-function replaceAssetsUrl(str, getCurrPackage) {
-	return str.replace(/([^a-zA-Z\d_.]|^)assets:\/\/((?:@[^\/]+\/)?[^\/]+)?(\/.*?)(['"),;:!\s]|$)/gm,
-		(match, leading, packageName, path, tail) => {
-			if (!packageName || packageName === '') {
-				packageName = getCurrPackage();
-			}
-			if (packageName) {
-				log.info('resolve assets to ' + packageName);
-			}
-			var resolvedTo = leading + resolveStaticUrl(api.config, packageName, path) + tail;
-			log.debug('-> ' + resolvedTo);
-			return resolvedTo;
-		});
 }
 
 function setCORSHeader(res) {

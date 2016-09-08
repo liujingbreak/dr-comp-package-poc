@@ -69,6 +69,7 @@ module.exports = {
 | `.bundleDepsGraph` | object<{string} entryPackageName, object<{string} locale, object<{string}> dependencyBundleName, boolean>>, A relationship map of `entry package` -> `locale` -> `dependency bundles` structure
 | `.findBrowserPackageByPath(filePath)` | returns package name, it tells you which package a file belongs to
 | `packageNames2bundles(packageNames)` | parameter `packageNames` is an array of package names, it returns corresponding bundle name that packages are belong to
+| `replaceAssetsUrl(str, sourceFile)` | Replace all text `assets://...` to exact URL string, `str` is the text content, `sourceFile` is absolute file path of that text content, replacement involves setting from "browser-injector.js", so you must provide `sourceFile` path as parameter. Return replaced content.
 
 **PackageInfo type**:
 

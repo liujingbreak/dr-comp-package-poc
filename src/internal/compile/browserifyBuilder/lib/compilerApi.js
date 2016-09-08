@@ -3,12 +3,14 @@ var _ = require('lodash');
 var api = require('__api');
 var log = require('log4js').getLogger(api.packageName + '.compilerApi');
 var chalk = require('chalk');
+var resolveStaticUrl = require('@dr-core/browserify-builder-api').resolveUrl;
 
 module.exports = function() {
 	var proto = Object.getPrototypeOf(api);
 	proto.findBrowserPackageByPath = findBrowserPackageByPath;
 	proto.findBrowserPackageInstanceByPath = findBrowserPackageInstanceByPath;
 	proto.packageNames2bundles = packageNames2bundles;
+	proto.replaceAssetsUrl = replaceAssetsUrl;
 	initPackageListInfo(proto);
 };
 
@@ -52,6 +54,40 @@ function findBrowserPackageInstanceByPath(file) {
 	} else {
 		return this._packagePath2Name[this._packagePathList[idx - 1]];
 	}
+}
+
+function replaceAssetsUrl(str, sourceFile) {
+	var self = this;
+	return str.replace(/([^a-zA-Z\d_.]|^)assets:\/\/((?:@[^\/]+\/)?[^\/]+)?(\/.*?)(['"),;:!\s]|$)/gm,
+		(match, leading, packageName, path, tail) => {
+			if (!packageName || packageName === '') {
+				packageName = self.findBrowserPackageByPath(sourceFile);
+			}
+			if (packageName) {
+				if (sourceFile) {
+					var injectedName = getInjectedPackage(sourceFile, packageName);
+					if (injectedName) {
+						log.info(`replace assets package ${packageName} to injected ${injectedName}`);
+						packageName = injectedName;
+					}
+				}
+			}
+			var resolvedUrl = resolveStaticUrl(api.config, packageName, path);
+			log.info('In file: %s\nresolve assets URL "%s" to "%s"', sourceFile, packageName + path, resolvedUrl);
+			return leading + resolvedUrl + tail;
+		});
+}
+
+function getInjectedPackage(file, origPackageName) {
+	var factoryMap = api.browserInjector.factoryMapForFile(file);
+	if (factoryMap) {
+		var ij = factoryMap.getInjector(origPackageName);
+		if (ij && _.has(ij, 'substitute')) {
+			//log.debug(`Found less import target: ${origPackageName}, replaced to ${ij.substitute}`);
+			return ij.substitute;
+		}
+	}
+	return null;
 }
 
 function packageNames2bundles(packageNames) {
