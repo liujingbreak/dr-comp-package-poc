@@ -54,7 +54,7 @@ function create(app, setting, packageCache) {
 
 	app.engine('html', engines.swig);
 	app.engine('jade', engines.jade);
-
+	app.set('trust proxy', true);
 	app.set('views', [path.join(__dirname, 'views'), setting.rootPath]);
 	app.set('view engine', 'html');
 	app.set('x-powered-by', false);

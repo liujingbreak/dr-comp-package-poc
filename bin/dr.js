@@ -97,8 +97,6 @@ function init(noExample) {
 		shell.cp('-f', Path.resolve(__dirname, 'inject-template.js'), argv.d + '/browserify-inject.js');
 		console.info('browserify-inject.js is created');
 	}
-	// Only for 0.5.1
-	shell.rm('-rf', Path.resolve(__dirname, 'node_modules/@dr/template-builder', 'node_modules/@dr-core/express-app'));
 
 	// to solve npm 2.0 nested node_modules folder issue
 	Promise.coroutine(function*() {
