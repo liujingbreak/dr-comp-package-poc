@@ -36,6 +36,8 @@ exports.onCompileTemplate = function(relativeHtmlFilePath, swig) {
 	var locals = getLocalVariablesForFile(relativeHtmlFilePath);
 	return locals ? { locals: locals } : null;
 	// return null has same effect as returning {locals: {}}
+	// or a promise
+	return Promise.resolve({locals: locals});
 };
 ```
 Exports object contains a function type property `onCompileTemplate` as compiling handler.

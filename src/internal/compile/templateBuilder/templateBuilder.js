@@ -34,41 +34,45 @@ function transformFactory(file) {
 			var packageExports = runPackage(browserPackage, file);
 			if (packageExports && _.isFunction(packageExports.onCompileTemplate)) {
 				log.debug('is template: ', file);
-				var swigOptions = packageExports.onCompileTemplate(
+				var swigOptionsProm = Promise.resolve(packageExports.onCompileTemplate(
 					Path.relative(browserPackage.packagePath, file).replace(/\\/g, '/'),
-					swig);
-				if (!swigOptions)
-					swigOptions = {locals: {}};
-				if (!swigOptions.locals)
-					swigOptions.locals = {};
-				swigOptions.locals.__api = api;
-				swigOptions.locals.__renderFile = (targetFile) => {
-					return renderFile(targetFile, file, swigOptions);
-				};
-				return createTransform(_.assign({cache: false}, swigOptions), file);
+					swig))
+				.then(swigOptions => {
+					if (!swigOptions)
+						swigOptions = {locals: {}};
+					if (!swigOptions.locals)
+						swigOptions.locals = {};
+					swigOptions.locals.__api = api;
+					swigOptions.locals.__renderFile = (targetFile) => {
+						return renderFile(targetFile, file, swigOptions);
+					};
+					return swigOptions;
+				});
+				return createTransform(swigOptionsProm, file);
 			}
 		}
 	}
 	return through();
 }
 
-function createTransform(swigOptions, absFile) {
+function createTransform(swigOptionsProm, absFile) {
 	var str = '';
 	return through(function(chunk, enc, next) {
 		str += chunk.toString();
 		next();
 	}, function(next) {
-		var opt = _.assign(_.clone(defaultOptions), swigOptions);
-		swig.setDefaults(opt);
-		try {
-			var compiled = swig.render(str, {filename: absFile});
-			//log.debug(compiled);
-			this.push(compiled);
-		} catch (e) {
-			log.error('failed to compile %s:\n%s', absFile, str);
-			this.emit('error', e);
-		}
-		next();
+		swigOptionsProm.then(swigOptions => {
+			var opt = _.assign(_.clone(defaultOptions), {cache: false}, swigOptions);
+			swig.setDefaults(opt);
+			try {
+				var compiled = swig.render(str, {filename: absFile});
+				this.push(compiled);
+			} catch (e) {
+				log.error('failed to compile %s:\n%s', absFile, str);
+				this.emit('error', e);
+			}
+			next();
+		});
 	});
 }
 

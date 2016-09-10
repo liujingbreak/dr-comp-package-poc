@@ -1,6 +1,6 @@
 {
   "name": "@dr/template-builder",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "A swig based template transform and builder",
   "main": "templateBuilder.js",
   "dr": {
@@ -9,7 +9,7 @@
     "builderPriority": "before @dr-core/browserify-builder"
   },
   "dependencies": {
-	"swig-package-tmpl-loader": "^1.0.7"
+    "swig-package-tmpl-loader": "^1.0.7"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -86,7 +86,9 @@ PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageTyp
 
 	return readFileAsync(pathInfo.abs, 'utf-8')
 	.then(function(content) {
-		content = compiler.transform(pathInfo.abs, content);
+		return compiler.transform(pathInfo.abs, content);
+	})
+	.then(content => {
 		var $ = cheerio.load(content);
 		compiler.injectElements($, buildInfo.bundleDepsGraph[instance.longName], instance,
 			buildInfo.config, buildInfo.revisionMeta, buildInfo.entryDataProvider, pathInfo);
@@ -118,19 +120,43 @@ PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageTyp
 				contents: new Buffer(hackedHtml)
 			}));
 		}
+		return null;
 	});
 };
 
 PageCompiler.prototype.transform = function(filePath, content) {
+	var self = this;
 	if (Array.isArray(this.addonTransforms) && this.addonTransforms.length > 0) {
-		this.addonTransforms.forEach(transform => {
-			var thr = transform(filePath);
-			thr.write(content);
-			thr.end();
-			content = thr.read().toString();
+		var streams = self.addonTransforms.map(factory => factory(filePath));
+		var last = streams.reduce((prev, t) => {
+			return prev.pipe(t);
 		});
+
+		var newContent = '';
+		return new Promise(resolve => {
+			streams[0].end(content);
+			last.on('data', data => newContent += data)
+			.on('end', () => resolve(newContent.toString()));
+		});
+
+		// var p = Promise.resolve(content);
+		// self.addonTransforms.forEach(transform => {
+		// 	p = p.then(content => {
+		// 		return new Promise((resolve) => {
+		// 			var newContent = '';
+		// 			var thr = transform(filePath).setEncoding('utf8');
+		// 			thr.write(content);
+		// 			thr.end();
+		// 			thr.on('data', (data) => {
+		// 				newContent += data;
+		// 			})
+		// 			.on('end', () => resolve(newContent));
+		// 		});
+		// 	});
+		// });
+		// return p;
 	}
-	return content;
+	return Promise.resolve(content);
 };
 
 var npmPat = /npm:\/\/((?:@[^\/]+\/)?[^\/]+)\/(.*?$)/;

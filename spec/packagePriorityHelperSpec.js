@@ -42,9 +42,8 @@ describe('packagePriorityHelper', function() {
 			expect(packageIndexMap.C).toBeLessThan(packageIndexMap.D);
 			expect(packageIndexMap.B).toBeLessThan(packageIndexMap.D);
 			done();
-		}).catch(e => {
-			done.fail(e);
-		});
+			return null;
+		}).catch(e => done.fail(e));
 	});
 
 	it('should work 2', function(done) {
@@ -80,10 +79,9 @@ describe('packagePriorityHelper', function() {
 			expect(run.calls.argsFor(3)[0].longName).toEqual('A');
 			expect(run.calls.argsFor(4)[0].longName).toEqual('E');
 			done();
+			return null;
 		})
-		.catch(e => {
-			done.fail(e);
-		});
+		.catch(e => done.fail(e));
 	});
 
 	it('should throw error if before or after package does not exist', (done)=> {
@@ -111,6 +109,7 @@ describe('packagePriorityHelper', function() {
 		.catch(e => {
 			console.log(e);
 			done();
+			return new Error(e);
 		});
 	});
 
@@ -149,6 +148,7 @@ describe('packagePriorityHelper', function() {
 		.catch(e => {
 			console.log(e);
 			done();
+			return new Error(e);
 		});
 	});
 
@@ -187,6 +187,7 @@ describe('packagePriorityHelper', function() {
 		.catch(e => {
 			console.log(e);
 			done();
+			return new Error(e);
 		});
 	});
 });

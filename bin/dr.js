@@ -110,7 +110,7 @@ function init(noExample) {
 	})()
 	.catch((err) => {
 		if (err) {
-			console.error(chalk.red(output));
+			console.error(chalk.red(err));
 		} else
 			console.error(chalk.red('Failed to execute: node_modules/.bin/gulp install-recipe'));
 	});
