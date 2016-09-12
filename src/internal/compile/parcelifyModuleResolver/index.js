@@ -65,7 +65,7 @@ module.exports = function(file, options) {
 };
 
 function replaceUrl(css, currPackage, file) {
-	return css.replace(/(\W)url\(\s*['"]?\s*([^'"]*)['"]?\s*\)/g,
+	return css.replace(/(\W)url\(\s*['"]?\s*([^'"\)]*)['"]?\s*\)/g,
 	function(match, preChar, url) {
 		var assetsUrlMatch = packagePathPat.exec(url);
 		if (assetsUrlMatch) {
