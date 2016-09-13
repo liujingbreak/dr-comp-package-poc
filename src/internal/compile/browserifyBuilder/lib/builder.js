@@ -394,13 +394,19 @@ function compile() {
 
 	function monkeyPatchBrowserApi(browserApi, entryPackage, revisionMeta) {
 		// setup server side config setting to browser
-		browserApi._config = {
-			staticAssetsURL: config().staticAssetsURL,
-			serverURL: config().serverURL,
-			packageContextPathMapping: config().packageContextPathMapping,
-			locales: config().locales,
-			devMode: config().devMode
-		};
+		browserApi._config = {};
+		var setting = api.config();
+		_.each(setting.browserSideConfigProp, prop => {
+			_.set(browserApi._config, prop, _.get(setting, prop));
+		});
+
+		// browserApi._config = {
+		// 	staticAssetsURL: config().staticAssetsURL,
+		// 	serverURL: config().serverURL,
+		// 	packageContextPathMapping: config().packageContextPathMapping,
+		// 	locales: config().locales,
+		// 	devMode: config().devMode
+		// };
 		// setup locale bundles data
 		browserApi.localeBundlesMap = {};
 		var entryMetadata = depCtl.entryOrSplitPointMetadata(entryPackage);
