@@ -100,6 +100,11 @@ function compile() {
 	var packageInfo = walkPackages(config, argv, packageUtils, api.compileNodePath);
 	initInjector(packageInfo);
 	var helper = helperFactor(config, injector);
+	var defaultBrowserSideConfigProp = [
+		'staticAssetsURL', 'serverURL', 'packageContextPathMapping',
+		'locales', 'devMode'
+	];
+
 	//monkey patch new API
 	Object.getPrototypeOf(api).packageInfo = packageInfo;
 	require('./compilerApi')(api);
@@ -396,7 +401,8 @@ function compile() {
 		// setup server side config setting to browser
 		browserApi._config = {};
 		var setting = api.config();
-		_.each(setting.browserSideConfigProp, prop => {
+		var browserSideConfigProp = _.uniq(defaultBrowserSideConfigProp.concat(setting.browserSideConfigProp));
+		_.each(browserSideConfigProp, prop => {
 			_.set(browserApi._config, prop, _.get(setting, prop));
 		});
 

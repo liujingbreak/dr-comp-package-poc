@@ -23,8 +23,9 @@ docHome.config(['$routeProvider', '$controllerProvider', '$compileProvider', '$f
 		require('./routes')($routeProvider);
 	}]);
 docHome
-.run(['$templateCache', function($templateCache) {
+.run(['$templateCache', 'drLoadingService', function($templateCache, drLoadingService) {
 		$templateCache.put('screens.html', require('../views/screens.html'));
+		drLoadingService.setLoading('main', true);
 	}]);
 require('./controllers/mainController')(docHome);
 require('./controllers/introController')(docHome);

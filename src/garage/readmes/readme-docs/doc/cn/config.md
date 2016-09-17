@@ -97,6 +97,8 @@ api.config.get(['gulp', 'watchTimeout'])
 
 #### api.config.resolve(pathPropName, path...)
 对于值是文件路径的属性, 返回绝对路径`fs.resolve(rootPath, api.config.get(pathPropName), path...)`
+> 只有Node运行环境API支持此function
+
 例如配置:
 ```yaml
 e2etestHelper:

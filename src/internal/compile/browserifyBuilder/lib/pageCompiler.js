@@ -112,6 +112,8 @@ PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageTyp
 			path: pagePath,
 			contents: new Buffer(hackedHtml)
 		}));
+
+		// @Deprecated approach to make a `rootPackage` via configure property `packageContextPathMapping`
 		if (pageType === 'static' && compiler.rootPackage === instance.shortName) {
 			pagePath = Path.resolve(pathInfo.path);
 			log.debug('copy root entry page of ' + compiler.rootPackage);
@@ -138,23 +140,6 @@ PageCompiler.prototype.transform = function(filePath, content) {
 			last.on('data', data => newContent += data)
 			.on('end', () => resolve(newContent.toString()));
 		});
-
-		// var p = Promise.resolve(content);
-		// self.addonTransforms.forEach(transform => {
-		// 	p = p.then(content => {
-		// 		return new Promise((resolve) => {
-		// 			var newContent = '';
-		// 			var thr = transform(filePath).setEncoding('utf8');
-		// 			thr.write(content);
-		// 			thr.end();
-		// 			thr.on('data', (data) => {
-		// 				newContent += data;
-		// 			})
-		// 			.on('end', () => resolve(newContent));
-		// 		});
-		// 	});
-		// });
-		// return p;
 	}
 	return Promise.resolve(content);
 };
@@ -182,6 +167,9 @@ function resolvePagePath(page, instance, moduleMap) {
 	}
 }
 
+/**
+ * @Deprecated
+ */
 function findRootContextPackage(mapping) {
 	var rootPackage;
 	_.some(mapping, function(path, name) {

@@ -8,8 +8,7 @@
 </head>
 <body class="doc-home" dr-doc-home dr-show-on-ready anim-completed="animState">
 	<div dr-menu-aside="asideVm.menuItems" menu-selected="mainVm.selectedMenuIdx"
-	class="main-aside dr-bg-dark dr-navi-aside loading-hide"
-	dr-class-anim="{{mainVm.loaded?'show':''}}" ng-controller="AsideController as asideVm">
+	class="main-aside dr-bg-dark dr-navi-aside" ng-controller="AsideController as asideVm">
 		<div class="logo"></div>
 		<div class="dr-menu">
 			<li menu-item-instance="item">
@@ -27,29 +26,10 @@
 		</div>
 	</div>
 
-	<div class="main-section loading-hide" dr-class-anim="{{mainVm.loaded?'show':''}}" class="viewer">
+
+	<div class="main-section" class="viewer">
+		<div dr-loading-indicator="main"></div>
 		<div class="ng-view"></div>
-		<!-- <div id="disqus_thread"></div>
-		<script>
-		/**
-		* RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-		* LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
-		*/
-		/*
-		var disqus_config = function () {
-		this.page.url = PAGE_URL; // Replace PAGE_URL with your page's canonical URL variable
-		this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
-		};
-		*/
-		(function() { // DON'T EDIT BELOW THIS LINE
-		var d = document, s = d.createElement('script');
-
-		s.src = '//webfunhouse.disqus.com/embed.js';
-
-		s.setAttribute('data-timestamp', +new Date());
-		(d.head || d.body).appendChild(s);
-		})();
-		</script> -->
 	</div>
 </body>
 </html>

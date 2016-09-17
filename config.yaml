@@ -68,12 +68,12 @@ browserifyNoParse:
     - "@dr/gsap"
 
 packageContextPathMapping:
-    # Package short name - route path map, used by Express server.
-    # By default, every package's is mapped to a route context path "/<package short name>"
+    # Package short name - route path map, used by Express server @dr/express-app.
+    # By default, each package's node server `api.router()`` is mapped to a route
+    # context path "/<package short name>"
     # e.g.
     #   if package name is "@dr/example-dr", default route root path will be `/example-dr`
     # If you want change this rule, config route path here.
-    doc-home: /
 
 entryPageMapping:
     # For static browser entry pages, the default entry page is compiled to
@@ -88,6 +88,7 @@ entryPageMapping:
     #   package-C: entriesC
     # It doesn't matter whether the "value" part startsWith or endsWith slash "/",
     # but if the value is only a slash "/", it means the root folder "dist/static"
+    doc-home: /
 
 # During developing, you can set this to `true` to make every package to a single bundle
 bundlePerPackage: false
@@ -124,12 +125,13 @@ gulp:
 #
 # Not everything in these file should be visible to browser, e.g. database connection setting
 browserSideConfigProp:
-    - staticAssetsURL
-    - serverURL
-    - packageContextPathMapping
-    - locales
-    - devMode
-    - entryPageMapping
+    # following are default properties
+    # - staticAssetsURL
+    # - serverURL
+    # - packageContextPathMapping
+    # - locales
+    # - devMode
+    # - entryPageMapping
 
 e2etestHelper:
     selenium:

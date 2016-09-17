@@ -1,8 +1,8 @@
 var readme = require('@dr/readme');
 module.exports = function(controllerProvider) {
 	controllerProvider.controller('AsideController', ['$scope',
-	'$location',
-	function($scope, $location) {
+	'$location', 'drLoadingService',
+	function($scope, $location, drLoadingService) {
 		var asideVm = this;
 
 		asideVm.menuItems = [

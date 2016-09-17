@@ -5,3 +5,4 @@ var m = angular.module('docUi', []);
 module.exports = m;
 
 require('./animation')(m);
+require('./loading.js').create(m);

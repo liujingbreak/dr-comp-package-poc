@@ -51,3 +51,6 @@ installedRecipes:
 
 enableSourceMaps: false
 port: 14334
+
+browserSideConfigProp:
+    # @dr/package-foo.propertyBar

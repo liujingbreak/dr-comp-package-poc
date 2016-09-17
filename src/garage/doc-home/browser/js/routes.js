@@ -15,16 +15,17 @@ module.exports = function($routeProvider) {
 		controller: 'SplitLoadController',
 		controllerAs: 'loaderVM',
 		resolve: {
-			loaded: ['$q', '$timeout', loadComponentsStoreModule]
+			loaded: ['$q', '$timeout', 'drLoadingService', loadComponentsStoreModule]
 		}
 	});
 };
 
-function loadComponentsStoreModule($q, $timeout) {
+function loadComponentsStoreModule($q, $timeout, drLoadingService) {
 	var defer = $q.defer();
-	console.log(require);
 	require.ensure(['@dr/comp-store'], function(require) {
+		//$timeout(function() {
 		defer.resolve(require('@dr/comp-store'));
+		//}, 5000);
 	});
 	return defer.promise;
 }

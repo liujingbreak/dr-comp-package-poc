@@ -17,7 +17,7 @@ function BrowserApi(packageName, bundleName) {
 	this.packageShortName = m[2];
 	this.bundle = bundleName;
 
-	var path = this.config().packageContextPathMapping[this.packageShortName];
+	var path = this.config.get(['packageContextPathMapping', this.packageShortName]);
 	path = path != null ? path : '/' + this.packageShortName;
 	this.contextPath = this.config().serverURL + path;
 }
@@ -227,4 +227,13 @@ BrowserApi.prototype = {
 			self.loadedBundleFileSet[b] = 1;
 		});
 	}
+};
+
+BrowserApi.prototype.config.set = function(path, value) {
+	_.set(BrowserApi.prototype._config, path, value);
+	return BrowserApi.prototype._config;
+};
+
+BrowserApi.prototype.config.get = function(propPath, defaultValue) {
+	return _.get(BrowserApi.prototype._config, propPath, defaultValue);
 };

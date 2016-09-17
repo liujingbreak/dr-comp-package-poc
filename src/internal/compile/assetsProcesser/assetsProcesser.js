@@ -54,36 +54,18 @@ function activate(api) {
 		var assetsFolder = json.dr ? (json.dr.assetsDir ? json.dr.assetsDir : 'assets') : 'assets';
 		var assetsDir = Path.join(packagePath, assetsFolder);
 		if (fs.existsSync(assetsDir)) {
-			var path = api.config.get('packageContextPathMapping[' + parsedName.name + ']');
-			path = path != null ? path : '/' + parsedName.name;
-			log.debug('route ' + path + ' -> ' + assetsDir);
+			var path = '/' + parsedName.name;
+			log.info('route ' + path + ' -> ' + assetsDir);
 			api.use(path + '/', api.express.static(assetsDir, {
 				setHeaders: function(res) {
 					res.setHeader('Access-Control-Allow-Origin', '*');
 				}
 			}));
-			if (path === '/') {
-				log.debug('found root package ' + parsedName.nam);
-				var favPath = Path.join(assetsDir, 'favicon.ico');
-				if (fs.existsSync(favPath)) {
-					log.debug('route favicon -> ' + favPath);
-					api.use('/favicon.ico', (req, res, next) => {
-						if (req.method !== 'GET') {
-							next();
-							return;
-						}
-						res.sendFile(favPath);
-					});
-				}
-			}
 		}
 	});
 }
 
 function copyRootPackageFavicon() {
-	if (!config().packageContextPathMapping) {
-		return;
-	}
 	var favicon = findFavicon();
 	if (!favicon)
 		return;
