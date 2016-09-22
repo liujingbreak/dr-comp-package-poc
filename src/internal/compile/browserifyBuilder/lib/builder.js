@@ -474,10 +474,14 @@ function compile() {
 
 	function getBundleMetadataForEntry(entryPackage, revisionMeta) {
 		var entryMetadata = depCtl.entryOrSplitPointMetadata(entryPackage);
-		return {
+		var cdnUrls = depCtl.cdnUrls(entryPackage);
+		var metadata = {
 			js: bundles2FilePaths(entryMetadata.bundles, 'js', revisionMeta),
-			css: bundles2FilePaths(entryMetadata.bundles, 'css', revisionMeta)
+			css: bundles2FilePaths(entryMetadata.bundles, 'css', revisionMeta),
 		};
+		metadata.js.push(...cdnUrls.js);
+		metadata.css.push(...cdnUrls.css);
+		return metadata;
 	}
 
 	function bundles2FilePaths(bundles, type, revisionMeta) {

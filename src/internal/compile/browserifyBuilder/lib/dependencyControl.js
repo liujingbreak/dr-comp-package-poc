@@ -32,6 +32,7 @@ exports.createEntryPackageDepGraph = createEntryPackageDepGraph;
 exports.createEntryBundleDepGraph = createEntryBundleDepGraph;
 // functions for retrieving result of loading information
 exports.entryOrSplitPointMetadata = entryOrSplitPointMetadata;
+exports.cdnUrls = cdnUrls
 exports.noDuplicateMetadata = noDuplicateMetadata;
 exports.allSplitPointsOfEntry = allSplitPointsOfEntry;
 
@@ -454,6 +455,14 @@ function entryOrSplitPointMetadata(packageName) {
 		metadata.locales[locale] = _.keys(depBundleSet);
 	});
 	return metadata;
+}
+
+/**
+ * calculated CDN links which are depended by specific package
+ * @return {js: [], css: []}
+ */
+function cdnUrls(packageName) {
+	return {js: [], css: []};
 }
 
 /**

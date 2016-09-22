@@ -51,6 +51,7 @@ function JsBundleEntryMaker(api, bundleName, packageBrowserInstances,
 	this.activeModules = {}; //key: bundle name, value: array of active module name
 
 	this.packageSplitPointMap = packageSplitPointMap;
+	this.CDNDependUrlSet = {}; // external JS library URL
 	// clean split points cache
 	this.packages.forEach(packageIns => {
 		if (_.has(this.packageSplitPointMap, packageIns.longName)) {
@@ -148,7 +149,6 @@ JsBundleEntryMaker.prototype = {
 			log.error('Failed to parse %s', file);
 			throw e;
 		}
-		//log.error(injector);
 		source = injector.injectToFile(file, source, ast);
 		if (hasRequireEnsure) {
 			source = 'require.ensure = function(){return drApi.ensureRequire.apply(drApi, arguments)};\n' +
