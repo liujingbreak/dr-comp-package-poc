@@ -2,7 +2,7 @@ require('@dr-core/labjs');
 (function() {
 	var jsPaths = {{ jsPaths }};
 	if (typeof(__EXTERNAL_JS) !== 'undefined')
-		jsPath.push.apply(jsPath, __EXTERNAL_JS);
+		jsPaths.push.apply(jsPaths, __EXTERNAL_JS);
 	var bundles = [], prefix, jsPath;
 	for (var i = 0, l = jsPaths.length; i < l; i++) {
 		jsPath = jsPaths[i];
