@@ -1,6 +1,6 @@
 {
   "name": "@dr/readme-docs",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "All readme markdown files",
   "main": "lib/compiler.js",
   "scripts": {

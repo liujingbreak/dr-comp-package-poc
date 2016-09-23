@@ -29,7 +29,7 @@ function controller($scope, $timeout, $routeParams, drLoadingService) {
 	function stopLoading() {
 		$timeout(function() {
 			drLoadingService.setLoading('main', false);
-			if (DISQUS)
+			if (window.DISQUS)
 				DISQUS.reset({
 					reload: true,
 					config: function() {

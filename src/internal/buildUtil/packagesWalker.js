@@ -64,17 +64,18 @@ function saveCache(packageInfo) {
  * @return {PackageInfo}
  */
 function _walkPackages() {
+	var configBundleInfo = readBundleMapConfig();
 	var info = {
 		allModules: null, // array
-		moduleMap: null, // object
+		moduleMap: _.clone(configBundleInfo.moduleMap),
 		noBundlePackageMap: {},
-		bundleMap: null,
+		bundleMap: configBundleInfo.bundleMap,
+		bundleUrlMap: configBundleInfo.bundleUrlMap,
+		urlPackageSet: configBundleInfo.urlPackageSet,
 		entryPageMap: {},
 		localeEntryMap: {}
 	};
-	var vendorConfigInfo = vendorBundleMapConfig();
-	var bundleMap = info.bundleMap = vendorConfigInfo.bundleMap;
-	info.moduleMap = _.clone(vendorConfigInfo.moduleMap);
+	var bundleMap = info.bundleMap;
 
 	packageUtils.findBrowserPackageByType('*', function(
 		name, entryPath, parsedName, pkJson, packagePath) {
@@ -88,9 +89,9 @@ function _walkPackages() {
 			// gutil.beep();
 		}
 		if (!pkJson.dr.builder || pkJson.dr.builder === 'browserify') {
-			if (_.has(vendorConfigInfo.moduleMap, name)) {
-				bundle = vendorConfigInfo.moduleMap[name].bundle;
-				//delete vendorConfigInfo.moduleMap[name];
+			if (_.has(configBundleInfo.moduleMap, name)) {
+				bundle = configBundleInfo.moduleMap[name].bundle;
+				//delete configBundleInfo.moduleMap[name];
 				log.debug('vendorBundleMap overrides bundle setting for ' + name);
 			} else {
 				bundle = pkJson.dr.bundle || pkJson.dr.chunk;
@@ -132,7 +133,7 @@ function _walkPackages() {
 			isEntryServerTemplate: isEntryServerTemplate,
 			i18n: pkJson.dr ? (pkJson.dr.i18n ? pkJson.dr.i18n : null) : null
 		});
-		addPackageToBundle(instance, info, bundle, vendorConfigInfo);
+		addPackageToBundle(instance, info, bundle, configBundleInfo);
 		var otherEntries = _.get(pkJson.dr, 'otherEntries');
 		if (otherEntries) {
 			otherEntries = [].concat(otherEntries);
@@ -156,29 +157,29 @@ function _walkPackages() {
 					isEntryServerTemplate: isEntryServerTemplate,
 					i18n: pkJson.dr ? (pkJson.dr.i18n ? pkJson.dr.i18n : null) : null
 				});
-				addPackageToBundle(pk, info, bundle, vendorConfigInfo);
+				addPackageToBundle(pk, info, bundle, configBundleInfo);
 			}
 		}
 	});
 	_.each(bundleMap, (packageMap, bundle) => {
-		bundleMap[bundle] = _.values(packageMap);
+		bundleMap[bundle] = _.values(packageMap); // turn Object.<moduleName, packageInstance> to Array.<packageInstance>
 	});
 	info.allModules = _.values(info.moduleMap);
 
 	return info;
 }
 
-function addPackageToBundle(instance, info, bundle, vendorConfigInfo) {
+function addPackageToBundle(instance, info, bundle, configBundleInfo) {
 	info.moduleMap[instance.longName] = instance;
-	if (!bundle && !_.get(vendorConfigInfo.moduleMap, [instance.longName, 'bundle'])) {
+	if (!bundle && !_.get(configBundleInfo.moduleMap, [instance.longName, 'bundle'])) {
 		info.noBundlePackageMap[instance.longName] = instance;
 		return;
 	}
 	if (!_.has(info.bundleMap, bundle)) {
 		info.bundleMap[bundle] = {};
 	}
-	if (_.has(vendorConfigInfo.moduleMap, instance.longName)) {
-		var newBundle = _.get(vendorConfigInfo.moduleMap, instance.longName).bundle;
+	if (_.has(configBundleInfo.moduleMap, instance.longName)) {
+		var newBundle = _.get(configBundleInfo.moduleMap, instance.longName).bundle;
 		log.info('Set vendorBundleMap setting of', instance.longName, ':', instance.bundle, '->', newBundle);
 		instance.bundle = newBundle;
 	}
@@ -189,37 +190,51 @@ function addPackageToBundle(instance, info, bundle, vendorConfigInfo) {
  * Read config.json, attribute 'vendorBundleMap'
  * @return {[type]} [description]
  */
-function vendorBundleMapConfig() {
+function readBundleMapConfig() {
 	var info = {
-		allModules: [],
 		moduleMap: {},
-		bundleMap: null
+		/** @type {Object.<bundleName, Object.<moduleName, packageInstance>>} */
+		bundleMap: {},
+		/** @type {Object.<bundleName, URL[]>} */
+		bundleUrlMap: {},
+		urlPackageSet: null
 	};
-	var vendorMap = config().vendorBundleMap;
-	var map = info.bundleMap = {};
-	_.forOwn(vendorMap, function(moduleNames, bundle) {
+	_readBundles(info, config().externalBundleMap, true);
+	_readBundles(info, config().vendorBundleMap, false);
+	return info;
+}
+
+function _readBundles(info, mapConfig, isExternal) {
+	var bmap = info.bundleMap;
+	var mmap = info.moduleMap;
+	if (isExternal)
+		info.urlPackageSet = {};
+	_.forOwn(mapConfig, function(bundleData, bundle) {
+		var moduleNames = _.isArray(bundleData.modules) ? bundleData.modules : bundleData;
 		var modules = {};
 		_.each(moduleNames, function(moduleName) {
 			var mainFile;
 			try {
-				mainFile = bResolve.sync(moduleName, {paths: compileNodePath});
+				mainFile = isExternal ? null : bResolve.sync(moduleName, {paths: compileNodePath});
 				var instance = packageBrowserInstance(config(), {
 					isVendor: true,
 					bundle: bundle,
 					longName: moduleName,
-					shortName: moduleName,
+					shortName: packageUtils.parseName(moduleName).name,
 					file: mainFile
 				});
-				info.allModules.push(instance);
-				info.moduleMap[moduleName] = instance;
+				mmap[moduleName] = instance;
 				modules[moduleName] = instance;
+				info.urlPackageSet[moduleName] = 1;
 			} catch (err) {
 				log.warn('This might be a problem:\n' +
 				' browser-resolve can\'t resolve on vendor bundle package: ' + chalk.red(moduleName) +
 				', remove it from ' + chalk.yellow('vendorBundleMap') + ' of config.yaml or `npm install it`');
 			}
 		});
-		map[bundle] = modules;
+		if (isExternal) {
+			info.bundleUrlMap[bundle] = _.has(bundleData, 'URLs') ? bundleData.URLs : bundleData;
+		} else
+			bmap[bundle] = modules;
 	});
-	return info;
 }

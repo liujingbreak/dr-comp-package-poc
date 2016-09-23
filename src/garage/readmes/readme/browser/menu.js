@@ -18,13 +18,13 @@ module.exports = function(goFunc) {
 			}
 		},  {
 			label: $translate('Entry Page'),
-			flag: 'new',
+			//flag: 'new',
 			action: function() {
 				goFunc('entry-page.md');
 			}
 		}, {
 			label: $translate('Configuration'),
-			flag: 'new',
+			//flag: 'new',
 			action: function() {
 				goFunc('config.md');
 			}
@@ -41,15 +41,9 @@ module.exports = function(goFunc) {
 			}
 		}, {
 			label: $translate('API Specification'),
-			flag: 'new',
+			//flag: 'new',
 			action: function() {
 				goFunc('api-spec-cn.md');
-			}
-		}, {
-			label: $translate('Server side template: Swig'),
-			flag: 'new',
-			action: function() {
-				goFunc('swig-template.md');
 			}
 		}, {
 			label: $translate('i18n'),
@@ -63,6 +57,18 @@ module.exports = function(goFunc) {
 				goFunc('how-does-it-work.md');
 			}
 		}, {
+			label: $translate('Deployment and CDN resource'),
+			flag: 'new',
+			action: function() {
+				goFunc('cdn-bundle.md');
+			}
+		}, {
+			label: $translate('Server side template: Swig'),
+			//flag: 'new',
+			action: function() {
+				goFunc('swig-template.md');
+			}
+		}, {
 			label: $translate('Unit Test'),
 			flag: '',
 			action: function() {
@@ -70,7 +76,7 @@ module.exports = function(goFunc) {
 			}
 		}, {
 			label: $translate('End-to-end Test'),
-			flag: 'new',
+			//flag: 'new',
 			action: function() {
 				goFunc('e2etest.md');
 			}

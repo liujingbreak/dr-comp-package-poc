@@ -48,7 +48,8 @@ staticAssetsURL: ""
 serverURL: ""
 
 # Override bundle file name for installed components (including 3rd-party library),
-# otherwise browserify will bundle them with every package that depends on them.
+# otherwise browserify will bundle them with every package that depends on.
+# Bundle file name could also be URL for loading bundle from an external CDN
 vendorBundleMap:
   core: # API bundle, always be loaded at first
     - lodash
@@ -57,6 +58,28 @@ vendorBundleMap:
       - bluebird
   alt-lib:
       - "@dr/light-lodash"
+
+# You may use external JS/CSS resource like CDN service instead of a local hosted bundle file,
+# `gulp compile` replaces those bundles with the URLs you set here in each eatry files.
+externalBundleMap:
+#    "bundleName":
+#       - "//foo-url/foo.js"
+#       - "http://foo-url/bar.js"
+#       - "https://bar-url/bar.css"
+#
+# Normally you will still need to provide a local package (probably via "npm install")
+# for analysing dependency, so that you won't get a "module not found" error for `require()`
+# during `gulp compile/build`, otherwise a complete format must provided, e.g.
+#    "bundleName":
+#       URLs:
+#           - "//foo-url/bar.js"
+#           - "//foo-url/bar.css"
+#       modules:
+#           - foo
+#           - bar
+
+
+
 # Global `browserify.bundle()` `noParse` option, there is also a package specific `dr.browserifyNoParse`
 # available option in individual package.json file
 browserifyNoParse:
@@ -138,12 +161,12 @@ e2etestHelper:
         driverPath: 'node_modules/@dr/chrome-driver/linux64'
 
 
-# To enable HTTP access control (CORS), you may set `enableCORS` to `true` or
+# To enable HTTP access control (CORS), you may set `express-app-enableCORS` to `true` or
 # a white list for allowed origins
 #
-# enableCORS: false
+# express-app-enableCORS: false
 # Or
-# enableCORS:
+# express-app-enableCORS:
 #   - http://www.example.com
 #   - http://other-allowed-origin.com
 # Also call

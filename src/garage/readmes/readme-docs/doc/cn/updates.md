@@ -1,5 +1,8 @@
 Updates
 =======
+### 2016-9-27
+- 部署到CDN和引用CDN资源，新config.yaml配置属性  [externalBundleMap](/#/doc/cdn-bundle.md)
+
 ### 2016-8-31
 - #### 新配置属性 config.yaml
 ```yaml

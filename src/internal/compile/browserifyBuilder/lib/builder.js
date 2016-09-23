@@ -165,7 +165,10 @@ function compile() {
 	})()
 	.catch( err => {
 		gutil.beep();
-		throw new Error(err);
+		if (err instanceof Error)
+			throw err;
+		else
+			throw new Error(err);
 		//process.exit(1);
 	});
 
@@ -479,8 +482,8 @@ function compile() {
 			js: bundles2FilePaths(entryMetadata.bundles, 'js', revisionMeta),
 			css: bundles2FilePaths(entryMetadata.bundles, 'css', revisionMeta),
 		};
-		metadata.js.push(...cdnUrls.js);
-		metadata.css.push(...cdnUrls.css);
+		[].push.apply(metadata.js, cdnUrls.js);
+		[].push.apply(metadata.css, cdnUrls.css);
 		return metadata;
 	}
 
@@ -488,7 +491,17 @@ function compile() {
 		var paths = [];
 		_.each(bundles, bundle => {
 			var file = type + '/' + bundle + ((config().devMode || type === 'css') ? '' : '.min') + '.' + type;
-			if (_.has(revisionMeta, file)) {
+			if (_.has(packageInfo.bundleUrlMap, bundle)) {
+				var urls = packageInfo.bundleUrlMap[bundle];
+				if (urls.length > 0)
+					log.debug(`Replace bundle "${bundle}" with CDN resources:`);
+				_.each(urls, url => {
+					if (url.endsWith('.' + type)) {
+						paths.push(url);
+						log.debug(`    ${url}`);
+					}
+				});
+			} else if (_.has(revisionMeta, file)) {
 				paths.push(revisionMeta[file]);
 			}
 		});

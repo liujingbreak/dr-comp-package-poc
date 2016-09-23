@@ -32,7 +32,7 @@ exports.createEntryPackageDepGraph = createEntryPackageDepGraph;
 exports.createEntryBundleDepGraph = createEntryBundleDepGraph;
 // functions for retrieving result of loading information
 exports.entryOrSplitPointMetadata = entryOrSplitPointMetadata;
-exports.cdnUrls = cdnUrls
+exports.cdnUrls = cdnUrls;
 exports.noDuplicateMetadata = noDuplicateMetadata;
 exports.allSplitPointsOfEntry = allSplitPointsOfEntry;
 
@@ -236,7 +236,7 @@ function createEntryPackageDepGraph() {
 				deps = parentDepsMap[file] ? parentDepsMap[file] : parentDepsMap[id];
 			}
 		}
-		if (!deps && !_.has(i18nModuleNameSet, id)) {
+		if (!deps && !_.has(i18nModuleNameSet, id) && !_.has(packageInfo.urlPackageSet, id)) {
 			log.warn('id=%s', id);
 			log.warn(`depsMap=${JSON.stringify(depsMap, null, '  ')}`);
 			log.warn(`resolvedPath2Module=${JSON.stringify(resolvedPath2Module, null, ' ')}`);

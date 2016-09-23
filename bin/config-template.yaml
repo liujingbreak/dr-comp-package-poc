@@ -54,3 +54,16 @@ port: 14334
 
 browserSideConfigProp:
     # @dr/package-foo.propertyBar
+
+# To enable HTTP access control (CORS), you may set `express-app-enableCORS` to `true` or
+# a white list for allowed origins
+#
+# express-app-enableCORS: false
+# Or
+# express-app-enableCORS:
+#   - http://www.example.com
+#   - http://other-allowed-origin.com
+# Also call
+#   api.router().use('/api', api.cors());
+# in server javascript
+express-app-enableCORS: false
