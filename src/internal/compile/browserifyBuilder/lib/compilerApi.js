@@ -58,7 +58,7 @@ function findBrowserPackageInstanceByPath(file) {
 
 function replaceAssetsUrl(str, sourceFile) {
 	var self = this;
-	return str.replace(/([^a-zA-Z\d_.]|^)assets:\/\/((?:@[^\/]+\/)?[^\/]+)?(\/.*?)(['"),;:!\s]|$)/gm,
+	return str.replace(/([^a-zA-Z\d_.]|^)assets:\/\/((?:@[^\/]+\/)?[^\/]+)?(\/.*?)(['"),;:!\s\\]|$)/gm,
 		(match, leading, packageName, path, tail) => {
 			if (!packageName || packageName === '') {
 				packageName = self.findBrowserPackageByPath(sourceFile);
