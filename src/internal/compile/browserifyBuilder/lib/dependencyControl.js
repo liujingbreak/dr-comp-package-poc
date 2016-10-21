@@ -359,7 +359,7 @@ function createEntryBundleDepGraph() {
 					} else {
 						msg = 'Entry bundle "' + currBundle + ' (' + moduleName + ')", module "' + dep + '" which is dependency of "' +
 							isDirectDeps + '" is not explicityly configured with any bundle, , it will be copyied to the dependent bundle';
-						log.warn(msg);
+						log.debug(msg);
 						return;
 					}
 				} else {
