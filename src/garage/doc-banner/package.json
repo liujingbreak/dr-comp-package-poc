@@ -1,0 +1,15 @@
+{
+  "name": "@dr/doc-banner",
+  "version": "1.0.0",
+  "description": "Logo & banner for Doc home",
+  "browser": "browser.js",
+  "dr": {
+    "bundle": "home",
+    "entryPage": "index.html"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "LJ",
+  "license": "MIT"
+}

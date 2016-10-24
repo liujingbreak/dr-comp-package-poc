@@ -1,8 +1,10 @@
 var msg = require('@dr/readme/i18n');
+var _ = require('lodash');
 module.exports = function(goFunc) {
-	return [
+	var menuList = [
 		{
 			label: $translate('Introduction'),
+			icon: 'fa-file-text',
 			action: function() {
 				goFunc('readme-cn.md');
 			}
@@ -83,6 +85,7 @@ module.exports = function(goFunc) {
 		}, {
 			label: $translate('Updates'),
 			flag: 'new',
+			icon: 'fa-newspaper-o',
 			action: function() {
 				goFunc('updates.md');
 			}
@@ -98,6 +101,12 @@ module.exports = function(goFunc) {
 			}
 		}
 	];
+
+	return _.reduce(menuList, function(menuList, menu) {
+		if (!menu.icon)
+			menu.icon = 'fa-file-text';
+		return menuList;
+	}, menuList);
 };
 
 function $translate(key) {

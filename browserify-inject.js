@@ -28,4 +28,7 @@ module.exports = function(injector) {
 	// injector.notFromPackages('lodash').substitute('lodash', '@dr/light-lodash');
 	if (process.cwd() === __dirname)
 		injector.fromPackage('@dr/example-browserify').substitute('__self', '@dr/example-browserify');
+	injector.fromPackage('@dr/fabricjs')
+		.value('canvas', null)
+		.value('jsdom', null);
 };

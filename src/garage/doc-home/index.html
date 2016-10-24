@@ -13,14 +13,15 @@
 		<div class="dr-menu">
 			<li menu-item-instance="item">
 				<button dr-button class="dr-button">
-					<i class="dr-icon-arrowright"></i><span ng-bind="item.label"></span>
+					<i class="fa fa-2x" ng-class="item.icon" aria-hidden="true"></i><span ng-bind="item.label"></span>
 				</button>
 			</li>
 		</div>
 		<div class="sub-menu dr-menu">
 			<div class="title" ng-bind="currHoverMenu.label"></div>
 			<li menu-item-instance="subItem">
-				<button dr-button class="dr-button"><div class="flag-new" ng-if="subItem.flag == 'new'"></div><i class="dr-icon-arrowright"></i><span ng-bind="subItem.label"></span>
+				<button dr-button class="dr-button"><div class="flag-new" ng-if="subItem.flag == 'new'"></div><!--
+				--><i class="dr-icon-arrowright fa fa-lg" ng-class="subItem.icon"></i><span ng-bind="subItem.label"></span>
 				</button>
 			</li>
 		</div>

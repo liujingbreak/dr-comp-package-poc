@@ -1,3 +1,5 @@
 require('@dr/angularjs');
 
-module.exports = 'Coming soon...';
+module.exports = {
+	view: require('./views/main.html')
+};

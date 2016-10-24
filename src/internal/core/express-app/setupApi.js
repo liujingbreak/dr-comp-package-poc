@@ -160,7 +160,8 @@ function setupApi(api, app) {
 			origin: function(origin, callback) {
 				var pass = origin == null || corsOpt === true || _.has(whiteOriginSet, origin);
 				callback(pass ? null : {status: 400, message: 'Bad Request (CORS) for origin: ' + origin}, pass);
-				log.info('CORS request blocked for origin: ' + origin);
+				if (!pass)
+					log.info('CORS request blocked for origin: ' + origin);
 			}
 		};
 		return cors(corsOptions);

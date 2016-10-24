@@ -9,6 +9,6 @@ module.exports = function(controllerProvider) {
 
 function controller($scope, $timeout, loaded, drLoadingService) {
 	var loaderVM = this;
-	loaderVM.message = loaded;
+	loaderVM.message = loaded.view;
 	drLoadingService.setLoading('main', false);
 }

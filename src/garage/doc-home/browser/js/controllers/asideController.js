@@ -9,16 +9,19 @@ module.exports = function(controllerProvider) {
 			{
 				label: $translate('Home'),
 				subMenu: [],
+				icon: 'fa-home',
 				action: function() {
 					$location.path('/');
 				}
 			},
 			{
+				icon: 'fa-book',
 				label: $translate('Documentation'),
 				subMenu: readme.buildMenu(docName2Route)
 			},
 			{
 				label: $translate('Component Store'),
+				icon: 'fa-th',
 				action: function() {
 					$location.path('/components');
 				}
