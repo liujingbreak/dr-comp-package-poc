@@ -1,11 +1,12 @@
 {
   "name": "@dr/comp-store",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Component store",
   "browser": "browser.js",
   "dr": {
     "bundle": "component-store"
   },
+  "style": "styles/main.less",
   "transforms": [
     "@dr/parcelify-module-resolver"
   ],
