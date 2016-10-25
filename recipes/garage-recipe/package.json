@@ -1,13 +1,13 @@
 {
   "name": "@dr/garage-recipe",
-  "version": "0.0.45",
+  "version": "0.0.46",
   "description": "Recipe package of garage-recipe",
   "dependencies": {
     "@dr/angularjs": "1.4.5",
     "@dr/gsap": "0.0.23",
     "@dr/light-lodash": "0.0.4",
-    "@dr/comp-store": "0.0.4",
-    "@dr/doc-home": "0.1.7",
+    "@dr/comp-store": "0.0.5",
+    "@dr/doc-home": "0.1.8",
     "@dr/doc-less-var": "0.0.23",
     "@dr/doc-ui": "0.0.25",
     "@dr/handlebars-tmpl-builder": "1.0.0",

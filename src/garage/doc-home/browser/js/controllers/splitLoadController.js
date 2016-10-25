@@ -1,5 +1,7 @@
+var mainModule;
 module.exports = function(controllerProvider) {
-	controllerProvider.controller('SplitLoadController',
+	mainModule = controllerProvider;
+	mainModule.controller('SplitLoadController',
 	['$scope',
 	'$timeout',
 	'loaded',
@@ -9,8 +11,10 @@ module.exports = function(controllerProvider) {
 };
 
 function controller($scope, $timeout, loaded, drLoadingService, $templateCache) {
-	var loaderVM = this;
 	$templateCache.put('splitView', loaded.view);
-	loaderVM.message = loaded.view;
+	if (!loaded.created) {
+		loaded.created = true;
+		loaded.createModule(mainModule);
+	}
 	drLoadingService.setLoading('main', false);
 }

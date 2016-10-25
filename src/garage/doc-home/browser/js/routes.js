@@ -11,7 +11,7 @@ module.exports = function($routeProvider) {
 		controllerAs: 'docVm'
 	});
 	$routeProvider.when('/components', {
-		template: '<h1>Component Store</h1><div ng-include="\'splitView\'"></ng-include>',
+		template: '<div ng-include="\'splitView\'"></ng-include>',
 		controller: 'SplitLoadController',
 		controllerAs: 'loaderVM',
 		resolve: {
