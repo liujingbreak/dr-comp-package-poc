@@ -8,6 +8,7 @@ var gutil = require('gulp-util');
 var PluginError = gutil.PluginError;
 var File = require('vinyl');
 var swig = require('swig');
+var esParser = require('./esParser');
 var api = require('__api');
 var log = require('@dr/logger').getLogger(api.packageName + '.pageCompiller');
 var packageUtils = api.packageUtils;
@@ -226,6 +227,11 @@ PageCompiler.prototype.injectElements = function($, bundleSet, pkInstance, confi
 		debug: !!config().devMode,
 		data: JSON.stringify(entryData, null, '  ')
 	});
+	var rpr = config.get([api.packageName, 'replaceRequireKeyword']) || config.get([api.packageShortName, 'replaceRequireKeyword']);
+	if (rpr) {
+		log.info('Option replaceRequireKeyword is on');
+		bootstrapCode = esParser.replaceRequireKeyword(bootstrapCode, rpr);
+	}
 	var jsDependencyDom = $('<script>').text(config().devMode ?
 		bootstrapCode : require('uglify-js').minify(bootstrapCode, {fromString: true}).code);
 

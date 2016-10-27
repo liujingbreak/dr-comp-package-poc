@@ -90,6 +90,11 @@ browserifyNoParse:
     - "@dr/angularjs"
     - "@dr/gsap"
 
+# Replace `require` keyword from final JS bundle file, this might help to eliminate conflict using `require`
+# from other tool or library
+# browserify-builder:
+# 	replaceRequireKeyword: __req # replace "require" to "__req"
+
 packageContextPathMapping:
     # Package short name - route path map, used by Express server @dr/express-app.
     # By default, each package's node server `api.router()`` is mapped to a route

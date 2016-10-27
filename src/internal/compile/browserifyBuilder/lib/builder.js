@@ -31,6 +31,7 @@ var helperFactor = require('./browserifyHelper');
 var PageCompiler = require('./pageCompiler');
 var walkPackages = require('@dr-core/build-util').walkPackages;
 var depCtl = require('./dependencyControl');
+var esParser = require('./esParser');
 var packageBrowserInstance = require('@dr-core/build-util').packageInstance;
 var rj = require('__injectorFactory');
 var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
@@ -266,6 +267,8 @@ function compile() {
 			basedir: process.cwd(),
 			noParse: config().browserifyNoParse ? config().browserifyNoParse : []
 		};
+		if (config.get([api.packageName, 'standalone']))
+			browserifyOpt.standalone = 'js' + bundle + '.sta';
 		var mIdx = 1;
 		var moduleCount = _.size(modules);
 		_.each(modules, function(moduleInfo) {
@@ -655,8 +658,19 @@ function _createBrowserifyBundle(b, bundle, handleError) {
 			gutil.beep();
 			out.end();
 			handleError(er);
-		})
-		.pipe(source(bundleBasename + '.js'))
+		});
+	var rpr = config.get([api.packageName, 'replaceRequireKeyword']) || config.get([api.packageShortName, 'replaceRequireKeyword']);
+	if (rpr) {
+		var buf = '';
+		out = out.pipe(through(function(chunk, enc, cb) {
+			buf += chunk;
+			cb();
+		}, function(cb) {
+			this.push(esParser.replaceRequireKeyword(buf, rpr));
+			cb();
+		}));
+	}
+	out = out.pipe(source(bundleBasename + '.js'))
 		.pipe(buffer())
 		//.pipe(gulpif(config().enableSourceMaps, sourcemaps.init()))
 		.pipe(gulpif(!config().devMode, uglify()))

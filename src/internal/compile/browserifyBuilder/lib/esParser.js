@@ -51,3 +51,24 @@ function parse(text, handler) {
 	});
 	return ast;
 }
+
+var acorn = require('acorn');
+var patchText = require('./patch-text');
+exports.replaceRequireKeyword = function(code, replacement) {
+	var ast = acorn.parse(code, {ecmaVersion: 6});
+	var patches = [];
+	estraverse.traverse(ast, {
+		enter: function(node, parent) {
+			if (node.type === 'Identifier' && node.name === 'require' &&
+				(parent.type !== 'MemberExpression' || parent.object === node || parent.computed) &&
+				(parent.type !== 'Property' || parent.key !== node)) {
+				patches.push({
+					start: node.start,
+					end: node.end,
+					replacement: replacement
+				});
+			}
+		}
+	});
+	return patchText(code, patches);
+};

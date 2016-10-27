@@ -88,3 +88,12 @@ module.exports = {
 		},// key is package name, value is depended package instances
 	}
 ```
+
+### Resolve conflict with AMD tool like requireJS
+If our JS bundle needs to be run with requireJS in same page, there will be conflict of using keyword `require` sometimes. In this case, we can add a special option to file `config.yaml`, e.g.
+```yaml
+browserify-builder:
+	replaceRequireKeyword: __req
+```
+This will tell the `gulp compile` command to parse and replace all `require` keywords (also including `require.ensure()`) from final JS bundle files.
+> The replacement follows rules like only replacing `require` in function call expression, assignment expression, skipping cases like using `require` as object property key or property name of a member expression
