@@ -1,5 +1,14 @@
-var resolveUrl = require('./resolveUrl');
+/* globals define:true */
+if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
+	// To avoid lodash conflict with some AMD build optimizers
+	var oldDefine = define;
+	define = null;
+	require('lodash');
+	define = oldDefine;
+}
+
 var _ = require('lodash');
+var resolveUrl = require('./resolveUrl');
 module.exports = BrowserApi;
 
 var packageNameReg = /(?:@([^\/]+)\/)?(\S+)/;
