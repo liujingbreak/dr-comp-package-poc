@@ -9,6 +9,8 @@ if (typeof define === 'function' && typeof define.amd === 'object' && define.amd
 
 var _ = require('lodash');
 var resolveUrl = require('./resolveUrl');
+var bundleLoader = require('@dr-core/bundle-loader');
+var loadCssBundles = bundleLoader.loadCssBundles;
 module.exports = BrowserApi;
 
 var packageNameReg = /(?:@([^\/]+)\/)?(\S+)/;
@@ -97,8 +99,7 @@ BrowserApi.ensureRequire = function(splitPoints, callBack) {
 	}
 	// load JS
 	window.$LAB.script(_.map(js, function(jsPath) {
-		var prefix = (jsPath.charAt(0) === '/' || jsPath.length >= 7 && (jsPath.substring(0, 7) === 'http://' || jsPath.substring(0, 8) === 'https://')) ? '' : self.config().staticAssetsURL;
-		return prefix + '/' + jsPath;
+		return bundleLoader.resolveBundleUrl(jsPath, self.config().staticAssetsURL);
 	})).wait(function() {
 		self.markBundleLoaded(js);
 		self.markBundleLoaded(css);
@@ -153,16 +154,7 @@ BrowserApi.prototype = {
 	},
 
 	_loadCssBundles: function(paths) {
-		var prefix = this.config().staticAssetsURL;
-		var h = window.document.getElementsByTagName('head')[0];
-		_.each(paths, function(bundle) {
-			var cssDom = document.createElement('link');
-			cssDom.rel = 'stylesheet';
-			cssDom.href = prefix + '/' + bundle;
-			cssDom.type = 'text/css';
-			cssDom.id = bundle;
-			h.appendChild(cssDom);
-		});
+		return loadCssBundles(paths, this.config().staticAssetsURL);
 	},
 
 	loadPrefLocaleBundles: function(waitCallback) {

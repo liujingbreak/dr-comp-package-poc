@@ -100,7 +100,7 @@ function _walkPackages() {
 					bundle = parsedName.name;
 				}
 			}
-			if (bundle && config().bundlePerPackage === true && parsedName.name !== 'browserify-builder-api') {
+			if (bundle && config().bundlePerPackage === true && parsedName.scope !== 'dr-core') {
 				bundle = parsedName.name;// force bundle name to be same as package name
 			}
 			if (pkJson.dr.entryPage) {

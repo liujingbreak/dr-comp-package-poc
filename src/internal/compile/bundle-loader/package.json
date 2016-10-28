@@ -1,0 +1,15 @@
+{
+  "name": "@dr-core/bundle-loader",
+  "version": "0.0.1",
+  "description": "Load CSS bundles, works with LABjs",
+  "browser": "bundle-loader.js",
+  "dr": {
+    "bundle": "labjs",
+	"browserifyNoParse": "browser.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "LJ",
+  "license": "MIT"
+}

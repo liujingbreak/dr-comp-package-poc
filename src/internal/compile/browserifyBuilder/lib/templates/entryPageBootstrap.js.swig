@@ -1,27 +1,9 @@
-require('@dr-core/labjs');
 (function() {
+	require('@dr-core/labjs');
+	var bl = require('@dr-core/bundle-loader');
+{% if cssPaths %}
+	bl.loadCssBundles({{ cssPaths }}, '{{ staticAssetsURL }}');
+{% endif %}
 	var jsPaths = {{ jsPaths }};
-	if (typeof(__EXTERNAL_JS) !== 'undefined')
-		jsPaths.push.apply(jsPaths, __EXTERNAL_JS);
-	var bundles = [], prefix, jsPath;
-	for (var i = 0, l = jsPaths.length; i < l; i++) {
-		jsPath = jsPaths[i];
-		prefix = (jsPath.charAt(0) === '/' ||
-			(jsPath.length >= 7 &&
-				(jsPath.substring(0, 7) === 'http://' || jsPath.substring(0, 8) === 'https://'))) ?
-			'' : '{{ staticAssetsURL }}/';
-		bundles.push(prefix + jsPath);
-	}
-	window.$LAB
-	.setGlobalDefaults({ {% if debug %}Debug:true{% endif %} })
-	.script(bundles).wait(function() {
-		try {
-			drApi = require('@dr-core/browserify-builder-api');
-			drApi.setup({{ data }});
-			drApi.setup({loadedBundles: bundles});
-			require('{{ entryPackage }}');
-		} catch(e) {
-			if(console) console.error(e.stack);
-		}
-	});
+	bl.runJsBundles(jsPaths, '{{ staticAssetsURL }}', '{{ entryPackage }}', {{ data }}{% if debug %}, true{% endif %})
 })();

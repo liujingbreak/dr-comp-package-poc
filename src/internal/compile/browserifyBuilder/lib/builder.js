@@ -245,6 +245,12 @@ function compile() {
 							});
 							return browserApi;
 						};
+
+						pageCompilerParam.createEntryBootstrapCode = function(entryPackageName, writeCss) {
+							return createEntryBootstrapCode(entryPackageName,
+								pageCompilerParam.revisionMeta,
+								pageCompilerParam.entryDataProvider, writeCss);
+						};
 						callback();
 					});
 				}))
@@ -258,7 +264,28 @@ function compile() {
 		});
 	}
 
-
+	/**
+	 * Browser side bootstrap code
+	 */
+	function createEntryBootstrapCode(entryPackageName, revisionMeta, entryDataProvider, writeCss) {
+		var loadingData = getBundleMetadataForEntry(entryPackageName, revisionMeta);
+		var bootstrapCode = PageCompiler.entryBootstrapTpl({
+			cssPaths: writeCss ? JSON.stringify(loadingData.css, null, '  ') : null,
+			jsPaths: JSON.stringify(loadingData.js, null, '  '),
+			staticAssetsURL: config().staticAssetsURL,
+			entryPackage: entryPackageName,
+			debug: !!api.config().devMode,
+			data: JSON.stringify(entryDataProvider(entryPackageName), null, '  ')
+		});
+		var rpr = api.config.get([api.packageName, 'replaceRequireKeyword']) || api.config.get([api.packageShortName, 'replaceRequireKeyword']);
+		if (rpr) {
+			log.info('Option replaceRequireKeyword is on');
+			bootstrapCode = esParser.replaceRequireKeyword(bootstrapCode, rpr);
+		}
+		if (!api.config().devMode)
+			bootstrapCode = require('uglify-js').minify(bootstrapCode, {fromString: true}).code;
+		return bootstrapCode;
+	}
 
 	function buildBundle(modules, bundle, destDir) {
 		var browserifyOpt = {
