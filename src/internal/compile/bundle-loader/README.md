@@ -4,6 +4,13 @@ It works with LABjs to load JS and CSS bundle files at entry page initial time, 
 
 ### Exports
 
-.loadCssBundles(paths: string[]) => any
+**.loadCssBundles** (paths: string[]) => void
 
-.runJsBundles(jsPaths: string[], urlPrefix: string, entryPackageName: string, entryApiData: Object, isDebug: boolean)
+**.runJsBundles** (\
+	jsPaths: string[],\
+	urlPrefix: string,\
+	entryPackageName: string,\
+	entryApiData: entryApiDataJson,\
+	isDebug: boolean,\
+	callback: (err: error) => void\
+)

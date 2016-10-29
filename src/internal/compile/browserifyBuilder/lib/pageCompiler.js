@@ -50,8 +50,8 @@ PageCompiler.prototype.compile = function(pageType) {
 				return;
 			}
 			var bootstrapCode = buildInfo.createEntryBootstrapCode(instance.longName, true);
-			compiler.entryFragmentFiles.push(new File({
-				path: 'entryFragment/' + instance.longName + '/entry.js',
+			self.push(new File({
+				path: instance.shortName + '.entry.js',
 				contents: new Buffer(bootstrapCode)
 			}));
 			if (pageType === 'static' && instance.entryPages) {
@@ -207,7 +207,7 @@ PageCompiler.prototype.injectElements = function($, bundleSet, pkInstance, confi
 	var cssPrinterDiv = $cssPrinter('div');
 	_injectElementsByBundle($, head, body, 'labjs', config, revisionMeta);
 	_injectElementsByBundle($, cssPrinterDiv, $jsPrinter('div'), 'labjs', config, revisionMeta);
-	delete bundleSet.labjs; // make sure there is no duplicate labjs bundle
+	//delete bundleSet.labjs; // make sure there is no duplicate labjs bundle
 
 	//var loadingData = this.buildInfo.getBundleMetadataForEntry(pkInstance.longName);
 	// var self = this;

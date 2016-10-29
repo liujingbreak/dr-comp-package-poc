@@ -10,9 +10,7 @@ function MainController($scope, $timeout, drLoadingService) {
 	$scope.$on('$routeChangeError', stopLoading);
 
 	function stopLoading() {
-		$timeout(function() {
-			drLoadingService.setLoading('main', false);
-		}, 0);
+		drLoadingService.setLoading('main', false);
 	}
 }
 

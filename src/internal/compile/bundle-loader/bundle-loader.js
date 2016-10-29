@@ -12,7 +12,10 @@ exports.loadCssBundles = function(paths, urlPrefix) {
 	}
 };
 
-exports.runJsBundles = function(jsPaths, urlPrefix, entryPackageName, entryApiData, isDebug) {
+/**
+ * @param callback function(error) optional
+ */
+exports.runJsBundles = function(jsPaths, urlPrefix, entryPackageName, entryApiData, isDebug, callback) {
 	var debug = !!isDebug;
 
 	if (typeof (__EXTERNAL_JS) !== 'undefined')
@@ -30,8 +33,12 @@ exports.runJsBundles = function(jsPaths, urlPrefix, entryPackageName, entryApiDa
 			drApi.setup(entryApiData);
 			drApi.setup({loadedBundles: bundles});
 			require(entryPackageName);
+			if (callback)
+				callback(null);
 		} catch (e) {
 			if (console) console.error(e.stack);
+			if (callback)
+				callback(e);
 		}
 	});
 };

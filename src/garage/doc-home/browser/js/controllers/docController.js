@@ -27,8 +27,8 @@ function controller($scope, $timeout, $routeParams, drLoadingService) {
 	$scope.$on('$includeContentError', stopLoading);
 
 	function stopLoading() {
+		drLoadingService.setLoading('main', false);
 		$timeout(function() {
-			drLoadingService.setLoading('main', false);
 			if (window.DISQUS)
 				DISQUS.reset({
 					reload: true,

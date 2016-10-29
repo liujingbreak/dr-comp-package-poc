@@ -137,6 +137,8 @@ function compile() {
 		buildJS = false;
 	}
 
+	var labJSBundle = packageInfo.moduleMap['@dr-core/labjs'].bundle;
+
 	var cssStream = through.obj(function(path, enc, next) {
 		fileAccessAsync(path, fs.R_OK).then(()=> {
 			return readFileAsync(path, 'utf8');
@@ -507,6 +509,7 @@ function compile() {
 
 	function getBundleMetadataForEntry(entryPackage, revisionMeta) {
 		var entryMetadata = depCtl.entryOrSplitPointMetadata(entryPackage);
+		_.remove(entryMetadata.bundles, b => b === labJSBundle); // make sure there is no duplicate labjs bundle
 		var cdnUrls = depCtl.cdnUrls(entryPackage);
 		var metadata = {
 			js: bundles2FilePaths(entryMetadata.bundles, 'js', revisionMeta),

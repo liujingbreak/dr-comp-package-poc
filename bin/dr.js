@@ -3,7 +3,6 @@
 var _ = require('lodash');
 var chalk = require('chalk');
 var shell = require('shelljs');
-var cli = require('shelljs-nodecli');
 var fs = require('fs');
 var Path = require('path');
 var yargs = require('yargs');

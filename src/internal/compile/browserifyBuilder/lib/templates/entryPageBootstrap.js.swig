@@ -5,5 +5,5 @@
 	bl.loadCssBundles({{ cssPaths }}, '{{ staticAssetsURL }}');
 {% endif %}
 	var jsPaths = {{ jsPaths }};
-	bl.runJsBundles(jsPaths, '{{ staticAssetsURL }}', '{{ entryPackage }}', {{ data }}{% if debug %}, true{% endif %})
+	bl.runJsBundles(jsPaths, '{{ staticAssetsURL }}', '{{ entryPackage }}', {{ data }}, {{ debug }}, window.onWfhReady)
 })();
