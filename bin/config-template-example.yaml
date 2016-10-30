@@ -18,7 +18,7 @@ recipeSrcMapping:
 # Override bundle file name for installed components (including 3rd-party library),
 # otherwise browserify will bundle them with every package that depends on them.
 vendorBundleMap:
-  core:
+  labjs:
       - lodash
       - jquery
 

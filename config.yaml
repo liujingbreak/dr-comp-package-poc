@@ -51,7 +51,7 @@ serverURL: ""
 # otherwise browserify will bundle them with every package that depends on.
 # Bundle file name could also be URL for loading bundle from an external CDN
 vendorBundleMap:
-  core: # API bundle, always be loaded at first
+  labjs: # API bundle, always be loaded at first
     - lodash
   ui-lib: # bundle name
       - jquery

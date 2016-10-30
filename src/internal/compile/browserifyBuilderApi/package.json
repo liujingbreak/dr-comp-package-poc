@@ -1,12 +1,12 @@
 {
   "name": "@dr-core/browserify-builder-api",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Add some useful API to work with browserify-builder",
   "browser": "browserifyBuilderApi.browser.js",
   "main": "browserifyBuilderApi.server.js",
   "dr": {
     "bundle": [
-      "core"
+      "labjs"
     ],
     "type": [
       "server",

@@ -368,12 +368,12 @@ function createEntryBundleDepGraph() {
 				if (bundle)
 					depBundleSet[bundle] = true;
 			});
-			if (isSplitPoint) {
-				delete depBundleSet.core; // No need for duplicate core bundle
-			} else {
-				// Core bundle should always be depended by all entry page modules!
-				depBundleSet.core = true;
-			}
+			// if (isSplitPoint) {
+			// 	delete depBundleSet.core; // No need for duplicate core bundle
+			// } else {
+			// 	// Core bundle should always be depended by all entry page modules!
+			// 	depBundleSet.core = true;
+			// }
 			_.forOwn(depBundleSet, (whatever, initialBundle) => {
 				_.forOwn(locDepBundleSet, (localeBundleSet, locale) => {
 					// remove any locale bundle that are duplicate with initial bundles, we don't want to load them twice in browser.
