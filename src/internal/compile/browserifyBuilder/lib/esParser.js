@@ -55,7 +55,7 @@ function parse(text, handler) {
 var acorn = require('acorn');
 var patchText = require('./patch-text');
 exports.replaceRequireKeyword = function(code, replacement) {
-	var ast = acorn.parse(code, {ecmaVersion: 6});
+	var ast = acorn.parse(code);
 	var patches = [];
 	estraverse.traverse(ast, {
 		enter: function(node, parent) {
