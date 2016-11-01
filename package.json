@@ -55,7 +55,7 @@
     "main-bower-files": "^2.11.0",
     "mkdirp": "^0.5.1",
     "parcelify": "^2.1.0",
-    "require-injector": "^0.5.0-alpha",
+    "require-injector": "^0.5.0",
     "resolve": "^1.1.7",
     "run-sequence": "^1.1.5",
     "semver": "^5.3.0",
