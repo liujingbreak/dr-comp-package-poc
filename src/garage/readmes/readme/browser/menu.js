@@ -49,7 +49,7 @@ module.exports = function(goFunc) {
 			}
 		}, {
 			label: $translate('i18n'),
-			flag: '',
+			flag: 'new',
 			action: function() {
 				goFunc('i18n.md');
 			}
@@ -60,7 +60,7 @@ module.exports = function(goFunc) {
 			}
 		}, {
 			label: $translate('Deployment and CDN resource'),
-			flag: 'new',
+			//flag: 'new',
 			action: function() {
 				goFunc('cdn-bundle.md');
 			}

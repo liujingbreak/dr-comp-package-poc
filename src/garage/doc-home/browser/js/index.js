@@ -4,10 +4,12 @@ require('@dr/doc-ui');
 require('@dr/markdown-viewer');
 require('@dr/light-respond-js');
 
+
 var textAnim = require('@dr/text-anim-ng');
 
 
 var docHome = angular.module('docHome', ['ngAnimate', 'ngRoute', 'docUi']);
+require('@dr/translate-generator').init(docHome);
 module.exports = docHome;
 
 docHome.config(['$routeProvider', '$controllerProvider', '$compileProvider', '$filterProvider', '$provide',
@@ -23,10 +25,11 @@ docHome.config(['$routeProvider', '$controllerProvider', '$compileProvider', '$f
 		require('./routes')($routeProvider);
 	}]);
 docHome
-.run(['$templateCache', 'drLoadingService', function($templateCache, drLoadingService) {
-		$templateCache.put('screens.html', require('../views/screens.html'));
-		drLoadingService.setLoading('main', true);
-	}]);
+.run(['$templateCache', 'drLoadingService', 'drTranslateService', function($templateCache, drLoadingService, drTranslateService) {
+	$templateCache.put('screens.html', require('../views/screens.html'));
+	drLoadingService.setLoading('main', true);
+	drTranslateService.addResource(__api.packageShortName, require('@dr/doc-home/i18n'));
+}]);
 require('./controllers/mainController')(docHome);
 require('./controllers/introController')(docHome);
 require('./controllers/asideController')(docHome);

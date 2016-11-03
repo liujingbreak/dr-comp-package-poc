@@ -2,13 +2,18 @@ var es = require('esprima');
 var walk = require('esprima-walk');
 var log = require('log4js').getLogger('translate-generator.jsParser');
 var _ = require('lodash');
+var api = require('__api');
 
 var matchFuncNames = [
 	'$translate',
 	'$translate.instant'
 ];
 
-module.exports = function(config, fileContent, onKeyFound) {
+module.exports = function(fileContent, onKeyFound) {
+	var configNames = api.config.get(api.packageShortName + '.scanMethodNames');
+	if (configNames) {
+		[].push.apply(matchFuncNames, [].concat(configNames));
+	}
 	var ast = es.parse(fileContent, {
 		loc: true,
 		range: true

@@ -33,3 +33,7 @@ module.exports = function(controllerProvider) {
 		}
 	}]);
 };
+
+function $translate(k) {
+	return require('@dr/doc-home/i18n')[k] || k;
+}

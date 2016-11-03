@@ -18,4 +18,14 @@ describe('jsParser', function() {
 			expect(jsParser.isSameAst(node1, node2)).toBeTruthy();
 		});
 	});
+
+	it('should parse JS properly', () => {
+		var onKeyFound = jasmine.createSpy('onKeyFound');
+
+		jsParser('t("key");  $translate("key2");  $translate.instant("key3");', onKeyFound);
+		expect(onKeyFound.calls.count()).toEqual(3);
+		expect(onKeyFound).toHaveBeenCalledWith('key');
+		expect(onKeyFound).toHaveBeenCalledWith('key2');
+		expect(onKeyFound).toHaveBeenCalledWith('key3');
+	});
 });

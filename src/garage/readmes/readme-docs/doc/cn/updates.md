@@ -1,5 +1,9 @@
 Updates
 =======
+### 2016-11-4
+- New browser side API function
+`.urlSearchParam(searchString)` which parses `window.location.search` to a hash object.
+- @dr/translate-generator brought handy Angular directives to display locale text in HTML
 ### 2016-9-27
 - 部署到CDN和引用CDN资源，新config.yaml配置属性  [externalBundleMap](/#/doc/cdn-bundle.md)
 

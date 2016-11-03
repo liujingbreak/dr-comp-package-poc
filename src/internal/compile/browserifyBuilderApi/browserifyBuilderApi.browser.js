@@ -227,6 +227,23 @@ BrowserApi.prototype = {
 		_.each(bundles, function(b) {
 			self.loadedBundleFileSet[b] = 1;
 		});
+	},
+
+	/**
+	 * Parse window.location.search to a hash object
+	 */
+	urlSearchParam: function(searchString) {
+		var searchMap = {};
+		var search = searchString ? searchString : window.location.search;
+		if (search && search.length > 0) {
+			if (_.startsWith(search, '?'))
+				search = search.substring(1);
+			_.each(search.split('&'), function(qs) {
+				var pair = qs.split('=');
+				searchMap[pair[0]] = pair[1];
+			});
+		}
+		return searchMap;
 	}
 };
 

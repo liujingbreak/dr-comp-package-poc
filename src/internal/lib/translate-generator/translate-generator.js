@@ -76,7 +76,7 @@ function scanPackage(packagePath) {
 	var promJS = glob.sync(Path.join(packagePath, '/**/*.js').replace(/\\/g, '/')).map(path => {
 		return readFileAsync(path, 'utf8').then(content => {
 			log.debug('scan: ' + path);
-			jsParser(config, content, (key) => {
+			jsParser(content, (key) => {
 				dirty = onKeyFound(key, yamls, existings, trackExess) || dirty;
 			});
 		});

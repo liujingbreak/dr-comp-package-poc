@@ -1,6 +1,6 @@
 {
   "name": "@dr/garage-recipe",
-  "version": "0.0.48",
+  "version": "0.0.49",
   "description": "Recipe package of garage-recipe",
   "dependencies": {
     "@dr/angularjs": "1.4.5",
@@ -10,14 +10,14 @@
     "@dr/light-lodash": "0.0.4",
     "@dr/comp-store": "0.0.5",
     "@dr/doc-banner": "1.0.0",
-    "@dr/doc-home": "0.1.9",
+    "@dr/doc-home": "0.1.10",
     "@dr/doc-less-var": "0.0.23",
     "@dr/doc-ui": "0.0.25",
     "@dr/handlebars-tmpl-builder": "1.0.0",
     "@dr/light-respond-js": "0.0.5",
     "@dr/markdown-viewer": "0.0.23",
-    "@dr/readme": "0.0.31",
-    "@dr/readme-docs": "0.1.18",
+    "@dr/readme": "0.0.32",
+    "@dr/readme-docs": "0.1.19",
     "@dr/text-anim-ng": "0.0.23"
   }
 }

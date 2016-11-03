@@ -70,8 +70,9 @@ console.log(__api.assetsUrl('some-picture.jpg'));
 | `.assetsUrl(packageName, path)` | 获取packageName对应的静态资源/assets目录下的文件的浏览器访问路径, `packageName` 为可选参数, 默认是当前package
 | `.loadLocaleBundles(language, callback)` | LABjs loads locale bundles to current page
 | `.loadPrefLocaleBundles(callback)` | LABjs loads locale bundles based on browser prefered language, language choosing logic is in the order of: `navigator.languages[0], navigator.language, navigator.browserLanguage, navigator.systemLanguage, navigator.userLanguage, navigator.languages[1] ...`
+| `.urlSearchParam(searchString)` | parses window.location.search and returns a hash object
 | `.getPrefLanguage()` | __api.loadPrefLocaleBundles() 调用此方法
-| `.isLocaleBundleLoaded()` | return true 如果locale bundle已经加载，可以安全调用的require('xxx/i18n')了
+| `.isLocaleBundleLoaded()` | returns true 如果locale bundle已经加载，可以安全调用的require('xxx/i18n')了
 | `.extend(obj)` | 扩展 API prototype `__api.__proto__`,  `__api.constructor.prototype`
 | `.isBrowser()` | true
 | `.isNode()` | false

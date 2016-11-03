@@ -1,4 +1,10 @@
-__api.loadPrefLocaleBundles(function(language) {
-	console.log('load locale bundles done with preferred language: ' + language);
-	require('./js');
-});
+var lang = __api.urlSearchParam().lang;
+if (lang) {
+	__api.loadLocaleBundles(lang, function() {
+		require('./js');
+	});
+} else {
+	__api.loadPrefLocaleBundles(function(language) {
+		require('./js');
+	});
+}

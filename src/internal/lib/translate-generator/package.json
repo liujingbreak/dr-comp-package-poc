@@ -1,11 +1,13 @@
 {
   "name": "@dr/translate-generator",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "A tool to scan source package files and generate translatable files",
   "main": "translate-generator.js",
+  "browser": "ng-translate.js",
   "dr": {
     "type": "builder",
-    "priority": 1100
+    "priority": 1100,
+    "bundle": "ui-lib"
   },
   "dependencies": {
     "esprima": "^2.7.1",
