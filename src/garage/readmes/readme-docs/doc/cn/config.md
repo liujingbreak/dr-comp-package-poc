@@ -70,7 +70,7 @@ value = api.config.get([api.packageName, 'propertyX']);
 ### 用API获取配置内容
 config API source code: [lib/config.js](https://github.com/dr-web-house/web-fun-house/blob/master/lib/config.js)
 #### api.config()
-会返回配置属性的object<{string}, {*}>
+会返回配置属性的object<string, any>
 e.g.
 ```js
 var api = require(`__api`);
@@ -88,7 +88,7 @@ api.config.get(['gulp', 'watchTimeout'])
 #### api.config.set(path, value)
 动态修改全局配置(参数同`lodash`的`_.set(configObj, path, value)`)
 - path (Array|string): The path of the property to set.
-- value (*): The value to set.
+- value (any): The value to set.
 ```js
 	api.config.set('gulp.watchTimeout', 1000);
 ```
@@ -114,3 +114,39 @@ var absolutePath = api.config.resolve('e2etestHelper.selenium.driverPath', 'linu
 
 #### api.config().rootPath
 获取当前项目的根目录绝对路径
+
+#### 浏览器端配置属性的读取限制
+当我们需要让浏览器端Javascript读取个别些属性，必须将`config.yaml`的内容和普通resource bundle一样发送到客户端，但是`config.yaml`的内容可能包含服务器端敏感的配置内容，比如内部URL和password之类信息，所以我们不会把完整的config.yaml信息发送到浏览器，需要配置属性`browserSideConfigProp`，告诉打包程序，哪些属性可以暴露在浏览器端
+
+```yaml
+# Following is a list of current configuration property names of which property
+# are visible to browser side environment, meaning those properties will be stringified
+# and downloaded to client browser as a property of API object, can be returned from
+# script:
+#   __api.config()
+#
+# Not everything in these file should be visible to browser, e.g. database connection setting
+browserSideConfigProp:
+    # following are default properties
+    # - staticAssetsURL
+    # - serverURL
+    # - packageContextPathMapping
+    # - locales
+    # - devMode
+    # - entryPageMapping
+```
+例如，如果需要暴露一个名为`yourPackage.apiURL`的属性
+```yaml
+yourPackage:
+	apiURL: '//localhost:8080/api'
+
+browserSideConfigProp:
+	- yourPackage.apiURL
+```
+Your JS file in Browser
+```js
+$.ajax({
+	url: api.config().yourPackage.apiURL,
+	...
+});
+```
