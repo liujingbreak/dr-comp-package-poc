@@ -11,6 +11,7 @@ module.exports = function(controllerProvider) {
 };
 
 function controller($scope, $timeout, loaded, drLoadingService, $templateCache) {
+	$scope.mainVm.selectedMenuIdx = 2;
 	$templateCache.put('splitView', loaded.view);
 	if (!loaded.created) {
 		loaded.created = true;
