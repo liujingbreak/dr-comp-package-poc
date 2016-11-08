@@ -226,7 +226,8 @@ function compile() {
 						config: config,
 						bundleDepsGraph: bundleGraph.bundleDepsGraph,
 						packageInfo: packageInfo,
-						builtBundles: bundleNames
+						builtBundles: bundleNames,
+						labJSBundleName: labJSBundle
 					});
 					this.push(pageCompilerParam);
 					_.assign(Object.getPrototypeOf(api), {

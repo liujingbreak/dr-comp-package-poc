@@ -5,3 +5,4 @@ static*
 runtime
 e2etest
 /logs
+.vscode/

@@ -49,19 +49,24 @@ PageCompiler.prototype.compile = function(pageType) {
 			if (!needUpdateEntryPage(buildInfo.builtBundles, buildInfo.bundleDepsGraph[name])) {
 				return;
 			}
-			var bootstrapCode = buildInfo.createEntryBootstrapCode(instance.longName, true);
+			var bootstrapCode = buildInfo.createEntryBootstrapCode(instance.longName, true); // load CSS by JS
+			var bootstrapCodeNoCss = buildInfo.createEntryBootstrapCode(instance.longName, false); // load CSS by HTML tag
+			// We prefer load CSS by insert <link> tag in HTML HEAD element,
+			// which starts downloading earlier than loading by JS,
+			// But we also want to output some JS fragment in case someone
+			// needs to insert entry JS with loading CSS bundle all together in their entry page.
 			self.push(new File({
 				path: instance.shortName + '.entry.js',
 				contents: new Buffer(bootstrapCode)
 			}));
 			if (pageType === 'static' && instance.entryPages) {
 				promises = promises.concat(instance.entryPages.map(page => {
-					return compiler.doEntryFile(page, instance, buildInfo, 'static', self, bootstrapCode);
+					return compiler.doEntryFile(page, instance, buildInfo, 'static', self, bootstrapCodeNoCss);
 				}));
 			}
 			if (pageType === 'server' && instance.entryViews) {
 				promises = promises.concat(promises, instance.entryViews.map(page => {
-					return compiler.doEntryFile(page, instance, buildInfo, 'server', self, bootstrapCode);
+					return compiler.doEntryFile(page, instance, buildInfo, 'server', self, bootstrapCodeNoCss);
 				}));
 			}
 		});
@@ -86,7 +91,6 @@ var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
  */
 PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageType, through, bootstrapCode) {
 	var compiler = this;
-	this.currentFile = page;
 	var pathInfo = resolvePagePath(page, instance, buildInfo.packageInfo.moduleMap);
 
 	return readFileAsync(pathInfo.abs, 'utf-8')
@@ -205,38 +209,24 @@ PageCompiler.prototype.injectElements = function($, bundleSet, pkInstance, confi
 	var $jsPrinter = cheerio.load('<div></div>');
 
 	var cssPrinterDiv = $cssPrinter('div');
-	_injectElementsByBundle($, head, body, 'labjs', config, revisionMeta);
-	_injectElementsByBundle($, cssPrinterDiv, $jsPrinter('div'), 'labjs', config, revisionMeta);
-	//delete bundleSet.labjs; // make sure there is no duplicate labjs bundle
+	_injectElementsByBundle($, head, body, this.buildInfo.labJSBundleName, config, revisionMeta);
+	_injectElementsByBundle($, cssPrinterDiv, $jsPrinter('div'), this.buildInfo.labJSBundleName, config, revisionMeta);
+	// -- Insert CSS bundle <link> tags
+	var self = this;
+	_.forOwn(bundleSet, function(v, bundleName) {
+		var bundleCss = createCssLinkElement($, bundleName, config, revisionMeta);
+		if (bundleCss) {
+			cssPrinterDiv.append(bundleCss);
+			if (head.length === 0) {
+				log.warn(`Invalid Entry HTML page: ${pkInstance.longName}: ${pathInfo.path},
+					missing HEAD element, CSS bundle can not be inserted automatically.
+					You will need to insert CSS links by yourself`);
+			}
+			head.append(bundleCss.clone());
+		}
+	});
+	log.debug('head', $cssPrinter.html());
 
-	//var loadingData = this.buildInfo.getBundleMetadataForEntry(pkInstance.longName);
-	// var self = this;
-	// _.forOwn(bundleSet, function(v, bundleName) {
-	// 	var bundleCss = createCssLinkElement($, bundleName, config, revisionMeta);
-	// 	if (bundleCss) {
-	// 		cssPrinterDiv.append(bundleCss);
-	// 		if (head.length === 0) {
-	// 			log.warn(`Invalid Entry HTML page: ${pkInstance.longName}/${self.currentFile},
-	// 				missing HEAD element, CSS bundle can not be inserted automatically.
-	// 				You will need to insert CSS links by yourself`);
-	// 		}
-	// 		head.append(bundleCss.clone());
-	// 	}
-	// });
-	// log.debug('head', $cssPrinter.html());
-	//var entryData = entryDataProvider(pkInstance.longName);
-	// var bootstrapCode = entryBootstrapTpl({
-	// 	jsPaths: JSON.stringify(loadingData.js, null, '  '),
-	// 	staticAssetsURL: config().staticAssetsURL,
-	// 	entryPackage: pkInstance.longName,
-	// 	debug: !!config().devMode,
-	// 	data: JSON.stringify(entryData, null, '  ')
-	// });
-	// var rpr = config.get([api.packageName, 'replaceRequireKeyword']) || config.get([api.packageShortName, 'replaceRequireKeyword']);
-	// if (rpr) {
-	// 	log.info('Option replaceRequireKeyword is on');
-	// 	bootstrapCode = esParser.replaceRequireKeyword(bootstrapCode, rpr);
-	// }
 	var jsDependencyDom = $('<script>').text(bootstrapCode);
 
 	$jsPrinter('div').append(jsDependencyDom);
@@ -291,24 +281,24 @@ function createScriptElement($, bundleName, config, revisionMeta) {
 	return scriptEl;
 }
 
-function createCssLinkElement($, bundleName, config, revisionMeta) {
-	return null;
-}
-
 // function createCssLinkElement($, bundleName, config, revisionMeta) {
-// 	var element = $('<link/>');
-// 	var file = 'css/' + bundleName + '.css';
-// 	var mappedFile = revisionMeta ? revisionMeta[file] : file;
-// 	if (!mappedFile) {
-// 		return null;
-// 	}
-// 	log.trace(file + ' -> ' + mappedFile);
-// 	var src = config().staticAssetsURL + '/' + mappedFile;
-// 	var rs = URL_PAT.exec(src);
-// 	src = (rs[1] ? rs[1] : '') + rs[2].replace(/\/\/+/g, '/');
-// 	element.attr('rel', 'stylesheet');
-// 	element.attr('href', src);
-// 	element.attr('type', 'text/css');
-//
-// 	return element;
+// 	return null;
 // }
+
+function createCssLinkElement($, bundleName, config, revisionMeta) {
+	var element = $('<link/>');
+	var file = 'css/' + bundleName + '.css';
+	var mappedFile = revisionMeta ? revisionMeta[file] : file;
+	if (!mappedFile) {
+		return null;
+	}
+	log.trace(file + ' -> ' + mappedFile);
+	var src = config().staticAssetsURL + '/' + mappedFile;
+	var rs = URL_PAT.exec(src);
+	src = (rs[1] ? rs[1] : '') + rs[2].replace(/\/\/+/g, '/');
+	element.attr('rel', 'stylesheet');
+	element.attr('href', src);
+	element.attr('type', 'text/css');
+
+	return element;
+}

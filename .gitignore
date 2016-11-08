@@ -7,4 +7,4 @@ config.local.yaml
 dist
 /logs
 /certificate
-
+.vscode
