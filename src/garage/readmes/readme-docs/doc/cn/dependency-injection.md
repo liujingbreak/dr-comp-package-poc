@@ -40,10 +40,12 @@ module.exports = function(injector) {
 
 ### Injector API
 - `inject.fromAllComponents()`
-- `inject.fromPackage(packageNames)`
-- `.factory(oldPackageName, factoryFunction)`
-- `.value(oldPackageName, newValue)`
-- `.substitue(oldPackageName, newPackageName)`
+- `inject.fromComponent(packageName: string)`
+- `inject.fromPackage(packageNames: string[])`\
+和`fromComponent()` 基本一样，支持非组件以外的普通Node package
+- `.factory(oldPackageName: string, factoryFunction: ()=> void)`
+- `.value(oldPackageName: string, newValue: any)`
+- `.substitue(oldPackageName: string, newPackageName: string)`
 
 具体参考
 [require-injector](https://www.npmjs.com/package/require-injector)
