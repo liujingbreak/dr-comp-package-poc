@@ -6,17 +6,17 @@ module.exports = function(controllerProvider) {
 	controllerProvider.controller('DocController',
 	['$scope',
 	'$timeout',
-	'$routeParams',
+	'$stateParams',
 	'drLoadingService',
 	controller]);
 };
 
-function controller($scope, $timeout, $routeParams, drLoadingService) {
+function controller($scope, $timeout, $stateParams, drLoadingService) {
 	var docVm = this;
 
 	$scope.mainVm.selectedMenuIdx = 1;
 
-	var file = $routeParams.docPath.substring(0, $routeParams.docPath.lastIndexOf('.'));
+	var file = $stateParams.docPath.substring(0, $stateParams.docPath.lastIndexOf('.'));
 
 	docVm.docAddress = __api.assetsUrl('readme-docs', docName2Route(file));
 

@@ -1,21 +1,37 @@
 
-module.exports = function($routeProvider) {
-	$routeProvider.when('/', {
-		template: require('../views/screens.html'),
-		controller: 'IntroController',
-		controllerAs: 'introVm'
+module.exports = function($stateProvider, $urlRouterProvider) {
+	$urlRouterProvider.when('', '/');
+	$stateProvider.state('home', {
+		url: '/',
+		views: {
+			main: {
+				template: require('../views/screens.html'),
+				controller: 'IntroController',
+				controllerAs: 'introVm'
+			}
+		}
 	});
-	$routeProvider.when('/doc/:docPath*', {
-		template: require('../views/doc.html'),
-		controller: 'DocController',
-		controllerAs: 'docVm'
+	$stateProvider.state('doc', {
+		url: '/doc/:docPath',
+		views: {
+			main: {
+				template: require('../views/doc.html'),
+				controller: 'DocController',
+				controllerAs: 'docVm'
+			}
+		}
 	});
-	$routeProvider.when('/components', {
-		template: '<div ng-include="\'splitView\'"></ng-include>',
-		controller: 'SplitLoadController',
-		controllerAs: 'loaderVM',
-		resolve: {
-			loaded: ['$q', '$timeout', 'drLoadingService', loadComponentsStoreModule]
+	$stateProvider.state('comp', {
+		url: '/components',
+		views: {
+			main: {
+				template: '<div ng-include="\'splitView\'"></ng-include>',
+				controller: 'SplitLoadController',
+				controllerAs: 'loaderVM',
+				resolve: {
+					loaded: ['$q', '$timeout', 'drLoadingService', loadComponentsStoreModule]
+				}
+			}
 		}
 	});
 };

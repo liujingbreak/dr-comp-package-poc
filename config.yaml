@@ -56,6 +56,7 @@ vendorBundleMap:
   ui-lib: # bundle name
       - jquery
       - bluebird
+      - angular-ui-router
   alt-lib:
       - "@dr/light-lodash"
 
@@ -87,6 +88,7 @@ browserifyNoParse:
     - lodash
     - jquery
     - bluebird
+    - angular-ui-router
     - "@dr/angularjs"
     - "@dr/gsap"
 

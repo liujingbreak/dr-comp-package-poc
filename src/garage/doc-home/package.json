@@ -13,7 +13,9 @@
     "bundle": "home",
     "entryPage": "index.html"
   },
-  "dependencies": {},
+  "dependencies": {
+	  "angular-ui-router": "^0.3.2"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

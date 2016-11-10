@@ -1,5 +1,6 @@
 require('jquery');
 require('@dr/angularjs');
+require('angular-ui-router');
 require('@dr/doc-ui');
 require('@dr/markdown-viewer');
 require('@dr/light-respond-js');
@@ -8,21 +9,22 @@ require('@dr/light-respond-js');
 var textAnim = require('@dr/text-anim-ng');
 
 
-var docHome = angular.module('docHome', ['ngAnimate', 'ngRoute', 'docUi']);
+var docHome = angular.module('docHome', ['ngAnimate', 'ui.router', 'docUi']);
 require('@dr/translate-generator').init(docHome);
 module.exports = docHome;
 
-docHome.config(['$routeProvider', '$controllerProvider', '$compileProvider', '$filterProvider', '$provide',
-	function($routeProvider, $controllerProvider, $compileProvider, $filterProvider, $provide) {
+docHome.config(['$controllerProvider', '$compileProvider', '$filterProvider', '$provide', '$stateProvider', '$urlRouterProvider',
+	function($controllerProvider, $compileProvider, $filterProvider, $provide, $stateProvider, $urlRouterProvider) {
 		// cache these providers so that we can lazy load angular component later on
 		// see http://ify.io/lazy-loading-in-angularjs/
 		docHome.controllerProvider = $controllerProvider;
 		docHome.compileProvider    = $compileProvider;
-		docHome.routeProvider      = $routeProvider;
 		docHome.filterProvider     = $filterProvider;
 		docHome.provide            = $provide;
+		docHome.$stateProvider = $stateProvider;
+		docHome.$urlRouterProvider = $urlRouterProvider;
 		textAnim.register(docHome.compileProvider);
-		require('./routes')($routeProvider);
+		require('./routes')($stateProvider, $urlRouterProvider);
 	}]);
 docHome
 .run(['$templateCache', 'drLoadingService', 'drTranslateService', function($templateCache, drLoadingService, drTranslateService) {
