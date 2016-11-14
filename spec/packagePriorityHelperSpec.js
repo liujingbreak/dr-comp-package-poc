@@ -18,7 +18,7 @@ describe('packagePriorityHelper', function() {
 			},
 			{
 				longName: 'D',
-				priority: 6000
+				priority: 4000
 			},
 			{
 				longName: 'E'
@@ -65,7 +65,7 @@ describe('packagePriorityHelper', function() {
 			},
 			{
 				longName: 'E',
-				priority: 5001
+				priority: 4999
 			}
 		];
 		var run = jasmine.createSpy('run');
@@ -94,7 +94,7 @@ describe('packagePriorityHelper', function() {
 				priority: 'before D'
 			}, {
 				longName: 'C',
-				priority: 5001
+				priority: 4999
 			}
 		];
 		var idx = 0;
@@ -178,7 +178,7 @@ describe('packagePriorityHelper', function() {
 			},
 			{
 				longName: 'E',
-				priority: 5001,
+				priority: 4999,
 				run: function() { console.log('running %s', this.longName); }
 			}
 		];

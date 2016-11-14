@@ -8,10 +8,14 @@
 </head>
 
 <body>
-	{= message =}
+	<h3>Message from server template:</h3>
+	<pre>{= message =}</pre>
+
+	Included swig tempalte file includedPage.html:
 	{% include "includedPage.html" %}
-	<br/>
+	<h3>Included swig tempalte file npm://@dr/example-common/commonView.html : </h3>
 	{% include "npm://@dr/example-common/commonView.html"%}
+	<h3>Use variable "Swig is dead"</h3>
 	{% set repeatRenderMsg = "Swig is dead" %}
 	{= __renderFile(toRenderFile) =}
 </body>

@@ -20,6 +20,6 @@
   "license": "MIT",
   "dr": {
     "type": "builder",
-    "builderPriority": 3000
+    "builderPriority": 7000
   }
 }

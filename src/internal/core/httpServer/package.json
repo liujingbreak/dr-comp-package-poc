@@ -8,6 +8,6 @@
       "core",
       "server"
     ],
-    "serverPriority": 0
+    "serverPriority": 999999
   }
 }

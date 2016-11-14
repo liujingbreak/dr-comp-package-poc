@@ -8,8 +8,8 @@
       "builder",
       "server"
     ],
-    "builderPriority": 2000,
-    "serverPriority": 9000
+    "builderPriority": 8000,
+    "serverPriority": 1000
   },
   "dependencies": {
     "through2": "^2.0.1",

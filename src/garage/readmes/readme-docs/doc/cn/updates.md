@@ -1,5 +1,9 @@
 Updates
 =======
+### 2016-11-14
+#### Breaking change
+package.json中的dr.builderPriority, dr.serverPriority 数字越大，越优先， 原来是越小越优先
+
 ### 2016-11-8 web-fun-house v0.6.4
 环境变量 `WFH_NODE_PATH` 可以以用于对Node module search path的扩展， 和NodeJs 的系统变量`NODE_PATH`类似但是又不同：NODE_PATH是添加在搜索path列表的末尾，优先级最低，而`WFH_NODE_PATH`会被插入在 `<working-directory>/node_modules`之前, 优先级很高
 

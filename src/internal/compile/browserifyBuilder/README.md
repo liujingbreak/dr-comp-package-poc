@@ -34,6 +34,21 @@ module exports is an object:
 | .compile(api) | function, called by `gulp compile` command
 | .addTransform(transforms) | `transforms` is a browserify Transform or an array of Transform, so that you can pre-process those files before browserify compiles them. Transforms are also applied to `dr.entryPage` which is configured in package.json.
 
+### Adding your own Browserify transform
+By adding transform to Browserify, you may extend capabilities of bundle compiler, like supporting new language compilation. Please read Browserify documentation about how to write a transform first.
+```js
+var through = require('through2');
+
+require('@dr-core/browserify-builder').addTransform(function(filePath) {
+	return through(); // Empty transform
+});
+```
+**package.json**, always specify "builderPriority" with a value higher than `@dr-core/browserify-builder`, it needs to setup tranform before `@dr-core/browserify-builder` starts, e.g.:
+```json
+builderPriority: "before @dr-core/browserify-builder"
+```
+> Be aware of transforms sequence, there might be multiple transforms provided by different package, if they process same type of files, make sure to use proper `builderPriority` to adjust order of adding transform from each package to Browserify
+
 ### Priority
 3000
 

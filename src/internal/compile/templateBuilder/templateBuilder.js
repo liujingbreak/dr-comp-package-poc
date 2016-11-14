@@ -11,17 +11,17 @@ var swigInjectLoader = require('swig-package-tmpl-loader');
 var parser = require('./template-parser').parser;
 var injector;
 
-require('@dr-core/browserify-builder').addTransform(transformFactory);
-module.exports = {
-	compile: function() {
-		injector = require('__injector');
-		swigInjectLoader.swigSetup(swig, {injector: injector});
-		return null;
-	},
-	swig: swig,
-	testable: {
-		preParseTemplate: preParseTemplate
-	}
+exports.compile = function() {
+	require('@dr-core/browserify-builder').addTransform(transformFactory);
+	injector = require('__injector');
+	swigInjectLoader.swigSetup(swig, {injector: injector});
+	return null;
+};
+
+exports.swig = swig;
+
+exports.testable = {
+	preParseTemplate: preParseTemplate
 };
 
 var packageCache = {};

@@ -56,7 +56,7 @@ e.g.
 | 属性 | 说明
 | -- | --
 | `dr.type` | 当value是"core"是，平台node server启动时会先加载当前的package，执行module.exports.activate(), 这样这个package 就是API provider, 可以用于monkey patch 新的属性或方法到api对象。`dr.type` 还可以有其他的值，`server` 代表是Node service package; `builder` 代表是一个build tool, `gulp compile`会依次调用他们
-| `dr.serverPriority` | number 或string, 可以用于package调用排序(调用主文件`exports.activate(api)`时的顺序)，lib/packageMgr/packagePriorityHelper.js负责处理priority排序, 缺省时默认为5000,数字越小越优先，支持Async，当exports.activate() 返回类型是Promise时，只有resolve了才会依次调用下一个package; 也可以是`before|after <package-name>`的string格式，比如'before @dr/my-package', 所有before, after相同package的priority会被视为可以同时，以Promise.all()的方式处理主文件的返回结果，然后调用下一个package。
+| `dr.serverPriority` | number 或string, 可以用于package调用排序(调用主文件`exports.activate(api)`时的顺序)，lib/packageMgr/packagePriorityHelper.js负责处理priority排序, 缺省时默认为5000,数字越大越优先，支持Async，当exports.activate() 返回类型是Promise时，只有resolve了才会依次调用下一个package; 也可以是`before|after <package-name>`的string格式，比如'before @dr/my-package', 所有before, after相同package的priority会被视为可以同时，以Promise.all()的方式处理主文件的返回结果，然后调用下一个package。
 | `dr.builderPriority` | 同 `dr.serverPriority`, 对于`dr.type`为`builder`时，调用 `exports.compile(api)`的顺序排序
 | `dr.noLint` | `gulp lint`不会对当前package check code style
 | `dr.noWatch` | `gulp watch` will skip current package
