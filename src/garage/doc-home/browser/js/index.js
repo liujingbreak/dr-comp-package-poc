@@ -17,13 +17,13 @@ docHome.config(['$controllerProvider', '$compileProvider', '$filterProvider', '$
 	function($controllerProvider, $compileProvider, $filterProvider, $provide, $stateProvider, $urlRouterProvider) {
 		// cache these providers so that we can lazy load angular component later on
 		// see http://ify.io/lazy-loading-in-angularjs/
-		docHome.controllerProvider = $controllerProvider;
-		docHome.compileProvider    = $compileProvider;
-		docHome.filterProvider     = $filterProvider;
-		docHome.provide            = $provide;
+		docHome.$controllerProvider = $controllerProvider;
+		docHome.$compileProvider    = $compileProvider;
+		docHome.$filterProvider     = $filterProvider;
+		docHome.$provide            = $provide;
 		docHome.$stateProvider = $stateProvider;
 		docHome.$urlRouterProvider = $urlRouterProvider;
-		textAnim.register(docHome.compileProvider);
+		textAnim.register(docHome.$compileProvider);
 		require('./routes')($stateProvider, $urlRouterProvider);
 	}]);
 docHome
@@ -36,7 +36,6 @@ require('./controllers/mainController')(docHome);
 require('./controllers/introController')(docHome);
 require('./controllers/asideController')(docHome);
 require('./controllers/docController')(docHome);
-require('./controllers/splitLoadController')(docHome);
 require('./directives/animate')(docHome);
 require('./directives/menuAside')(docHome);
 require('./directives/docHome')(docHome);

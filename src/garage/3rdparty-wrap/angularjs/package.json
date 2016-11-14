@@ -1,21 +1,21 @@
 {
   "name": "@dr/angularjs",
-  "version": "1.4.5",
-  "description": "wrapper of angularjs v1.4.5 and jquery as dependency",
+  "version": "1.5.8",
+  "description": "wrapper of angularjs v1.5.8 and jquery as dependency",
   "browser": "main.js",
-  "style": "angular-1.4.5/angular-csp.css",
+  "style": "angular-1.5.8/angular-csp.css",
   "dr": {
     "bundle": "ui-lib",
     "browserifyNoParse": [
-      "./angular-1.4.5/angular.js",
-      "./angular-1.4.5/angular-animate.js",
-      "./angular-1.4.5/angular-cookies.js",
-      "./angular-1.4.5/angular-route.js",
-      "./angular-1.4.5/angular-aria.js",
-      "./angular-1.4.5/angular-messages.js",
-      "./angular-1.4.5/angular-sanitize"
+      "./angular-1.5.8/angular.js",
+      "./angular-1.5.8/angular-animate.js",
+      "./angular-1.5.8/angular-cookies.js",
+      "./angular-1.5.8/angular-route.js",
+      "./angular-1.5.8/angular-aria.js",
+      "./angular-1.5.8/angular-messages.js",
+      "./angular-1.5.8/angular-sanitize"
     ],
-    "i18n": "angular-1.4.5/i18n/angular-locale_{locale}.js",
+    "i18n": "angular-1.5.8/i18n/angular-locale_{locale}.js",
     "noLint": true,
 	"noWatch": true
   },

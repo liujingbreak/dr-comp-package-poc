@@ -21,27 +21,5 @@ module.exports = function($stateProvider, $urlRouterProvider) {
 			}
 		}
 	});
-	$stateProvider.state('comp', {
-		url: '/components',
-		views: {
-			main: {
-				template: '<div ng-include="\'splitView\'"></ng-include>',
-				controller: 'SplitLoadController',
-				controllerAs: 'loaderVM',
-				resolve: {
-					loaded: ['$q', '$timeout', 'drLoadingService', loadComponentsStoreModule]
-				}
-			}
-		}
-	});
+	require('@dr/comp-store/routes')($stateProvider);
 };
-
-function loadComponentsStoreModule($q, $timeout, drLoadingService) {
-	var defer = $q.defer();
-	require.ensure(['@dr/comp-store'], function(require) {
-		//$timeout(function() {
-		defer.resolve(require('@dr/comp-store'));
-		//}, 5000);
-	});
-	return defer.promise;
-}

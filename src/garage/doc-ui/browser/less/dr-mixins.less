@@ -1,0 +1,279 @@
+@import "dr-variables.less";
+
+.dr-mixin-unselectable () {
+   -webkit-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
+}
+.dr-mixin-selectable () {
+   -webkit-user-select: text;
+   -moz-user-select: text;
+   -ms-user-select: text;
+   user-select: text;
+}
+.dr-mixin-border-box () {
+   -webkit-box-sizing: border-box;
+   -moz-box-sizing: border-box;
+   -ms-box-sizing: border-box;
+   box-sizing: border-box;
+}
+.dr-mixin-content-box () {
+   -webkit-box-sizing: content-box;
+   -moz-box-sizing: content-box;
+   -ms-box-sizing: content-box;
+   box-sizing: content-box;
+}
+.dr-mixin-maximize () {
+   position: absolute;
+   top: 0;
+   right: 0;
+   bottom: 0;
+   left: 0;
+}
+.dr-mixin-contain () {
+   &:after {
+	   content: "";
+	   display: block;
+	   clear: both;
+   }
+}
+.dr-mixin-label-text () {
+   text-transform: uppercase;
+   font-size: @dr-fontsize-small;
+   font-weight: @dr-fontweight-bold;
+}
+.dr-mixin-rounded ( @tl : @dr-radius, @tr : @dr-radius, @br : @dr-radius, @bl : @dr-radius ) {
+   border-radius: @tl @tr @br @bl;
+}
+.dr-mixin-noround () {
+   border-radius: 0;
+}
+.dr-mixin-rounded-t () {
+   border-radius: @dr-radius @dr-radius 0 0;
+}
+.dr-mixin-rounded-r () {
+   border-radius: 0 @dr-radius @dr-radius 0;
+}
+.dr-mixin-rounded-b () {
+   border-radius: 0 0 @dr-radius @dr-radius;
+}
+.dr-mixin-rounded-l () {
+   border-radius: @dr-radius 0 0 @dr-radius;
+}
+.dr-mixin-rounded-tl () {
+   border-radius: @dr-radius 0 0 0;
+}
+.dr-mixin-rounded-tr () {
+   border-radius: 0 @dr-radius 0 0;
+}
+.dr-mixin-rounded-bl () {
+   border-radius: 0 0 0 @dr-radius;
+}
+.dr-mixin-rounded-br () {
+   border-radius: 0 0 @dr-radius 0;
+}
+.dr-mixin-expand ( @value : @dr-unit-half ) {
+   margin-left: -@value;
+   margin-right: -@value;
+}
+.dr-mixin-reduce ( @value : @dr-unit-half ) {
+   padding-left: @value;
+   padding-right: @value;
+}
+.dr-mixin-reduce-l ( @value : @dr-unit-half ) {
+   padding-left: @value;
+}
+.dr-mixin-reduce-r ( @value : @dr-unit-half ) {
+   padding-right: @value;
+}
+.dr-mixin-liftup ( @value : @dr-unit-half ) {
+   margin-top: -@value;
+}
+
+// Appearance ..................................................................
+
+.dr-mixin-button () {
+   padding: @dr-unit-half;
+   text-align: left;
+   display: inline-block;
+   text-decoration: none;
+   .dr-mixin-unselectable();
+   > span,
+   > i {
+	   //display: table-cell;
+	   vertical-align: middle;
+   }
+   > i ~ span,
+   > span ~ i {
+	   padding-left: 8px;
+   }
+   > i:only-child {
+	   line-height: @dr-unit;
+   }
+   &:not([disabled]) {
+	   &:active {
+		   > span,
+		   > i { // firefox appears to be confused about the exact offset for 1px???
+			   .dr-mixin-transform (translateY(1px));
+		   }
+	   }
+   }
+}
+.dr-mixin-button-max () {
+   span {
+	   width: 100%;
+   }
+}
+
+
+// Transitions ..................................................................
+
+.dr-mixin-transition ( @what : all, @length : @dr-transition-fast, @easing : none, @delay : 0s ) {
+   -webkit-transition-property: @what;
+   -moz-transition-property: @what;
+   -ms-transition-property: @what;
+   transition-property: @what;
+   .dr-mixin-transition-duration (@length);
+   .dr-mixin-transition-timing (@easing);
+   -webkit-transition-delay: @delay;
+   -moz-transition-delay: @delay;
+   -ms-transition-delay: @delay;
+   transition-delay: @delay;
+}
+.dr-mixin-transition-transform ( @length : @dr-transition-fast, @easing : none, @delay : 0s ) {
+   .dr-mixin-transition ( none, @length, @easing, @delay );
+   -webkit-transition-property: -webkit-transform;
+   -moz-transition-property: -moz-tranform;
+   -ms-transition-property: -ms-transform;
+   transition-property: transform;
+}
+.dr-mixin-transition-duration (@length: @dr-transition-fast) {
+   -webkit-transition-duration: @length;
+   -moz-transition-duration: @length;
+   -ms-transition-duration: @length;
+   transition-duration: @length;
+}
+.dr-mixin-transition-timing (@easing: ease-in-out) {
+   -webkit-transition-timing-function: @easing;
+   -moz-transition-timing-function: @easing;
+   -ms-transition-timing-function: @easing;
+   transition-timing-function: @easing;
+}
+.dr-mixin-transition-delay (@delay: 0) {
+   -webkit-transition-delay: @delay;
+   -moz-transition-delay: @delay;
+   -ms-transition-delay: @delay;
+   transition-delay: @delay;
+}
+
+// Animations .......................................................................
+
+.dr-mixin-animation (@name, @duration: 300ms, @delay: 0s, @ease: ease) {
+   -webkit-animation: @name @duration @delay @ease;
+   -moz-animation:@name @duration @delay @ease;
+   -ms-animation: @name @duration @delay @ease;
+}
+
+
+// Transformations ..................................................................
+
+.dr-mixin-transform ( @shorthand : none ) {
+   -webkit-transform: @shorthand;
+   -moz-transform: @shorthand;
+   -ms-transform: @shorthand;
+   transform: @shorthand;
+}
+.dr-mixin-scale ( @factor ) {
+   -webkit-transform: scale( @factor );
+   -moz-transform: scale( @factor );
+   -ms-transform: scale( @factor );
+   transform: scale( @factor );
+}
+.dr-mixin-scaleX ( @factor ) {
+   -webkit-transform: scaleX( @factor );
+   -moz-transform: scaleX( @factor );
+   -ms-transform: scaleX( @factor );
+   transform: scaleX( @factor );
+}
+.dr-mixin-scaleY ( @factor ) {
+   -webkit-transform: scaleY( @factor );
+   -moz-transform: scaleY( @factor );
+   -ms-transform: scaleY( @factor );
+   transform: scaleY( @factor );
+}
+.dr-mixin-rotate ( @deg ) {
+   -webkit-transform: rotate( @deg );
+   -moz-transform: rotate( @deg );
+   -ms-transform: rotate( @deg );
+   transform: rotate( @deg );
+}
+.dr-mixin-translate ( @x, @y:0 ) {
+   -webkit-transform: translate( @x, @y );
+   -moz-transform: translate( @x, @y );
+   -ms-transform: translate( @x, @y );
+   transform: translate( @x, @y );
+}
+.dr-mixin-translate3d ( @x, @y: 0, @z: 0 ) {
+   -webkit-transform: translate3d( @x, @y, @z );
+   -moz-transform: translate3d( @x, @y, @z );
+   -ms-transform: translate3d( @x, @y, @z );
+   -ms-transform: translate3d( @x, @y, @z );
+}
+.dr-mixin-perspective ( @value: 1000 ) {
+   -webkit-perspective: @value;
+   -moz-perspective: @value;
+   -ms-perspective: @value;
+   perspective: @value;
+}
+.dr-mixin-transform-origin ( @x:center, @y:center  ) {
+   -webkit-transform-origin: @x @y;
+   -moz-transform-origin:@x @y;
+   -ms-transform-origin: @x @y;
+   -o-transform-origin:@x @y;
+}
+// TODO: read this: http://dev.opera.com/articles/css-will-change-property/
+.dr-mixin-maybeoptimze-gpu () {
+   -webkit-transform-style: preserve-3d;
+   -webkit-transform: translateZ(0);
+   -moz-transform: translateZ(0);
+   -ms-transform: translateZ(0);
+   transform: translateZ(0);
+   -webkit-backface-visibility: hidden;
+   -webkit-perspective: 1000;
+   -moz-backface-visibility: hidden;
+   -moz-perspective: 1000;
+   -ms-backface-visibility: hidden;
+   -ms-perspective: 1000;
+   backface-visibility: hidden;
+   perspective: 1000;
+}
+
+// Danger zone: Modern browsers only ...........................................
+
+.dr-mixin-flexbox () {
+   display: -webkit-flex;
+   display: flex;
+   -webkit-flex-wrap : nowrap;
+   flex-wrap : nowrap;
+}
+.dr-mixin-flexcol() { // TODO: flexrow (see gui.FlexCSS.js)
+   .dr-mixin-flexbox();
+   -webkit-flex-direction : column;
+   flex-direction : column;
+   min-height : auto;
+   height: 100%;
+}
+.dr-mixin-flexrow () {
+   .dr-mixin-flexbox();
+   -webkit-flex-direction : row;
+   flex-direction : row;
+   min-width : auto;
+   width: 100%;
+}
+.dr-mixin-flex(@value: 1) {
+   -webkit-flex-grow: @value;
+   -webkit-flex-basis: @value;
+   flex-grow: @value;
+   flex-basis: @value;
+}
