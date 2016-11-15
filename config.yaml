@@ -51,12 +51,13 @@ serverURL: ""
 # otherwise browserify will bundle them with every package that depends on.
 # Bundle file name could also be URL for loading bundle from an external CDN
 vendorBundleMap:
-  labjs: # API bundle, always be loaded at first
-    - lodash
-  ui-lib: # bundle name
+  common-lib:
       - jquery
       - bluebird
+      - lodash
+  ui-lib: # bundle name
       - angular-ui-router
+      - fontfaceobserver
   alt-lib:
       - "@dr/light-lodash"
 

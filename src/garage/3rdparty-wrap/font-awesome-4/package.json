@@ -1,6 +1,6 @@
 {
   "name": "@dr/font-awesome-4",
-  "version": "4.6.3",
+  "version": "4.6.3-1",
   "description": "Font awesome",
   "browser": "browser.js",
   "style": "less/font-awesome.less",
@@ -9,6 +9,9 @@
     "bundle": "ui-lib",
     "noWatch": true,
     "noLint": true
+  },
+  "dependencies": {
+	  "fontfaceobserver": "^2.0.5"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

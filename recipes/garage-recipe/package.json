@@ -5,7 +5,7 @@
   "dependencies": {
     "@dr/angularjs": "1.5.8",
     "@dr/fabricjs": "1.0.0",
-    "@dr/font-awesome-4": "4.6.3",
+    "@dr/font-awesome-4": "4.6.3-1",
     "@dr/gsap": "0.0.23",
     "@dr/light-lodash": "0.0.4",
     "@dr/comp-store": "0.0.6",
