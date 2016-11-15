@@ -212,7 +212,6 @@ PageCompiler.prototype.injectElements = function($, bundleSet, pkInstance, confi
 	_injectElementsByBundle($, head, body, this.buildInfo.labJSBundleName, config, revisionMeta);
 	_injectElementsByBundle($, cssPrinterDiv, $jsPrinter('div'), this.buildInfo.labJSBundleName, config, revisionMeta);
 	// -- Insert CSS bundle <link> tags
-	var self = this;
 	_.forOwn(bundleSet, function(v, bundleName) {
 		var bundleCss = createCssLinkElement($, bundleName, config, revisionMeta);
 		if (bundleCss) {
