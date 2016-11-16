@@ -7,7 +7,7 @@ var through = require('through2');
 var gutil = require('gulp-util');
 var PluginError = gutil.PluginError;
 var File = require('vinyl');
-var swig = require('swig');
+//var swig = require('swig');
 var api = require('__api');
 var log = require('@dr/logger').getLogger(api.packageName + '.pageCompiller');
 var packageUtils = api.packageUtils;
@@ -98,14 +98,15 @@ PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageTyp
 		return compiler.transform(pathInfo.abs, content);
 	})
 	.then(content => {
-		var $ = cheerio.load(content);
+		var $ = cheerio.load(content, {decodeEntities: false});
 		compiler.injectElements($, buildInfo.bundleDepsGraph[instance.longName], instance,
 			buildInfo.config, buildInfo.revisionMeta, pathInfo, bootstrapCode);
 		var hackedHtml = $.html();
 		hackedHtml = api.replaceAssetsUrl(hackedHtml, pathInfo.abs);
 
 		var pagePath;
-		var mappedTo = _.get(api.config(), ['entryPageMapping', instance.shortName]) || _.get(api.config(), ['entryPageMapping', instance.longName]);
+		var mappedTo = _.get(api.config(), ['entryPageMapping', instance.shortName]) ||
+			_.get(api.config(), ['entryPageMapping', instance.longName]);
 		if (mappedTo) {
 			if (mappedTo === '/')
 				pagePath = Path.resolve(pathInfo.path);
@@ -197,7 +198,12 @@ function needUpdateEntryPage(builtBundles, bundleSet) {
 	});
 }
 
-var entryBootstrapTpl = swig.compileFile(Path.join(__dirname, 'templates', 'entryPageBootstrap.js.swig'), {autoescape: false});
+var entryBootstrapTpl = _.template(fs.readFileSync(Path.join(__dirname, 'templates', 'entryBootstrap.js.tmpl'), 'utf8'),
+	{
+		interpolate: /\{\{([\s\S]+?)\}\}/g,
+		evaluate: /\{%([\s\S]+?)%\}/g
+	});
+
 PageCompiler.entryBootstrapTpl = entryBootstrapTpl;
 
 PageCompiler.prototype.injectElements = function($, bundleSet, pkInstance, config, revisionMeta, pathInfo, bootstrapCode) {
@@ -205,8 +211,8 @@ PageCompiler.prototype.injectElements = function($, bundleSet, pkInstance, confi
 	var head = $('head');
 	// $cssPrinter, $jsPrinter are used to output these bootstrap HTML fragment to seperate files, which
 	// can be read by server-side rendering program, e.g. express res.render()
-	var $cssPrinter = cheerio.load('<div></div>');
-	var $jsPrinter = cheerio.load('<div></div>');
+	var $cssPrinter = cheerio.load('<div></div>', {decodeEntities: false});
+	var $jsPrinter = cheerio.load('<div></div>', {decodeEntities: false});
 
 	var cssPrinterDiv = $cssPrinter('div');
 	_injectElementsByBundle($, head, body, this.buildInfo.labJSBundleName, config, revisionMeta);
@@ -230,11 +236,11 @@ PageCompiler.prototype.injectElements = function($, bundleSet, pkInstance, confi
 
 	$jsPrinter('div').append(jsDependencyDom);
 	this.entryFragmentFiles.push(new File({
-		path: 'entryFragment/' + pkInstance.longName + '/' + pathInfo.path + '.js.html',
+		path: 'entryFragment/' + api.getBuildLocale() + '/' + pkInstance.longName + '/' + pathInfo.path + '.js.html',
 		contents: new Buffer($jsPrinter.html('div *'))
 	}));
 	this.entryFragmentFiles.push(new File({
-		path: 'entryFragment/' + pkInstance.longName + '/' + pathInfo.path + '.style.html',
+		path: 'entryFragment/' + api.getBuildLocale() + '/' + pkInstance.longName + '/' + pathInfo.path + '.style.html',
 		contents: new Buffer($cssPrinter.html('div *'))
 	}));
 	body.append(jsDependencyDom.clone());
@@ -292,7 +298,7 @@ function createCssLinkElement($, bundleName, config, revisionMeta) {
 		return null;
 	}
 	log.trace(file + ' -> ' + mappedFile);
-	var src = config().staticAssetsURL + '/' + mappedFile;
+	var src = config().staticAssetsURL + '/' + api.localeBundleFolder() + mappedFile;
 	var rs = URL_PAT.exec(src);
 	src = (rs[1] ? rs[1] : '') + rs[2].replace(/\/\/+/g, '/');
 	element.attr('rel', 'stylesheet');

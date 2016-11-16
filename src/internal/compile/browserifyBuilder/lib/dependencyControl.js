@@ -134,6 +134,9 @@ function updatePack2localeModule(map) {
 	_.assign(pk2localeModule, map);
 }
 
+/**
+ * @Deprecated
+ */
 function addI18nModule(name) {
 	i18nModuleNameSet[name] = 1;
 }
@@ -231,9 +234,9 @@ function createEntryPackageDepGraph() {
 			}
 		} else {
 			deps = depsMap[file];
-			deps = deps ? deps : depsMap[resolvedPath2Module[file]];
+			deps = deps || depsMap[resolvedPath2Module[file]];
 			if (parentDepsMap && !deps) {
-				deps = parentDepsMap[file] ? parentDepsMap[file] : parentDepsMap[id];
+				deps = parentDepsMap[file] || parentDepsMap[id];
 			}
 		}
 		if (!deps && !_.has(i18nModuleNameSet, id) && !_.has(packageInfo.urlPackageSet, id)) {
@@ -318,7 +321,14 @@ function createEntryBundleDepGraph() {
 	function createGraph(entries, isSplitPoint) {
 		var bundleDepsGraph = {};
 		_.forOwn(entries, function(deps, moduleName) {
-			var currBundle = moduleMap[moduleName].bundle;
+			var currBundle = _.get(moduleMap, [moduleName, 'bundle']);
+			if (!currBundle) {
+				throw new Error('No bundle setting for entry/split point ' + moduleName);
+				// var parentModuleMatch = /^((?:@[^\/]+\/)?[^\/]+)/.exec(moduleName);
+				// if (parentModuleMatch) { // moduleName is in form of "<package>/**/*"
+				// 	currBundle = _.get(moduleMap, [parentModuleMatch[1], 'bundle']);
+				// }
+			}
 			var depBundleSet = bundleDepsGraph[moduleName] = {};
 			var locDepBundleSet = localeBundlesDepsGraph[moduleName] = {};
 			depBundleSet[currBundle] = true;
@@ -329,24 +339,25 @@ function createEntryBundleDepGraph() {
 					return;
 				}
 				var bundle, msg;
-				if (_.has(i18nModuleNameSet, dep)) {
-					// it is i18n module like "@dr/angularjs/i18n" which is not belong to any initial bundle
-					api.config().locales.forEach(locale => {
-						var graph = locDepBundleSet[locale];
-						if (!graph) {
-							graph = locDepBundleSet[locale] = {};
-						}
-						var localeModuleName = pk2localeModule[dep][locale];
-						var localeDeps = packageDepsGraph.localeEntries[locale][localeModuleName];
-						graph[packageInfo.localeEntryMap[locale][localeModuleName].bundle] = true;
-						//log.debug('localeDeps: ' + JSON.stringify(localeDeps, null, '  '));
-						_.keys(localeDeps).forEach(moduleName => {
-							if (moduleMap[moduleName].bundle)
-								graph[moduleMap[moduleName].bundle] = true;
-						});
-					});
-					return;
-				} else if (_.startsWith(dep, 'sp:')) {
+				// if (_.has(i18nModuleNameSet, dep)) {
+				// 	// it is i18n module like "@dr/angularjs/i18n" which is not belong to any initial bundle
+				// 	api.config().locales.forEach(locale => {
+				// 		var graph = locDepBundleSet[locale];
+				// 		if (!graph) {
+				// 			graph = locDepBundleSet[locale] = {};
+				// 		}
+				// 		var localeModuleName = pk2localeModule[dep][locale];
+				// 		var localeDeps = packageDepsGraph.localeEntries[locale][localeModuleName];
+				// 		graph[packageInfo.localeEntryMap[locale][localeModuleName].bundle] = true;
+				// 		//log.debug('localeDeps: ' + JSON.stringify(localeDeps, null, '  '));
+				// 		_.keys(localeDeps).forEach(moduleName => {
+				// 			if (moduleMap[moduleName].bundle)
+				// 				graph[moduleMap[moduleName].bundle] = true;
+				// 		});
+				// 	});
+				// 	return;
+				// } else
+				if (_.startsWith(dep, 'sp:')) {
 					// split point
 					return;
 				} else if (!moduleMap[dep] || !(bundle = moduleMap[dep].bundle)) {
@@ -368,12 +379,7 @@ function createEntryBundleDepGraph() {
 				if (bundle)
 					depBundleSet[bundle] = true;
 			});
-			// if (isSplitPoint) {
-			// 	delete depBundleSet.core; // No need for duplicate core bundle
-			// } else {
-			// 	// Core bundle should always be depended by all entry page modules!
-			// 	depBundleSet.core = true;
-			// }
+
 			_.forOwn(depBundleSet, (whatever, initialBundle) => {
 				_.forOwn(locDepBundleSet, (localeBundleSet, locale) => {
 					// remove any locale bundle that are duplicate with initial bundles, we don't want to load them twice in browser.
@@ -391,12 +397,12 @@ function createEntryBundleDepGraph() {
 			_.forOwn(depBundleSet, function(whatever, bundle) {
 				PrintNode({content: chalk.magenta(bundle), parent: subNode1});
 			});
-			_.forOwn(localeBundlesDepsGraph[entryOrSplitPoint], (depBundleSet, locale) => {
-				var subNode2 = PrintNode({content: '{locale: ' + chalk.cyan(locale) + '}', parent: subNode1});
-				_.forOwn(depBundleSet, function(whatever, bundle) {
-					PrintNode({content: chalk.magenta(bundle), parent: subNode2});
-				});
-			});
+			// _.forOwn(localeBundlesDepsGraph[entryOrSplitPoint], (depBundleSet, locale) => {
+			// 	var subNode2 = PrintNode({content: '{locale: ' + chalk.cyan(locale) + '}', parent: subNode1});
+			// 	_.forOwn(depBundleSet, function(whatever, bundle) {
+			// 		PrintNode({content: chalk.magenta(bundle), parent: subNode2});
+			// 	});
+			// });
 		});
 		return node;
 	}

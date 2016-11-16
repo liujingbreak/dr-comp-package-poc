@@ -12,27 +12,27 @@ var jsParser = require('./jsParser');
 
 var config;
 
-module.exports = {
-	compile: function() {
-		config = api.config;
-		if (!api.argv.translate) {
-			log.debug('skip');
-			return null;
-		}
-		var proms = [];
-		if (api.argv.p) {
-			api.packageUtils.findAllPackages(api.argv.p, (name, entryPath, parsedName, json, packagePath) => {
-				proms.push(scanPackage(packagePath, json));
-			}, 'src');
-		} else {
-			api.packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
-				proms.push(scanPackage(packagePath, json));
-			}, 'src');
-		}
-		return Promise.all(proms);
-	},
-	scanPackage: scanPackage
+exports.compile = function() {
+	config = api.config;
+	if (!api.argv.translate) {
+		log.debug('Replacing translatable text');
+		require('@dr-core/browserify-builder').addTransform(
+			require('./translate-replacer').createBrowserifyReplacerTransform(api.argv.locale || api.config.get('locales[0]')));
+		return null;
+	}
+	var proms = [];
+	if (api.argv.p) {
+		api.packageUtils.findAllPackages(api.argv.p, (name, entryPath, parsedName, json, packagePath) => {
+			proms.push(scanPackage(packagePath, json));
+		}, 'src');
+	} else {
+		api.packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
+			proms.push(scanPackage(packagePath, json));
+		}, 'src');
+	}
+	return Promise.all(proms);
 };
+exports.scanPackage = scanPackage;
 
 var readFileAsync = Promise.promisify(fs.readFile);
 var writeFileAsync = Promise.promisify(fs.writeFile);
@@ -63,13 +63,15 @@ function scanPackage(packagePath) {
 	var proms = glob.sync(Path.join(packagePath, '/**/*.html').replace(/\\/g, '/')).map(path => {
 		return readFileAsync(path, 'utf8').then(content => {
 			log.debug('scan: ' + path);
-			var $ = cheerio.load(content);
-			$('.t').each((i, dom) => {
+			var $ = cheerio.load(content, {decodeEntities: false});
+			$('.t').each(onElement);
+			$('.dr-translate').each(onElement);
+			$('[t]').each(onElement);
+			$('[dr-translate]').each(onElement);
+			function onElement(i, dom) {
 				dirty = doElement($(dom), yamls, existings, trackExess) || dirty;
-			});
-			$('[translate]').each((i, dom) => {
-				dirty = doElement($(dom), yamls, existings, trackExess) || dirty;
-			});
+				return true;
+			}
 		});
 	});
 
@@ -78,7 +80,7 @@ function scanPackage(packagePath) {
 			log.debug('scan: ' + path);
 			jsParser(content, (key) => {
 				dirty = onKeyFound(key, yamls, existings, trackExess) || dirty;
-			});
+			}, path);
 		});
 	});
 
@@ -108,11 +110,11 @@ function scanPackage(packagePath) {
 
 function doElement(el, yamls, existing, trackExess) {
 	var key;
-	var translateAttr = el.attr('translate');
+	var translateAttr = el.attr('dr-translate');
 	if (translateAttr && translateAttr !== '') {
 		key = translateAttr;
 	} else {
-		key = el.text();
+		key = el.html();
 	}
 	log.debug('found key in HTML: ' + key);
 	return onKeyFound(key, yamls, existing, trackExess);
@@ -124,6 +126,8 @@ function onKeyFound(key, yamls, existing, trackExess) {
 	var newLine = quote + ': ' + quote + '\n';
 	var dirty = false;
 	_.forOwn(yamls, (content, locale) => {
+		if (yamls[locale].length > 0 && !(_.endsWith(yamls[locale], '\n') || _.endsWith(yamls[locale], '\r')))
+			yamls[locale] += '\n';
 		if (_.has(trackExess, locale))
 			delete trackExess[locale][key];
 		if (!existing[locale] || !_.has(existing[locale], key)) {

@@ -1,14 +1,12 @@
 var through = require('through2');
 var Path = require('path');
+var api = require('__api');
 var stream = require('stream');
-var __api = require('__api');
-var log = require('@dr/logger').getLogger(__api.packageName + '.browserifyHelper');
-var swig = require('swig');
+var log = require('@dr/logger').getLogger(api.packageName + '.browserifyHelper');
 var fs = require('fs');
 var esParser = require('./esParser');
 var _ = require('lodash');
-var api = require('__api');
-swig.setDefaults({autoescape: false});
+
 var config, injector;
 
 module.exports = function(_config, _injector) {
@@ -26,7 +24,7 @@ module.exports = function(_config, _injector) {
 	});
 	return {
 		JsBundleEntryMaker: JsBundleEntryMaker,
-		JsBundleWithI18nMaker: JsBundleWithI18nMaker,
+//		JsBundleWithI18nMaker: JsBundleWithI18nMaker,
 		buildins: buildins,
 		buildinSet: buildinSet,
 		str2Stream: str2Stream
@@ -35,8 +33,8 @@ module.exports = function(_config, _injector) {
 //exports.dependencyTree = dependencyTree;
 
 var BOOT_FUNCTION_PREFIX = '_deps_';
-var apiVariableTpl = swig.compileFile(Path.join(__dirname, 'templates', 'apiVariable.js.swig'),
-	{autoescape: false});
+var apiVariableTpl = _.template(fs.readFileSync(
+	Path.join(__dirname, 'templates', 'apiVariable.js.tmpl'), 'utf8'));
 
 function JsBundleEntryMaker(api, bundleName, packageBrowserInstances,
 	packageSplitPointMap) {
@@ -61,11 +59,10 @@ function JsBundleEntryMaker(api, bundleName, packageBrowserInstances,
 }
 
 var apiVarablePat = /(?:^|[^\w$\.])__api(?:$|[^\w$])/mg;
-var requireI18nPat = /(^|[^\w$\.])require\s*\(([^)]*)\)/mg;
 
 JsBundleEntryMaker.prototype = {
-	entryBundleFileTpl: swig.compileFile(Path.join(__dirname, 'templates', 'bundle.js.swig'), {autoescape: false}),
-
+	entryBundleFileTpl:
+	_.template(fs.readFileSync(Path.join(__dirname, 'templates', 'bundle.js.tmpl'), 'utf8'), {imports: {api: api, _: _}}),
 	setLocale: function(locale) {
 		this.locale = locale;
 	},
@@ -154,10 +151,10 @@ JsBundleEntryMaker.prototype = {
 			source = 'require.ensure = function(){return drApi.ensureRequire.apply(drApi, arguments)};\n' +
 				source;
 		}
-		source = source.replace(requireI18nPat, (match, leading, path) => {
-			path = path.replace(/\{locale\}/g, locale ? locale : 'en');
-			return leading + 'require(' + path + ')';
-		});
+		// source = source.replace(requireI18nPat, (match, leading, path) => {
+		// 	path = path.replace(/\{locale\}/g, locale ? locale : 'en');
+		// 	return leading + 'require(' + path + ')';
+		// });
 
 		return source;
 	},
@@ -166,7 +163,7 @@ JsBundleEntryMaker.prototype = {
 		return str2Stream(this.createPackageListFile.apply(this, arguments));
 	}
 };
-
+/*
 function JsBundleWithI18nMaker(api, bundleName, packageBrowserInstances,
 	packageSplitPointMap, browserResolve) {
 	if (!(this instanceof JsBundleWithI18nMaker)) {
@@ -189,7 +186,7 @@ JsBundleWithI18nMaker.prototype = _.create(JsBundleEntryMaker.prototype, {
 			var i18nPath = this.i18nPath(pkInstance, locale);
 			var i18nModuleName = pkInstance.longName + '/i18n';
 			if (i18nPath) {
-				var relI18nPath = Path.relative(__api.config().rootPath, i18nPath);
+				var relI18nPath = Path.relative(api.config().rootPath, i18nPath);
 				i18nModules.push({
 					longName: i18nModuleName
 				});
@@ -212,7 +209,7 @@ JsBundleWithI18nMaker.prototype = _.create(JsBundleEntryMaker.prototype, {
 			return null;
 		}
 		return this.entryBundleFileTpl({
-			bundle: this.bundleName,
+			bundle: this.bundleName + '_' + locale,
 			requireFilesFuncName: '_i18nBundle_' + safeBundleNameOf(this.bundleName),
 			packageInstances: i18nModules
 		});
@@ -252,7 +249,7 @@ JsBundleWithI18nMaker.prototype = _.create(JsBundleEntryMaker.prototype, {
 	}
 });
 JsBundleWithI18nMaker.prototype.constructor = JsBundleWithI18nMaker;
-
+*/
 function safeBundleNameOf(bundleName) {
 	return bundleName.replace(/[-\.&#@]/g, '_');
 }
@@ -265,11 +262,11 @@ function str2Stream(str) {
 	return output;
 }
 
-function fileExists(file) {
-	try {
-		fs.accessSync(file, fs.R_OK);
-		return true;
-	} catch (e) {
-		return false;
-	}
-}
+// function fileExists(file) {
+// 	try {
+// 		fs.accessSync(file, fs.R_OK);
+// 		return true;
+// 	} catch (e) {
+// 		return false;
+// 	}
+// }

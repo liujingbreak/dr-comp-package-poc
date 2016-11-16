@@ -51,8 +51,9 @@ BrowserApi.ensureRequire = function(splitPoints, callBack) {
 	var css = {}; // CSS bundles need to be loaded
 	var allLoaded = true;
 	_.each(splitPoints, function(splitPoint) {
-		var jsBundles = self.splitPoints[splitPoint].js;
-		var cssBundles = self.splitPoints[splitPoint].css;
+		var splitPointMeta = self.splitPoints[splitPoint];
+		var jsBundles = splitPointMeta.js;
+		var cssBundles = splitPointMeta.css;
 		_.each(jsBundles, function(jsBundle) {
 			if (!_.has(loadedBundleFileSet, jsBundle)) {
 				allLoaded = false;
@@ -65,15 +66,18 @@ BrowserApi.ensureRequire = function(splitPoints, callBack) {
 				css[cssBundle] = 1;
 			}
 		});
-		var localedBundles = self.splitPoints[splitPoint];
-		if (localedBundles) {
-			_.each(localedBundles.locales[self.lastLoadedLocale].js, function(bundle) {
+		if (!self.lastLoadedLocale) {
+			// locale resource has not been loaded, skip loading splitpoint's locale resource
+			return;
+		}
+		if (splitPointMeta) {
+			_.each(splitPointMeta.locales[self.lastLoadedLocale].js, function(bundle) {
 				if (!_.has(loadedBundleFileSet, bundle)) {
 					allLoaded = false;
 					js[bundle] = 1;
 				}
 			});
-			_.each(localedBundles.locales[self.lastLoadedLocale].css, function(bundle) {
+			_.each(splitPointMeta.locales[self.lastLoadedLocale].css, function(bundle) {
 				if (!_.has(loadedBundleFileSet, bundle)) {
 					allLoaded = false;
 					css[bundle] = 1;
@@ -135,16 +139,23 @@ BrowserApi.prototype = {
 	},
 
 	loadLocaleBundles: function(locale, waitCallback) {
+		BrowserApi.prototype.lastLoadedLocale = locale;
+
 		var self = this;
 		var prefix = this.config().staticAssetsURL;
 		var localeBundles = this.localeBundlesMap[locale];
+
+		if (!localeBundles)
+			return waitCallback();
 		var localeBundleJsUrls = _.map(localeBundles.js, function(bundle) {
 			return prefix + '/' + bundle;
 		});
 		if (localeBundles.css && localeBundles.css.length > 0) {
 			this._loadCssBundles(localeBundles.css);
 		}
-		BrowserApi.prototype.lastLoadedLocale = locale;
+
+		if (!localeBundleJsUrls || localeBundleJsUrls.length === 0)
+			return waitCallback();
 		window.$LAB.script(localeBundleJsUrls).wait(function() {
 			BrowserApi.prototype.i18nLoaded = true;
 			self.markBundleLoaded(localeBundles.js);

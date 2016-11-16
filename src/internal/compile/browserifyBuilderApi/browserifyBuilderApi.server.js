@@ -5,40 +5,46 @@ var readFileAsync = Promise.promisify(fs.readFile);
 
 exports.activate = function(api) {
 	var apiProto = Object.getPrototypeOf(api);
-	apiProto.getCompiledViewPath = function(packageRelativePath) {
-		return '/' + this.config().destDir + '/server/' + this.packageShortName + '/' + packageRelativePath;
+	apiProto.getCompiledViewPath = function(packageRelativePath, locale) {
+		locale = locale ? locale + '/' : '';
+		return '/' + this.config().destDir + '/server/' + locale + this.packageShortName + '/' + packageRelativePath;
 	};
-	apiProto.entryJsHtmlFile = function(entryViewPath) {
+	apiProto.entryJsHtmlFile = function(entryViewPath, locale) {
 		if (!entryViewPath)
 			throw new Error('missing entryViewPath');
-		return this.config.resolve('destDir', 'entryFragment', this.packageName, entryViewPath + '.js.html');
+		locale = locale || api.config.get('locales')[0];
+		return this.config.resolve('destDir', 'entryFragment', locale, this.packageName, entryViewPath + '.js.html');
 	};
-	apiProto.entryStyleHtmlFile = function(entryViewPath) {
+	apiProto.entryStyleHtmlFile = function(entryViewPath, locale) {
 		if (!entryViewPath)
 			throw new Error('missing entryViewPath');
-		return this.config.resolve('destDir', 'entryFragment', this.packageName, entryViewPath + '.style.html');
+		locale = locale || api.config.get('locales')[0];
+		return this.config.resolve('destDir', 'entryFragment', locale, this.packageName, entryViewPath + '.style.html');
 	};
-	apiProto.entryJsHtmlAsync = function(entryViewPath) {
+	apiProto.entryJsHtmlAsync = function(entryViewPath, locale) {
 		if (!entryViewPath)
 			throw new Error('missing entryViewPath');
-		return readFileAsync(this.config.resolve('destDir', 'entryFragment', this.packageName, entryViewPath + '.js.html'), 'utf8');
+		locale = locale || api.config.get('locales')[0];
+		return readFileAsync(this.config.resolve('destDir', 'entryFragment', locale, this.packageName, entryViewPath + '.js.html'), 'utf8');
 	};
-	apiProto.entryStyleHtmlAsync = function(entryViewPath) {
+	apiProto.entryStyleHtmlAsync = function(entryViewPath, locale) {
 		if (!entryViewPath)
 			throw new Error('missing entryViewPath');
-		return readFileAsync(this.config.resolve('destDir', 'entryFragment', this.packageName, entryViewPath + '.style.html'), 'utf8');
+		locale = locale || api.config.get('locales')[0];
+		return readFileAsync(this.config.resolve('destDir', 'entryFragment', locale, this.packageName, entryViewPath + '.style.html'), 'utf8');
 	};
 
-	apiProto.entryJsHtml = function(entryViewPath) {
+	apiProto.entryJsHtml = function(entryViewPath, locale) {
 		if (!entryViewPath)
 			throw new Error('missing entryViewPath');
-		console.log(this.config.resolve('destDir', 'entryFragment', this.packageName, entryViewPath + '.js.html'));
-		return fs.readFileSync(this.config.resolve('destDir', 'entryFragment', this.packageName, entryViewPath + '.js.html'), 'utf8');
+		locale = locale || api.config.get('locales')[0];
+		return fs.readFileSync(this.config.resolve('destDir', 'entryFragment', locale, this.packageName, entryViewPath + '.js.html'), 'utf8');
 	};
-	apiProto.entryStyleHtml = function(entryViewPath) {
+	apiProto.entryStyleHtml = function(entryViewPath, locale) {
 		if (!entryViewPath)
 			throw new Error('missing entryViewPath');
-		return fs.readFileSync(this.config.resolve('destDir', 'entryFragment', this.packageName, entryViewPath + '.style.html'), 'utf8');
+		locale = locale || api.config.get('locales')[0];
+		return fs.readFileSync(this.config.resolve('destDir', 'entryFragment', locale, this.packageName, entryViewPath + '.style.html'), 'utf8');
 	};
 };
 

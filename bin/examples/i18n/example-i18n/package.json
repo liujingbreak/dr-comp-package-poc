@@ -1,16 +1,15 @@
 {
   "name": "@dr/example-i18n",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Demo how we support i18n in browser side package",
-  "browser": "browser.js",
+  "browser": "module.js",
   "style": "style.less",
   "transforms": [
     "@dr/parcelify-module-resolver"
   ],
   "dr": {
     "bundle": "example",
-    "entryPage": "index.html",
-    "i18n": "i18n/{locale}.js"
+    "entryPage": "index.html"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

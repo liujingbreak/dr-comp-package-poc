@@ -9,7 +9,6 @@ var log = require('log4js').getLogger(api.packageName);
 var resolveStaticUrl = require('@dr-core/browserify-builder-api').resolveUrl;
 
 var packagePathPat = /assets:\/\/((?:@[^\/]+\/)?[^\/]+)?(\/.*)/;
-var npmUrlPat = /npm:\/\/((?:@[^\/]+\/)?[^\/]+\/).*/;
 
 module.exports = function(file, options) {
 	var buf = '';
@@ -101,26 +100,28 @@ function replaceUrl(css, currPackage, file) {
 }
 
 function injectReplace(content, file) {
-	content.replace(/@import\s+["']([^'"]+)["']/g, (match, p1, offset, whole) => {
+	var replaced = content.replace(/@import\s+["']([^'"]+)["']/g, (match, p1, offset, whole) => {
 		if (p1.startsWith('npm://')) {
-			var newPackage = getInjectedPackage(file, npmUrlPat.exec(p1)[1]);
+			var newPackage = getInjectedPackage(file, p1.substring('npm://'.length));
 			if (newPackage) {
 				log.info(`Found less import target: ${p1}, replaced to ${newPackage}`);
-				return newPackage;
+				return '@import "npm://' + newPackage + '"';
 			}
 		}
-		return p1;
+		return match;
 	});
-	return content;
+	return replaced;
 }
 
 function getInjectedPackage(file, origPackageName) {
 	var factoryMap = api.browserInjector.factoryMapForFile(file);
 	if (factoryMap) {
-		var ij = factoryMap.getInjector(origPackageName);
-		if (ij && _.has(ij, 'substitute')) {
+		var ijSetting = factoryMap.matchRequire(origPackageName);
+		if (ijSetting && ijSetting.method === 'substitute') {
+			if (_.isFunction(ijSetting.value))
+				return ijSetting.value(file, ijSetting.execResult);
 			//log.debug(`Found less import target: ${origPackageName}, replaced to ${ij.substitute}`);
-			return ij.substitute;
+			return ijSetting.value;
 		}
 	}
 	return null;

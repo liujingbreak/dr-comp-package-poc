@@ -57,9 +57,10 @@ vendorBundleMap:
       - lodash
   ui-lib: # bundle name
       - angular-ui-router
-      - fontfaceobserver
   alt-lib:
       - "@dr/light-lodash"
+  preload-font:
+      - fontfaceobserver/fontfaceobserver
 
 # You may use external JS/CSS resource like CDN service instead of a local hosted bundle file,
 # `gulp compile` replaces those bundles with the URLs you set here in each eatry files.
@@ -184,4 +185,4 @@ express-app-enableCORS: false
 
 translate-generator:
     scanMethodNames:
-            - t
+            - drTranslate

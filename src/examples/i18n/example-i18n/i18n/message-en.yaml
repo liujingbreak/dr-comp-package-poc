@@ -1,0 +1,6 @@
+"我是任性的中文Key": "I am English text Key"
+"i18nText1-key": "i18nText1-value"
+"i18nText2-key": "i18nText2-value"
+"Hellow i18n": "Hellow Internationalization(i18n)"
+"现在时间是 {{ mainVm.time | date : 'medium' }}。": "Current time is {{ mainVm.time | date : 'medium' }}。"
+"Hellow I am text from a template html": "Hellow I am text from a template html"

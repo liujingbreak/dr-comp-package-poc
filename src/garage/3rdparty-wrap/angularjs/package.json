@@ -1,6 +1,6 @@
 {
   "name": "@dr/angularjs",
-  "version": "1.5.8",
+  "version": "1.5.9",
   "description": "wrapper of angularjs v1.5.8 and jquery as dependency",
   "browser": "main.js",
   "style": "angular-1.5.8/angular-csp.css",
@@ -17,13 +17,14 @@
     ],
     "i18n": "angular-1.5.8/i18n/angular-locale_{locale}.js",
     "noLint": true,
-	"noWatch": true
+    "noWatch": true,
+    "translatable": false
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-	  "jquery": "^1.12.0"
+    "jquery": "^1.12.0"
   },
   "author": "",
   "license": "ISC"

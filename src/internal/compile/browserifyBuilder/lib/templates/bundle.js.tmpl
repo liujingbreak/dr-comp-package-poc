@@ -1,0 +1,9 @@
+function <%= requireFilesFuncName %>() {
+<%
+	_.each(packageInstances, function(packageIns) {
+%>	require('<%= packageIns.longName %>');
+<% }); %>}
+<% if (api.config().devMode) {
+%>	var now = new Date();
+	window.console && console.log('Bundle of "<%= bundle %>" is loaded at ' + now.toLocaleTimeString() + '.' + now.getMilliseconds());
+<% }%>

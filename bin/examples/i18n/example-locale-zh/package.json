@@ -4,7 +4,10 @@
   "description": "A demo package that contains locale specific stuff",
   "browser": "index.js",
   "style": "zh-style.less",
-  "dr": {},
+  "transforms": ["@dr/parcelify-module-resolver"],
+  "dr": {
+	  "bundle": "example-locale-zh-bundle"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

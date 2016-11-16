@@ -8,7 +8,8 @@ require('./angular-1.5.8/angular-messages.js');
 require('./angular-1.5.8/angular-sanitize');
 // require('./angular-1.5.8/angular-touch.js');
 require('./angular-1.5.8/angular-resource.js');
-if (__api.isLocaleBundleLoaded()) {
-	require('@dr/angularjs/i18n');
-}
+require('./angular-1.5.8/i18n/angular-locale_{locale}');
+// if (__api.isLocaleBundleLoaded()) {
+// 	require('@dr/angularjs/i18n');
+// }
 module.exports = angular;

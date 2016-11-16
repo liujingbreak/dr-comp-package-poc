@@ -32,7 +32,7 @@ var PageCompiler = require('./pageCompiler');
 var walkPackages = require('@dr-core/build-util').walkPackages;
 var depCtl = require('./dependencyControl');
 var esParser = require('./esParser');
-var packageBrowserInstance = require('@dr-core/build-util').packageInstance;
+//var packageBrowserInstance = require('@dr-core/build-util').packageInstance;
 var rj = require('__injectorFactory');
 var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
 var fileAccessAsync = Promise.promisify(fs.access, {context: fs});
@@ -79,7 +79,11 @@ function initInjector(packageInfo) {
 		if (pack.packagePath) // no vendor package's path information
 			injector.addPackage(pack.longName, pack.packagePath);
 	});
-	injector.fromAllPackages().value('__api', {replacement: '__api'});
+	injector.fromAllPackages()
+	.replaceCode('__api', '__api')
+	.substitute(/^([^\{]*)\{locale\}(.*)$/,
+		(filePath, match) => match[1] + api.getBuildLocale() + match[2]);
+
 	injector.readInjectFile('browserify-inject.js');
 	Object.getPrototypeOf(api).browserInjector = injector;
 }
@@ -258,9 +262,9 @@ function compile() {
 					});
 				}))
 			.pipe(pageCompiler.compile('server'))
-			.pipe(gulp.dest(Path.join(config().destDir, 'server')))
+			.pipe(gulp.dest(Path.join(config().destDir, 'server' + (api.isDefaultLocale() ? '' : '/' + api.getBuildLocale()))))
 			.pipe(pageCompiler.compile('static'))
-			.pipe(gulp.dest(config().staticDir))
+			.pipe(gulp.dest(config().staticDir + (api.isDefaultLocale() ? '' : '/' + api.getBuildLocale())))
 			.pipe(pageCompiler.dependencyApiData())
 			.pipe(gulp.dest(config().destDir))
 			.on('finish', resolve);
@@ -272,6 +276,7 @@ function compile() {
 	 */
 	function createEntryBootstrapCode(entryPackageName, revisionMeta, entryDataProvider, writeCss) {
 		var loadingData = getBundleMetadataForEntry(entryPackageName, revisionMeta);
+
 		var bootstrapCode = PageCompiler.entryBootstrapTpl({
 			cssPaths: writeCss ? JSON.stringify(loadingData.css, null, '  ') : null,
 			jsPaths: JSON.stringify(loadingData.js, null, '  '),
@@ -338,11 +343,11 @@ function compile() {
 		});
 		b.transform(htmlTranform, {global: true});
 		b.transform(yamlify, {global: true});
-		b.transform(jsBundleEntryMaker.transform('{do not require localed package here}'), {global: true});
+		b.transform(jsBundleEntryMaker.transform(api.argv.locale || api.config.get('locales[0]'), {global: true}));
 
-		var excludeList = excludeModules(packageInfo, b, _.map(modules, function(module) {return module.longName;}));
-		excludeI18nModules(packageInfo.allModules, b);
-		//browserifyInc(b, {cacheFile: Path.resolve(config().destDir, 'browserify-cache.json')});
+		//var excludeList =
+		excludeModules(packageInfo, b, _.map(modules, function(module) {return module.longName;}));
+		//excludeI18nModules(packageInfo.allModules, b);
 
 		var cssPromises = [buildCssBundle(b, bundle, destDir)];
 
@@ -350,17 +355,18 @@ function compile() {
 		depCtl.browserifyDepsMap(b, depCtl.depsMap, resolve);
 		var jsStream = _createBrowserifyBundle(b, bundle, rejectOnError);
 
-		var i18nBuildRet = buildI18nBundles(browserifyOpt, modules, excludeList, bundle, entryJsDir);
-		if (i18nBuildRet) {
-			jsStream = es.merge([jsStream, i18nBuildRet[0]]);
-			cssPromises = cssPromises.concat(i18nBuildRet[1]);
-		}
+		// var i18nBuildRet = buildI18nBundles(browserifyOpt, modules, excludeList, bundle, entryJsDir);
+		// if (i18nBuildRet) {
+		// 	jsStream = es.merge([jsStream, i18nBuildRet[0]]);
+		// 	cssPromises = cssPromises.concat(i18nBuildRet[1]);
+		// }
 		return {
 			cssPromises: cssPromises,
 			jsStream: jsStream
 		};
 	}
 
+	/*
 	function buildI18nBundles(browserifyOpt, modules, excludeList, bundle, entryJsDir) {
 		var streams = [];
 		var cssPromises = [];
@@ -432,7 +438,7 @@ function compile() {
 		var out = _createBrowserifyBundle(b, localeBunleName, rejectOnError);
 		return [out, cssProm];
 	}
-
+	*/
 	function monkeyPatchBrowserApi(browserApi, entryPackage, revisionMeta) {
 		// setup server side config setting to browser
 		browserApi._config = {};
@@ -441,14 +447,6 @@ function compile() {
 		_.each(browserSideConfigProp, prop => {
 			_.set(browserApi._config, prop, _.get(setting, prop));
 		});
-
-		// browserApi._config = {
-		// 	staticAssetsURL: config().staticAssetsURL,
-		// 	serverURL: config().serverURL,
-		// 	packageContextPathMapping: config().packageContextPathMapping,
-		// 	locales: config().locales,
-		// 	devMode: config().devMode
-		// };
 		// setup locale bundles data
 		browserApi.localeBundlesMap = {};
 		var entryMetadata = depCtl.entryOrSplitPointMetadata(entryPackage);
@@ -458,6 +456,8 @@ function compile() {
 				css: bundles2FilePaths(bundles, 'css', revisionMeta)
 			};
 		});
+
+		browserApi.buildLocale = api.getBuildLocale();
 		// setup split points bundles data
 
 		depCtl.allSplitPointsOfEntry(entryPackage).forEach(splitPoint => {
@@ -536,7 +536,7 @@ function compile() {
 					}
 				});
 			} else if (_.has(revisionMeta, file)) {
-				paths.push(revisionMeta[file]);
+				paths.push(api.localeBundleFolder() + revisionMeta[file]);
 			}
 		});
 		return paths;
@@ -552,21 +552,22 @@ function compile() {
 		});
 		return excludeList;
 	}
-
+	/*
 	function excludeI18nModules(allModules, b) {
 		allModules.forEach((pkModule) => {
 			b.exclude(pkModule.longName + '/i18n');
 		});
 	}
-
+	*/
 	function revisionBundleFile(bundleStream) {
 		var revAll = new RevAll();
-
+		var localeDir = api.localeBundleFolder();
 		var stream;
 		if (config().devMode) {
 			var fakeRevManifest = {};
+
 			stream = bundleStream
-			.pipe(gulp.dest(config().staticDir))
+			.pipe(gulp.dest(config().staticDir + (localeDir ? '/' + localeDir : '')))
 			.pipe(through.obj(function(row, encode, next) {
 				var relivePath = Path.relative(row.base, row.path).replace(/\\/g, '/');
 				fakeRevManifest[relivePath] = relivePath;
@@ -593,7 +594,7 @@ function compile() {
 			}))
 			.pipe(revAll.revision())
 			.pipe(revFilter.restore)
-			.pipe(gulp.dest(config().staticDir))
+			.pipe(gulp.dest(config().staticDir + (localeDir ? '/' + localeDir : '')))
 			.pipe(revAll.manifestFile());
 		}
 		return stream.pipe(through.obj(function(row, encode, next) {
@@ -709,11 +710,11 @@ function _createBrowserifyBundle(b, bundle, handleError) {
 		//.pipe(gulpif(config().enableSourceMaps, sourcemaps.write('./sourcemaps', {
 			//sourceMappingURLPrefix: config().staticAssetsURL
 		//})))
-		.pipe(size({
+		.pipe(gulpif(!config().devMode, size({
 			showFiles: true,
 			gzip: true,
 			showTotal: false
-		}))
+		})))
 		.on('error', (er) => {
 			log.error('browserify bundle() sourcemaps failed');
 			out.end();

@@ -1,4 +1,4 @@
-var FontFaceObserver = require('fontfaceobserver');
+var FontFaceObserver = require('fontfaceobserver/fontfaceobserver');
 var font = new FontFaceObserver('FontAwesome');
 
 font.load().then(function() {

@@ -11,6 +11,9 @@ module.exports = function() {
 	proto.findBrowserPackageInstanceByPath = findBrowserPackageInstanceByPath;
 	proto.packageNames2bundles = packageNames2bundles;
 	proto.replaceAssetsUrl = replaceAssetsUrl;
+	proto.getBuildLocale = getBuildLocale;
+	proto.localeBundleFolder = localeBundleFolder;
+	proto.isDefaultLocale = isDefaultLocale;
 	initPackageListInfo(proto);
 };
 
@@ -22,6 +25,11 @@ function initPackageListInfo(proto) {
 		if (!instance.packagePath) {
 			return;
 		}
+
+		storePath(instance.packagePath);
+		if (instance.realPackagePath !== instance.packagePath)
+			storePath(instance.realPackagePath);
+
 		function storePath(packagePath) {
 			var path = Path.relative(proto.config().rootPath, packagePath);
 			if (Path.sep === '\\') {
@@ -33,16 +41,13 @@ function initPackageListInfo(proto) {
 			proto._packagePath2Name[path] = instance;
 			proto._packagePathList.push(path);
 		}
-		storePath(instance.packagePath);
-		if (instance.realPackagePath !== instance.packagePath)
-			storePath(instance.realPackagePath);
 	});
 	proto._packagePathList.sort();
 }
 
 
 function findBrowserPackageByPath(file) {
-	return this.findBrowserPackageInstanceByPath(file).longName;
+	return _.get(this.findBrowserPackageInstanceByPath(file), 'longName');
 }
 
 function findBrowserPackageInstanceByPath(file) {
@@ -50,7 +55,8 @@ function findBrowserPackageInstanceByPath(file) {
 
 	var idx = _.sortedIndex(this._packagePathList, file);
 	if (idx === 0 || !file.startsWith(this._packagePathList[idx - 1])) {
-		throw new Error('file ' + file + ' doesn\'t belong to any of our private packages');
+		//throw new Error('file ' + file + ' doesn\'t belong to any of our private packages');
+		return null; // Return null if a file does not belong to our packages
 	} else {
 		return this._packagePath2Name[this._packagePathList[idx - 1]];
 	}
@@ -117,4 +123,16 @@ function packageNames2bundles(packageNames) {
 	});
 	var bundles = _.keys(bundleSet);
 	return bundles;
+}
+
+function getBuildLocale() {
+	return api.argv.locale || api.config.get('locales[0]');
+}
+
+function localeBundleFolder() {
+	return api.config.get('locales[0]') === getBuildLocale() ? '' : getBuildLocale() + '/';
+}
+
+function isDefaultLocale() {
+	return api.config.get('locales[0]') === getBuildLocale();
 }

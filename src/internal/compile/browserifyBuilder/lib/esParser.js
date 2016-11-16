@@ -1,4 +1,4 @@
-var esprima = require('esprima');
+var acorn = require('acorn');
 var estraverse = require('estraverse');
 var _ = require('lodash');
 
@@ -15,7 +15,7 @@ function parse(text, handler) {
 	if (_.startsWith(text, '#!')) {
 		text = text.substring(text.indexOf('\n'));
 	}
-	var ast = esprima.parse(text, {range: true, loc: false});
+	var ast = acorn.parse(text, {ranges: true});
 	//console.log('\n---------\n%s', JSON.stringify(ast, null, '  '));
 	estraverse.traverse(ast, {
 		enter: function(node, parent) {
@@ -52,7 +52,6 @@ function parse(text, handler) {
 	return ast;
 }
 
-var acorn = require('acorn');
 var patchText = require('./patch-text');
 exports.replaceRequireKeyword = function(code, replacement) {
 	var ast = acorn.parse(code);

@@ -46,7 +46,7 @@ function activate(api) {
 	// 	res.render('index.html', {});
 	// });
 
-	if (!api.config().devMode) {
+	if (!api.config().devMode || !api.isDefaultLocale()) {
 		return;
 	}
 

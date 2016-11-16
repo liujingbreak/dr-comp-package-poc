@@ -1,22 +1,19 @@
 require('@dr/angularjs');
-var messages;
-if (__api.isLocaleBundleLoaded()) {
-	messages = require('@dr/example-i18n/i18n');
-}
+require('./i18n');
 
-angular.module('example-i18n', []).controller('MainController',
-function() {
+angular.module('example-i18n', [])
+.controller('MainController', ['$interval', '$compile', function($interval, $compile) {
 	var mainVm = this;
 	mainVm.time = new Date().getTime();
-	mainVm.youHaveAMessage = messages['Hellow i18n'];
-	mainVm.i18nText1 = $translate('i18nText1-key');
-	mainVm.i18nText2 = $translate('i18nText2-key', 'param1', 'param2');
-})
-.directive('translate', function() {
-	return function(scope, el, attrs) {
-		el.html(messages[el.text()]);
-	};
-});
+	mainVm.youHaveAMessage = drTranslate('Hellow i18n');
+	mainVm.i18nText1 = drTranslate('i18nText1-key');
+	mainVm.i18nText2 = drTranslate('i18nText2-key');
+	$interval(function() {
+		mainVm.time = new Date().getTime();
+	}, 1000);
+
+	mainVm.templateContent = require('./template.html');
+}]);
 
 angular.element(document).ready(function() {
 	angular.bootstrap(document, ['example-i18n']);

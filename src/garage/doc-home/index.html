@@ -1,12 +1,12 @@
 <!doctype html>
-<html ng-controller="MainController as mainVm">
+<html ng-controller="MainController as mainVm" translate-scope="@dr/doc-home">
 
 <head>
-	<title translate>@dr Web Platform Home</title>
+	<title t>@dr Web Platform Home</title>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 </head>
-<body class="doc-home" dr-doc-home dr-show-on-ready anim-completed="animState" translate-scope="doc-home">
+<body class="doc-home" dr-doc-home dr-show-on-ready anim-completed="animState">
 	<div dr-menu-aside="asideVm.menuItems" menu-selected="mainVm.selectedMenuIdx"
 	class="main-aside dr-bg-dark dr-navi-aside" ng-controller="AsideController as asideVm">
 		<div class="logo"></div>

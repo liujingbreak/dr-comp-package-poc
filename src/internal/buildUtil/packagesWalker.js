@@ -131,6 +131,7 @@ function _walkPackages() {
 			entryViews: entryViews,
 			browserifyNoParse: noParseFiles,
 			isEntryServerTemplate: isEntryServerTemplate,
+			translatable: !_.has(pkJson, 'dr.translatable') || _.get(pkJson, 'dr.translatable'),
 			i18n: pkJson.dr ? (pkJson.dr.i18n ? pkJson.dr.i18n : null) : null
 		});
 		addPackageToBundle(instance, info, bundle, configBundleInfo);
@@ -155,6 +156,7 @@ function _walkPackages() {
 					// entryViews: null,
 					browserifyNoParse: noParseFiles,
 					isEntryServerTemplate: isEntryServerTemplate,
+					translatable: !_.has(pkJson, 'dr.translatable') || _.get(pkJson, 'dr.translatable'),
 					i18n: pkJson.dr ? (pkJson.dr.i18n ? pkJson.dr.i18n : null) : null
 				});
 				addPackageToBundle(pk, info, bundle, configBundleInfo);

@@ -7,7 +7,7 @@ module.exports = function(controllerProvider) {
 
 		asideVm.menuItems = [
 			{
-				label: $translate('Home'),
+				label: drTranslate('Home'),
 				subMenu: [],
 				icon: 'fa-home',
 				action: function() {
@@ -16,11 +16,11 @@ module.exports = function(controllerProvider) {
 			},
 			{
 				icon: 'fa-book',
-				label: $translate('Documentation'),
+				label: drTranslate('Documentation'),
 				subMenu: readme.buildMenu(docName2Route)
 			},
 			{
-				label: $translate('Component Store'),
+				label: drTranslate('Component Store'),
 				icon: 'fa-th',
 				action: function() {
 					$location.path('/components');
@@ -34,6 +34,3 @@ module.exports = function(controllerProvider) {
 	}]);
 };
 
-function $translate(k) {
-	return require('@dr/doc-home/i18n')[k] || k;
-}

@@ -1,52 +1,54 @@
-var es = require('esprima');
-var walk = require('esprima-walk');
+var acorn = require('acorn');
+var estraverse = require('estraverse');
 var log = require('log4js').getLogger('translate-generator.jsParser');
 var _ = require('lodash');
 var api = require('__api');
 
-var matchFuncNames = [
-	'$translate',
-	'$translate.instant'
-];
+var matchFuncNames = [];
 
-module.exports = function(fileContent, onKeyFound) {
+module.exports = function(fileContent, onCallExpNode, filePath, ast) {
 	var configNames = api.config.get(api.packageShortName + '.scanMethodNames');
 	if (configNames) {
 		[].push.apply(matchFuncNames, [].concat(configNames));
 	}
-	var ast = es.parse(fileContent, {
-		loc: true,
-		range: true
-	});
+	if (!ast)
+		ast = acorn.parse(fileContent, {
+			locations: true
+		});
 
 	var matchAsts = matchFuncNames.map(name => {
-		return es.parse(name).body[0].expression;
+		return acorn.parse(name).body[0].expression;
 	});
 
-	walk(ast, node => {
-		if (node.type === 'CallExpression') {
-			matchAsts.some(matchAst => {
-				if (isSameAst(matchAst, node.callee)) {
-					if (!node.arguments || node.arguments.length === 0) {
-						log.warn('Should call with at least 1 parameter, ' + 'line ' + node.loc.start.line +
-						':\n' + fileContent.substring(node.range[0], node.range[1]));
+	estraverse.traverse(ast, {
+		enter: function(node, parent) {
+			if (node.type === 'CallExpression') {
+				matchAsts.some(matchAst => {
+					if (isSameAst(matchAst, node.callee)) {
+						if (!node.arguments || node.arguments.length === 0) {
+							log.warn('%s\nShould call with at least 1 parameter, ' + 'line ' + node.loc.start.line +
+							':\n' + fileContent.substring(node.start, node.end), filePath);
+							return true;
+						}
+						var keyParam = node.arguments[0];
+						if (keyParam.type !== 'Literal') {
+							log.warn('%s\nShould be String literal param type, ' + 'line ' + keyParam.loc.start.line +
+								':\n' + fileContent.substring(node.start, node.end), filePath);
+							return true;
+						}
+						log.debug('found key in JS: ' + node.arguments[0].value);
+						onCallExpNode(node.arguments[0].value, node);
 						return true;
 					}
-					var keyParam = node.arguments[0];
-					if (keyParam.type !== 'Literal') {
-						log.warn('Should be String literal param type, ' + 'line ' + keyParam.loc.start.line +
-							':\n' + fileContent.substring(node.range[0], node.range[1]));
-						return true;
-					}
-					log.debug('found key in JS: ' + node.arguments[0].value);
-					onKeyFound(node.arguments[0].value);
-					return true;
-				}
-				return false;
-			});
+					return false;
+				});
+			}
 		}
 	});
 };
+
+var compareIngoreProperty = {loc: true, start: true, end: true};
+
 module.exports.isSameAst = isSameAst;
 /**
  * Deep comparison
@@ -54,7 +56,9 @@ module.exports.isSameAst = isSameAst;
  */
 function isSameAst(node1, node2) {
 	return _.every(node1, (value, key) => {
-		if (!{}.hasOwnProperty.call(node2, key)) {
+		if (_.has(compareIngoreProperty, key))
+			return true;
+		if (!_.has(node2, key)) {
 			return false;
 		}
 		if (_.isObject(value)) {

@@ -1,9 +1,12 @@
 (function() {
 	require('@dr-core/labjs');
 	var bl = require('@dr-core/bundle-loader');
-{% if cssPaths %}
+{% if (cssPaths) { %}
 	bl.loadCssBundles({{ cssPaths }}, '{{ staticAssetsURL }}');
-{% endif %}
+{% } %}
+{% if (typeof preloadJs != 'undefined') { %}
+	bl.preloadJs({{ preloadJsBundles }}, '{{ staticAssetsURL }}', {{ debug }}, {{ preloadJs }});
+{% } %}
 	var jsPaths = {{ jsPaths }};
 	bl.runJsBundles(jsPaths, '{{ staticAssetsURL }}', '{{ entryPackage }}', {{ data }}, {{ debug }}, window.onWfhReady)
 })();

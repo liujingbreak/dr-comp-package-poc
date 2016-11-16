@@ -1,12 +1,14 @@
 {
   "name": "@dr/example-locale-zh",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "A demo package that contains locale specific stuff",
   "browser": "index.js",
   "style": "zh-style.less",
-  "transforms": ["@dr/parcelify-module-resolver"],
+  "transforms": [
+    "@dr/parcelify-module-resolver"
+  ],
   "dr": {
-	  "bundle": false
+    "bundle": "example-locale-zh-bundle"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

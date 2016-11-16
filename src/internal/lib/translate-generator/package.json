@@ -1,20 +1,22 @@
 {
   "name": "@dr/translate-generator",
-  "version": "0.0.10",
+  "version": "0.1.1",
   "description": "A tool to scan source package files and generate translatable files",
   "main": "translate-generator.js",
   "browser": "ng-translate.js",
   "dr": {
     "type": "builder",
-    "priority": 1100,
-    "bundle": "ui-lib"
+    "bundle": "ui-lib",
+    "builderPriority": "before @dr-core/browserify-builder"
   },
   "dependencies": {
-    "esprima": "^2.7.1",
-    "esprima-walk": "^0.1.0",
+    "acorn": "^4.0.3",
+    "estraverse": "^4.1.1",
     "cheerio": "^0.20.0",
     "mkdirp": "^0.5.1",
-    "js-yaml": "^3.6.1"
+    "js-yaml": "^3.6.1",
+    "through2": "^2.0.1",
+    "browser-resolve": "^1.11.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

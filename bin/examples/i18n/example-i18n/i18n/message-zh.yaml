@@ -1,0 +1,6 @@
+"我是任性的中文Key": "我是成功的中文value"
+"i18nText1-key": "i18nText1-value"
+"i18nText2-key": "i18nText2-value"
+"Hellow i18n": "你好, 国际化"
+"现在时间是 {{ mainVm.time | date : 'medium' }}。": "中文：现在时间是 {{ mainVm.time | date : 'medium' }}。"
+"Hellow I am text from a template html": "中文：Hellow I am text from a template html"

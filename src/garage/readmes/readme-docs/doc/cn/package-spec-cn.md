@@ -31,7 +31,7 @@ Package.json的一些特殊属性说明
 | `dr.entryPage` | 可以是Array, 入口主静态页面，`gulp compile`时会自动copy到dist/static目录下，自动inject所依赖的JS, CSS bundle, 可以是package内相对路径，也可以是引用其他package内的文件`npm://<package-name>/<path>`，e.g. `npm://@dr/parent/browser/views/index.html`
 | `dr.entryView` | 类似`dr.entryPage`, 可以是Array, 入口的server端render主页面, `gulp compile`时会自动copy到dist/server目录下, 用`api.getCompiledViewPath(relativePath)`可以获得compiled absolute path.
 | `dr.assetsDir` | 存放静态资源的目录，package根目录下的相对路径, 默认为`assets`
-| `dr.i18n` | 可选配置，默认就是`i18n`。i18n 文件所在路径，可以是带有{locale}变量的路径pattern，可以是某个代表i18n逻辑的主文件夹或文件，其他JS代码可以通过`require('packageName/i18n')`的方式获取i18n对象，i18n文件可以是`.json`, `.yaml`, `.js`
+| `dr.translatable` | `false` 表示没有可翻译的内容, gulp compile时@dr/translate-generator会跳过当前包，加速编译，默认`true`
 e.g.
 
 ```javascript

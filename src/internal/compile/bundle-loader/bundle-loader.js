@@ -1,4 +1,4 @@
-/* globals __EXTERNAL_JS, drApi: true */
+/* globals __EXTERNAL_JS, drApi: true, $LAB */
 exports.loadCssBundles = function(paths, urlPrefix) {
 	var h = window.document.getElementsByTagName('head')[0];
 	for (var i = 0, l = paths.length; i < l; i++) {
@@ -25,10 +25,12 @@ exports.runJsBundles = function(jsPaths, urlPrefix, entryPackageName, entryApiDa
 		var jsPath = jsPaths[i];
 		bundles.push(resolveBundleUrl(jsPath, urlPrefix));
 	}
-	window.$LAB
-	.setGlobalDefaults({Debug: debug})
+	$LAB
+	.setGlobalDefaults({Debug: debug, AlwaysPreserveOrder: true})
 	.script(bundles).wait(function() {
 		try {
+			if (typeof drApi !== 'undefined')
+				return;
 			drApi = require('@dr-core/browserify-builder-api');
 			drApi.setup(entryApiData);
 			drApi.setup({loadedBundles: bundles});
@@ -41,6 +43,24 @@ exports.runJsBundles = function(jsPaths, urlPrefix, entryPackageName, entryApiDa
 				callback(e);
 		}
 	});
+};
+
+/**
+ * Helps to preload font file, must be invoke after CSS file which defines @font-face be loaded
+ * (Read https://github.com/bramstein/fontfaceobserver)
+ * @param fonts Array<Font | fontFamilyName> | Font | fontFamilyName: string
+ * interface FontOption {
+ * 		name: string, // fontFamilyName
+ * 		weight?: number | string,
+ * 		style?: string,
+ * 		stretch?: any
+ * 		...
+ * }
+ */
+exports.reploadJs = function(fontfaceobserverBundle, urlPrefix, isDebug, callback) {
+	$LAB
+	.setGlobalDefaults({Debug: !!isDebug, AlwaysPreserveOrder: true})
+	.script(resolveBundleUrl(fontfaceobserverBundle, urlPrefix)).wait(callback);
 };
 
 exports.resolveBundleUrl = resolveBundleUrl;

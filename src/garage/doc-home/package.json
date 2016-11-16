@@ -1,8 +1,8 @@
 {
   "name": "@dr/doc-home",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "Home page",
-  "browser": "browser/loader.js",
+  "browser": "browser/js/index.js",
   "main": "server/server.js",
   "style": "browser/style/main.less",
   "transforms": [
@@ -14,7 +14,7 @@
     "entryPage": "index.html"
   },
   "dependencies": {
-	  "angular-ui-router": "^0.3.2"
+    "angular-ui-router": "^0.3.2"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
