@@ -27,6 +27,12 @@ function compile(api) {
 		log.info('DevMode enabled, skip copying assets to static folder');
 		return;
 	}
+	if (!api.isDefaultLocale() && !argv.copyAssets) {
+		log.info('Build for "%s" which is not default locale, skip copying assets to static folder',
+			api.getBuildLocale());
+		return;
+	}
+
 	copyRootPackageFavicon();
 	return copyAssets();
 }
@@ -46,7 +52,7 @@ function activate(api) {
 	// 	res.render('index.html', {});
 	// });
 
-	if (!api.config().devMode || !api.isDefaultLocale()) {
+	if (!api.config().devMode) {
 		return;
 	}
 

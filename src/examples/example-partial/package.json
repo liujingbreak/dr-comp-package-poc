@@ -1,12 +1,13 @@
 {
   "name": "@dr/example-partial",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A package which is with auto bundle setting",
   "browser": "browser.js",
   "style": "main.less",
-  "transforms": [ "@dr/parcelify-module-resolver"],
-  "dr": {
-  },
+  "transforms": [
+    "@dr/parcelify-module-resolver"
+  ],
+  "dr": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

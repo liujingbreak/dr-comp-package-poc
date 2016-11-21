@@ -11,9 +11,6 @@ module.exports = function() {
 	proto.findBrowserPackageInstanceByPath = findBrowserPackageInstanceByPath;
 	proto.packageNames2bundles = packageNames2bundles;
 	proto.replaceAssetsUrl = replaceAssetsUrl;
-	proto.getBuildLocale = getBuildLocale;
-	proto.localeBundleFolder = localeBundleFolder;
-	proto.isDefaultLocale = isDefaultLocale;
 	initPackageListInfo(proto);
 };
 
@@ -123,16 +120,4 @@ function packageNames2bundles(packageNames) {
 	});
 	var bundles = _.keys(bundleSet);
 	return bundles;
-}
-
-function getBuildLocale() {
-	return api.argv.locale || api.config.get('locales[0]');
-}
-
-function localeBundleFolder() {
-	return api.config.get('locales[0]') === getBuildLocale() ? '' : getBuildLocale() + '/';
-}
-
-function isDefaultLocale() {
-	return api.config.get('locales[0]') === getBuildLocale();
 }

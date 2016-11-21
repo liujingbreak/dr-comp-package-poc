@@ -69,6 +69,7 @@ function createTransform(swigOptionsProm, absFile) {
 				this.push(compiled);
 			} catch (e) {
 				log.error('failed to compile %s:\n%s', absFile, str);
+				log.error(e);
 				this.emit('error', e);
 			}
 			next();
