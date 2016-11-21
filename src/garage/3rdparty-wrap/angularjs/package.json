@@ -1,6 +1,6 @@
 {
   "name": "@dr/angularjs",
-  "version": "1.5.9",
+  "version": "1.5.8-1",
   "description": "wrapper of angularjs v1.5.8 and jquery as dependency",
   "browser": "main.js",
   "style": "angular-1.5.8/angular-csp.css",

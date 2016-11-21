@@ -343,7 +343,7 @@ function compile() {
 		});
 		b.transform(htmlTranform, {global: true});
 		b.transform(yamlify, {global: true});
-		b.transform(jsBundleEntryMaker.transform(api.argv.locale || api.config.get('locales[0]'), {global: true}));
+		b.transform(jsBundleEntryMaker.transform(api.getBuildLocale()), {global: true});
 
 		//var excludeList =
 		excludeModules(packageInfo, b, _.map(modules, function(module) {return module.longName;}));

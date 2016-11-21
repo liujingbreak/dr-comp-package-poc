@@ -1,12 +1,10 @@
 {
   "name": "@dr/translate-generator",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A tool to scan source package files and generate translatable files",
   "main": "translate-generator.js",
-  "browser": "ng-translate.js",
   "dr": {
     "type": "builder",
-    "bundle": "ui-lib",
     "builderPriority": "before @dr-core/browserify-builder"
   },
   "dependencies": {

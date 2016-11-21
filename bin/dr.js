@@ -61,7 +61,7 @@ function init(noExample) {
 		shell.mkdir('-p', 'src/examples');
 		shell.cp('-R', [
 			Path.resolve(__dirname, 'examples', 'example-entry'),
-			Path.resolve(__dirname, 'examples', 'i18n'),
+			//Path.resolve(__dirname, 'examples', 'i18n'),
 			Path.resolve(__dirname, 'examples', 'example-node'),
 		], argv.d + '/src/examples/');
 		buildUtils.promisifyExe('npm', 'install', '--save',  '@dr/angularjs');
