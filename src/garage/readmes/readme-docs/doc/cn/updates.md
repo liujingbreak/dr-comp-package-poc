@@ -1,5 +1,9 @@
 Updates
 =======
+### 2016-11-22
+**web-fun-house 0.7.0 replease**
+- i18n重新设计，采用更简单的方案，gulp编译打包时替换可翻译文字到不同的语言
+- @dr/angularjs has been upgraded to AngularJS 1.5.8
 ### 2016-11-14
 #### Breaking change
 package.json中的dr.builderPriority, dr.serverPriority 数字越大，越优先， 原来是越小越优先

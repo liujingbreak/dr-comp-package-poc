@@ -17,7 +17,7 @@ exports.compile = function() {
 	if (!api.argv.translate) {
 		log.debug('Replacing translatable text');
 		require('@dr-core/browserify-builder').addTransform(
-			require('./translate-replacer').createBrowserifyReplacerTransform(api.argv.locale || api.config.get('locales[0]')));
+			require('./translate-replacer').createBrowserifyReplacerTransform(api.getBuildLocale()));
 		return null;
 	}
 	var proms = [];

@@ -137,7 +137,7 @@ BrowserApi.prototype = {
 		}
 		return resolveUrl(this.config, packageName, path);
 	},
-
+	/*
 	loadLocaleBundles: function(locale, waitCallback) {
 		BrowserApi.prototype.lastLoadedLocale = locale;
 
@@ -163,17 +163,18 @@ BrowserApi.prototype = {
 			waitCallback();
 		});
 	},
+	*/
 
 	_loadCssBundles: function(paths) {
 		return loadCssBundles(paths, this.config().staticAssetsURL);
 	},
-
+	/*
 	loadPrefLocaleBundles: function(waitCallback) {
 		var pref = this.getPrefLanguage();
 		if (this.config().devMode && console) {
 			console.log('preferred language ' + pref);
 		}
-		this.loadLocaleBundles(pref, function() {
+		this.‘loadLocaleBundles’(pref, function() {
 			waitCallback(pref);
 		});
 	},
@@ -181,7 +182,7 @@ BrowserApi.prototype = {
 	isLocaleBundleLoaded: function() {
 		return this.i18nLoaded;
 	},
-
+	*/
 	getPrefLanguage: function() {
 		var availables = this.config().locales;
 

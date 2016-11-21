@@ -24,7 +24,7 @@ module.exports = function(_config, _injector) {
 	});
 	return {
 		JsBundleEntryMaker: JsBundleEntryMaker,
-//		JsBundleWithI18nMaker: JsBundleWithI18nMaker,
+		//JsBundleWithI18nMaker: JsBundleWithI18nMaker,
 		buildins: buildins,
 		buildinSet: buildinSet,
 		str2Stream: str2Stream
