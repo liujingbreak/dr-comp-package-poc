@@ -1,6 +1,6 @@
 {
   "name": "@dr/internal-recipe",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "description": "Recipe package of package-recipe",
   "dependencies": {
     "@dr-core/labjs": "0.0.24",
@@ -10,10 +10,10 @@
     "@dr-core/browserify-builder-api": "0.2.2",
     "@dr-core/bundle-loader": "0.0.3",
     "@dr/parcelify-module-resolver": "0.0.31",
-    "@dr/template-builder": "0.1.3",
-    "@dr-core/express-app": "0.2.14",
+    "@dr/template-builder": "0.1.4",
+    "@dr-core/express-app": "0.2.15",
     "@dr/http-server": "0.1.0",
     "@dr/logger": "0.0.27",
-    "@dr/translate-generator": "0.1.2"
+    "@dr/translate-generator": "0.1.5"
   }
 }

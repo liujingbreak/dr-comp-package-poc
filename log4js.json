@@ -21,7 +21,6 @@
 		"test": "DEBUG",
 		"rwPackageJson": "INFO",
 		"@dr-core/browserify-builder": "INFO",
-		"packageInstallMgr": "INFO",
-		"@dr/translate-generator": "DEBUG"
+		"packageInstallMgr": "INFO"
 	}
 }

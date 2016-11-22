@@ -38,7 +38,7 @@ var readFileAsync = Promise.promisify(fs.readFile);
 var writeFileAsync = Promise.promisify(fs.writeFile);
 
 function scanPackage(packagePath) {
-	log.debug(packagePath);
+	log.info(packagePath);
 	var yamls = {};
 	var i18nDir = Path.join(packagePath, 'i18n');
 	var existings = {};
@@ -47,7 +47,7 @@ function scanPackage(packagePath) {
 	config().locales.forEach(locale => {
 		var file = Path.join(i18nDir, 'message-' + locale + '.yaml');
 		if (fileExists(file)) {
-			log.debug('found existing i18n message file: ' + file);
+			log.info('found existing i18n message file: ' + file);
 			var contents = fs.readFileSync(file, 'utf8');
 			var obj = yaml.safeLoad(contents);
 			obj = obj ? obj : {};
@@ -62,7 +62,7 @@ function scanPackage(packagePath) {
 
 	var proms = glob.sync(Path.join(packagePath, '/**/*.html').replace(/\\/g, '/')).map(path => {
 		return readFileAsync(path, 'utf8').then(content => {
-			log.debug('scan: ' + path);
+			log.info('scan: ' + path);
 			var $ = cheerio.load(content, {decodeEntities: false});
 			$('.t').each(onElement);
 			$('.dr-translate').each(onElement);
@@ -77,7 +77,7 @@ function scanPackage(packagePath) {
 
 	var promJS = glob.sync(Path.join(packagePath, '/**/*.js').replace(/\\/g, '/')).map(path => {
 		return readFileAsync(path, 'utf8').then(content => {
-			log.debug('scan: ' + path);
+			log.info('scan: ' + path);
 			jsParser(content, (key) => {
 				dirty = onKeyFound(key, yamls, existings, trackExess) || dirty;
 			}, path);
@@ -97,7 +97,7 @@ function scanPackage(packagePath) {
 				}
 				var writeProms = config().locales.map(locale => {
 					var fileToWrite = Path.join(i18nDir, 'message-' + locale + '.yaml');
-					log.debug('write to file ' + fileToWrite);
+					log.info('write to file ' + fileToWrite);
 					return writeFileAsync(fileToWrite, yamls[locale]);
 				});
 				Promise.all(writeProms).then(resolve);
@@ -132,7 +132,8 @@ function onKeyFound(key, yamls, existing, trackExess) {
 			delete trackExess[locale][key];
 		if (!existing[locale] || !_.has(existing[locale], key)) {
 			yamls[locale] += newLine;
-			log.debug('+ ' + newLine);
+			_.set(existing, [locale, key], key);
+			log.info('+ ' + newLine);
 			dirty = true;
 		}
 	});

@@ -14,7 +14,13 @@ var injector;
 exports.compile = function() {
 	require('@dr-core/browserify-builder').addTransform(transformFactory);
 	injector = require('__injector');
-	swigInjectLoader.swigSetup(swig, {injector: injector});
+	var translateHtml = require('@dr/translate-generator/translate-replacer').htmlReplacer();
+	swigInjectLoader.swigSetup(swig, {
+		injector: injector,
+		fileContentHandler: function(file, source) {
+			return translateHtml(source, file, api.getBuildLocale());
+		}
+	});
 	return null;
 };
 

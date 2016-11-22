@@ -14,6 +14,7 @@ exports.createBrowserifyReplacerTransform = createBrowserifyReplacerTransform;
 function createBrowserifyReplacerTransform(locale) {
 	var skipPackageCache = {};
 	return function(file) {
+		log.debug('Replace file %s', file);
 		var source = '';
 		var ext = Path.extname(file).toLowerCase();
 		//var basename = Path.basename(file);
@@ -29,7 +30,7 @@ function createBrowserifyReplacerTransform(locale) {
 				}
 				cb();
 			});
-		} else if (ext === '.html'){
+		} else if (ext === '.html') {
 			return through(function(chunk, enc, next) {
 				source += chunk;
 				next();
@@ -47,7 +48,6 @@ function createBrowserifyReplacerTransform(locale) {
 	};
 }
 
-exports.replaceJS = replaceJS;
 function replaceJS(source, file, locale, skipPackageCache) {
 	var res = checkSkipPackageAndGetRes(file, locale, skipPackageCache);
 	if (!res)
@@ -55,16 +55,26 @@ function replaceJS(source, file, locale, skipPackageCache) {
 	var ast = acorn.parse(source, {locations: true});
 	var replacements = [];
 	jsParser(source, (keyNode, callExpNode) => {
+		if (!_.has(res, keyNode))
+			log.warn('missing i18n message for: %s', keyNode);
+		var replaced = res[keyNode];
 		replacements.push({
 			start: callExpNode.start,
 			end: callExpNode.end,
-			replacement: '"' + res[keyNode] + '"'
+			replacement: '"' + replaced + '"'
 		});
+		log.debug('Replace JS i18n message "%s" with:\n%s', keyNode, replaced);
 	}, file, ast);
 	return patchText(source, replacements);
 }
 
-exports.replaceHtml = replaceHtml;
+exports.htmlReplacer = function(source, file, locale) {
+	var skipPackageCache = {};
+	return function(source, file, locale) {
+		return replaceHtml(source, file, locale, skipPackageCache);
+	};
+};
+
 function replaceHtml(source, file, locale, skipPackageCache) {
 	var res = checkSkipPackageAndGetRes(file, locale, skipPackageCache);
 	if (!res)
@@ -77,7 +87,11 @@ function replaceHtml(source, file, locale, skipPackageCache) {
 
 	function onElement(i, dom) {
 		var el = $(dom);
-		el.html(res[el.html()]);
+		var key = el.html();
+		// if (!_.has(res, key))
+		// 	log.debug('missing i18n message for: %s', key);
+		el.html(res[key]);
+		log.debug('Replace HTML i18n message "%s" with:\n%s', key, res[key]);
 	}
 	return $.html();
 }
