@@ -7,8 +7,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 </head>
 <body class="ng-cloak example-i18n">
-	<a ng-href="/en/example-i18n">English</a><br/>
-	<a ng-href="/example-i18n">中文</a><br/>
+	<ul>
+		<li><a ng-href="/en/example-i18n">English</a>
+		<li><a ng-href="/example-i18n">中文</a><br/>
+	</ul>
 	<h1>{{ mainVm.time | date : 'medium' }}</h1>
 	<h2>{{ mainVm.youHaveAMessage }}</h2>
 	<h2 dr-translate>现在时间是 {{ mainVm.time | date : 'medium' }}。</h2>

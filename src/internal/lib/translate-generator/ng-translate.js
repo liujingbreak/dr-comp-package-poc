@@ -1,3 +1,7 @@
+/**
+ * @Deprecated
+ * @type {[type]}
+ */
 var api = require('__api');
 
 var m = angular.module('drTranslate', []);

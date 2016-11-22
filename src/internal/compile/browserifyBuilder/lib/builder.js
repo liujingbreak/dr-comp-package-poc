@@ -477,18 +477,18 @@ function compile() {
 			}
 
 			// locale bundles
-			_.each(metadata.locales, (bundles, locale) => {
-				loadingFiles.locales[locale] = {
-					js: bundles2FilePaths(bundles, 'js', revisionMeta),
-					css: bundles2FilePaths(bundles, 'css', revisionMeta)
-				};
-				if (_.size(loadingFiles.locales[locale].js) === 0) {
-					delete loadingFiles.locales[locale].js;
-				}
-				if (_.size(loadingFiles.locales[locale].css) === 0) {
-					delete loadingFiles.locales[locale].css;
-				}
-			});
+			// _.each(metadata.locales, (bundles, locale) => {
+			// 	loadingFiles.locales[locale] = {
+			// 		js: bundles2FilePaths(bundles, 'js', revisionMeta),
+			// 		css: bundles2FilePaths(bundles, 'css', revisionMeta)
+			// 	};
+			// 	if (_.size(loadingFiles.locales[locale].js) === 0) {
+			// 		delete loadingFiles.locales[locale].js;
+			// 	}
+			// 	if (_.size(loadingFiles.locales[locale].css) === 0) {
+			// 		delete loadingFiles.locales[locale].css;
+			// 	}
+			// });
 			if (!_.has(browserApi, 'splitPoints')) {
 				browserApi.splitPoints = {};
 			}

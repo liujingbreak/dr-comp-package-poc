@@ -15,10 +15,6 @@ module.exports = BrowserApi;
 
 var packageNameReg = /(?:@([^\/]+)\/)?(\S+)/;
 
-window.$translate = function(text) {
-	return text;
-};
-
 function BrowserApi(packageName, bundleName) {
 	if (!(this instanceof BrowserApi)) {
 		return new BrowserApi(packageName);
@@ -218,6 +214,31 @@ BrowserApi.prototype = {
 		}
 		pref = pref ? pref : 'en';
 		return pref;
+	},
+
+	getLocaleUrl: function(lang) {
+		lang = _.trim(lang, '/');
+		var url;
+		if (lang === this.config.get('locales[0]', 'zh'))
+			url = this.config().staticAssetsURL + location.pathname;
+		else
+			url = this.config().staticAssetsURL + '/' + lang + location.pathname;
+		return url;
+	},
+
+	reloadToLocale: function(lang) {
+		if (!this.isInDefaultLocale())
+			return false;
+		lang = _.trim(lang, '/');
+		if (this.buildLocale !== lang) {
+			window.location = this.getLocaleUrl(lang);
+			return true;
+		}
+		return false;
+	},
+
+	isInDefaultLocale: function() {
+		return this.buildLocale === this.config.get('locales[0]', 'zh');
 	},
 
 	extend: function(obj) {

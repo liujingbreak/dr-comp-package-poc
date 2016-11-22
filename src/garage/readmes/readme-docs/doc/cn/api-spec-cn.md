@@ -68,14 +68,16 @@ console.log(__api.assetsUrl('some-picture.jpg'));
 | .packageUtils | lib/packageMgr/packageUtils.js 查找其他package的工具
 | `.config()` | 获取config.yaml配置， 但是浏览器端只有部分config属性可读:  `staticAssetsURL`, `serverURL`, `packageContextPathMapping`
 | `.assetsUrl(packageName, path)` | 获取packageName对应的静态资源/assets目录下的文件的浏览器访问路径, `packageName` 为可选参数, 默认是当前package
-| **Deprecated** ~~`.loadLocaleBundles(language, callback)`~~ | ~~LABjs loads locale bundles to current page~~
-| **Deprecated** ~~`.loadPrefLocaleBundles(callback)`~~ | ~~LABjs loads locale bundles based on browser prefered language, language choosing logic is in the order of: `navigator.languages[0], navigator.language, navigator.browserLanguage, navigator.systemLanguage, navigator.userLanguage, navigator.languages[1] ...`~~
 | `.urlSearchParam(searchString)` | parses window.location.search and returns a hash object
 | `.getPrefLanguage()` | Get browser prefered language, language choosing logic is in the order of: `navigator.languages[0], navigator.language, navigator.browserLanguage, navigator.systemLanguage, navigator.userLanguage, navigator.languages[1] ...`
-| `.isLocaleBundleLoaded()` | returns true 如果locale bundle已经加载，可以安全调用的require('xxx/i18n')了
+| `.reloadToLocale(lang)` | return true if current page will be reloaded to locale based URL of `lang`
 | `.extend(obj)` | 扩展 API prototype `__api.__proto__`,  `__api.constructor.prototype`
 | `.isBrowser()` | true
 | `.isNode()` | false
+| **Deprecated** ~~`.loadLocaleBundles(language, callback)`~~ | ~~LABjs loads locale bundles to current page~~
+| **Deprecated** ~~`.loadPrefLocaleBundles(callback)`~~ | ~~LABjs loads locale bundles based on browser prefered language, language choosing logic is in the order of: `navigator.languages[0], navigator.language, navigator.browserLanguage, navigator.systemLanguage, navigator.userLanguage, navigator.languages[1] ...`~~
+| **Deprecated** ~~`.isLocaleBundleLoaded()`~~ | returns true 如果locale bundle已经加载，可以安全调用的require('xxx/i18n')了
+
 
 - #### Node compile-time
 对于"dr.typ"为"builder"的编译工具类package, 可获得的api和Node server运行时那些package的api一样，只是多了两个有用的属性
