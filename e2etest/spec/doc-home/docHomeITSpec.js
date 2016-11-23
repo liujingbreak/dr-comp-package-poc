@@ -7,6 +7,9 @@ var Promise = require('bluebird');
 
 describe('When server is started', function() {
 	helper.setup();
+	beforeAll(() => {
+		jasmine.DEFAULT_TIMEOUT_INTERVAL = 20 * 1000;
+	});
 
 	it('the home page should be available', function(done) {
 		Promise.coroutine(function*() {

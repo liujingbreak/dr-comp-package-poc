@@ -9,7 +9,7 @@ var Promise = require('bluebird');
 util.inherits(DocHomePage, basePage);
 
 function DocHomePage() {
-	DocHomePage.super_.call(this, '');
+	DocHomePage.super_.call(this, '?lang=zh');
 	this.el('body', '.doc-home', true);
 	this.el('mainSection', '.main-section', true);
 }
