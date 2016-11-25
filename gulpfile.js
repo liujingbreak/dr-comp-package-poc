@@ -55,7 +55,9 @@ gulp.task('clean:dist', function() {
 	return del([config().staticDir, config().destDir]);
 });
 
-gulp.task('clean', ['clean:dist', 'clean:recipe']);
+gulp.task('clean', (cb) => {
+	runSequence('clean:recipe', 'clean:dist', cb);
+});
 
 gulp.task('build', (cb)=> {
 	_npmInstallCurrFolder()

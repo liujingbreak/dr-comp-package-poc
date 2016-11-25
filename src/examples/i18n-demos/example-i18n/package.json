@@ -1,8 +1,9 @@
 {
   "name": "@dr/example-i18n",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "Demo how we support i18n in browser side package",
   "browser": "module.js",
+  "main": "server.js",
   "style": "style.less",
   "transforms": [
     "@dr/parcelify-module-resolver"

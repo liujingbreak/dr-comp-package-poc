@@ -57,7 +57,8 @@ describe('packageUtils', function() {
 				'@dr-core/assets-processer',
 				'@dr/example-node',
 				'@dr/example-server-swig-entry',
-				'@dr/example-browserify'
+				'@dr/example-browserify',
+				'@dr/translate-generator'
 			];
 			var foundPackages = callback.calls.allArgs().map(row => { return row[0];});
 

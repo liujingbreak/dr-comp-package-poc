@@ -5,7 +5,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var engines = require('consolidate');
-var swig = require('swig');
+var swig = require('swig-templates');
 var setupApi = require('./setupApi');
 var log4js = require('log4js');
 var api = require('__api');
@@ -48,12 +48,18 @@ function create(app, setting, packageCache) {
 		cache: setting.devMode ? false : 'memory'
 	});
 	var injector = require('__injector');
+	//var translateHtml = require('@dr/translate-generator').htmlReplacer();
 	swigInjectLoader.swigSetup(swig, {
 		injector: injector
+		// fileContentHandler: function(file, source) {
+		// 	return translateHtml(source, file, api.config.get('locales[0]'));
+		// }
 	});
 
+	engines.requires.swig = swig;
 	app.engine('html', engines.swig);
-	app.engine('jade', engines.jade);
+	app.set('view cache', false);
+	//app.engine('jade', engines.jade);
 	app.set('trust proxy', true);
 	app.set('views', [path.join(__dirname, 'views'), setting.rootPath]);
 	app.set('view engine', 'html');

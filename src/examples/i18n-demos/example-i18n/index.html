@@ -15,9 +15,13 @@
 	<h2>{{ mainVm.youHaveAMessage }}</h2>
 	<h2 dr-translate>现在时间是 {{ mainVm.time | date : 'medium' }}。</h2>
 	<h2 dr-translate>我是任性的中文Key</h2>
-	Template.html content:
+	Js template Template.html content:
 	<p>
 		{{mainVm.templateContent}}
+	</p>
+	Swig template swig-template.html content:
+	<p>
+		{% include "./swig-template.html" %}
 	</p>
 	<h2>scope variable i18nText1: {{ mainVm.i18nText1 }}</h2>
 	<h2>scope variable i18nText2: {{ mainVm.i18nText2 }}</h2>

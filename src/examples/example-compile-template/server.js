@@ -19,7 +19,7 @@ var locals = {
 	'index.html': {
 		message: 'This page file is compiled by @dr/template-builder during compilation time',
 		toRenderFile: 'npm://@dr/example-partial/repeatablePartial.html',
-		repeatRenderMsg: 'swig is dead, shame'
+		repeatRenderMsg: 'Swig is out of maintainance, use "swig-templates" instead'
 	},
 
 	'browser-render.html': {

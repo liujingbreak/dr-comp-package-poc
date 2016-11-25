@@ -1,4 +1,7 @@
 module.exports = function replaceCode(text, replacements) {
+	replacements.sort(function(a, b) {
+		return a.start - b.start;
+	});
     var offset = 0;
     return replacements.reduce(function(text, update) {
         var start = update.start + offset;

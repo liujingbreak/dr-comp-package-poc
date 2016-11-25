@@ -1,5 +1,5 @@
 var through = require('through2');
-var swig = require('swig');
+var swig = require('swig-templates');
 var Path = require('path');
 var fs = require('fs');
 var _ = require('lodash');

@@ -3,7 +3,7 @@ var api = require('__api');
 var log = require('log4js').getLogger(api.packageName + '.setApi');
 var _ = require('lodash');
 var Path = require('path');
-var swig = require('swig');
+var swig = require('swig-templates');
 
 var routerSetupFuncs = [];
 //var middlewares = [];

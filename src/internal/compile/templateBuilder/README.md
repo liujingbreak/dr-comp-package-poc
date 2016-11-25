@@ -1,6 +1,8 @@
 Template Builder
 =========
-> Swig is no longer maintained by it original owner, you'd better choose another server side template engine like Handlerbars.
+> Swig is out of maintainance, you'd better choose another server side template engine like Handlerbars.
+
+> We replaced swig with [swig-templates](https://www.npmjs.com/package/swig-templates) as its successor.
 
 Under the hood, this is just a transform plugin for Browserify.
 
@@ -111,6 +113,4 @@ exports.compile = function() {
 	// Do things to swig instance
 }
 ```
-Now you can manipulate Swig instance.
-
-Yout can also obtain swig by `require('swig')` in that package, it will be the same instance returned from `@dr/template-builder`.
+Now you can manipulate Swig [swig-templates](https://github.com/node-swig/swig-templates) instance.

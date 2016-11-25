@@ -1,6 +1,6 @@
 {
   "name": "@dr/examples-recipe",
-  "version": "0.0.30",
+  "version": "0.0.31",
   "description": "Recipe package of examples-recipe",
   "dependencies": {
     "@dr/example-common": "1.0.27",
@@ -10,7 +10,7 @@
     "@dr/example-partial": "1.0.1",
     "@dr/example-server-swig-entry": "1.0.2",
     "@dr/example-browserify": "0.0.28",
-    "@dr/example-i18n": "0.0.15",
+    "@dr/example-i18n": "0.0.16",
     "@dr/example-locale-zh": "0.0.9"
   }
 }

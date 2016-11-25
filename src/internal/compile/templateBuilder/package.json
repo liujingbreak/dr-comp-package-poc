@@ -1,6 +1,6 @@
 {
   "name": "@dr/template-builder",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "description": "A swig based template transform and builder",
   "main": "templateBuilder.js",
   "dr": {
@@ -9,7 +9,8 @@
     "builderPriority": "before @dr/translate-generator"
   },
   "dependencies": {
-    "swig-package-tmpl-loader": "^1.1.0"
+    "swig-package-tmpl-loader": "^1.1.0",
+    "swig-templates": "^2.0.2"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

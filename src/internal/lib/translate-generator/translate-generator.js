@@ -33,7 +33,9 @@ exports.compile = function() {
 	return Promise.all(proms);
 };
 exports.scanPackage = scanPackage;
+exports.htmlReplacer = require('./translate-replacer').htmlReplacer;
 
+exports.activate = function() {};
 var readFileAsync = Promise.promisify(fs.readFile);
 var writeFileAsync = Promise.promisify(fs.writeFile);
 
