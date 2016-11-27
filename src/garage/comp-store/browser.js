@@ -6,13 +6,13 @@ exports.init = function(app, parentRouterState) {
 		return;
 	initialized = true;
 
-	app.$compileProvider.component('compStore', {
+	app.component('compStore', {
 		template: require('./views/componentStore.html'),
 		controller: function() {
 			console.log('Hey there, we have a component store now.');
 		}
 	});
-	app.$compileProvider.component('compDetails', {
+	app.component('compDetails', {
 		template: '<h1>Details: {{detailsCtrl.compId}}</h1>',
 		controller: ['$stateParams', function($stateParams) {
 			this.compId = $stateParams.compId;

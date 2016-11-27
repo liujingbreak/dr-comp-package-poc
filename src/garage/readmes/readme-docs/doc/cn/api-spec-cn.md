@@ -19,6 +19,7 @@ API 像一个service对象， Node平台会在启动时为每个package创建一
 
 #### 获取API instance
 - 新的获取方式是`require('__api')`， 无论是browser 还是Node 的JS里面都可以用这种方式获取API
+> 每个package在运行时只有一个对应的API instance, 就是说同一个package里不同JS文件访问的是同一个API instance, 他们可以利用api传递信息，但是API prototype是全局的，会影响到所有的package访问到的API instance
 
 ##### 旧的方式
 - Node side, API 对象是在main JS file `module.exports.activate(api)` 时被传入的
@@ -65,7 +66,7 @@ console.log(__api.assetsUrl('some-picture.jpg'));
 | .packageShortName | 当前package name 不包含scope部分 e.g. `doc-home`
 | .contextPath | 当前package Node 端运行作为Express router时的，http 访问根路径， 是根据config.yaml里面`nodeRoutePath + packageContextPathMapping`配置计算得，默认是`/<package short name>`, 比如`/doc-home`
 | .eventBus | 一个singleton 的EventEmitter对象
-| .packageUtils | lib/packageMgr/packageUtils.js 查找其他package的工具
+| .bundle | 当前package所属于的bundle名称
 | `.config()` | 获取config.yaml配置， 但是浏览器端只有部分config属性可读:  `staticAssetsURL`, `serverURL`, `packageContextPathMapping`
 | `.assetsUrl(packageName, path)` | 获取packageName对应的静态资源/assets目录下的文件的浏览器访问路径, `packageName` 为可选参数, 默认是当前package
 | `.urlSearchParam(searchString)` | parses window.location.search and returns a hash object

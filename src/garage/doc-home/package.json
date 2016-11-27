@@ -1,6 +1,6 @@
 {
   "name": "@dr/doc-home",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "Home page",
   "browser": "browser/switchLocale.js",
   "main": "server/server.js",

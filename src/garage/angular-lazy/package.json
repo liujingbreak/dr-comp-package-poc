@@ -1,0 +1,17 @@
+{
+  "name": "@dr/angular-lazy",
+  "version": "1.0.0",
+  "description": "Angular JS lazy load module (Derived from angular-require-lazy)",
+  "browser": "lazyAngularUtils.js",
+  "dr": {
+    "bundle": "ui-lib"
+  },
+  "transforms": [
+    "@dr/parcelify-module-resolver"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "LJ",
+  "license": "MIT"
+}

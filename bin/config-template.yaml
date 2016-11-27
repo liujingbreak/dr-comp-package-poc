@@ -28,7 +28,7 @@ entryPageMapping:
 
 # Change your source code folder here
 recipeSrcMapping:
-    recipes/hellow-world-recipe: src
+    dist/recipes/hellow-world-recipe: src
 
 # Override bundle file name for installed components (including 3rd-party library),
 # otherwise browserify will bundle them with every package that depends on them.

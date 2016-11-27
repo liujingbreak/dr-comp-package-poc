@@ -4,6 +4,7 @@ require('angular-ui-router');
 require('@dr/doc-ui');
 require('@dr/markdown-viewer');
 require('@dr/light-respond-js');
+var lazy = require('@dr/angular-lazy');
 
 var textAnim = require('@dr/text-anim-ng');
 
@@ -25,6 +26,7 @@ docHome.config(['$controllerProvider', '$compileProvider', '$filterProvider', '$
 		textAnim.register(docHome.$compileProvider);
 		require('./routes')($stateProvider, $urlRouterProvider);
 	}]);
+docHome.config(lazy.cacheInternals);
 require('./controllers/mainController')(docHome);
 require('./controllers/introController')(docHome);
 require('./controllers/asideController')(docHome);
@@ -34,7 +36,8 @@ require('./directives/menuAside')(docHome);
 require('./directives/docHome')(docHome);
 require('./directives/showOnReady')(docHome);
 require('./service/scrollableAnim')(docHome);
-
 angular.element(document).ready(function() {
 	angular.bootstrap(document, ['docHome']);
 });
+lazy.makeLazyAngular();
+angular.module('lazyModule', []);

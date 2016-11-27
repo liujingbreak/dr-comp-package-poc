@@ -17,7 +17,7 @@ var packageNameReg = /(?:@([^\/]+)\/)?(\S+)/;
 
 function BrowserApi(packageName, bundleName) {
 	if (!(this instanceof BrowserApi)) {
-		return new BrowserApi(packageName);
+		return new BrowserApi(packageName, bundleName);
 	}
 	this.packageName = packageName;
 	var m = packageNameReg.exec(packageName);
@@ -27,12 +27,17 @@ function BrowserApi(packageName, bundleName) {
 	var path = this.config.get(['packageContextPathMapping', this.packageShortName]);
 	path = path != null ? path : '/' + this.packageShortName;
 	this.contextPath = this.config().serverURL + path;
+	BrowserApi.packageApiMap[packageName] = this;
 }
 
 BrowserApi.setup = function(obj) {
 	_.assign(BrowserApi.prototype, obj);
 };
 
+BrowserApi.packageApiMap = {}; // Cache browser side API instance by package name
+BrowserApi.getCachedApi = function(name) {
+	return _.get(BrowserApi.packageApiMap, name);
+};
 /**
  * Code splitting
  * @param  {string | string[]} bundlePaths  dependencies bundles

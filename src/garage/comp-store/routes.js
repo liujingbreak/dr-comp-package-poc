@@ -28,7 +28,7 @@ function loadComponentsStoreModule($q, $timeout) {
 	var defer = $q.defer();
 	require.ensure(['@dr/comp-store'], function() {
 		//$timeout(function() {
-		require('@dr/comp-store').init(angular.module('docHome'), 'components');
+		require('@dr/comp-store').init(angular.module('lazyModule'), 'components');
 		defer.resolve();
 		//}, 5000);
 	});
