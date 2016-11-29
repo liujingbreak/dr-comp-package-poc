@@ -45,71 +45,59 @@ BrowserApi.getCachedApi = function(name) {
  */
 BrowserApi.ensureRequire = function(splitPoints, callBack) {
 	var self = BrowserApi.prototype;
-	console.log('BrowserApi.ensureRequire()');
-	var loadedBundleFileSet = self.loadedBundleFileSet;
+	try {
+		console.log('BrowserApi.ensureRequire()');
+		var loadedBundleFileSet = self.loadedBundleFileSet;
 
-	var js = {}; // JS bundles need to be loaded
-	var css = {}; // CSS bundles need to be loaded
-	var allLoaded = true;
-	_.each(splitPoints, function(splitPoint) {
-		var splitPointMeta = self.splitPoints[splitPoint];
-		var jsBundles = splitPointMeta.js;
-		var cssBundles = splitPointMeta.css;
-		_.each(jsBundles, function(jsBundle) {
-			if (!_.has(loadedBundleFileSet, jsBundle)) {
-				allLoaded = false;
-				js[jsBundle] = 1;
-			}
+		var js = {}; // JS bundles need to be loaded
+		var css = {}; // CSS bundles need to be loaded
+		var allLoaded = true;
+		_.each(splitPoints, function(splitPoint) {
+			var splitPointMeta = self.splitPoints[splitPoint];
+			var jsBundles = splitPointMeta.js;
+			var cssBundles = splitPointMeta.css;
+			_.each(jsBundles, function(jsBundle) {
+				if (!_.has(loadedBundleFileSet, jsBundle)) {
+					allLoaded = false;
+					js[jsBundle] = 1;
+				}
+			});
+			_.each(cssBundles, function(cssBundle) {
+				if (!_.has(loadedBundleFileSet, cssBundle)) {
+					allLoaded = false;
+					css[cssBundle] = 1;
+				}
+			});
 		});
-		_.each(cssBundles, function(cssBundle) {
-			if (!_.has(loadedBundleFileSet, cssBundle)) {
-				allLoaded = false;
-				css[cssBundle] = 1;
-			}
-		});
-		if (!self.lastLoadedLocale) {
-			// locale resource has not been loaded, skip loading splitpoint's locale resource
+		if (allLoaded) {
+			callBack(require);
 			return;
 		}
-		if (splitPointMeta) {
-			_.each(splitPointMeta.locales[self.lastLoadedLocale].js, function(bundle) {
-				if (!_.has(loadedBundleFileSet, bundle)) {
-					allLoaded = false;
-					js[bundle] = 1;
-				}
-			});
-			_.each(splitPointMeta.locales[self.lastLoadedLocale].css, function(bundle) {
-				if (!_.has(loadedBundleFileSet, bundle)) {
-					allLoaded = false;
-					css[bundle] = 1;
-				}
-			});
+		js = _.keys(js);
+		css = _.keys(css);
+		if (self.isDebug()) {
+			console.log('loading ' + css);
 		}
-	});
-	if (allLoaded) {
-		callBack(require);
-		return;
+		// load CSS
+		if (_.size(css) > 0) {
+			self._loadCssBundles(css);
+		}
+		if (self.isDebug()) {
+			console.log('loading ' + js);
+		}
+		// load JS
+		window.$LAB.script(_.map(js, function(jsPath) {
+			return bundleLoader.resolveBundleUrl(jsPath, self.config().staticAssetsURL);
+		})).wait(function() {
+			self.markBundleLoaded(js);
+			self.markBundleLoaded(css);
+			callBack(require);
+		});
+	} catch (e) {
+		if (self.isDebug()) {
+			console.error(e);
+		}
 	}
-	js = _.keys(js);
-	css = _.keys(css);
-	if (self.isDebug()) {
-		console.log('loading ' + css);
-	}
-	// load CSS
-	if (_.size(css) > 0) {
-		self._loadCssBundles(css);
-	}
-	if (self.isDebug()) {
-		console.log('loading ' + js);
-	}
-	// load JS
-	window.$LAB.script(_.map(js, function(jsPath) {
-		return bundleLoader.resolveBundleUrl(jsPath, self.config().staticAssetsURL);
-	})).wait(function() {
-		self.markBundleLoaded(js);
-		self.markBundleLoaded(css);
-		callBack(require);
-	});
 };
 
 BrowserApi.prototype = {

@@ -1,4 +1,11 @@
 <component-header translate-scope="@dr/comp-store"><h1 class="t">res:Component Store</h1></component-header>
-<section ui-view="compMain">
-	<h1 class="center-message t">res:Yo Components!</h1>
+<main ui-view="compMain" class="comp-main">
+	<section>
+		<h1 class="center-message t">res:Yo Components!</h1>
+	</section>
+</main>
+<section ng-show="compStoreVm.showNavi" class="comp-navi">
+	<form name="naviForm">
+		<input type="text" ng-model="compStoreVm.nameSearch"/>
+	</form>
 </section>

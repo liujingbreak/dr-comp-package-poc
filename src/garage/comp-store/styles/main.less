@@ -1,4 +1,26 @@
+@import "npm://@dr/doc-ui/browser/less/dr-variables.less";
+@import "npm://@dr/doc-ui/browser/less/dr-mixins.less";
+@comp-navi-width: 250px;
+
+.comp-store {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
 .center-message {
 	font-size: 32px;
 	text-align: center;
+}
+.comp-main {
+	position: absolute;
+	left: 0;
+	right: @comp-navi-width;
+}
+.comp-navi {
+	position: absolute;
+	right: 0;
+	width: @comp-navi-width;
+	background: @dr-liteblue-dark;
+	padding: @dr-unit;
+	height: 100%;
 }
