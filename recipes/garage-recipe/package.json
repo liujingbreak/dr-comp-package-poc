@@ -1,6 +1,6 @@
 {
   "name": "@dr/garage-recipe",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Recipe package of garage-recipe",
   "dependencies": {
     "@dr/angularjs": "1.5.8-1",
@@ -16,8 +16,8 @@
     "@dr/light-respond-js": "0.0.5",
     "@dr/markdown-viewer": "0.0.24",
     "@dr/readme": "0.0.32",
-    "@dr/readme-docs": "0.2.4",
     "@dr/text-anim-ng": "0.0.23",
-    "@dr/angular-lazy": "1.0.0"
+    "@dr/angular-lazy": "1.0.0",
+    "@dr/readme-docs": "0.2.5"
   }
 }

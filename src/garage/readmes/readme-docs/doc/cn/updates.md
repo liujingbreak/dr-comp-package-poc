@@ -1,9 +1,9 @@
 Updates
 =======
-**web-fun-house 0.7.1 replease**
+**web-fun-house 0.7.1 release**
 - **Swig** is out of maintainance, replace Swig with [swig-templates](https://www.npmjs.com/package/swig-templates)
 ### 2016-11-22
-**web-fun-house 0.7.0 replease**
+**web-fun-house 0.7.0 release**
 - i18n重新设计，采用更简单的方案，gulp编译打包时替换可翻译文字到不同的语言
 - @dr/angularjs has been upgraded to AngularJS 1.5.8
 ### 2016-11-14
