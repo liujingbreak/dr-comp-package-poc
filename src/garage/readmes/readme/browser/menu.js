@@ -26,7 +26,7 @@ module.exports = function(goFunc) {
 			}
 		}, {
 			label: $translate('Configuration'),
-			//flag: 'new',
+			flag: 'new',
 			action: function() {
 				goFunc('config.md');
 			}

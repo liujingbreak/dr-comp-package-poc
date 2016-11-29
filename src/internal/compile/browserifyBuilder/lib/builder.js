@@ -321,7 +321,7 @@ function compile() {
 			mIdx++;
 		});
 		var entryJsDir = Path.join(config().destDir, 'temp');
-		jsBundleEntryMaker = helper.JsBundleEntryMaker(api, bundle, modules, depCtl.packageSplitPointMap);
+		jsBundleEntryMaker = helper.JsBundleEntryMaker(api, bundle, modules, depCtl.fileSplitPointMap);
 		var listFile = jsBundleEntryMaker.createPackageListFile();
 		mkdirp.sync(entryJsDir);
 		var entryFile = Path.join(entryJsDir, jsBundleEntryMaker.bundleFileName);
@@ -366,79 +366,6 @@ function compile() {
 		};
 	}
 
-	/*
-	function buildI18nBundles(browserifyOpt, modules, excludeList, bundle, entryJsDir) {
-		var streams = [];
-		var cssPromises = [];
-		var maker = helper.JsBundleWithI18nMaker(api, bundle, modules, depCtl.packageSplitPointMap, resolve);
-
-		config().locales.forEach(locale => {
-			if (!_.has(depCtl.localeDepsMap, locale)) {
-				depCtl.localeDepsMap[locale] = {};
-			}
-			var ret = buildLocaleBundle(maker, browserifyOpt, locale, modules, excludeList, bundle, entryJsDir, depCtl.localeDepsMap[locale]);
-			if (ret) {
-				streams.push(ret[0]);
-				cssPromises.push(ret[1]);
-			}
-		});
-		if (streams.length === 0) {
-			return null;
-		}
-		return [es.merge(streams), cssPromises];
-	}
-
-	function buildLocaleBundle(maker, browserifyOpt, locale, modules, excludeList, bundle, entryJsDir, depsMap) {
-		var listFile = maker.createI18nListFile(locale);
-		if (!listFile) {
-			return null;
-		}
-		depCtl.updatePack2localeModule(maker.pk2LocaleModule);
-
-		var localeBunleName = bundle + '_' + locale;
-
-		var b = browserify(browserifyOpt);
-		maker.i18nModuleForRequire.forEach(expose => {
-			b.require(expose.file, expose.opts);
-			var localeModuleName = expose.id;
-			var pkInstance = packageBrowserInstance(config(), {
-				isVendor: false,
-				bundle: localeBunleName,
-				longName: expose.opts.expose + '{' + locale + '}',
-				shortName: expose.opts.expose + '{' + locale + '}',
-				file: expose.file
-				//isEntryJS: _.has(config().defaultEntrySet, moduleName)
-			});
-			if (!packageInfo.localeEntryMap[locale]) {
-				packageInfo.localeEntryMap[locale] = {};
-			}
-			packageInfo.localeEntryMap[locale][localeModuleName] = pkInstance;
-			packageInfo.moduleMap[expose.opts.expose + '{' + locale + '}'] = pkInstance;
-			//log.debug('buildLocaleBundle() locale entry ' + localeModuleName);
-			depCtl.addI18nModule(expose.opts.expose);
-		});
-		//var listFilePath = Path.resolve(maker.i18nBundleEntryFileName(locale));
-		// var listStream = through();
-		// listStream.write(listFile, 'utf8');
-		// listStream.end();
-		// b.add(listStream, {file: listFilePath, basedir: process.cwd});
-		var listFilePath = Path.join(entryJsDir, maker.i18nBundleEntryFileName(locale));
-		fs.writeFileSync(listFilePath, listFile);
-		b.add(listFilePath);
-		addonTransforms.forEach(addonTransform => {
-			b.transform(addonTransform, {global: true});
-		});
-		b.transform(htmlTranform, {global: true});
-		b.transform(yamlify, {global: true});
-		//jsBundleEntryMaker.setLocale(locale);
-		b.transform(jsBundleEntryMaker.transform(locale), {global: true});
-		depCtl.browserifyDepsMap(b, depsMap, resolve);
-		var cssProm = buildCssBundle(b, bundle + '_' + locale, config().staticDir);
-		excludeList.forEach(b.exclude, b);
-		var out = _createBrowserifyBundle(b, localeBunleName, rejectOnError);
-		return [out, cssProm];
-	}
-	*/
 	function monkeyPatchBrowserApi(browserApi, entryPackage, revisionMeta) {
 		// setup server side config setting to browser
 		browserApi._config = {};
@@ -475,20 +402,6 @@ function compile() {
 			if (_.size(loadingFiles.css) === 0) {
 				delete loadingFiles.css;
 			}
-
-			// locale bundles
-			// _.each(metadata.locales, (bundles, locale) => {
-			// 	loadingFiles.locales[locale] = {
-			// 		js: bundles2FilePaths(bundles, 'js', revisionMeta),
-			// 		css: bundles2FilePaths(bundles, 'css', revisionMeta)
-			// 	};
-			// 	if (_.size(loadingFiles.locales[locale].js) === 0) {
-			// 		delete loadingFiles.locales[locale].js;
-			// 	}
-			// 	if (_.size(loadingFiles.locales[locale].css) === 0) {
-			// 		delete loadingFiles.locales[locale].css;
-			// 	}
-			// });
 			if (!_.has(browserApi, 'splitPoints')) {
 				browserApi.splitPoints = {};
 			}

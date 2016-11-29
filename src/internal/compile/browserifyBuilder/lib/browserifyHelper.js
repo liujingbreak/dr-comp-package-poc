@@ -37,10 +37,10 @@ var apiVariableTpl = _.template(fs.readFileSync(
 	Path.join(__dirname, 'templates', 'apiVariable.js.tmpl'), 'utf8'));
 
 function JsBundleEntryMaker(api, bundleName, packageBrowserInstances,
-	packageSplitPointMap) {
+	fileSplitPointMap) {
 	if (!(this instanceof JsBundleEntryMaker)) {
 		return new JsBundleEntryMaker(api, bundleName, packageBrowserInstances,
-			packageSplitPointMap);
+			fileSplitPointMap);
 	}
 	this.api = api; // same as require('__api');
 	this.packages = packageBrowserInstances;
@@ -48,14 +48,8 @@ function JsBundleEntryMaker(api, bundleName, packageBrowserInstances,
 	this.bundleFileName = bundleName + '_bundle_entry.js';
 	this.activeModules = {}; //key: bundle name, value: array of active module name
 
-	this.packageSplitPointMap = packageSplitPointMap;
+	this.fileSplitPointMap = fileSplitPointMap;
 	this.CDNDependUrlSet = {}; // external JS library URL
-	// clean split points cache
-	this.packages.forEach(packageIns => {
-		if (_.has(this.packageSplitPointMap, packageIns.longName)) {
-			delete this.packageSplitPointMap[packageIns.longName];
-		}
-	});
 }
 
 var apiVarablePat = /(?:^|[^\w$\.])__api(?:$|[^\w$])/mg;
@@ -117,6 +111,10 @@ JsBundleEntryMaker.prototype = {
 		var currPackageName;
 		var hasRequireEnsure = false;
 		var self = this;
+
+		var relRealPath = Path.relative(api.config().rootPath, fs.realpathSync(file));
+		delete self.fileSplitPointMap[relRealPath]; // clean up cached data
+
 		apiVarablePat.lastIndex = 0;
 		if (apiVarablePat.test(source)) {
 			log.debug('reference __api in ' + file);
@@ -133,13 +131,10 @@ JsBundleEntryMaker.prototype = {
 			ast = esParser.parse(source, {
 				splitLoad: splitPoint => {
 					hasRequireEnsure = true;
-					if (!currPackageName) {
-						currPackageName = self.api.findBrowserPackageByPath(file);
+					if (!_.has(self.fileSplitPointMap, relRealPath)) {
+						self.fileSplitPointMap[relRealPath] = {};
 					}
-					if (!_.has(self.packageSplitPointMap, currPackageName)) {
-						self.packageSplitPointMap[currPackageName] = {};
-					}
-					self.packageSplitPointMap[currPackageName][splitPoint] = 1;
+					self.fileSplitPointMap[relRealPath][splitPoint] = 1;
 				}
 			});
 		} catch (e) {
@@ -163,93 +158,7 @@ JsBundleEntryMaker.prototype = {
 		return str2Stream(this.createPackageListFile.apply(this, arguments));
 	}
 };
-/*
-function JsBundleWithI18nMaker(api, bundleName, packageBrowserInstances,
-	packageSplitPointMap, browserResolve) {
-	if (!(this instanceof JsBundleWithI18nMaker)) {
-		return new JsBundleWithI18nMaker(api, bundleName, packageBrowserInstances,
-			packageSplitPointMap, browserResolve);
-	}
-	JsBundleEntryMaker.call(this, api, bundleName, packageBrowserInstances, packageSplitPointMap);
-	this.browserResolve = browserResolve;
-	this.pk2LocaleModule = {};
-}
 
-JsBundleWithI18nMaker.prototype = _.create(JsBundleEntryMaker.prototype, {
-	createI18nListFile: function(locale) {
-		var i18nModules = [];
-		this.i18nModuleForRequire = [];
-		this.packages.forEach(pkInstance => {
-			if (pkInstance.isVendor) {
-				return;
-			}
-			var i18nPath = this.i18nPath(pkInstance, locale);
-			var i18nModuleName = pkInstance.longName + '/i18n';
-			if (i18nPath) {
-				var relI18nPath = Path.relative(api.config().rootPath, i18nPath);
-				i18nModules.push({
-					longName: i18nModuleName
-				});
-				this.i18nModuleForRequire.push({
-					file: i18nPath,
-					opts: {
-						expose: i18nModuleName
-					},
-					id: relI18nPath
-				});
-				log.debug(`i18nPath = ${i18nPath}`);
-				this.createI18nPackageJson(i18nPath, i18nModuleName, locale);
-				if (!this.pk2LocaleModule[i18nModuleName]) {
-					this.pk2LocaleModule[i18nModuleName] = {};
-				}
-				this.pk2LocaleModule[i18nModuleName][locale] = relI18nPath;
-			}
-		});
-		if (i18nModules.length === 0) {
-			return null;
-		}
-		return this.entryBundleFileTpl({
-			bundle: this.bundleName + '_' + locale,
-			requireFilesFuncName: '_i18nBundle_' + safeBundleNameOf(this.bundleName),
-			packageInstances: i18nModules
-		});
-	},
-
-	i18nBundleEntryFileName: function(locale) {
-		return this.bundleName + '_bundle_entry_' + locale + '.js';
-	},
-
-	i18nPath: function(pkInstance, locale) {
-		var i18nPath = pkInstance.i18n;
-		if (!i18nPath) {
-			i18nPath = Path.resolve(pkInstance.packagePath, 'i18n');
-			if (!fileExists(i18nPath)) {
-				return null;
-			}
-		}
-		i18nPath = Path.resolve(pkInstance.packagePath, i18nPath.replace(/\{locale\}/g, locale));
-		if (!fileExists(i18nPath)) {
-			log.error('i18n not found: ' + pkInstance.i18n + ' in ' + pkInstance.longName);
-			return null;
-		}
-		return fs.realpathSync(this.browserResolve(i18nPath));
-	},
-
-	createI18nPackageJson: function(i18nPath, i18nModuleName, locale) {
-		if (this.i18nPackageJsonCreated) {
-			return;
-		}
-		var folder = fs.lstatSync(i18nPath).isDirectory() ? i18nPath : Path.dirname(i18nPath);
-		var jsonFile = Path.join(folder, 'package.json');
-		var json = {};
-		if (!fs.existsSync(jsonFile)) {
-			fs.writeFileSync(jsonFile, JSON.stringify(json, null, '  '));
-		}
-		this.i18nPackageJsonCreated = true;
-	}
-});
-JsBundleWithI18nMaker.prototype.constructor = JsBundleWithI18nMaker;
-*/
 function safeBundleNameOf(bundleName) {
 	return bundleName.replace(/[-\.&#@]/g, '_');
 }
@@ -262,11 +171,3 @@ function str2Stream(str) {
 	return output;
 }
 
-// function fileExists(file) {
-// 	try {
-// 		fs.accessSync(file, fs.R_OK);
-// 		return true;
-// 	} catch (e) {
-// 		return false;
-// 	}
-// }

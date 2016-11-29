@@ -53,6 +53,7 @@ config.local.yaml 应该被放入.gitignore, 不作为生产环境的配置内�
 	- packageContextPathMapping
 	- entryPageMapping
 	- vendorBundleMap：设置第三方package的bundle，或者是用来覆盖组件package.json中bundle配置，重新分配bundle配置
+	- colorfulConsole 设置是否输出彩色的console log
 
 ### 添加自定义的全局配置属性
 建议添加自定义的属性时，尽量以package name作为顶级属性名，防止和其他属性名冲突

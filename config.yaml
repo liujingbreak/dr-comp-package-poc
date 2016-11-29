@@ -185,3 +185,12 @@ express-app-enableCORS: false
 translate-generator:
     scanMethodNames:
             - drTranslate
+
+# Disable colorful console log message, useful for outputing console log to a file instead of terminal screen,
+# because the colorful log message contains extra messy character as special color indicator, that's what terminal can understand for printing colorful text.
+#
+# e.g. When you running `gulp compile` on a Jenkins server remotely, you will need to disable `colorfulConsole`,
+# since Jenkins actually stores console message to file and shows it on web page.
+#
+# Also you make set environment variable "CHALK_ENABLED" to `false` to disable colorful console log.
+# colorfulConsole: false

@@ -1,5 +1,20 @@
 Updates
 =======
+### 2016-11-30
+**web-fun-house 0.7.3 release**
+- New config.yaml property,
+```yaml
+colorfulConsole: false
+``` 
+同样效果设置环境变量 CHALK_ENABLED=false
+可以禁止在Jenkins等远程build环境中console log输出特殊的色彩字符。
+- 对Split loading `require.ensure()`修复一些`gulp watch`时的bug
+- 升级部分第三方依赖
+- 去掉了对旧i18n方式支持的代码
+
+**web-fun-house 0.7.2 release**
+- Bug fixes
+
 **web-fun-house 0.7.1 release**
 - **Swig** is out of maintainance, replace Swig with [swig-templates](https://www.npmjs.com/package/swig-templates)
 ### 2016-11-22

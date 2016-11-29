@@ -11,14 +11,14 @@ var buildUtils = require('../lib/gulp/buildUtils');
 var os = require('os');
 var argv = yargs.usage('Usage: $0 <command> [-d <target_folder>]')
 	.command('init', 'Initialize environment, create gulpfile.js and other basic configuration')
-	.command('update', 're-initialize environment, create gulpfile.js and other basic configuration, but don\'t copy examples')
-	.command('install-deps', 'install gulp to local node_modules')
+	.command('update', 'Re-initialize environment, create gulpfile.js and other basic configuration, but don\'t copy examples')
+	.command('install-deps', 'Install gulp to local node_modules')
 	.demand(1)
-	.describe('d', 'set target directory')
-	.alias('d', 'dir')
-	.default('d', process.cwd(), 'current working directory')
+	.describe('d', 'Indicate project root folder')
+	.default('d', process.cwd())
 	.help('h').alias('h', 'help')
 	.epilog('copyright 2016')
+	.global('d')
 	.argv;
 
 var rootPath = Path.resolve(__dirname, '..');

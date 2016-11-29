@@ -14,6 +14,7 @@ module.exports = function(injector) {
 	 *  injector.fromAllComponents()
 	 *  	.substitute('depenency-package', 'another-package');
 	 */
+	var _ = require('lodash');
 	var resolve = require('resolve');
 	var nodeSearchPath = require('./lib/nodeSearchPath.js');
 
@@ -36,5 +37,12 @@ module.exports = function(injector) {
 			return resolve.sync(id, opts);
 		};
 		return _resolve;
+	});
+
+	var chalk = require('chalk');
+	var config = require('./lib/config');
+	injector.fromAllComponents()
+	.factory('chalk', function() {
+		return new chalk.constructor({enabled: config.get('colorfulConsole') !== false && _.toLower(process.env.CHALK_ENABLED) !== 'false'});
 	});
 };
