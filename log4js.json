@@ -1,7 +1,11 @@
 {
 	"appenders": [
 		{
-			"type": "console"
+			"type": "console",
+			"layout": {
+				"type": "pattern",
+				"pattern": "%[%r %c -%] %m"
+			}
 		}, {
 			"type": "dateFile",
 		    "filename": "logs/server.log",
@@ -21,6 +25,7 @@
 		"test": "DEBUG",
 		"rwPackageJson": "INFO",
 		"@dr-core/browserify-builder": "INFO",
-		"packageInstallMgr": "INFO"
+		"packageInstallMgr": "INFO",
+		"require-injector.node-inject": "info"
 	}
 }

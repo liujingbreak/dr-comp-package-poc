@@ -100,11 +100,18 @@ _2016-3-28 更新_
 	比`gulp compile`快速, 只负责编译bundle
 
 - ### gulp watch
-	修改js, less, html, json等文件后，自动编译browser package,浏览器需要手工刷新，对修改node js代码无效
+	修改js, less, html, json等文件后，自动编译browser package，对修改node js代码无效
 
 	`-p`可以指定只编译某些package, 可能节省些资源
 	```
 	gulp watch  -p <package-short-name>  -p <package-short-name>
+	```
+	配合livereload, 在`devMode` true的时候，任何改动都可以会触发自动编译和自动页面刷新，大大方便Web app开发。
+	注意livereload配置端口如果被占用需要修改config.local.yaml
+	```
+	livereload:
+	   port: 135729
+	   delay: 800
 	```
 - ### gulp check-deps
 	列出所有组件package的dependencies, 方便查看组件的第三方依赖有没有版本不一致

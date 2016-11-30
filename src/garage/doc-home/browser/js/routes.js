@@ -21,5 +21,5 @@ module.exports = function($stateProvider, $urlRouterProvider) {
 			}
 		}
 	});
-	require('@dr/comp-store/routes')($stateProvider);
+	require('./comp-store-routes')($stateProvider);
 };

@@ -8,6 +8,8 @@ var cheerio = require('cheerio');
 var jsParser = require('./jsParser');
 var patchText = require('./patch-text');
 var bResolve = require('browser-resolve');
+var yamljs = require('yamljs');
+var fs = require('fs');
 
 exports.createBrowserifyReplacerTransform = createBrowserifyReplacerTransform;
 
@@ -113,5 +115,5 @@ function checkSkipPackageAndGetRes(file, locale, skipPackageCache) {
 	} catch (e) {
 		solved = false;
 	}
-	return solved ? require(resName) : false;
+	return solved ? yamljs.parse(fs.readFileSync(require.resolve(resName), 'utf8')) : false;
 }

@@ -280,9 +280,10 @@ function compile() {
 		var bootstrapCode = PageCompiler.entryBootstrapTpl({
 			cssPaths: writeCss ? JSON.stringify(loadingData.css, null, '  ') : null,
 			jsPaths: JSON.stringify(loadingData.js, null, '  '),
-			staticAssetsURL: config().staticAssetsURL,
+			staticAssetsURL: config.get('staticAssetsURL'),
 			entryPackage: entryPackageName,
-			debug: !!api.config().devMode,
+			debug: !!api.config.get('devMode'),
+			livereload: api.config.get('livereload'),
 			data: JSON.stringify(entryDataProvider(entryPackageName), null, '  ')
 		});
 		var rpr = api.config.get([api.packageName, 'replaceRequireKeyword']) || api.config.get([api.packageShortName, 'replaceRequireKeyword']);

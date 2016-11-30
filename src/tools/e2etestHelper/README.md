@@ -1,5 +1,6 @@
 End-to-end Test
 ==========
+[Selenum web driver doc](http://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/)
 ### Test Spec directory
 
 Any file in `<project-root>/e2etest/spec` is considered as test spec file.
@@ -121,6 +122,7 @@ module.exports = new YourPage();
 
 | Name | description
 | - | -
+| .driver | Underneath Webdriver instance
 | .statusCodeOf(path) | return a Promise, resolved to a number type `statusCode`
 | .saveScreen(fileName) | Take a screenshot for browser and save to folder `dist` as `config.resolve('destDir')`
 If you want to assert a response status code of a local HTTP Path, you may do like this,

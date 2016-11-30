@@ -186,6 +186,11 @@ translate-generator:
     scanMethodNames:
             - drTranslate
 
+# livereload will be enabled when `devMode` is true
+livereload:
+    port: 35730
+    delay: 800
+
 # Disable colorful console log message, useful for outputing console log to a file instead of terminal screen,
 # because the colorful log message contains extra messy character as special color indicator, that's what terminal can understand for printing colorful text.
 #

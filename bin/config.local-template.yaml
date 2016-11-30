@@ -6,3 +6,9 @@ devMode: true
 bundlePerPackage: true
 cacheControlMaxAge: 0
 enableSourceMaps: true
+
+#port: 14334
+# livereload will be enabled when `devMode` is true
+#livereload:
+#     port: 35729
+#     delay: 800

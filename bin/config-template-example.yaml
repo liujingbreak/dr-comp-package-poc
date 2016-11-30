@@ -38,3 +38,7 @@ installedRecipes:
 
 enableSourceMaps: false
 port: 14334
+
+livereload:
+    port: 35729
+    delay: 800

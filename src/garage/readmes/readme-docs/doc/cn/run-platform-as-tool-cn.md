@@ -88,14 +88,6 @@ http://localhost:14334/example-entry
 npm install @dr/garage-recipe
 # no need to run 'gulp install-recipe' anymore
 ```
-~~编辑 `config.yaml` or `config.local.yaml`, 修改`installedRecipes`属性~~
-
-> 确保安装的recipe命名匹配config.yaml的配置
-> ```yaml
-> installedRecipes:
->    - node_modules/@dr/*-recipe
->    - node_modules/@dr/recipe-*
-> ```
 
 再次执行以下命令
 ```
@@ -103,7 +95,17 @@ gulp compile
 
 node app.js
 ```
+
 访问 [http://localhost:14334/example-entry](http://localhost:14334/example-entry)
+
+正式开发时可以用`gulp watch`代替 `gulp compile`， 内置的livereload, 在`devMode`下，任何改动都可以会触发自动编译和自动页面刷新，大大方便浏览器端的开发。
+注意livereload配置端口如果被占用冲突，需要修改config.local.yaml
+```
+livereload:
+	port: 135729
+	delay: 800
+```
+> **livereload** 目前对改动Node端JS没有自动重启Server效果。
 
 #### 5. 安装他人贡献的组件
 可以安装recipe的方式一次安装多个package: `npm install <recipe-name>`

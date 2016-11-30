@@ -67,3 +67,7 @@ browserSideConfigProp:
 #   api.router().use('/api', api.cors());
 # in server javascript
 express-app-enableCORS: false
+
+livereload:
+    port: 35729
+    delay: 800
