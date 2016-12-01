@@ -1,0 +1,18 @@
+dr-doc-spinner{
+	z-index: 99999;
+	position: absolute;
+	top: 0;
+	left: 0;
+	text-align: center;
+	i {
+		vertical-align: middle;
+	}
+	.spinning {
+		animation: spin 1s linear 0s infinite normal;
+	}
+}
+
+@keyframes spin{
+	0% {transform: rotateZ(0deg);}
+	100% {transform: rotateZ(360deg);}
+}

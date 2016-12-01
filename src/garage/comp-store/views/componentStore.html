@@ -1,11 +1,16 @@
-<main ui-view="compMain" class="comp-main">
-	<section>
-		<h1 class="center-message t">res:Yo Components!</h1>
-	</section>
-</main>
 <section ng-show="compStoreVm.showNavi" class="comp-navi">
-	<h3 class="t">res:Component Store</h3>
+	<div class="vertical-line"></div>
+	<h2 class="t">res:Component Store</h2>
 	<form name="naviForm">
-		<input class="quick-search" type="text" ng-model="compStoreVm.nameSearch"/>
+		<div class="input-row">
+			<input class="quick-search" autocomplete="false" placeholder="{{compStoreVm.quickSearch}}"
+				type="text" ng-model="compStoreVm.nameSearch"/>
+			<i class="fa fa-search" aria-hidden="true"></i>
+		</div>
 	</form>
 </section>
+<main ui-view="compMain" class="comp-main">
+	<section class="banner"></section>
+	<div class="horizatal-line"></div>
+	<comp-group></comp-group>
+</main>

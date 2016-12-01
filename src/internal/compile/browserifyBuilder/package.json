@@ -1,6 +1,6 @@
 {
   "name": "@dr-core/browserify-builder",
-  "version": "0.5.7",
+  "version": "0.5.9",
   "description": "The default browser side stuff builder module based on browserify",
   "main": "lib/main.js",
   "scripts": {
@@ -13,7 +13,7 @@
     "gulp-filter": "^4.0.0",
     "uglify-js": "^2.6.4",
     "acorn": "^4.0.3",
-    "livereload": "^0.6.0"
+    "tiny-lr": "^1.0.3"
   },
   "author": "LJ",
   "license": "MIT",

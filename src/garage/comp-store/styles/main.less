@@ -1,7 +1,7 @@
 @import "npm://@dr/doc-ui/browser/less/dr-variables.less";
 @import "npm://@dr/doc-ui/browser/less/dr-mixins.less";
 @comp-navi-width: 250px;
-
+@banner-height: @dr-unit * 11;
 .comp-store {
 	position: relative;
 	width: 100%;
@@ -11,21 +11,34 @@
 	font-size: 32px;
 	text-align: center;
 }
+
+.size-mobile {
+	.comp-main {
+		position: static;
+		overflow-y: visible;
+		padding: 0 @dr-unit-half;
+		.horizatal-line {
+			position: static;
+		}
+	}
+}
 .comp-main {
 	position: absolute;
 	left: 0;
 	right: @comp-navi-width;
-}
-.comp-navi {
-	position: absolute;
-	right: 0;
-	width: @comp-navi-width;
-	bottom: 0;
-	top: 0;
-	background: @dr-liteblue-dark;
-	padding: 0 @dr-unit;
-	.quick-search{
-		width: 100%;
-		height: @dr-unit;
+	height: 100%;
+	overflow-y: auto;
+	.banner {
+		height: @banner-height;
+		margin: @dr-unit;
+	}
+	.horizatal-line {
+		position: absolute;
+		left: @dr-unit;
+		right: @dr-unit;
+		height: 1px;
+		top: @banner-height;
+		background-color: @dr-medium-liter;
 	}
 }
+@import "comp-navi.less";

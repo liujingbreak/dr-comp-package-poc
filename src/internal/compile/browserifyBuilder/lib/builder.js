@@ -283,7 +283,7 @@ function compile() {
 			staticAssetsURL: config.get('staticAssetsURL'),
 			entryPackage: entryPackageName,
 			debug: !!api.config.get('devMode'),
-			livereload: api.config.get('livereload'),
+			lrport: api.config.get('livereload.port'),
 			data: JSON.stringify(entryDataProvider(entryPackageName), null, '  ')
 		});
 		var rpr = api.config.get([api.packageName, 'replaceRequireKeyword']) || api.config.get([api.packageShortName, 'replaceRequireKeyword']);

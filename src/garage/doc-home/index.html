@@ -7,6 +7,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 </head>
 <body class="doc-home" dr-doc-home dr-show-on-ready anim-completed="animState">
+	<dr-doc-spinner class="spin-loading" ng-show="">
+		<i class="fa fa-2x fa-circle-o-notch spinning" aria-hidden="true"></i>
+	</dr-doc-spinner>
 	<div dr-menu-aside="asideVm.menuItems" menu-selected="mainVm.selectedMenuIdx"
 	class="main-aside dr-bg-dark dr-navi-aside" ng-controller="AsideController as asideVm">
 		<div class="logo"></div>

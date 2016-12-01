@@ -3,7 +3,7 @@
 	var livereload = document.createElement('script');
 	livereload.type='text/javascript';
 	livereload.async = true;
-	livereload.src = 'http://' + (location.host || 'localhost').split(':')[0] + ':{{ livereload.port }}/livereload.js';
+	livereload.src = 'http://' + (location.host || 'localhost').split(':')[0] + ':{{ lrport }}/livereload.js';
 	var s = document.getElementsByTagName('script')[0];
 	s.parentNode.insertBefore(livereload, s);
 {% } %}

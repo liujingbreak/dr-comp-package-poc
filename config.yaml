@@ -146,7 +146,7 @@ installedRecipes:
 
 gulp:
     watchTimeout: 20000 # gulp watch on change which triggers `gulp compile` with a timeout check
-    watchDebounceDelay: 800 # gulp watch change event will not trigger `gulp compile` within this duration
+    watchDebounceDelay: 1000 # gulp watch change event will not trigger `gulp compile` within this duration
 
 # Following is a list of current configuration property names of which property
 # are visible to browser side environment, meaning those properties will be stringified
@@ -189,7 +189,6 @@ translate-generator:
 # livereload will be enabled when `devMode` is true
 livereload:
     port: 35730
-    delay: 800
 
 # Disable colorful console log message, useful for outputing console log to a file instead of terminal screen,
 # because the colorful log message contains extra messy character as special color indicator, that's what terminal can understand for printing colorful text.

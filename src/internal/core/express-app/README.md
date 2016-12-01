@@ -15,6 +15,7 @@ New Node API methods
 | .expressAppSet(callback) | callback: function(app, express), whatever things you want to do before express's app getting initialized
 | .swig | express view engines: `require('swig')`
 | .express | express instance, so that you can access some express middleware, like `api.express.static`
+| .expressApp | the main express app instance used by us, which is value of `express()`
 check [setupApi.js](setupApi.js)
 
 Above API methods must be called within `module.exports.activate()` function

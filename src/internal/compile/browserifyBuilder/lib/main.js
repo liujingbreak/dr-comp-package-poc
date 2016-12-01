@@ -1,15 +1,25 @@
 exports.compile = function() {
-	require('./builder').compile();
+	return require('./builder').compile();
 };
 
 exports.activate = function(api) {
 	var chalk = require('chalk');
 	var log = require('log4js').getLogger(api.packageName);
-	var livereload = require('livereload');
+	var lr = require('tiny-lr');
 	if (api.config.get('devMode') === true) {
-		log.info(chalk.red('Yo~ livereload server is running on port %d, run `gulp watch` to speed up your coding job !!'), api.config.get('livereload.port'));
-		var server = livereload.createServer(api.config.get('livereload'));
-		server.watch(api.config.resolve('staticDir'));
+		try {
+			var lrPort = api.config.get('livereload.port');
+			lr().listen(lrPort, () => {
+				log.info(chalk.red('Yo~ Live reload(tiny-lr) server is running on port %d, run `gulp watch` to speed up your coding job !!'), lrPort);
+			});
+			// var server = livereload.createServer(_.assign({exts: ['json', 'html', 'js', 'css', 'png', 'gif', 'jpg']}, api.config.get('livereload')));
+			// server.watch(_.has(api.config(), 'livereload.watch') ?
+			// 	api.config.resolve('livereload.watch') :
+			// 	api.config.resolve('destDir', 'depsMap.json')); // Helps to debounce changes, this file only get changed after gulp compile finished
+		} catch (e) {
+			log.error(e);
+			log.error(chalk.red('If error is caused by conflict port number, change config.yaml set `livereload.port` to a new value.'));
+		}
 	}
 };
 

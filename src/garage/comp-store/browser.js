@@ -12,6 +12,7 @@ exports.init = function(app, parentRouterState) {
 			console.log('Hey there, we have a component store now.');
 			var compStoreVm = this;
 			compStoreVm.showNavi = true;
+			compStoreVm.quickSearch = drTranslate('搜索组件和小应用');
 		},
 		controllerAs: 'compStoreVm'
 	});

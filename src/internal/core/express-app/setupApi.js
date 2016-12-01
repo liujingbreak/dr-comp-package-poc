@@ -46,6 +46,7 @@ module.exports.applyPackageDefinedAppSetting = function(app) {
 function setupApi(api, app) {
 	var apiPrototype = Object.getPrototypeOf(api);
 	apiPrototype.express = express;
+	apiPrototype.expressApp = app;
 	apiPrototype.swig = swig;
 	/**
 	 * setup a router under package context path

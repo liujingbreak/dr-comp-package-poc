@@ -1,0 +1,49 @@
+@import "npm://@dr/doc-ui/browser/less/dr-variables.less";
+@import "npm://@dr/doc-ui/browser/less/dr-mixins.less";
+.comp-navi {
+	position: absolute;
+	right: 0;
+	width: @comp-navi-width;
+	bottom: 0;
+	top: 0;
+	padding: 0 @dr-unit-half;
+	.company-name {
+		color: @dr-green;
+	}
+	.vertical-line {
+		position: absolute;
+		top: @dr-unit;
+		bottom: @dr-unit;
+		width: 1px;
+		left: 0;
+		background-color: @dr-medium-liter;
+	}
+	.quick-search{
+		width: 100%;
+		height: @dr-unit-double;
+		padding: @dr-unit-half;
+		background-color: transparent;
+		border-bottom: 1px solid @dr-medium-liter;
+	}
+	.input-row {
+		position: relative;
+	}
+	input[type=text]:focus{
+		background-color: @dr-yellow;
+	}
+	i.fa-search {
+		position: absolute;
+		right: 0;
+		margin-right: @dr-unit-half;
+		color: @dr-green;
+		line-height: @dr-unit-double;
+		opacity: 1;
+		transition: opacity .3s ease-out;
+	}
+}
+.size-mobile {
+	.comp-navi {
+		position: static;
+		width: 100%;
+	}
+}
