@@ -8,8 +8,23 @@
 	position: relative;
 	width: @sub-aside-width + @dr-unit-triple;
 	.logo {
+		opacity: 0;
+		transition: opacity .3s ease-out;
 		width: @dr-unit-triple;
 		height: @dr-unit-triple;
+		text-align: center;
+		line-height: @dr-unit-triple;
+		&:before{
+			content: "";
+			display: inline-block;
+			background: url(assets://@dr/doc-home/dr-logo.png) no-repeat center left/auto 100%;
+			vertical-align: middle;
+			height: 24px;
+			width: 27px;
+		}
+		&.visible {
+			opacity: 1;
+		}
 	}
 	// to override @dr/doc-ui/aside.less
 	.sub-menu {

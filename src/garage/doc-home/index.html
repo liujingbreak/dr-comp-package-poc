@@ -8,11 +8,11 @@
 </head>
 <body class="doc-home" dr-doc-home dr-show-on-ready anim-completed="animState">
 	<dr-doc-spinner class="spin-loading" ng-show="">
-		<i class="fa fa-2x fa-circle-o-notch spinning" aria-hidden="true"></i>
+		<div class="spinning" aria-hidden="true"></div>
 	</dr-doc-spinner>
 	<div dr-menu-aside="asideVm.menuItems" menu-selected="mainVm.selectedMenuIdx"
 	class="main-aside dr-bg-dark dr-navi-aside" ng-controller="AsideController as asideVm">
-		<div class="logo"></div>
+		<div class="logo" ng-class="{visible: true}"></div>
 		<div class="dr-menu">
 			<li menu-item-instance="item">
 				<button dr-button class="dr-button">

@@ -1,7 +1,11 @@
 require('@dr/angularjs');
+var api = require('__api');
 
 var initialized = false;
-exports.init = function(app, parentRouterState) {
+exports.init = function(app) {
+	// Set app as a property of API instance, so that all the files from this package can access it
+	// There is only one API instance for each package, it can share stuff cross files within same package.
+	api.app = app;
 	if (initialized)
 		return;
 	initialized = true;
@@ -23,4 +27,6 @@ exports.init = function(app, parentRouterState) {
 		}],
 		controllerAs: 'detailsCtrl'
 	});
+	require('./js/comp-services');
+	require('./js/comp-group');
 };

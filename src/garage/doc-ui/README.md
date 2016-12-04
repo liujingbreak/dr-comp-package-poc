@@ -7,7 +7,7 @@ it shows spinning icon at very beiginning of loading process
 even before AngularJS has not started.
 ```html
 <dr-doc-spinner class="spin-loading" ng-show="">
-	<i class="fa fa-2x fa-circle-o-notch spinning" aria-hidden="true"></i>
+	<div class="spinning" aria-hidden="true"></div>
 </dr-doc-spinner>
 ```
 

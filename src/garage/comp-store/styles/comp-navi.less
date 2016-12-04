@@ -21,7 +21,7 @@
 	.quick-search{
 		width: 100%;
 		height: @dr-unit-double;
-		padding: @dr-unit-half;
+		padding: @dr-unit-half @dr-unit @dr-unit-half @dr-unit-half;
 		background-color: transparent;
 		border-bottom: 1px solid @dr-medium-liter;
 	}
@@ -39,6 +39,22 @@
 		line-height: @dr-unit-double;
 		opacity: 1;
 		transition: opacity .3s ease-out;
+	}
+	.logo-bg {
+		> * {
+			vertical-align: middle;
+		}
+		&:before{
+			content: "";
+			display: inline-block;
+			background: url(assets://@dr/doc-home/dr-logo.png) no-repeat center left/auto 100%;
+			vertical-align: middle;
+			height: 24px;
+			width: 27px;
+		}
+		span {
+			margin-left: @dr-unit-half;
+		}
 	}
 }
 .size-mobile {

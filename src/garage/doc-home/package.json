@@ -1,6 +1,6 @@
 {
   "name": "@dr/doc-home",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "Home page",
   "browser": "browser/switchLocale.js",
   "main": "server/server.js",
@@ -14,7 +14,8 @@
     "entryPage": "index.html"
   },
   "dependencies": {
-    "angular-ui-router": "^0.3.2"
+    "angular-ui-router": "^0.3.2",
+    "fastclick": "^1.0.6"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

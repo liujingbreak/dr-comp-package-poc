@@ -26,7 +26,11 @@ docHome.config(['$controllerProvider', '$compileProvider', '$filterProvider', '$
 		textAnim.register(docHome.$compileProvider);
 		require('./routes')($stateProvider, $urlRouterProvider);
 	}]);
-docHome.config(lazy.cacheInternals);
+docHome.config(lazy.cacheInternals)
+.run(function() {
+	var attachFastClick = require('fastclick');
+	attachFastClick(document.body);
+});
 require('./controllers/mainController')(docHome);
 require('./controllers/introController')(docHome);
 require('./controllers/asideController')(docHome);
