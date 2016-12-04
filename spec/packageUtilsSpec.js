@@ -59,7 +59,8 @@ describe('packageUtils', function() {
 				'@dr/example-server-swig-entry',
 				'@dr/example-browserify',
 				'@dr/translate-generator',
-				'@dr-core/browserify-builder'
+				'@dr-core/browserify-builder',
+				'@dr/comp-store'
 			];
 			var foundPackages = callback.calls.allArgs().map(row => { return row[0];});
 

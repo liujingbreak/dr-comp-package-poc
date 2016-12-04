@@ -1,17 +1,16 @@
 Updates
 =======
-### 2016-12-1
-**web-fun-house 0.8.0-aplpha.1**
+### 2016-12-6
+**web-fun-house 0.8.0**
 - 优化了`gulp watch`，(gulp.watch is replaced with chokidar) 
-新增和删除代码文件都会触发自动编译，
+新增和删除代码文件都会触发自动编译, package.json "dr.noWatch" 可以是{string|array}glob表达式
 
 - 在开发模式`devMode` true时，
-正式开发时可以用`gulp watch`代替 `gulp compile`， Node server内置了的livereload，任何改动都可以会触发自动编译和自动页面刷新，方便浏览器端的开发。
+正式开发时可以用`gulp watch`代替 `gulp compile`， Node server内置了的tiny-lr，任何改动都可以会触发自动编译和自动页面刷新，方便浏览器端的开发。
 注意livereload配置端口如果被占用冲突，需要修改config.local.yaml
 ```
 livereload:
 	port: 135729
-	delay: 800
 ```
 > **livereload** 目前对改动Node端JS没有自动重启Server效果。
 **web-fun-house 0.7.3 release**

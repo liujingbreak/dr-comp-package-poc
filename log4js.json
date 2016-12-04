@@ -26,6 +26,7 @@
 		"rwPackageJson": "INFO",
 		"@dr-core/browserify-builder": "INFO",
 		"packageInstallMgr": "INFO",
-		"require-injector.node-inject": "info"
+		"require-injector.node-inject": "info",
+		"gulp.watchPackages": "debug"
 	}
 }

@@ -1,6 +1,6 @@
 {
   "name": "@dr/readme",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "description": "Readme file mapping",
   "browser": "browser/index.js",
   "dr": {

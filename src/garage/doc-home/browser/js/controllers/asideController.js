@@ -25,7 +25,14 @@ module.exports = function(controllerProvider) {
 				action: function() {
 					$location.path('/components');
 				}
-			}
+			},
+			{
+				label: drTranslate('Updates'),
+				icon: 'fa-newspaper-o',
+				action: function() {
+					$location.path('/doc/updates.md');
+				}
+			},
 		];
 
 		function docName2Route(name) {

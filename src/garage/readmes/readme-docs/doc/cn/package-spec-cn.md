@@ -59,5 +59,5 @@ e.g.
 | `dr.serverPriority` | number 或string, 可以用于package调用排序(调用主文件`exports.activate(api)`时的顺序)，lib/packageMgr/packagePriorityHelper.js负责处理priority排序, 缺省时默认为5000,数字越大越优先，支持Async，当exports.activate() 返回类型是Promise时，只有resolve了才会依次调用下一个package; 也可以是`before|after <package-name>`的string格式，比如'before @dr/my-package', 所有before, after相同package的priority会被视为可以同时，以Promise.all()的方式处理主文件的返回结果，然后调用下一个package。
 | `dr.builderPriority` | 同 `dr.serverPriority`, 对于`dr.type`为`builder`时，调用 `exports.compile(api)`的顺序排序
 | `dr.noLint` | `gulp lint`不会对当前package check code style
-| `dr.noWatch` | `gulp watch` will skip current package
+| `dr.noWatch` | 1) {boolean}`true` - `gulp watch` will skip current package, 2) {string/array} - a "glob" expression for watching ingored paths like 'dest/**/*'
 > 当有复杂的先后顺序时，也可以用api.eventBus eventEmitter来解决，dr.priority只是一个补充的方便的机制

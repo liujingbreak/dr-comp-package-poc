@@ -83,13 +83,6 @@ module.exports = function(goFunc) {
 				goFunc('e2etest.md');
 			}
 		}, {
-			label: $translate('Updates'),
-			flag: 'new',
-			icon: 'fa-newspaper-o',
-			action: function() {
-				goFunc('updates.md');
-			}
-		}, {
 			label: $translate('I am platform developer'),
 			action: function() {
 				goFunc('quickstart-cn.md');
