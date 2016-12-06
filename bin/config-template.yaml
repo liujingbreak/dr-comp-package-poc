@@ -45,9 +45,9 @@ browserifyNoParse:
 #  npm install @dr/garage-recipe
 #  npm install @dr/examples-recipe
 # And maybe specify a version number like `npm install @dr/garage-recipe@0.0.0`
-installedRecipes:
-    - node_modules/@dr/*-recipe
-    - node_modules/@dr/recipe-*
+# installedRecipes:
+#     - node_modules/@dr/*-recipe
+#     - node_modules/@dr/recipe-*
 
 enableSourceMaps: false
 port: 14334

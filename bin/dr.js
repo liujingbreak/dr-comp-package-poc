@@ -10,9 +10,10 @@ var Promise = require('bluebird');
 var buildUtils = require('../lib/gulp/buildUtils');
 var os = require('os');
 var argv = yargs.usage('Usage: $0 <command> [-d <target_folder>]')
-	.command('init', 'Initialize environment, create gulpfile.js and other basic configuration')
-	.command('update', 'Re-initialize environment, create gulpfile.js and other basic configuration, but don\'t copy examples')
-	.command('install-deps', 'Install gulp to local node_modules')
+	.command(['init', 'init-example'], 'Initialize environment, create gulp script, examples and other basic configuration')
+	.command(['update', 'u'], 'Re-initialize environment, create gulp script and other basic configuration, but don\'t copy examples')
+	.command('install-deps', 'Install and expand components and their dependency to local node_modules, and cleanup plain folder structure for NPM v2')
+	.command(['version', 'v'], 'Find local installed web-fun-house and show its version')
 	.demand(1)
 	.describe('d', 'Indicate project root folder')
 	.default('d', process.cwd())
@@ -26,13 +27,21 @@ var rootPath = Path.resolve(__dirname, '..');
 if (argv._ && argv._[0]) {
 	switch (argv._[0]) {
 		case 'init':
+		case 'init-example':
 			init();
 			break;
 		case 'update':
+		case 'u':
 			init(true);
 			break;
-		case 'install-gulp':
+		case 'install-deps':
 			installDevDependencyAsync();
+			break;
+		case 'v':
+		case 'version':
+			var path = Path.dirname(__dirname);
+			console.log('Found web-fun-house at:\n\t %s\nversion:\t%s', chalk.blue(path),
+				chalk.blue(require(Path.join(path, 'package.json')).version));
 			break;
 	}
 }
