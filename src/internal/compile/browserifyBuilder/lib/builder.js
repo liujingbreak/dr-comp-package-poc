@@ -267,7 +267,7 @@ function compile() {
 			.pipe(gulp.dest(config().staticDir + (api.isDefaultLocale() ? '' : '/' + api.getBuildLocale())))
 			.pipe(pageCompiler.dependencyApiData())
 			.pipe(gulp.dest(config().destDir))
-			.on('finish', resolve);
+			.on('end', resolve);
 		});
 	}
 

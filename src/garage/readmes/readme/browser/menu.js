@@ -87,11 +87,6 @@ module.exports = function(goFunc) {
 			action: function() {
 				goFunc('quickstart-cn.md');
 			}
-		},{
-			label: $translate('Backlog'),
-			action: function() {
-				goFunc('todo-cn.md');
-			}
 		}
 	];
 

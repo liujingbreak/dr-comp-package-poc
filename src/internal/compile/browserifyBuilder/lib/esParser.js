@@ -9,17 +9,19 @@ exports.parse = parse;
  * @param  {string} text    [description]
  * @param  {object} handler {
  * @param  {function} handler.splitLoad(packageName)
- * @param  {function} handler.Identifier(name)
+ * @param  {function} handler.apiIndentity(astNode)
  */
 function parse(text, handler) {
 	if (_.startsWith(text, '#!')) {
 		text = text.substring(text.indexOf('\n'));
 	}
-	var ast = acorn.parse(text, {ranges: true});
+	var ast = acorn.parse(text, {ranges: true, allowHashBang: true});
 	//console.log('\n---------\n%s', JSON.stringify(ast, null, '  '));
 	estraverse.traverse(ast, {
 		enter: function(node, parent) {
-			if (node.type === 'CallExpression') {
+			if (onIdentity('__api', node, parent)) {
+				handler.apiIndentity(node);
+			} else if (node.type === 'CallExpression') {
 				if (node.callee && node.callee.type === 'MemberExpression' &&
 				node.callee.object.name === 'require' &&
 				node.callee.object.type === 'Identifier' &&
@@ -50,6 +52,11 @@ function parse(text, handler) {
 		}
 	});
 	return ast;
+}
+
+exports.onIdentity = onIdentity;
+function onIdentity(name, node, parent) {
+	return (node.type === 'Identifier' && node.name === name && !(parent.type === 'MemberExpression' && parent.property === node));
 }
 
 var patchText = require('./patch-text');

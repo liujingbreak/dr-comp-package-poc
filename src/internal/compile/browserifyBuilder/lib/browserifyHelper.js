@@ -52,7 +52,7 @@ function JsBundleEntryMaker(api, bundleName, packageBrowserInstances,
 	this.CDNDependUrlSet = {}; // external JS library URL
 }
 
-var apiVarablePat = /(?:^|[^\w$\.])__api(?:$|[^\w$])/mg;
+//var apiVarablePat = /(?:^|[^\w$\.])__api(?:$|[^\w$])/mg;
 
 JsBundleEntryMaker.prototype = {
 	entryBundleFileTpl:
@@ -111,21 +111,22 @@ JsBundleEntryMaker.prototype = {
 		var currPackageName;
 		var hasRequireEnsure = false;
 		var self = this;
+		var hasApi = false;
 
 		var relRealPath = Path.relative(api.config().rootPath, fs.realpathSync(file));
 		delete self.fileSplitPointMap[relRealPath]; // clean up cached data
 
-		apiVarablePat.lastIndex = 0;
-		if (apiVarablePat.test(source)) {
-			log.debug('reference __api in ' + file);
-			currPackageName = this.api.findBrowserPackageByPath(file);
-			source = apiVariableTpl({
-				bundle: this.bundleName,
-				packageName: currPackageName,
-				source: source,
-				packageNameAvailable: currPackageName !== null
-			});
-		}
+		// apiVarablePat.lastIndex = 0;
+		// if (apiVarablePat.test(source)) {
+		// 	log.debug('reference __api in ' + file);
+		// 	currPackageName = this.api.findBrowserPackageByPath(file);
+		// 	source = apiVariableTpl({
+		// 		bundle: this.bundleName,
+		// 		packageName: currPackageName,
+		// 		source: source,
+		// 		packageNameAvailable: currPackageName !== null
+		// 	});
+		// }
 		var ast;
 		try {
 			ast = esParser.parse(source, {
@@ -135,22 +136,38 @@ JsBundleEntryMaker.prototype = {
 						self.fileSplitPointMap[relRealPath] = {};
 					}
 					self.fileSplitPointMap[relRealPath][splitPoint] = 1;
-				}
+				},
+
+				apiIndentity: () => {hasApi = true;}
 			});
 		} catch (e) {
 			log.error('Failed to parse %s', file);
 			throw e;
 		}
+		function onReplaceApiCall(mName) {
+			if (mName === '__api') {
+				hasApi = true;
+				log.debug('require __api in ' + file);
+			}
+		}
+		injector.on('replace', onReplaceApiCall);
 		source = injector.injectToFile(file, source, ast);
+		injector.removeListener('replace', onReplaceApiCall);
 		if (hasRequireEnsure) {
 			source = 'require.ensure = function(){return drApi.ensureRequire.apply(drApi, arguments)};\n' +
 				source;
 		}
-		// source = source.replace(requireI18nPat, (match, leading, path) => {
-		// 	path = path.replace(/\{locale\}/g, locale ? locale : 'en');
-		// 	return leading + 'require(' + path + ')';
-		// });
 
+		if (hasApi) {
+			log.debug('reference __api in ' + file);
+			currPackageName = this.api.findBrowserPackageByPath(file);
+			source = apiVariableTpl({
+				bundle: this.bundleName,
+				packageName: currPackageName,
+				source: source,
+				packageNameAvailable: currPackageName !== null
+			});
+		}
 		return source;
 	},
 
