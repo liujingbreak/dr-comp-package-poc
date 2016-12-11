@@ -53,8 +53,8 @@ serverURL: ""
 vendorBundleMap:
   common-lib:
       - jquery
-      - bluebird
       - lodash
+      - fastclick
   ui-lib: # bundle name
       - angular-ui-router
       - fontfaceobserver/fontfaceobserver

@@ -1,5 +1,3 @@
-var Promise = require('bluebird');
-
 module.exports = AnimQueue;
 
 function AnimQueue() {
@@ -8,44 +6,6 @@ function AnimQueue() {
 }
 
 AnimQueue.prototype = {
-	/** @deprecated */
-	thenno: function(actionFunc) {
-		var self = this;
-		if (typeof actionFunc !== 'function') {
-			var params = [].slice.call(arguments);
-			var defer = Promise.defer();
-			params.forEach(function(p) {
-				if (typeof p === 'object') {
-					var originComp = p.onComplete;
-					p.onComplete = function() {
-						if (originComp) {
-							originComp();
-						}
-						defer.resolve();
-					};
-				}
-			});
-			actionFunc = function() {
-				try {
-					console.log(params);
-					TweenMax.to.apply(TweenMax, params);
-				} catch (e) {
-					defer.reject(e);
-				}
-				return defer.promise;
-			};
-		}
-		if (!self.promise) {
-			self.promise = Promise.resolve(actionFunc());
-		} else {
-			self.promise = self.promise
-			.then(actionFunc, function(e) {
-				console.log(e);
-				self.promise = null;
-			});
-		}
-	},
-
 	then: function(action) {
 		var self = this;
 		self.q.push(action);

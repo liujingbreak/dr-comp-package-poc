@@ -1,4 +1,3 @@
-var Promise = require('bluebird');
 var _ = require('lodash');
 var Modernizr = require('@dr/light-respond-js');
 
@@ -6,6 +5,7 @@ module.exports = function(compileProvider) {
 	compileProvider.directive('drMenuAside', ['$timeout',
 	'$parse',
 	'$compile',
+	'$q',
 	factory]);
 };
 
@@ -20,7 +20,7 @@ var SUBMENU_EXP_OPEN_LEFT = ASIDE_MENU_WIDTH - 33;
  * e.g.
  * <div dr-aside-menu on-menu-enter=" doSomething() " on-menu-leave="">
  */
-function factory($timeout, $parse, $compile) {
+function factory($timeout, $parse, $compile, $q) {
 	return {
 		scope: true,
 		require: '^^drDocHome',
@@ -142,7 +142,7 @@ function factory($timeout, $parse, $compile) {
 					controller.menuLeave(scope);
 					animQueue.then(function() {
 						TweenMax.set(subMenuEl[0], {x: ASIDE_MENU_WIDTH});
-						return Promise.resolve();
+						return $q.resolve(null);
 					});
 					scope.$apply();
 					mainMenuState = VISIBLE;
@@ -154,7 +154,7 @@ function factory($timeout, $parse, $compile) {
 						return;
 					}
 					animQueue.then(function(next) {
-						return new Promise(function(resolve) {
+						return new $q(function(resolve) {
 							TweenMax.to(subMenuEl[0], 0.25, {x: ASIDE_MENU_WIDTH, ease: 'Power2.easeOut', onComplete: resolve});
 						});
 					});
@@ -167,7 +167,7 @@ function factory($timeout, $parse, $compile) {
 					}
 					subMenuState = VISIBLE;
 					animQueue.then(function() {
-						return new Promise(function(resolve) {
+						return new $q(function(resolve) {
 							if (hoverIdx === menuSelectedIdx) {
 								subMenuEl.addClass('highlight');
 							} else {
@@ -187,7 +187,7 @@ function factory($timeout, $parse, $compile) {
 					subMenuState = EXPANDED;
 					animQueue.then(function() {
 						subMenuEl.addClass('highlight');
-						return new Promise(function(resolve, reject) {
+						return new $q(function(resolve, reject) {
 							TweenMax.killTweensOf(subMenuEl[0]);
 							TweenMax.to(subMenuEl[0], 0.25, {x: SUBMENU_EXP_LEFT, ease: 'Power2.easeOut', onComplete: resolve});
 							highlightMenu(lastHover);
@@ -205,7 +205,7 @@ function factory($timeout, $parse, $compile) {
 					}
 					subMenuState = HIDDEN;
 					animQueue.then(function() {
-						return new Promise(function(resolve, reject) {
+						return new $q(function(resolve, reject) {
 							TweenMax.to(subMenuEl[0], 0.25, {x: ASIDE_MENU_WIDTH, ease: 'Power2.easeOut', onComplete: resolve});
 							var menuSelectedIdx = getMenuSelectedIdx(scope);
 							if (lastHover !== menuSelectedIdx) {
@@ -230,7 +230,7 @@ function factory($timeout, $parse, $compile) {
 					scope.currSubMenus = getMenuItem(scope)[menuSelectedIdx].subMenu;
 					animQueue.then(function(next) {
 						subMenuEl.addClass('highlight');
-						return Promise.resolve();
+						return $q.resolve();
 					});
 				}
 
