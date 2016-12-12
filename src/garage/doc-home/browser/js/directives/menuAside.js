@@ -37,8 +37,8 @@ function factory($timeout, $parse, $compile, $q) {
 			});
 
 			return function link(scope, iElement, iAttrs, controller) {
-				var AnimQ = require('../service/animQueue');
-				var animQueue = new AnimQ();
+				//var AnimQ = require('../service/animQueue');
+				var animQueue = $q.resolve(null);
 				scope.currSubMenus = [];
 				var mainMenuState = VISIBLE;
 				var subMenuState = HIDDEN;
@@ -140,7 +140,7 @@ function factory($timeout, $parse, $compile, $q) {
 						return;
 					}
 					controller.menuLeave(scope);
-					animQueue.then(function() {
+					animQueue = animQueue.then(function() {
 						TweenMax.set(subMenuEl[0], {x: ASIDE_MENU_WIDTH});
 						return $q.resolve(null);
 					});
@@ -153,7 +153,7 @@ function factory($timeout, $parse, $compile, $q) {
 					if (subMenuState === HIDDEN) {
 						return;
 					}
-					animQueue.then(function(next) {
+					animQueue = animQueue.then(function(next) {
 						return new $q(function(resolve) {
 							TweenMax.to(subMenuEl[0], 0.25, {x: ASIDE_MENU_WIDTH, ease: 'Power2.easeOut', onComplete: resolve});
 						});
@@ -166,7 +166,7 @@ function factory($timeout, $parse, $compile, $q) {
 						return;
 					}
 					subMenuState = VISIBLE;
-					animQueue.then(function() {
+					animQueue = animQueue.then(function() {
 						return new $q(function(resolve) {
 							if (hoverIdx === menuSelectedIdx) {
 								subMenuEl.addClass('highlight');
@@ -185,13 +185,12 @@ function factory($timeout, $parse, $compile, $q) {
 					}
 					//subMenuEl.off('mouseenter');
 					subMenuState = EXPANDED;
-					animQueue.then(function() {
+					animQueue = animQueue.then(function() {
 						subMenuEl.addClass('highlight');
 						return new $q(function(resolve, reject) {
 							TweenMax.killTweensOf(subMenuEl[0]);
 							TweenMax.to(subMenuEl[0], 0.25, {x: SUBMENU_EXP_LEFT, ease: 'Power2.easeOut', onComplete: resolve});
 							highlightMenu(lastHover);
-							scope.$apply();
 						});
 					});
 					controller.menuExpand({width: subMenuEl.prop('offsetWidth') + 66});
@@ -204,7 +203,7 @@ function factory($timeout, $parse, $compile, $q) {
 						return;
 					}
 					subMenuState = HIDDEN;
-					animQueue.then(function() {
+					animQueue = animQueue.then(function() {
 						return new $q(function(resolve, reject) {
 							TweenMax.to(subMenuEl[0], 0.25, {x: ASIDE_MENU_WIDTH, ease: 'Power2.easeOut', onComplete: resolve});
 							var menuSelectedIdx = getMenuSelectedIdx(scope);
@@ -212,7 +211,6 @@ function factory($timeout, $parse, $compile, $q) {
 								subMenuEl.removeClass('highlight');
 							}
 							highlightMenu(menuSelectedIdx);
-							scope.$apply();
 						});
 					});
 					controller.menuUnexpand({width: subMenuLeft});
@@ -228,7 +226,7 @@ function factory($timeout, $parse, $compile, $q) {
 					var li = liList.eq(menuSelectedIdx);
 					li.addClass('dr-checked');
 					scope.currSubMenus = getMenuItem(scope)[menuSelectedIdx].subMenu;
-					animQueue.then(function(next) {
+					animQueue = animQueue.then(function(next) {
 						subMenuEl.addClass('highlight');
 						return $q.resolve();
 					});

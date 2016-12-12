@@ -11,9 +11,8 @@ function docHome($timeout) {
 		function($scope, $element, $attrs, $parse) {
 			this.menuOpened = false;
 			var bodyVm = this;
-			var self = this;
 
-			self.menuEnter = function(size) {
+			bodyVm.menuEnter = function(size) {
 				if (bodyVm.menuOpened) {
 					return;
 				}
@@ -22,12 +21,12 @@ function docHome($timeout) {
 				bodyVm.menuOpened = true;
 			};
 
-			self.menuUnexpand = self.menuExpand = function(size) {
+			bodyVm.menuUnexpand = bodyVm.menuExpand = function(size) {
 				TweenMax.killTweensOf(bodyVm.mainSection[0]);
 				TweenMax.to(bodyVm.mainSection[0], 0.25, {x: size.width - 66, ease: 'Power2.easeOut'});
 			};
 
-			self.menuLeave = function() {
+			bodyVm.menuLeave = function() {
 				if (!bodyVm.menuOpened) {
 					return;
 				}
