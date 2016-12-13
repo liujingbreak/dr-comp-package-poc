@@ -203,12 +203,17 @@ function compile() {
 				outStreams.push(cssStream);
 				Promise.all(cssPromises).then(()=> {
 					cssStream.end();
+				})
+				.catch(err => {
+					gutil.beep();
+					reject(err);
 				});
 			}
 			bundleStream = es.merge(outStreams)
 			.on('error', function(er) {
 				log.error('merged bundle stream error', er);
 				gutil.beep();
+				reject(er);
 			});
 
 			var pageCompilerParam = {};
@@ -559,7 +564,7 @@ function compile() {
 			parce.on('error', function(err) {
 				log.error('parcelify bundle error: ', err);
 				gutil.beep();
-				reject(fileName);
+				reject(new Error(fileName));
 			});
 			// this is a work around for a bug introduced in Parcelify
 			// check this out, https://github.com/rotundasoftware/parcelify/issues/30

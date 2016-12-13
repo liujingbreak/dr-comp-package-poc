@@ -164,15 +164,15 @@ gulp.task('link', function() {
 	return recipeManager.link();
 });
 
-gulp.task('compile', ['link', 'flatten-recipe'], function(cb) {
-	runSequence('compile:dev', cb);
+gulp.task('compile', function(cb) {
+	runSequence(['link', 'flatten-recipe'], 'compile:dev', cb);
 });
 
 gulp.task('compile:dev', function(cb) {
 	require('./lib/packageMgr/packageCompiler')(argv)
-	.then(() => cb())
+	.then(cb)
 	.catch( e => {
-		cb('Error ' + e.stack);
+		cb('compile:dev faile: ' + e.stack);
 		//process.nextTick(()=> process.exit(1));
 	});
 });
