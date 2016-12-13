@@ -17,6 +17,8 @@ Ideally you should group your test specs in subdirectories like:
 ```
 
 ### Configure your test environment
+> Skip this, if you have put browser driver in environment PATH
+
 1. In `config.yaml` or `config.local.yaml`, add following lines:
 	```yaml
     e2etestHelper:
@@ -24,6 +26,7 @@ Ideally you should group your test specs in subdirectories like:
            driverPath: '..'
 	```
 	It is where you put your browser driver if you want to run test against browser other than Firefox.
+
 
 2. Optional setting
 	```yaml

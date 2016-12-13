@@ -44,10 +44,18 @@ function activate(api) {
 	var favicon = findFavicon();
 	if (favicon)
 		require('@dr-core/express-app').app.use(serverFavicon(favicon));
-	api.use('/', api.express.static(staticFolder, {
-		maxAge: api.config().cacheControlMaxAge,
-		setHeaders: setCORSHeader
-	}));
+
+	var maxAgeMap = api.config.get('cacheControlMaxAge', {
+		js: '365 days',
+		css: '365 days',
+		less: '365 days',
+		html: 0,
+		png: '365 days',
+		jpg: '365 days',
+		gif: '365 days',
+		svg: '365 days',
+	});
+	api.use('/', staticRoute(staticFolder));
 	// api.get('/', function(req, res) {
 	// 	res.render('index.html', {});
 	// });
@@ -62,14 +70,25 @@ function activate(api) {
 		if (fs.existsSync(assetsDir)) {
 			var path = '/' + parsedName.name;
 			log.info('route ' + path + ' -> ' + assetsDir);
-			api.use(path + '/', api.express.static(assetsDir, {
-				setHeaders: function(res) {
-					res.setHeader('Access-Control-Allow-Origin', '*');
-				}
-			}));
+
+			api.use(path + '/', staticRoute(assetsDir));
 		}
 	});
+
+	function staticRoute(staticDir) {
+		return function(req, res, next) {
+			var ext = _.trimStart(Path.extname(req.path).toLowerCase(), '.');
+			api.express.static(staticDir, {
+				maxAge: _.isObject(maxAgeMap) ?
+					(_.has(maxAgeMap, ext) ? maxAgeMap[ext] : 0) :
+					maxAgeMap,
+				setHeaders: setCORSHeader
+			})(req, res, next);
+		};
+	}
 }
+
+
 
 function copyRootPackageFavicon() {
 	var favicon = findFavicon();
