@@ -1,4 +1,4 @@
-var through = require('through');
+var through = require('through2');
 var less = require('less');
 var LessPluginAutoPrefix = require('less-plugin-autoprefix');
 var NpmImportPlugin = require('less-plugin-npm-import');
@@ -13,12 +13,13 @@ var packagePathPat = /assets:\/\/((?:@[^\/]+\/)?[^\/]+)?(\/.*)/;
 module.exports = function(file, options) {
 	var buf = '';
 	var currPackage;
-	var transform = function(buffer) {
+	var transform = function(buffer, enc, next) {
 		buf += buffer;
+		next();
 	};
 
 
-	var flush = function() {
+	var flush = function(next) {
 		var self = this;
 		var lessOptions = {
 			compress: !api.config().devMode,
@@ -36,11 +37,14 @@ module.exports = function(file, options) {
 		lessOptions.filename = file;
 		less.render(buf, lessOptions)
 		.then(function(output) {
+			log.debug(file);
 			self.push(replaceUrl(output.css, currPackage, file));
 			self.push(null);
+			next();
 		}, function(err) {
 			log.error('parcelifyModuleResolver, error in parsing less ' + err.stack);
 			self.emit('error', new Error(getErrorMessage(err), file, err.line));
+			next();
 		});
 	};
 

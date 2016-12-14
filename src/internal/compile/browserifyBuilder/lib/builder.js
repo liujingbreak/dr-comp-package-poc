@@ -3,7 +3,7 @@ var _ = require('lodash');
 var Promise = require('bluebird');
 var fs = require('fs');
 var Path = require('path');
-//var bResolve = require('browser-resolve');
+var bResolve = require('browser-resolve');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
@@ -103,7 +103,7 @@ function compile() {
 	var argv = api.argv;
 	//var jsTransform = helper.jsTransform;
 	var buildCss = true;
-	var buildJS = true;
+	//var buildJS = true;
 	var cssPromises = [];
 	var jsStreams = [];
 	var staticDir = Path.resolve(config().staticDir);
@@ -141,10 +141,12 @@ function compile() {
 	}
 	if (argv['only-js']) {
 		buildCss = false;
+		log.info('Only JS compilation');
 	}
-	if (argv['only-css']) {
-		buildJS = false;
-	}
+	// if (argv['only-css']) {
+	// 	buildJS = false;
+	// 	log.info('Only CSS compilation');
+	// }
 
 	var labJSBundle = packageInfo.moduleMap['@dr-core/labjs'].bundle;
 
@@ -175,6 +177,9 @@ function compile() {
 		walkPackages.saveCache(packageInfo);
 		return depCtl.tailDown();
 	})()
+	.then(() => {
+		log.info('Yeh!');
+	})
 	.catch( err => {
 		gutil.beep();
 		if (err instanceof Error)
@@ -193,12 +198,10 @@ function compile() {
 				var buildObj = buildBundle(packageInfo.bundleMap[bundle],
 					bundle, config().staticDir);
 				if (buildCss) {
-					buildObj.cssPromises.forEach(prom => {
-						cssPromises.push(prom.then(filePath => {
-							cssStream.write(filePath);
-							return null;
-						}));
-					});
+					cssPromises.push(buildObj.cssPromise.then(filePath => {
+						cssStream.write(filePath);
+						return null;
+					}));
 				}
 				jsStreams.push(buildObj.jsStream);
 			});
@@ -360,7 +363,7 @@ function compile() {
 		excludeModules(packageInfo, b, _.map(modules, function(module) {return module.longName;}));
 		//excludeI18nModules(packageInfo.allModules, b);
 
-		var cssPromises = [buildCssBundle(b, bundle, destDir)];
+		var cssPromise = buildCssBundle(b, bundle, destDir);
 
 		// draw a cross bundles dependency map
 		depCtl.browserifyDepsMap(b);
@@ -372,7 +375,7 @@ function compile() {
 		// 	cssPromises = cssPromises.concat(i18nBuildRet[1]);
 		// }
 		return {
-			cssPromises: cssPromises,
+			cssPromise: cssPromise,
 			jsStream: jsStream
 		};
 	}
@@ -546,6 +549,8 @@ function compile() {
 	}
 
 	function buildCssBundle(b, bundle, destDir) {
+		if (!buildCss)
+			return Promise.resolve(null);
 		mkdirp.sync(Path.resolve(destDir, 'css'));
 		var fileName = Path.resolve(destDir, 'css', bundle + '.css');
 		var appTransforms = ['@dr/parcelify-module-resolver'];
@@ -562,7 +567,7 @@ function compile() {
 		});
 		return new Promise(function(resolve, reject) {
 			parce.on('done', function() {
-				//log.debug('buildCssBundle(): ' + fileName);
+				log.debug('buildCssBundle() built out: ' + fileName);
 				resolve(fileName);
 			});
 
@@ -577,14 +582,15 @@ function compile() {
 				if (Path.isAbsolute(row.file)) {
 					if (fs.lstatSync(row.file).isDirectory()) {
 						// most likely it is an i18n folder
-						row.file = resolve(row.file);
+						row.file = bResolve(row.file);
 					}
 				} else {
 					// row.file is a package name
 					// Use fs.realpathSync to make sure those symbolic link directories
 					// can work with Parcelify
 					var resolved = packageInfo.moduleMap[row.id] ? fs.realpathSync(packageInfo.moduleMap[row.id].file) : null;
-					row.file = resolved ? resolved : resolve(row.file);
+					log.debug('resolving %s', row.file);
+					row.file = resolved ? resolved : bResolve(row.file);
 				}
 				this.push(row);
 				next();
