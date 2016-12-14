@@ -31,6 +31,15 @@ config.yaml 和 config.local.yaml 是当前项目的全局配置文件.
 1. 读取 node_modules/web-fun-house/config.yaml
 2. 读取 config.yaml, 覆盖已读取的同名的属性
 3. 读取 config.local.yaml, 覆盖已读取的同名的属性
+	默认config.local.yaml可以用`gulp -c`指定读取其他文件, e.g.
+	```
+	gulp compile -c config.demo.yaml
+	```
+	运行Node server时也可以用`-c`指向其他文件
+	```
+	node app -c config.demo.yaml
+	```
+
 
 config.local.yaml 应该被放入.gitignore, 不作为生产环境的配置内容，例如`devMode: true`之类的配置项都写入config.local.yaml 以方便本地开发调试。
 

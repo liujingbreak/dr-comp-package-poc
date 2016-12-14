@@ -1,5 +1,24 @@
 Updates
 =======
+### 2016-12-14
+**web-fun-house 0.8.8**
+- 支持新命令行option`gulp compile -c <config.xxx.yaml>`, `node app -c <config.xxx.yaml>`
+- 默认 config.yaml `cacheControlMaxAge` 根据文件扩展名分别配置了不同的值
+```yaml
+cacheControlMaxAge:
+    js: '365 days'
+    css: '365 days'
+    less: '365 days'
+    html: 0
+    png: '365 days'
+    jpg: '365 days'
+    gif: '365 days'
+    svg: '365 days'
+    eot: '365 days'
+    ttf: '365 days'
+    woff: '365 days'
+    woff2: '365 days'
+```
 ### 2016-12-6
 **web-fun-house 0.8.0**
 - 优化了`gulp watch`，(gulp.watch is replaced with chokidar) 

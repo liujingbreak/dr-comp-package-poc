@@ -39,11 +39,15 @@ if (argv._ && argv._[0]) {
 			break;
 		case 'v':
 		case 'version':
-			var path = Path.dirname(__dirname);
-			console.log('Found web-fun-house at:\n\t %s\nversion:\t%s', chalk.blue(path),
-				chalk.blue(require(Path.join(path, 'package.json')).version));
+			showVersion();
 			break;
 	}
+}
+
+function showVersion() {
+	var path = Path.dirname(__dirname);
+	console.log('Found web-fun-house at:\n\t %s\nversion:\t%s', chalk.blue(path),
+		chalk.blue(require(Path.join(path, 'package.json')).version));
 }
 
 function init(noExample) {
