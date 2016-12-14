@@ -11,13 +11,19 @@ var _ = require('lodash');
 var jsParser = require('./jsParser');
 
 var config;
+var transformAdded = false;
 
 exports.compile = function() {
 	config = api.config;
 	if (!api.argv.translate) {
 		log.debug('Replacing translatable text');
-		require('@dr-core/browserify-builder').addTransform(
-			require('./translate-replacer').createBrowserifyReplacerTransform(api.getBuildLocale()));
+
+		if (!transformAdded) {
+			// Gulp watch will run this function multiple times, needs to avoid do this repeatedly
+			transformAdded = true;
+			require('@dr-core/browserify-builder').addTransform(
+				require('./translate-replacer').getBrowserifyReplacerTransform(api.getBuildLocale()));
+		}
 		return null;
 	}
 	var proms = [];

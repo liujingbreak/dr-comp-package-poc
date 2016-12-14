@@ -11,11 +11,14 @@ var bResolve = require('browser-resolve');
 var yamljs = require('yamljs');
 var fs = require('fs');
 
-exports.createBrowserifyReplacerTransform = createBrowserifyReplacerTransform;
+exports.getBrowserifyReplacerTransform = getBrowserifyReplacerTransform;
 
-function createBrowserifyReplacerTransform(locale) {
+var transformMap = {};
+function getBrowserifyReplacerTransform(locale) {
+	if (_.has(transformMap, locale))
+		return transformMap[locale];
 	var skipPackageCache = {};
-	return function(file) {
+	var tr = function(file) {
 		log.debug('Replace file %s', file);
 		var source = '';
 		var ext = Path.extname(file).toLowerCase();
@@ -48,6 +51,8 @@ function createBrowserifyReplacerTransform(locale) {
 			return through();
 		}
 	};
+	transformMap[locale] = tr;
+	return tr;
 }
 
 function replaceJS(source, file, locale, skipPackageCache) {

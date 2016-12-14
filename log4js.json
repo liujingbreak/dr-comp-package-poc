@@ -23,10 +23,11 @@
 	"levels": {
 		"[all]": "info",
 		"test": "DEBUG",
-		"rwPackageJson": "INFO",
-		"@dr-core/browserify-builder": "INFO",
+		"rwPackageJson": "info",
+		"@dr-core/browserify-builder": "info",
 		"packageInstallMgr": "INFO",
 		"require-injector.node-inject": "info",
-		"gulp.watchPackages": "debug"
+		"gulp.watchPackages": "debug",
+		"@dr/translate-generator": "info"
 	}
 }

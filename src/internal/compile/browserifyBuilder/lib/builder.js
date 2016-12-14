@@ -3,7 +3,7 @@ var _ = require('lodash');
 var Promise = require('bluebird');
 var fs = require('fs');
 var Path = require('path');
-var bResolve = require('browser-resolve');
+//var bResolve = require('browser-resolve');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
@@ -36,7 +36,7 @@ var esParser = require('./esParser');
 var rj = require('__injectorFactory');
 var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
 var fileAccessAsync = Promise.promisify(fs.access, {context: fs});
-var packageUtils, config, jsBundleEntryMaker, injector;
+var packageUtils, config, injector;
 
 var tasks = [];
 var addonTransforms = [];
@@ -51,7 +51,12 @@ module.exports = {
 	 * @param {transform} | {transform[]} transforms
 	 */
 	function(transforms) {
-		addonTransforms = addonTransforms.concat(transforms);
+		transforms = [].concat(transforms);
+		var difference = _.difference(transforms, addonTransforms);
+		if (difference.length < transforms.length) {
+			log.warn('Adding existing transforms to %s will be ignored: %s', api.packageName, new Error('Duplicated transform').stack);
+		}
+		[].push.apply(addonTransforms, difference);
 	}
 };
 
@@ -327,7 +332,7 @@ function compile() {
 			mIdx++;
 		});
 		var entryJsDir = Path.join(config().destDir, 'temp');
-		jsBundleEntryMaker = helper.JsBundleEntryMaker(api, bundle, modules, depCtl.fileSplitPointMap);
+		var jsBundleEntryMaker = helper.JsBundleEntryMaker(api, bundle, modules, depCtl.fileSplitPointMap);
 		var listFile = jsBundleEntryMaker.createPackageListFile();
 		mkdirp.sync(entryJsDir);
 		var entryFile = Path.join(entryJsDir, jsBundleEntryMaker.bundleFileName);
@@ -358,7 +363,7 @@ function compile() {
 		var cssPromises = [buildCssBundle(b, bundle, destDir)];
 
 		// draw a cross bundles dependency map
-		depCtl.browserifyDepsMap(b, depCtl.depsMap, resolve);
+		depCtl.browserifyDepsMap(b);
 		var jsStream = _createBrowserifyBundle(b, bundle, rejectOnError);
 
 		// var i18nBuildRet = buildI18nBundles(browserifyOpt, modules, excludeList, bundle, entryJsDir);
@@ -585,10 +590,6 @@ function compile() {
 				next();
 			}));
 		});
-	}
-
-	function resolve(file) {
-		return bResolve.sync(file, {paths: api.compileNodePath});
 	}
 
 	function runTasks() {

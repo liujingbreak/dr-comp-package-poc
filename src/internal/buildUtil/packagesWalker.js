@@ -14,7 +14,7 @@ module.exports = walkPackages;
 module.exports.saveCache = saveCache;
 module.exports.listBundleInfo = listBundleInfo;
 
-var config, argv, packageUtils, compileNodePath, packageInfoCacheFile;
+var config, argv, packageUtils, packageInfoCacheFile;
 
 /**
  * @return {PackageInfo}
@@ -29,7 +29,6 @@ function walkPackages(_config, _argv, _packageUtils, _compileNodePath, ignoreCac
 	config = _config;
 	argv = _argv;
 	packageUtils = _packageUtils;
-	compileNodePath = _compileNodePath;
 
 	packageInfoCacheFile = config.resolve('destDir', 'packageInfo.json');
 	var packageInfo;
@@ -39,7 +38,7 @@ function walkPackages(_config, _argv, _packageUtils, _compileNodePath, ignoreCac
 		packageInfo = cycle.retrocycle(packageInfo);
 	} else {
 		log.info('scan for packages info');
-		packageInfo = _walkPackages();
+		packageInfo = _walkPackages(_compileNodePath);
 		mkdirp.sync(Path.join(config().rootPath, config().destDir));
 		//saveCache(packageInfo);
 	}
@@ -63,8 +62,8 @@ function saveCache(packageInfo) {
 /**
  * @return {PackageInfo}
  */
-function _walkPackages() {
-	var configBundleInfo = readBundleMapConfig();
+function _walkPackages(compileNodePath) {
+	var configBundleInfo = readBundleMapConfig(compileNodePath);
 	var info = {
 		allModules: null, // array
 		moduleMap: _.clone(configBundleInfo.moduleMap),
@@ -192,7 +191,7 @@ function addPackageToBundle(instance, info, bundle, configBundleInfo) {
  * Read config.json, attribute 'vendorBundleMap'
  * @return {[type]} [description]
  */
-function readBundleMapConfig() {
+function readBundleMapConfig(compileNodePath) {
 	var info = {
 		moduleMap: {},
 		/** @type {Object.<bundleName, Object.<moduleName, packageInstance>>} */
@@ -201,12 +200,12 @@ function readBundleMapConfig() {
 		bundleUrlMap: {},
 		urlPackageSet: null
 	};
-	_readBundles(info, config().externalBundleMap, true);
-	_readBundles(info, config().vendorBundleMap, false);
+	_readBundles(info, compileNodePath, config().externalBundleMap, true);
+	_readBundles(info, compileNodePath, config().vendorBundleMap, false);
 	return info;
 }
 
-function _readBundles(info, mapConfig, isExternal) {
+function _readBundles(info, compileNodePath, mapConfig, isExternal) {
 	var bmap = info.bundleMap;
 	var mmap = info.moduleMap;
 	if (isExternal)

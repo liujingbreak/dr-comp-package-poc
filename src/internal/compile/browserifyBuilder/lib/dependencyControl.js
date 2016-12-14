@@ -28,7 +28,7 @@ var nodeFileDirPattern = /^(?:\.\/|\.\.\/|\/)/; // to test if a required id is n
 // functions for calculation
 exports.initAsync = initAsync;
 exports.browserifyDepsMap = browserifyDepsMap;
-exports.updatePack2localeModule = updatePack2localeModule;
+// exports.updatePack2localeModule = updatePack2localeModule;
 exports.createEntryPackageDepGraph = createEntryPackageDepGraph;
 exports.createEntryBundleDepGraph = createEntryBundleDepGraph;
 // functions for retrieving result of loading information
@@ -59,6 +59,7 @@ Object.defineProperties(exports, {
 });
 
 function initAsync(_api, _packageInfo) {
+	packageInfo = _packageInfo;
 	if (inited) {
 		return Promise.resolve();
 	}
@@ -66,7 +67,6 @@ function initAsync(_api, _packageInfo) {
 	if (!fileCache) {
 		fileCache = new FileCache(_api.config().destDir);
 	}
-	packageInfo = _packageInfo;
 	return Promise.all([
 		fileCache.loadFromFile('bundleInfoCache.json'),
 		fileCache.loadFromFile('depsMap.json'),
@@ -84,7 +84,7 @@ function initAsync(_api, _packageInfo) {
  * draw a cross bundles dependency map
  * @param  {object} b       browserify instance
  */
-function browserifyDepsMap(b, depsMap) {
+function browserifyDepsMap(b) {
 	var rootPath = api.config().rootPath;
 	b.pipeline.get('deps').push(through.obj(function(row, encoding, callback) {
 		var shortFilePath = row.file;
@@ -119,9 +119,9 @@ function initDepGraphInfo(bundleInfoCache) {
 	fileSplitPointMap = bundleInfoCache.splitPointMap;
 }
 
-function updatePack2localeModule(map) {
-	_.assign(pk2localeModule, map);
-}
+// function updatePack2localeModule(map) {
+// 	_.assign(pk2localeModule, map);
+// }
 
 function DepsWalker() {
 	this.depPath = new UniqStringArray();
