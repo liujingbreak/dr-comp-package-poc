@@ -1,7 +1,46 @@
-var api = require('__api');
+var request = require('request');
+var _ = require('lodash');
 
 exports.activate = function() {
-	api.router().get('/packages', (req, res) => {
-		res.send(['Component store coming soon...']);
+	const api = require('__api');
+	const log = require('log4js').getLogger(api.packageName);
+
+	var verdaccioUrl = api.config.get(api.packageShortName + '.verdaccioUrl', 'http://localhost:4873');
+	verdaccioUrl = _.trimEnd(verdaccioUrl, '/');
+
+	api.router().get('/packageBanner', (req, res) => {
+		request({
+			url: verdaccioUrl + '/-wfh/packages',
+			method: 'GET',
+			json: true
+		}, (err, msg, body) => {
+			if (err) {
+				log.error('"/packageBanner" failed' , err);
+				res.send({
+					error: err,
+					packages: []
+				});
+			} else {
+				//log.info('response: %s', body);
+				res.send(body);
+			}
+		});
+	});
+
+	api.router().get('/search/:anything', (req, res) => {
+		request({
+			url: verdaccioUrl + '/-/search/' + req.params.anything,
+			method: 'GET',
+			json: true
+		}, (err, httpResponse, body) => {
+			if (err) {
+				log.error('/search/:anything failed' , err);
+				res.send({
+					error: err,
+					packages: []
+				});
+			}
+		});
 	});
 };
+

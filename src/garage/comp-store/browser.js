@@ -12,12 +12,17 @@ exports.init = function(app) {
 
 	app.component('compStore', {
 		template: require('./views/componentStore.html'),
-		controller: function() {
-			console.log('Hey there, we have a component store now.');
+		controller: ['compService', function(compService) {
 			var compStoreVm = this;
 			compStoreVm.showNavi = true;
 			compStoreVm.quickSearch = drTranslate('搜索组件和小应用');
-		},
+
+			compService.getPackagesAndBanner()
+			.then(function(data) {
+				compStoreVm.banner = data.banner;
+				compStoreVm.packages = data.packages;
+			});
+		}],
 		controllerAs: 'compStoreVm'
 	});
 	app.component('compDetails', {
@@ -29,4 +34,5 @@ exports.init = function(app) {
 	});
 	require('./js/comp-services');
 	require('./js/comp-group');
+	require('./js/comp-card');
 };

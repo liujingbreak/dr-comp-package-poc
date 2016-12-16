@@ -1,0 +1,3 @@
+# comp-store:
+#   nodeServer: /comp-store
+#   verdaccioUrl: 'http://localhost:4873'

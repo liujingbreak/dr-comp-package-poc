@@ -1,6 +1,6 @@
 {
   "name": "@dr/comp-store",
-  "version": "0.0.10",
+  "version": "0.0.12",
   "description": "Component store",
   "browser": "browser.js",
   "main": "server/server.js",
@@ -16,6 +16,9 @@
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "request": "^2.72.0"
   },
   "author": "LJ",
   "license": "MIT"

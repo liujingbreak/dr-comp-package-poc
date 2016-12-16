@@ -10,8 +10,12 @@ var log = require('log4js').getLogger(api.packageName);
 var swigInjectLoader = require('swig-package-tmpl-loader');
 var parser = require('./template-parser').parser;
 var injector;
+var transformAdded = false;
 
 exports.compile = function() {
+	if (transformAdded)
+		return;
+	transformAdded = true;
 	require('@dr-core/browserify-builder').addTransform(transformFactory);
 	injector = require('__injector');
 	var translateHtml = require('@dr/translate-generator/translate-replacer').htmlReplacer();

@@ -257,21 +257,19 @@ function compile() {
 						return getBundleMetadataForEntry(entryPackage, pageCompilerParam.revisionMeta);
 					};
 					runTasks().then(getDataFuncs => {
-						pageCompilerParam.entryDataProvider = function(entryPackageName) {
+						pageCompilerParam.createEntryBootstrapCode = function(entryPackageName, writeCss) {
+							return createEntryBootstrapCode(entryPackageName, pageCompilerParam.revisionMeta, entryDataProvider, writeCss);
+						};
+						callback();
+
+						function entryDataProvider(entryPackageName) {
 							var browserApi = {};
 							monkeyPatchBrowserApi(browserApi, entryPackageName, pageCompilerParam.revisionMeta);
 							getDataFuncs.forEach(getData => {
 								getData(browserApi, entryPackageName);
 							});
 							return browserApi;
-						};
-
-						pageCompilerParam.createEntryBootstrapCode = function(entryPackageName, writeCss) {
-							return createEntryBootstrapCode(entryPackageName,
-								pageCompilerParam.revisionMeta,
-								pageCompilerParam.entryDataProvider, writeCss);
-						};
-						callback();
+						}
 					});
 				}))
 			.pipe(pageCompiler.compile('server'))

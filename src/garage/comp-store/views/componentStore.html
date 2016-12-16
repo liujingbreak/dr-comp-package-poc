@@ -10,6 +10,9 @@
 	</form>
 </section>
 <main ui-view="compMain" class="comp-main">
-	<section class="banner"></section>
-	<comp-group></comp-group>
+	<section class="error-msg" ng-if="compStoreVm.error"><pre>{{ compStoreVm.error }}</pre></section>
+	<section class="banner" ng-show="compStoreVm.banner"></section>
+	<comp-group>
+		<comp-card ng-repeat="pk in compStoreVm.packages" package="pk"></comp-card>
+	</comp-group>
 </main>
