@@ -32,6 +32,7 @@ Package.json的一些特殊属性说明
 | `dr.entryView` | 类似`dr.entryPage`, 可以是Array, 入口的server端render主页面, `gulp compile`时会自动copy到dist/server目录下, 用`api.getCompiledViewPath(relativePath)`可以获得compiled absolute path.
 | `dr.assetsDir` | 存放静态资源的目录，package根目录下的相对路径, 默认为`assets`
 | `dr.translatable` | `false` 表示没有可翻译的内容, gulp compile时@dr/translate-generator会跳过当前包，加速编译，默认`true`
+| `dr.browserSideConfigProp` | Array, 列出config.yaml中哪些property是可以被浏览器Javascript读取到，具体看[配置文档](config.md)
 e.g.
 
 ```javascript

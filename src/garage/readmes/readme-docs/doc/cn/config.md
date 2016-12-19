@@ -67,14 +67,22 @@ config.local.yaml 应该被放入.gitignore, 不作为生产环境的配置内�
 ### 添加自定义的全局配置属性
 建议添加自定义的属性时，尽量以package name作为顶级属性名，防止和其他属性名冲突
 ```yaml
-@dr/packageA: # @dr/packageA is the package name
-	propertyX: 1
+@dr/foo: # @dr/foo is the package name
+	bar: 1
 ```
 读取配置时
 ```js
-var value = api.config()[api.packageName].propertyX;
-// Or
-value = api.config.get([api.packageName, 'propertyX']);
+var value = api.config.get([api.packageName, 'propPath'], 'defaultValue');
+```
+> `propPath`是一个符合lodash `_.get(object, path)` path参数的字符串,
+e.g. `'a[0].b.c'`.
+
+> 提供一个`defaultValue` 很重要，这样当package被install到别的项目resue时，
+有可能没有配置相应的属性在config.yaml，需要确保不会出错
+
+这样写法也可以，但不是best practise:
+```js
+var value = api.config()[api.packageName].foobar;
 ```
 
 ### 用API获取配置内容
@@ -126,8 +134,22 @@ var absolutePath = api.config.resolve('e2etestHelper.selenium.driverPath', 'linu
 获取当前项目的根目录绝对路径
 
 #### 浏览器端配置属性的读取限制
-当我们需要让浏览器端Javascript读取个别些属性，必须将`config.yaml`的内容和普通resource bundle一样发送到客户端，但是`config.yaml`的内容可能包含服务器端敏感的配置内容，比如内部URL和password之类信息，所以我们不会把完整的config.yaml信息发送到浏览器，需要配置属性`browserSideConfigProp`，告诉打包程序，哪些属性可以暴露在浏览器端
+当我们需要让浏览器端Javascript读取个别些属性，必须将`config.yaml`的内容和普通resource bundle一样发送到客户端，
+但是`config.yaml`的内容可能包含服务器端敏感的配置内容，
+比如内部URL和password之类信息，所以我们不会把完整的config.yaml信息发送到浏览器，
+需要配置属性`browserSideConfigProp`，告诉打包程序，哪些属性可以暴露在浏览器端
 
+1. Package specific 配置
+package.json
+```json
+dr: {
+	browserSideConfigProp: ["<property-path>"]
+}
+```
+>`<property-path>` 是一个符合lodash `_.get(object, path)` path参数的字符串,
+e.g. `'a[0].b.c'`
+
+2. 全局配置 config.yaml
 ```yaml
 # Following is a list of current configuration property names of which property
 # are visible to browser side environment, meaning those properties will be stringified
@@ -145,14 +167,26 @@ browserSideConfigProp:
     # - devMode
     # - entryPageMapping
 ```
-例如，如果需要暴露一个名为`yourPackage.apiURL`的属性
+例如，如果需要暴露一个名为`foo.apiURL`的属性, `foo`
 ```yaml
-yourPackage:
+foo:
 	apiURL: '//localhost:8080/api'
-
-browserSideConfigProp:
-	- yourPackage.apiURL
 ```
+
+package.json
+```json
+
+dr: {
+	...
+	"browserSideConfigProp": [
+		"foo.apiURL"
+		// 或者 "foo", 如果foo 一下所有的property都包括
+	],
+	...
+}
+```
+
+
 Your JS file in Browser
 ```js
 $.ajax({

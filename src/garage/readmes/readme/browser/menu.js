@@ -15,6 +15,7 @@ module.exports = function(goFunc) {
 			}
 		}, {
 			label: $translate('Package.json Specification'),
+			flag: 'new',
 			action: function() {
 				goFunc('package-spec-cn.md');
 			}

@@ -16,8 +16,8 @@
     "@dr/handlebars-tmpl-builder": "1.0.0",
     "@dr/light-respond-js": "0.0.5",
     "@dr/markdown-viewer": "0.0.24",
-    "@dr/readme": "0.0.35",
-    "@dr/readme-docs": "0.2.10",
+    "@dr/readme": "0.0.36",
+    "@dr/readme-docs": "0.2.11",
     "@dr/text-anim-ng": "0.0.23"
   }
 }

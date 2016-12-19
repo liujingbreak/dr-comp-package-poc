@@ -36,6 +36,7 @@ exports.entryOrSplitPointMetadata = entryOrSplitPointMetadata;
 exports.cdnUrls = cdnUrls;
 exports.noDuplicateMetadata = noDuplicateMetadata;
 exports.allSplitPointsOfEntry = allSplitPointsOfEntry;
+exports.packageDepsAndSplitPoints = packageDepsAndSplitPoints;
 
 exports.tailDown = function() {
 	fileCache.tailDown();
@@ -157,12 +158,13 @@ UniqStringArray.prototype = Object.create(Array.prototype, {
  * Create a map of entry module and depended modules.
  * @param  {[type]} depsMap  [description]
  * @param  {[type]} entryMap [description]
- * @return {entries: {}, localeEntries: {}, splitPoints: {}}
+ * @return {entries: {packageName:string, isDirectDependency:boolean}, splitPoints: {}}
+ *   If packageName starts with "sp:", then the remaining part is split point package name.
  */
 function createEntryPackageDepGraph() {
 	var walkContext = new DepsWalker();
 	walkContext.walkDeps = _walkDeps;
-	packageDepsGraph = {entries: {}, localeEntries: {}, splitPoints: {}};
+	packageDepsGraph = {entries: {}, splitPoints: {}};
 
 	try {
 		_.forOwn(packageInfo.entryPageMap, function(pkInstance, moduleName) {
@@ -375,6 +377,23 @@ function allSplitPointsOfEntry(entryPackageName) {
 	// log.debug('allSplitPointsOfEntry: ' + entryPackageName);
 	// log.debug(found);
 	return found;
+}
+
+/**
+ * Get all values from packageDepsGraph.entries and replated
+ * packageDepsGraph.splitPoints for specific entry package.
+ * But excluding entryPackage itself.
+ * @return {packageName:string, isDirectDependency:boolean}
+ *   If packageName starts with "sp:", then the remaining part is split point package name.
+ */
+function packageDepsAndSplitPoints(entryPackageName) {
+	var graph = _.clone(packageDepsGraph.entries[entryPackageName]);
+	var splitPoints = allSplitPointsOfEntry(entryPackageName);
+	_.each(splitPoints, name => {
+		var splitGraph = packageDepsGraph.entries[entryPackageName];
+		_.assign(graph, splitGraph);
+	});
+	return graph;
 }
 
 function _recursivelyLookupSplitPoints(entryPackageName, found) {

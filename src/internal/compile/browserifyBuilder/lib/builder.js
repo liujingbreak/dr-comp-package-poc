@@ -264,7 +264,7 @@ function compile() {
 
 						function entryDataProvider(entryPackageName) {
 							var browserApi = {};
-							monkeyPatchBrowserApi(browserApi, entryPackageName, pageCompilerParam.revisionMeta);
+							monkeyPatchBrowserApi(browserApi, entryPackageName, depsGraph, pageCompilerParam.revisionMeta);
 							getDataFuncs.forEach(getData => {
 								getData(browserApi, entryPackageName);
 							});
@@ -378,23 +378,22 @@ function compile() {
 		};
 	}
 
-	function monkeyPatchBrowserApi(browserApi, entryPackage, revisionMeta) {
+	function monkeyPatchBrowserApi(browserApi, entryPackage, depsGraph, revisionMeta) {
 		// setup server side config setting to browser
 		browserApi._config = {};
 		var setting = api.config();
-		var browserSideConfigProp = _.uniq(defaultBrowserSideConfigProp.concat(setting.browserSideConfigProp));
-		_.each(browserSideConfigProp, prop => {
-			_.set(browserApi._config, prop, _.get(setting, prop));
+		var deps = depCtl.packageDepsAndSplitPoints(entryPackage);
+		deps[entryPackage] = true; // Including itself
+		var browserPropSet = {};
+		_.each(deps, (v, name) => {
+			var pkConfig = _.get(packageInfo.moduleMap, [name, 'dr', 'browserSideConfigProp']);
+			if (!pkConfig)
+				return;
+			_.each(pkConfig, prop => browserPropSet[prop] = true);
 		});
-		// setup locale bundles data
-		browserApi.localeBundlesMap = {};
-		var entryMetadata = depCtl.entryOrSplitPointMetadata(entryPackage);
-		_.each(entryMetadata.locales, (bundles, locale) => {
-			browserApi.localeBundlesMap[locale] = {
-				js: bundles2FilePaths(bundles, 'js', revisionMeta),
-				css: bundles2FilePaths(bundles, 'css', revisionMeta)
-			};
-		});
+		_.each(defaultBrowserSideConfigProp, prop => browserPropSet[prop] = 1);
+		_.each(setting.browserSideConfigProp, prop => browserPropSet[prop] = 1);
+		_.forOwn(browserPropSet, (nothing, propPath) => _.set(browserApi._config, propPath, _.get(setting, propPath)));
 
 		browserApi.buildLocale = api.getBuildLocale();
 		// setup split points bundles data

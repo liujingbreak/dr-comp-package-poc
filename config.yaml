@@ -175,7 +175,6 @@ browserSideConfigProp:
     # - packageContextPathMapping
     # - locales
     # - devMode
-    # - entryPageMapping
 
 e2etestHelper:
     selenium:

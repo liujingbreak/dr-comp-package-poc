@@ -131,6 +131,7 @@ function _walkPackages(compileNodePath) {
 			browserifyNoParse: noParseFiles,
 			isEntryServerTemplate: isEntryServerTemplate,
 			translatable: !_.has(pkJson, 'dr.translatable') || _.get(pkJson, 'dr.translatable'),
+			dr: pkJson.dr,
 			i18n: pkJson.dr ? (pkJson.dr.i18n ? pkJson.dr.i18n : null) : null
 		});
 		addPackageToBundle(instance, info, bundle, configBundleInfo);

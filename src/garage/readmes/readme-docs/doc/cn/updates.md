@@ -1,5 +1,7 @@
 Updates
 =======
+- package.json 新配置属性
+`"dr.browserSideConfigProp"` [配置文档](config.md)
 ### 2016-12-14
 **web-fun-house 0.8.8**
 - 支持新命令行option`gulp compile -c <config.xxx.yaml>`, `node app -c <config.xxx.yaml>`

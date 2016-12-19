@@ -11,7 +11,8 @@
   "dr": {
     "bundle": "example",
     "entryPage": "index.html",
-	"type": "server"
+    "browserSideConfigProp": ["gulp.watchDebounceDelay", "e2etestHelper"],
+    "type": "server"
   },
   "license": "MIT"
 }
