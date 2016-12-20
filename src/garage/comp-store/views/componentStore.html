@@ -13,6 +13,8 @@
 	<section class="error-msg" ng-if="compStoreVm.error"><pre>{{ compStoreVm.error }}</pre></section>
 	<section class="banner" ng-show="compStoreVm.banner"></section>
 	<comp-group>
-		<comp-card ng-repeat="pk in compStoreVm.packages" package="pk"></comp-card>
+		<div class="center-container">
+			<comp-card ng-repeat="pk in compStoreVm.packages" package="pk"></comp-card>
+		</div>
 	</comp-group>
 </main>

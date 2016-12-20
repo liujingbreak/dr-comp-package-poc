@@ -1,0 +1,22 @@
+comp-card {
+	display: inline-block;
+	background-color: @dr-white;
+	border-right: 1px solid @dr-lite-dark;
+	border-bottom: 1px solid @dr-lite-dark;
+	width: @dr-unit * 14;
+	height: @dr-unit * 10;
+	overflow: hidden;
+	padding: @dr-unit-half;
+	vertical-align: middle;
+	text-align: left;
+	.name {
+		font-size: @dr-fontsize-big;
+		font-weight: @dr-fontweight;
+	}
+	.desc {
+		font-weight: @dr-fontweight-light;
+		max-height: @dr-unit-triple;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+}
