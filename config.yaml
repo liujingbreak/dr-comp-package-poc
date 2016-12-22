@@ -198,8 +198,9 @@ translate-generator:
     scanMethodNames:
             - drTranslate
 
-# livereload will be enabled when `devMode` is true
+# livereload will be enabled when `devMode` is true and `livereload.enabled` is not `false`
 livereload:
+    #enabled: true  # By default `true`, put `false` to disable adding livereload script tag and starting server
     port: 35730
 
 # Disable colorful console log message, useful for outputing console log to a file instead of terminal screen,

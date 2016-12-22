@@ -143,10 +143,12 @@ function compile() {
 		buildCss = false;
 		log.info('Only JS compilation');
 	}
-	// if (argv['only-css']) {
-	// 	buildJS = false;
-	// 	log.info('Only CSS compilation');
-	// }
+
+	var entryBootstrapTpl = _.template(fs.readFileSync(Path.join(__dirname, 'templates', 'entryBootstrap.js.tmpl'), 'utf8'),
+	{
+		interpolate: /\{\{([\s\S]+?)\}\}/g,
+		evaluate: /\{%([\s\S]+?)%\}/g
+	});
 
 	var labJSBundle = packageInfo.moduleMap['@dr-core/labjs'].bundle;
 
@@ -288,12 +290,13 @@ function compile() {
 	function createEntryBootstrapCode(entryPackageName, revisionMeta, entryDataProvider, writeCss) {
 		var loadingData = getBundleMetadataForEntry(entryPackageName, revisionMeta);
 
-		var bootstrapCode = PageCompiler.entryBootstrapTpl({
+		var bootstrapCode = entryBootstrapTpl({
 			cssPaths: writeCss ? JSON.stringify(loadingData.css, null, '  ') : null,
 			jsPaths: JSON.stringify(loadingData.js, null, '  '),
 			staticAssetsURL: config.get('staticAssetsURL'),
 			entryPackage: entryPackageName,
 			debug: !!api.config.get('devMode'),
+			lrEnabled: api.config.get('devMode') && api.config.get('livereload.enabled', true),
 			lrport: api.config.get('livereload.port'),
 			data: JSON.stringify(entryDataProvider(entryPackageName), null, '  ')
 		});

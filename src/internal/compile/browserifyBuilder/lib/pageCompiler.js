@@ -198,14 +198,6 @@ function needUpdateEntryPage(builtBundles, bundleSet) {
 	});
 }
 
-var entryBootstrapTpl = _.template(fs.readFileSync(Path.join(__dirname, 'templates', 'entryBootstrap.js.tmpl'), 'utf8'),
-	{
-		interpolate: /\{\{([\s\S]+?)\}\}/g,
-		evaluate: /\{%([\s\S]+?)%\}/g
-	});
-
-PageCompiler.entryBootstrapTpl = entryBootstrapTpl;
-
 PageCompiler.prototype.injectElements = function($, bundleSet, pkInstance, config, revisionMeta, pathInfo, bootstrapCode) {
 	var body = $('body');
 	var head = $('head');

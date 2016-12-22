@@ -23,7 +23,6 @@
 	"levels": {
 		"[all]": "info",
 		"test": "DEBUG",
-		"rwPackageJson": "info",
 		"@dr-core/browserify-builder": "info",
 		"packageInstallMgr": "INFO",
 		"require-injector.node-inject": "info",

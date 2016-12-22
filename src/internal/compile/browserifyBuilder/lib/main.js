@@ -6,7 +6,7 @@ exports.activate = function(api) {
 	var chalk = require('chalk');
 	var log = require('log4js').getLogger(api.packageName);
 	var lr = require('tiny-lr');
-	if (api.config.get('devMode') === true) {
+	if (api.config.get('devMode') === true && api.config.get('livereload.enabled', true)) {
 		try {
 			var lrPort = api.config.get('livereload.port');
 			lr().listen(lrPort, () => {

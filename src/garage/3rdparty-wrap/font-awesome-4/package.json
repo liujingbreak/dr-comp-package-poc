@@ -10,7 +10,7 @@
     "noWatch": true
   },
   "dependencies": {
-	  "fontfaceobserver": "^2.0.5"
+	  "fontfaceobserver": "^2.0.7"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
