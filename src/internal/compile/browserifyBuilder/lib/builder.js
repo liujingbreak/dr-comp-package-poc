@@ -160,7 +160,7 @@ function compile() {
 			var file = new File({
 				// gulp-rev-all is so stupid that it can only accept same `base` for all files,
 				// So css files' base path must be sames as JS files.
-				// To make rev-all think they are all based on process.cwd(), I have to change a
+				// To make rev-all think they are all based on config().rootPath, I have to change a
 				// css file's path to a relative 'fake' location as as JS files.
 				// Otherwise rev-manifest.json will be screwed up.
 				path: Path.resolve(Path.relative(staticDir, path)),
@@ -314,7 +314,7 @@ function compile() {
 		var browserifyOpt = {
 			debug: config().enableSourceMaps,
 			paths: api.compileNodePath,
-			basedir: process.cwd(),
+			basedir: config().rootPath,
 			noParse: config().browserifyNoParse ? config().browserifyNoParse : []
 		};
 		if (config.get([api.packageName, 'standalone']))

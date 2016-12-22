@@ -1,0 +1,29 @@
+{
+  "name": "@dr/angularjs-legacy",
+  "version": "1.0.1",
+  "description": "Angular 1.2.x for IE8",
+  "browser": "index.js",
+  "style": "angular-1.2.29/angular-csp.css",
+  "dr": {
+    "bundle": "ui-lib",
+    "browserifyNoParse": [
+      "./angular-1.2.29/angular.js",
+      "./angular-1.2.29/angular-animate.js",
+      "./angular-1.2.29/angular-cookies.js",
+      "./angular-1.2.29/angular-route.js",
+      "./angular-1.2.29/angular-aria.js",
+      "./angular-1.2.29/angular-sanitize"
+    ],
+    "noLint": true,
+    "noWatch": true,
+    "translatable": false
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "jquery": "^1.12.0"
+  },
+  "author": "LJ",
+  "license": "ISC"
+}

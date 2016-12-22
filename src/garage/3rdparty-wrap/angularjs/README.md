@@ -1,4 +1,4 @@
 AngularJS wrapper package
 =========================
 
-Angular 1.4.5
+Angular 1.5.8

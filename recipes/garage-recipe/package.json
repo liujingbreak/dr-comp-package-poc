@@ -1,6 +1,6 @@
 {
   "name": "@dr/garage-recipe",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "description": "Recipe package of garage-recipe",
   "dependencies": {
     "@dr/angularjs": "1.5.8-1",
@@ -18,6 +18,8 @@
     "@dr/markdown-viewer": "0.0.24",
     "@dr/readme": "0.0.36",
     "@dr/readme-docs": "0.2.11",
-    "@dr/text-anim-ng": "0.0.23"
+    "@dr/text-anim-ng": "0.0.23",
+    "@dr/angularjs-legacy": "1.0.1",
+    "@dr/lodash3": "1.0.0"
   }
 }

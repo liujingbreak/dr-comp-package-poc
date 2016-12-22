@@ -77,7 +77,9 @@ function activate(api) {
 
 	function staticRoute(staticDir) {
 		return function(req, res, next) {
-			var ext = _.trimStart(Path.extname(req.path).toLowerCase(), '.');
+			var ext = Path.extname(req.path).toLowerCase();
+			if (ext.startsWith('.'))
+				ext = ext.substring(1);
 			api.express.static(staticDir, {
 				maxAge: _.isObject(maxAgeMap) ?
 					(_.has(maxAgeMap, ext) ? maxAgeMap[ext] : 0) :
