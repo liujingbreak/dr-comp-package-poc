@@ -13,6 +13,9 @@ module.exports = function(injector) {
 	 *
 	 *  injector.fromAllComponents()
 	 *  	.substitute('depenency-package', 'another-package');
-	 *
+	 * 
+	 *  // Or for all Node packages
+	 *  injector.fromDir(['src', 'node_modules'])
+	 *      .substitute('depenency-package', 'another-package');
 	 */
 };

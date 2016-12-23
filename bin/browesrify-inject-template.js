@@ -11,9 +11,12 @@ module.exports = function(injector) {
 	 *
 	 *  // Inject to all component packages:
 	 *
-	 *  injector.fromAllPackage()
+	 *  injector.fromAllComponents()
 	 *  	.substitute('depenency-package', 'another-package');
 	 *
+	 *  // Or for all Node packages
+	 *  injector.fromDir(['src', 'node_modules'])
+	 *      .substitute('depenency-package', 'another-package');
 	 * For example,
 	 *
 	 * Assume you have a component depends on `@dr/angularjs`, it calls

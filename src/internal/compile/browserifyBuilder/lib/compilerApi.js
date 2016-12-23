@@ -82,15 +82,21 @@ function replaceAssetsUrl(str, sourceFile) {
 }
 
 function getInjectedPackage(file, origPackageName) {
-	var factoryMap = api.browserInjector.factoryMapForFile(file);
-	if (factoryMap) {
-		var ij = factoryMap.getInjector(origPackageName);
-		if (ij && _.has(ij, 'substitute')) {
-			//log.debug(`Found less import target: ${origPackageName}, replaced to ${ij.substitute}`);
-			return ij.substitute;
+	var fmaps = api.browserInjector.factoryMapsForFile(file);
+	var replaced = null;
+	_.some(fmaps, factoryMap => {
+		var ijSetting = factoryMap.matchRequire(origPackageName);
+		if (ijSetting && ijSetting.method === 'substitute') {
+			if (_.isFunction(ijSetting.value)) {
+				replaced = ijSetting.value(file, ijSetting.execResult);
+			} else {
+				replaced = ijSetting.value;
+			}
+			return true;
 		}
-	}
-	return null;
+		return false;
+	});
+	return replaced;
 }
 
 function packageNames2bundles(packageNames) {

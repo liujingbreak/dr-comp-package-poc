@@ -118,15 +118,22 @@ function injectReplace(content, file) {
 }
 
 function getInjectedPackage(file, origPackageName) {
-	var factoryMap = api.browserInjector.factoryMapForFile(file);
-	if (factoryMap) {
-		var ijSetting = factoryMap.matchRequire(origPackageName);
-		if (ijSetting && ijSetting.method === 'substitute') {
-			if (_.isFunction(ijSetting.value))
-				return ijSetting.value(file, ijSetting.execResult);
-			//log.debug(`Found less import target: ${origPackageName}, replaced to ${ij.substitute}`);
-			return ijSetting.value;
-		}
+	var fmaps = api.browserInjector.factoryMapsForFile(file);
+	var replaced = null;
+	if (fmaps.length > 0) {
+		_.some(fmaps, factoryMap => {
+			var ijSetting = factoryMap.matchRequire(origPackageName);
+			if (ijSetting && ijSetting.method === 'substitute') {
+				if (_.isFunction(ijSetting.value)) {
+					replaced = ijSetting.value(file, ijSetting.execResult);
+				//log.debug(`Found less import target: ${origPackageName}, replaced to ${ij.substitute}`);
+				} else {
+					replaced = ijSetting.value;
+				}
+				return true;
+			}
+			return false;
+		});
 	}
-	return null;
+	return replaced;
 }
