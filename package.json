@@ -1,6 +1,6 @@
 {
   "name": "web-fun-house",
-  "version": "0.9.0-rc.1",
+  "version": "0.9.0-rc.2",
   "description": "A company's web platform",
   "main": "lib/main.js",
   "bin": "bin/dr.js",
@@ -56,7 +56,7 @@
     "main-bower-files": "^2.11.0",
     "mkdirp": "^0.5.1",
     "parcelify": "^2.1.0",
-    "require-injector": "^1.0.2",
+    "require-injector": "^2.0.0-rc.1",
     "resolve": "^1.1.7",
     "run-sequence": "^1.1.5",
     "semver": "^5.3.0",
