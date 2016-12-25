@@ -1,14 +1,16 @@
 comp-card {
 	display: inline-block;
 	background-color: @dr-white;
-	border-right: 1px solid @dr-lite-dark;
-	border-bottom: 1px solid @dr-lite-dark;
-	width: @dr-unit * 14;
+	border-right: 1px solid @dr-lite-lite;
+	border-bottom: 1px solid @dr-lite-lite;
 	height: @dr-unit * 10;
 	overflow: hidden;
 	padding: @dr-unit-half;
 	vertical-align: middle;
 	text-align: left;
+	box-shadow: 0 0 0 0 @dr-dark;
+	transition: box-shadow 0.25s linear;
+	
 	.name {
 		font-size: @dr-fontsize-big;
 		font-weight: @dr-fontweight;
@@ -18,5 +20,10 @@ comp-card {
 		max-height: @dr-unit-triple;
 		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+	&:hover {
+		box-shadow: 0 0 10px 1px rgba(0,0,0,0.5);
+		overflow: hidden;
+		position: relative; // makes box slightly float over others to show box shadow, z-index does not work for this
 	}
 }

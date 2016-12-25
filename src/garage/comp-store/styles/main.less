@@ -16,19 +16,18 @@
 	.comp-main {
 		position: static;
 		overflow-y: visible;
-		padding: 0 @dr-unit-half;
+		padding: 0 0 @dr-unit-half 0;
 		// .horizatal-line {
 		// 	position: static;
 		// }
 	}
 }
 .comp-main {
-	position: absolute;
-	left: 0;
-	right: @comp-navi-width;
+	position: relative;
+	display: block;
 	height: 100%;
 	overflow-y: auto;
-	padding: @dr-unit;
+	padding: 0 0 @dr-unit 0;
 	.banner {
 		height: @banner-height;
 		padding: @dr-unit;

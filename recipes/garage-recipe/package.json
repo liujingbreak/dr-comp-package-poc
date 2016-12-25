@@ -1,6 +1,6 @@
 {
   "name": "@dr/garage-recipe",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "Recipe package of garage-recipe",
   "dependencies": {
     "@dr/angularjs": "1.5.8-1",
@@ -11,7 +11,7 @@
     "@dr/light-lodash": "0.0.4",
     "@dr/lodash3": "1.0.0",
     "@dr/angular-lazy": "1.0.0",
-    "@dr/comp-store": "0.0.12",
+    "@dr/comp-store": "0.0.13",
     "@dr/doc-banner": "1.0.0",
     "@dr/doc-home": "0.1.21",
     "@dr/doc-ui": "0.0.30",

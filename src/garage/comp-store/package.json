@@ -1,6 +1,6 @@
 {
   "name": "@dr/comp-store",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Component store",
   "browser": "browser.js",
   "main": "server/server.js",

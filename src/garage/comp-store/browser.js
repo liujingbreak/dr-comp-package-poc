@@ -12,7 +12,7 @@ exports.init = function(app) {
 
 	app.component('compStore', {
 		template: require('./views/componentStore.html'),
-		controller: ['compService', function(compService) {
+		controller: ['$scope', 'compService', function($scope, compService) {
 			var compStoreVm = this;
 			compStoreVm.showNavi = true;
 			compStoreVm.quickSearch = drTranslate('搜索组件和小应用');
@@ -25,6 +25,7 @@ exports.init = function(app) {
 		}],
 		controllerAs: 'compStoreVm'
 	});
+
 	app.component('compDetails', {
 		template: '<h1>Details: {{detailsCtrl.compId}}</h1>',
 		controller: ['$stateParams', function($stateParams) {
