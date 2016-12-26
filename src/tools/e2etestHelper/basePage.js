@@ -11,9 +11,9 @@ function Page(path) {
 	if (!(this instanceof Page)) {
 		return new Page(path);
 	}
-	this.path = this.path ? this.path : '';
+	path = path ? path : '';
 
-	this.url = this._urlPrefix + (_.startsWith(this.path, '/') ? '' : '/') + this.path;
+	this.url = this._urlPrefix + (_.startsWith(path, '/') ? '' : '/') + path;
 	this.elements = {};
 	// lazy restart webdriver
 	Object.defineProperty(this, 'driver', {
@@ -52,7 +52,7 @@ Page.prototype = {
 				log.debug('check element : ' + prop.selector);
 				var errMsg = 'Page object has a required element "' +
 						name + '[' + prop.selector + ']' + '" which is not available';
-				var found = yield helper.waitForElement(prop.selector, 10000, errMsg);
+				var found = yield helper.waitForElement(prop.selector, errMsg, 5000);
 				log.debug('%s found %j', prop.selector, found);
 				prop.cache = found;
 				//expect(found.length > 0).toBeTruthy();

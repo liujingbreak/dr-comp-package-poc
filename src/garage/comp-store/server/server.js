@@ -21,7 +21,6 @@ exports.activate = function() {
 					packages: []
 				});
 			} else {
-				//log.info('response: %s', body);
 				res.send(body);
 			}
 		});

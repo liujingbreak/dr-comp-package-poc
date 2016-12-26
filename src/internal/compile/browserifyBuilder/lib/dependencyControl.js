@@ -390,7 +390,9 @@ function packageDepsAndSplitPoints(entryPackageName) {
 	var graph = _.clone(packageDepsGraph.entries[entryPackageName]);
 	var splitPoints = allSplitPointsOfEntry(entryPackageName);
 	_.each(splitPoints, name => {
-		var splitGraph = packageDepsGraph.entries[entryPackageName];
+		delete graph['sp:' + name];
+		graph[name] = true;
+		var splitGraph = packageDepsGraph.splitPoints[name];
 		_.assign(graph, splitGraph);
 	});
 	return graph;

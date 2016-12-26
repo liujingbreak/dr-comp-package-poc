@@ -1,7 +1,10 @@
 var Path = require('path');
 var log = require('@dr/logger').getLogger('test.' + Path.basename(__filename, '.js'));
 var helper = require('@dr/e2etest-helper');
-var docHomePage = require('../../pages/docHomePage');
+//var webdriver = require('selenium-webdriver');
+var pages = require('../../pages/docHomePage');
+var docHomePage = pages.docHomePage;
+var compStorePage = pages.compStorePage;
 var _ = require('lodash');
 var Promise = require('bluebird');
 
@@ -23,6 +26,22 @@ describe('When server is started', function() {
 			log.debug(text);
 			//yield Promise.delay(1500);
 			//helper.saveScreen('doc-home.png');
+			done();
+		})()
+		.catch(e => {
+			log.error(e);
+			done.fail(e);
+		});
+	});
+
+	xit('the component store page should be available', function(done) {
+		Promise.coroutine(function*() {
+			yield compStorePage.get();
+			var allcomp = yield compStorePage.el('group').waitAndFind('comp-card');
+			log.debug('There are %d components', allcomp.length);
+			expect(allcomp.length > 5).toBe(true);
+			var nocomp = yield compStorePage.el('group').waitAndFind('.fuckedup', 1000);
+			expect(nocomp.length === 0).toBe(true);
 			done();
 		})()
 		.catch(e => {

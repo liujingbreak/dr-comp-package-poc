@@ -127,8 +127,8 @@ module.exports = new YourPage();
 | Name | description
 | - | -
 | .driver | Underneath Webdriver instance
-| .waitForElement(cssSelector, timeout, errMsg) | return Promise(WebElement)
-| .wait(func, timeout, errMsg) | return Promise(true)
+| .waitForElement(cssSelector [,errMsg , timeout]) | return Promise(WebElement)
+| .wait(func [,errMsg , timeout]) | return Promise(true), `func` is a `function` that returns `true|false`, `timeout` is 5 seconds
 | .statusCodeOf(path) | return a Promise, resolved to a number type `statusCode`
 | .saveScreen(fileName) | Take a screenshot for browser and save to folder `dist` as `config.resolve('destDir')`
 If you want to assert a response status code of a local HTTP Path, you may do like this,
@@ -146,6 +146,14 @@ it('"http://localhost:<port>/resource" Should return 200', (done)=> {
 	});
 });
 ```
+### Useful (monkey-patched) API on WebElement
+
+| Name | description
+| - | -
+| waitAndFind(css, timeout) | return Promise< Array < WebElement > >
+| findElementsByCss(css) | return Promise < Array < WebElement> >
+| findElementByCss(css) | return WebElementPromise
+More on [http://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/index_exports_WebElement.html](http://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/index_exports_WebElement.html)
 
 ## Sample
 Page Object `foobarPage.js`
@@ -164,6 +172,7 @@ function FoobarPage() {
 	this.el('body', '.doc-home', true);
 	this.el('mainSection', '.main-section', true);
 	this.el('apiResult', '.api-result', false);
+	this.el('apiError', '.api-error', false);
 }
 
 // If you want to extend Page `check` logic
@@ -199,12 +208,21 @@ describe('When server is started', function() {
 		Promise.coroutine(function*() {
 			yield foobarPage.get();
 			expect(foobarPage.faviconStatus).toBe(200);
-			yield Promise.delay(1000);
+
+			helper.driver.sleep(1000); // or `yield Promise.delay(`1000)`
 			var url = yield helper.driver.getCurrentUrl();
-			log.info('current url: ' + url);
-			expect(_.endsWith(url, '#/')).toBe(true);
+			expect(url.endsWith('#/')).toBe(true);
+
 			var text = yield foobarPage.el('mainSection').getText();
-			expect(text).toEqual('foobar');
+			expect(text.indexOf('foobar') >= 0).toBe(true);
+
+			// API might takes some time to finish rendering, so do waitAndFind
+			var results = yield foobarPage.el('apiResult').waitAndFind('li');
+			expect(results.length > 2).toBe(true);
+
+			// Expect no errors
+			var errors = yield foobarPage.el('apiError').findElementsByCss('.message');
+			expecr(errors.length === 0).toBe(true);
 			done();
 		})()
 		.catch(e => {

@@ -29,7 +29,9 @@ exports.driver = driver;
 exports.waitForServer = waitForServer;
 exports.waitForServerStart = waitForServerStart;
 exports.run = run;
-
+exports.wait = wait;
+exports.waitForElement = waitForElement;
+exports.waitAndFind = waitAndFind;
 /**
  * @param  {function} theConfig  config object
  * @param  {string} browser
@@ -118,17 +120,58 @@ exports.saveScreen = function(fileName) {
 /**
  * @param func {function|WebElement}
  */
-exports.wait = function wait(func, timeout, errMsg) {
+function wait(func, errMsg, timeout) {
 	if (_.isFunction(func))
-		return driver.wait(new webdriver.until.Condition(errMsg, func), timeout, errMsg);
+		return driver.wait(new webdriver.until.Condition(errMsg || 'wait() timeout', func),
+			timeout || 5000,
+			errMsg || 'wait() timeout');
 	else {
-		return waitForElement(errMsg, func, timeout);
+		return waitForElement(func, errMsg, timeout);
 	}
-};
+}
 
-exports.waitForElement = waitForElement;
-function waitForElement(css, timeout, errMsg) {
-	return driver.wait(new webdriver.until.WebElementCondition(errMsg, () => driver.findElement(webdriver.By.css(css))), timeout, errMsg);
+function waitForElement(css, errMsg, timeout) {
+	return driver.wait(new webdriver.until.WebElementCondition(errMsg || 'wait() timeout',
+		() => driver.findElement(webdriver.By.css(css))), timeout || 5000, errMsg || 'wait() timeout');
+}
+
+_.assign(webdriver.WebElement.prototype, {
+
+	waitAndFind: function(css, timeout) {
+		return waitAndFind(this, css, timeout);
+	},
+
+	findElementsByCss: function(css) {
+		return this.findElements(webdriver.By.css(css));
+	},
+
+	findElementByCss: function(css) {
+		return this.findElement(webdriver.By.css(css));
+	}
+});
+
+function waitAndFind(parentElPromise, css, timeout) {
+	return Promise.coroutine(function*() {
+		var parent = yield Promise.resolve(parentElPromise);
+		var children;
+		try {
+			yield wait(() => {
+				return parent.findElements(webdriver.By.css(css))
+				.then(els => {
+					if (els && els.length > 0) {
+						children = els;
+						return true;
+					}
+					return false;
+				});
+			}, 'no-elements', timeout);
+		} catch (e) {
+			if (e.message.indexOf('no-elements') >= 0)
+				return [];
+			throw e;
+		}
+		return children;
+	})();
 }
 
 

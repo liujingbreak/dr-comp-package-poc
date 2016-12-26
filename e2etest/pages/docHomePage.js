@@ -7,6 +7,8 @@ var _ = require('lodash');
 var Promise = require('bluebird');
 
 util.inherits(DocHomePage, basePage);
+util.inherits(CompStorePage, basePage);
+
 
 function DocHomePage() {
 	DocHomePage.super_.call(this, '?lang=zh');
@@ -24,4 +26,14 @@ _.assign(DocHomePage.prototype, {
 	}
 });
 
-module.exports = new DocHomePage();
+
+function CompStorePage() {
+	CompStorePage.super_.call(this, '/#/components');
+	this.el('store', 'comp-store', true);
+	this.el('group', 'comp-group', true);
+}
+
+exports.docHomePage = new DocHomePage();
+exports.compStorePage = new CompStorePage();
+
+console.log(exports);
