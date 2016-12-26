@@ -8,7 +8,8 @@
     "bundle": "component-store",
     "type": [
       "server"
-    ]
+    ],
+    "browserSideConfigProp": ["comp-store.nodeServer"]
   },
   "style": "styles/main.less",
   "transforms": [

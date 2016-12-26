@@ -116,6 +116,7 @@ module.exports = new YourPage();
 | Name | description
 | - | -
 | {constructor} helper.basePage(contextPath) | e.g. `''`, `'/login'`
+| this.driver | Underneath Webdriver instance
 | this.get(path) | Send get request to load current Page object. `path` is optional, if not empty it will be add to page's `contextPath`, e.g. `page.get('?lang=zh')` if page's context is '/login', the actual URL will be `http://localhost/login?lang=zh`
 | this.el(elementName, selector, isRequired) | Define a page element, if `isRequired` is true, that element be be tested when `.get()` is called on Page object
 | this[elementName] | {`ElementPromise`} Get defined page element, it calls `driver.indElement(selector)` lazily
@@ -126,6 +127,8 @@ module.exports = new YourPage();
 | Name | description
 | - | -
 | .driver | Underneath Webdriver instance
+| .waitForElement(cssSelector, timeout, errMsg) | return Promise(WebElement)
+| .wait(func, timeout, errMsg) | return Promise(true)
 | .statusCodeOf(path) | return a Promise, resolved to a number type `statusCode`
 | .saveScreen(fileName) | Take a screenshot for browser and save to folder `dist` as `config.resolve('destDir')`
 If you want to assert a response status code of a local HTTP Path, you may do like this,
@@ -142,4 +145,73 @@ it('"http://localhost:<port>/resource" Should return 200', (done)=> {
 		done.fail(e);
 	});
 });
+```
+
+## Sample
+Page Object `foobarPage.js`
+```js
+var util = require('util');
+var helper = require('@dr/e2etest-helper');
+var basePage = helper.basePage;
+var _ = require('lodash');
+//var Promise = require('bluebird');
+
+util.inherits(FoobarPage, basePage);
+
+function FoobarPage() {
+	FoobarPage.super_.call(this, '?lang=zh');
+	// Defined your page elements
+	this.el('body', '.doc-home', true);
+	this.el('mainSection', '.main-section', true);
+	this.el('apiResult', '.api-result', false);
+}
+
+// If you want to extend Page `check` logic
+//_.assign(FoobarPage.prototype, {
+//	check: function() {
+//		var self = this;
+//		return Promise.coroutine(function*() {
+//			self.faviconStatus = yield helper.statusCodeOf('/favicon.ico');
+//			return yield FoobarPage.super_.prototype.check.apply(self, arguments);
+//		})();
+//	}
+//});
+
+module.exports = new FoobarPage();
+```
+
+Test spec `foobarSpec.js`
+```js
+var Path = require('path');
+var log = require('@dr/logger').getLogger('test.' + Path.basename(__filename, '.js'));
+var helper = require('@dr/e2etest-helper');
+var foobarPage = require('../../pages/foobarPage');
+var _ = require('lodash');
+var Promise = require('bluebird');
+
+describe('When server is started', function() {
+	helper.setup();
+	beforeAll(() => {
+		jasmine.DEFAULT_TIMEOUT_INTERVAL = 20 * 1000;
+	});
+
+	it('the home page should be available', function(done) {
+		Promise.coroutine(function*() {
+			yield foobarPage.get();
+			expect(foobarPage.faviconStatus).toBe(200);
+			yield Promise.delay(1000);
+			var url = yield helper.driver.getCurrentUrl();
+			log.info('current url: ' + url);
+			expect(_.endsWith(url, '#/')).toBe(true);
+			var text = yield foobarPage.el('mainSection').getText();
+			expect(text).toEqual('foobar');
+			done();
+		})()
+		.catch(e => {
+			log.error(e);
+			done.fail(e);
+		});
+	});
+});
+
 ```

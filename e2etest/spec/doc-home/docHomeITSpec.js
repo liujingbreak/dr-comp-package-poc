@@ -19,8 +19,10 @@ describe('When server is started', function() {
 			var url = yield helper.driver.getCurrentUrl();
 			log.info('current url: ' + url);
 			expect(_.endsWith(url, '#/')).toBe(true);
-			yield Promise.delay(1500);
-			helper.saveScreen('doc-home.png');
+			var text = yield docHomePage.el('body').getText();
+			log.debug(text);
+			//yield Promise.delay(1500);
+			//helper.saveScreen('doc-home.png');
 			done();
 		})()
 		.catch(e => {

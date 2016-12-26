@@ -115,6 +115,23 @@ exports.saveScreen = function(fileName) {
 	});
 };
 
+/**
+ * @param func {function|WebElement}
+ */
+exports.wait = function wait(func, timeout, errMsg) {
+	if (_.isFunction(func))
+		return driver.wait(new webdriver.until.Condition(errMsg, func), timeout, errMsg);
+	else {
+		return waitForElement(errMsg, func, timeout);
+	}
+};
+
+exports.waitForElement = waitForElement;
+function waitForElement(css, timeout, errMsg) {
+	return driver.wait(new webdriver.until.WebElementCondition(errMsg, () => driver.findElement(webdriver.By.css(css))), timeout, errMsg);
+}
+
+
 function startup() {
 	jasmine.DEFAULT_TIMEOUT_INTERVAL = 10 * 1000;
 }

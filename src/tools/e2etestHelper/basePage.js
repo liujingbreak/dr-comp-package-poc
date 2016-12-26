@@ -1,7 +1,9 @@
 var Path = require('path');
-var log = require('@dr/logger').getLogger(Path.basename(__filename));
+var log = require('@dr/logger').getLogger('test.' + Path.basename(__filename));
 var _ = require('lodash');
 var Promise = require('bluebird');
+var helper = require('./webdriverHelper');
+var webdriver = require('selenium-webdriver');
 
 module.exports = Page;
 
@@ -33,6 +35,7 @@ Page.prototype = {
 		// Sometimes the page can't finish loading, like trying to connect to google adv
 		return Promise.any(bothProm).then(() => {
 			log.debug('page loaded');
+			//helper.saveScreen(encodeURIComponent(path));
 			return self.check();
 		});
 	},
@@ -43,18 +46,16 @@ Page.prototype = {
 	check: function(done) {
 		var all = [];
 		_.forOwn(this.elements, (prop, name) => {
-			var self = this;
 			var proms = Promise.coroutine(function*() {
 				if (!prop.required)
 					return;
 				log.debug('check element : ' + prop.selector);
-				var presents = yield self.driver.isElementPresent({css: prop.selector});
-				log.debug('presents:', presents);
-				if (!presents) {
-					return Promise.reject('Page object has a required element "' +
-						name + '[' + this.elements[name].selector + ']' + '" which is not available');
-				}
-				expect(presents).toBe(true);
+				var errMsg = 'Page object has a required element "' +
+						name + '[' + prop.selector + ']' + '" which is not available';
+				var found = yield helper.waitForElement(prop.selector, 10000, errMsg);
+				log.debug('%s found %j', prop.selector, found);
+				prop.cache = found;
+				//expect(found.length > 0).toBeTruthy();
 			})()
 			.catch(e => {
 				log.error('Failed to locate element ', name, ' ', prop.selector, e ? e.stack : '');
@@ -80,7 +81,7 @@ Page.prototype = {
 		var el = this.elements[name].cache;
 		if (!el) {
 			css = this.elements[name].selector;
-			cache = this.driver.findElement({css: css});
+			cache = this.driver.findElement(webdriver.By.css(css));
 			el = this.elements[name].cache = cache;
 		}
 		return el;

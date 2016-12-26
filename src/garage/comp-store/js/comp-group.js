@@ -32,10 +32,3 @@ api.app.component('compGroup', {
 		cardMinWidth: '@'
 	}
 });
-
-api.app.directive('drResize', function() {
-
-	return function(scope, el, iAttrs) {
-		el.find('comp-card:first')
-	};
-});
