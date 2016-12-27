@@ -79,7 +79,7 @@ module.exports = function(goFunc) {
 			}
 		}, {
 			label: $translate('End-to-end Test'),
-			//flag: 'new',
+			flag: 'new',
 			action: function() {
 				goFunc('e2etest.md');
 			}

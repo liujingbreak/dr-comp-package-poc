@@ -131,9 +131,10 @@ module.exports = new YourPage();
 | this.get(path) | Send get request to load current Page object. `path` is optional, if not empty it will be add to page's `contextPath`, e.g. `page.get('?lang=zh')` if page's context is '/login', the actual URL will be `http://localhost/login?lang=zh`
 | this.el(elementName, selector, isRequired) | Define a page element, if `isRequired` is true, that element be be tested when `.get()` is called on Page object
 | this[elementName] | {`ElementPromise`} Get defined page element, it calls `driver.indElement(selector)` lazily
-| this.el(elementName) | same as `this[elementName]`
+| this.el(elementName) | Same as `this[elementName]`
+| this.check() | Force do check page elements, invoked by `.get()`
 
-### Some help method on `e2etest-helper`
+### `e2etest-helper` API
 
 | Name | description
 | - | -
