@@ -22,6 +22,18 @@ api.app.factory('compService', ['$q', '$http', '$timeout', function($q, $http, $
 					packages: res.data.packages
 				};
 			});
+		},
+
+		searchPackage: function(anything) {
+			return $http({method: 'GET',
+				url: this.nodeServer + api.contextPath + '/searchPackage/' + encodeURIComponent(anything)})
+			.then(function(res) {
+				if (res.data.error)
+					throw new Error(res.data.error);
+				return {
+					packages: res.data.packages
+				};
+			});
 		}
 	};
 	return new CompService($q, $http, $timeout);

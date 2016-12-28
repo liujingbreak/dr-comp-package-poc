@@ -1,5 +1,6 @@
 require('@dr/angularjs');
 var api = require('__api');
+var _ = require('lodash');
 
 var initialized = false;
 exports.init = function(app) {
@@ -12,16 +13,52 @@ exports.init = function(app) {
 
 	app.component('compStore', {
 		template: require('./views/componentStore.html'),
-		controller: ['$scope', 'compService', function($scope, compService) {
+		controller: ['$scope', 'compService', 'drLoadingService', function($scope, compService, drLoadingService) {
 			var compStoreVm = this;
 			compStoreVm.showNavi = true;
-			compStoreVm.quickSearch = drTranslate('搜索组件和小应用');
 
-			compService.getPackagesAndBanner()
-			.then(function(data) {
-				compStoreVm.banner = data.banner;
-				compStoreVm.packages = data.packages;
-			});
+			this.$onInit = function() {
+				compStoreVm.quickSearch = drTranslate('搜索组件和小应用');
+				listPackages();
+
+				$scope.$watch('compStoreVm.nameSearch', search);
+			};
+
+			var searchCount = 0;
+			var search = _.debounce(function(text, old) {
+				if (text) {
+					var index = ++searchCount;
+					drLoadingService.setLoading('compStore', true);
+					compService.searchPackage(text)
+					.then(function(data) {
+						if (index === searchCount)
+							compStoreVm.packages = data.packages;
+					})
+					.finally(function() {
+						drLoadingService.setLoading('compStore', false);
+					});
+				} else if (text !== old){
+					listPackages();
+				}
+			}, 800);
+
+			function listPackages() {
+				drLoadingService.setLoading('compStore', true);
+				compService.getPackagesAndBanner()
+				.then(function(data) {
+					compStoreVm.banner = data.banner;
+					compStoreVm.packages = data.packages;
+				})
+				.finally(function() {
+					drLoadingService.setLoading('compStore', false);
+				});
+			}
+			// this.$onChanges = function(changes) {
+			// 	debugger;
+			// 	if (changes.nameSearch) {
+			// 		console.log('search %s', changes.nameSearch.currentValue);
+			// 	}
+			// };
 		}],
 		controllerAs: 'compStoreVm'
 	});

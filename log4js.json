@@ -27,6 +27,7 @@
 		"packageInstallMgr": "INFO",
 		"require-injector.node-inject": "info",
 		"gulp.watchPackages": "debug",
-		"@dr/translate-generator": "info"
+		"@dr/translate-generator": "info",
+		"@dr/comp-store": "debug"
 	}
 }

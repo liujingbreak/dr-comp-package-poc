@@ -8,11 +8,14 @@ api.app.component('compCard', {
 				$element.css('width', changes.cardWidth.currentValue + '%');
 			}
 		};
-		// this.$postLink = function() {
-		// 	$element.on('mouseenter', function(evt) {
-		// 		$element.addClass('mouseover')
-		// 	});
-		// };
+		this.$postLink = function() {
+			$element.on('mousedown', function(evt) {
+				$element.addClass('press');
+			});
+			$element.on('mouseup', function(evt) {
+				$element.removeClass('press');
+			});
+		};
 	}],
 	template: require('../views/comp-card.html'),
 	bindings: {

@@ -11,6 +11,15 @@ even before AngularJS has not started.
 </dr-doc-spinner>
 ```
 
+Loading indicator
+--------------
+```html
+<div dr-loading-indicator="foobar"></div>
+```
+```js
+drLoadingService.setLoading('foobar', true);
+```
+
 LESS components
 -------------
 ### Variables and mixins

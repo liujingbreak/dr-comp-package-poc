@@ -1,16 +1,18 @@
 comp-card {
 	display: inline-block;
-	background-color: @dr-white;
-	border-right: 1px solid @dr-lite-lite;
-	border-bottom: 1px solid @dr-lite-lite;
+	background-color: @dr-lite-lite;
+	border-right: 1px solid @dr-lite-liter;
+	border-bottom: 1px solid @dr-white;
 	height: @dr-unit * 10;
 	overflow: hidden;
 	padding: @dr-unit-half;
 	vertical-align: middle;
 	text-align: left;
 	box-shadow: 0 0 0 0 @dr-dark;
-	transition: box-shadow 0.25s linear;
-	
+	transition: box-shadow 0.25s linear, transform 0.2s linear, background 0.25s linear;
+	transform: translate3d(0, 0, 0);
+	z-index: 0;
+
 	.name {
 		font-size: @dr-fontsize-big;
 		font-weight: @dr-fontweight;
@@ -22,8 +24,46 @@ comp-card {
 		text-overflow: ellipsis;
 	}
 	&:hover {
-		box-shadow: 0 0 10px 1px rgba(0,0,0,0.5);
+		border-right: 0;
+		border-bottom: 0;
+		//transform: translate3d(0, 0, 0);
+		background-color: @dr-white;
+		//box-shadow: 0 0 10px 1px rgba(0,0,0,0.5);
 		overflow: hidden;
 		position: relative; // makes box slightly float over others to show box shadow, z-index does not work for this
+	}
+	&.press {
+		z-index: 2;
+		border-right: 0;
+		border-bottom: 0;
+		box-shadow: inset 0 0 5px 0px rgba(0,0,0,0.5);
+		transform: translate3d(0, 2px, 0);
+	}
+}
+
+.size-desktop, .size-tablet {
+	comp-card {
+		.animate-card();
+	}
+}
+
+.animate-card() {
+	&.ng-enter {
+		opacity: 0;
+		transform: scale(0.5); //translate3d(0, -50%, 0);
+		transition: all 0.2s cubic-bezier(0.1, -0.6, 0.2, 0);
+		&.ng-enter-active {
+			opacity: 1;
+			transform: scale(1); //translate3d(0, 0, 0);
+		}
+	}
+	&.ng-enter-stagger {
+		/* this will have a 100ms delay between each successive leave animation */
+		transition-delay: 0.1s;
+		transition-duration: 0s;
+	}
+	&.ng-enter-prepare {
+		transform: scale(0); //translate3d(0, -50%, 0);
+		opacity: 0;
 	}
 }

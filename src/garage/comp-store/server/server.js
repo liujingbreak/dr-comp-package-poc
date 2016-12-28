@@ -26,7 +26,8 @@ exports.activate = function() {
 		});
 	});
 
-	api.router().get('/search/:anything', (req, res) => {
+	api.router().get('/searchPackage/:anything', (req, res) => {
+		log.debug('search package %s', req.params.anything);
 		request({
 			url: verdaccioUrl + '/-/search/' + req.params.anything,
 			method: 'GET',
@@ -39,6 +40,10 @@ exports.activate = function() {
 					packages: []
 				});
 			}
+			log.debug(body.length);
+			res.send({
+				packages: body
+			});
 		});
 	});
 };
