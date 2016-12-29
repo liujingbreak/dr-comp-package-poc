@@ -2,10 +2,18 @@
 @import "npm://@dr/doc-ui/browser/less/dr-mixins.less";
 @comp-navi-width: 250px;
 @banner-height: @dr-unit * 11;
-.comp-store {
+comp-store {
 	position: relative;
 	width: 100%;
 	height: 100%;
+	.error-msg {
+		text-align: center;
+		color: @dr-red;
+		padding: @dr-unit-half;
+		border: 1px solid @dr-red;
+		border-radius: 3px 3px 3px 3px;
+		margin: @dr-unit-half;
+	}
 }
 .center-message {
 	font-size: 32px;
@@ -45,3 +53,4 @@
 @import "comp-navi.less";
 @import "comp-group.less";
 @import "comp-card.less";
+@import "comp-detail.less";

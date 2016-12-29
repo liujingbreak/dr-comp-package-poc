@@ -30,9 +30,17 @@ api.app.factory('compService', ['$q', '$http', '$timeout', function($q, $http, $
 			.then(function(res) {
 				if (res.data.error)
 					throw new Error(res.data.error);
-				return {
-					packages: res.data.packages
-				};
+				return res.data;
+			});
+		},
+
+		detail: function(packageName, version) {
+			return $http({method: 'GET',
+				url: this.nodeServer + api.contextPath + '/details/' + encodeURIComponent(packageName) + '/' + version})
+			.then(function(res) {
+				if (res.data.error)
+					throw new Error(res.data.error);
+				return res.data;
 			});
 		}
 	};

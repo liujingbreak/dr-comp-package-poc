@@ -211,3 +211,7 @@ livereload:
 #
 # Also you make set environment variable "CHALK_ENABLED" to `false` to disable colorful console log.
 # colorfulConsole: false
+
+comp-store:
+  nodeServer: //localhost:14333
+  verdaccioUrl: http://localhost:4873

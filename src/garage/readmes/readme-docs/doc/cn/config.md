@@ -39,6 +39,12 @@ config.yaml 和 config.local.yaml 是当前项目的全局配置文件.
 	```
 	node app -c config.demo.yaml
 	```
+	或通过environment variable `DR_CONFIG_FILE` 指定本地配置文件
+	```
+	export DR_CONFIG_FILE=config.demo.yaml
+	gulp compile
+	node app
+	```
 
 
 config.local.yaml 应该被放入.gitignore, 不作为生产环境的配置内容，例如`devMode: true`之类的配置项都写入config.local.yaml 以方便本地开发调试。

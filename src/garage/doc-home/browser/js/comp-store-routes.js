@@ -16,8 +16,15 @@ module.exports = function($stateProvider) {
 	});
 	$stateProvider.state('components.details', {
 		url: '/:compId',
+		resolve: {
+			compStore: loadComponentsStoreModule
+		},
 		views: {
 			compMain: {
+				controller: ['$scope', 'drLoadingService', function($scope, drLoadingService) {
+					//$scope.mainVm.selectedMenuIdx = 2;
+					drLoadingService.setLoading('main', false);
+				}],
 				template: '<comp-details></comp-details>'
 			}
 		}

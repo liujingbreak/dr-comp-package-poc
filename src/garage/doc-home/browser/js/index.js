@@ -9,7 +9,7 @@ var lazy = require('@dr/angular-lazy');
 var textAnim = require('@dr/text-anim-ng');
 
 
-var docHome = angular.module('docHome', ['ngAnimate', 'ui.router', 'docUi']);
+var docHome = angular.module('docHome', ['ngAnimate', 'ngSanitize', 'ui.router', 'docUi']);
 
 module.exports = docHome;
 

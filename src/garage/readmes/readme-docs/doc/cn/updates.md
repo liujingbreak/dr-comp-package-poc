@@ -1,5 +1,7 @@
 Updates
 =======
+**web-fun-house** 0.9.1
+- new environment variable `DR_CONFIG_FILE` [配置文档](config.md)
 - package.json 新配置属性
 `"dr.browserSideConfigProp"` [配置文档](config.md)
 ### 2016-12-14

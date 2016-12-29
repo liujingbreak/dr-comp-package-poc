@@ -39,10 +39,32 @@ exports.activate = function() {
 					error: err,
 					packages: []
 				});
+				return;
 			}
 			log.debug(body.length);
 			res.send({
 				packages: body
+			});
+		});
+	});
+
+	api.router().get('/details/:package/:version', (req, res) => {
+		request({
+			url: verdaccioUrl + '/-/readme/' + encodeURIComponent(req.params.package),
+			method: 'GET',
+			json: true
+		}, (err, httpResponse, body) => {
+			if (err || body.error) {
+				log.error('/-/readme/:package failed' , err);
+				res.send({
+					error: err || body.error,
+					readme: ''
+				});
+				return;
+			}
+			log.debug(body);
+			res.send({
+				readme: body
 			});
 		});
 	});

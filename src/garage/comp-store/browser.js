@@ -27,12 +27,16 @@ exports.init = function(app) {
 			var searchCount = 0;
 			var search = _.debounce(function(text, old) {
 				if (text) {
+					compStoreVm.error = null;
 					var index = ++searchCount;
 					drLoadingService.setLoading('compStore', true);
 					compService.searchPackage(text)
 					.then(function(data) {
 						if (index === searchCount)
 							compStoreVm.packages = data.packages;
+					})
+					.catch(function(err) {
+						compStoreVm.error = err;
 					})
 					.finally(function() {
 						drLoadingService.setLoading('compStore', false);
@@ -44,10 +48,14 @@ exports.init = function(app) {
 
 			function listPackages() {
 				drLoadingService.setLoading('compStore', true);
+				compStoreVm.error = null;
 				compService.getPackagesAndBanner()
 				.then(function(data) {
 					compStoreVm.banner = data.banner;
 					compStoreVm.packages = data.packages;
+				})
+				.catch(function(err) {
+					compStoreVm.error = err.message;
 				})
 				.finally(function() {
 					drLoadingService.setLoading('compStore', false);
@@ -62,15 +70,8 @@ exports.init = function(app) {
 		}],
 		controllerAs: 'compStoreVm'
 	});
-
-	app.component('compDetails', {
-		template: '<h1>Details: {{detailsCtrl.compId}}</h1>',
-		controller: ['$stateParams', function($stateParams) {
-			this.compId = $stateParams.compId;
-		}],
-		controllerAs: 'detailsCtrl'
-	});
 	require('./js/comp-services');
 	require('./js/comp-group');
 	require('./js/comp-card');
+	require('./js/comp-detail');
 };
