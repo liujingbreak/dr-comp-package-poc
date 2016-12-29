@@ -1,5 +1,7 @@
 <header class="comp-detail-header">
+	<button ng-click="$ctrl.goBack()"><i class="fa fa-angle-left fa-4x" aria-hidden="true"></i></button>
 	<h2> {{$ctrl.compId}} </h2>
 </header>
 <div dr-loading-indicator="compDetail"></div>
+<section class="error-msg" ng-if="$ctrl.error">{{ $ctrl.error }}</section>
 <div class="doc-section markdown-body" ng-bind-html="$ctrl.readme"></div>

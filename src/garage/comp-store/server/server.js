@@ -62,7 +62,7 @@ exports.activate = function() {
 				});
 				return;
 			}
-			log.debug(body);
+			//log.debug(body);
 			res.send({
 				readme: body
 			});

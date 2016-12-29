@@ -7,6 +7,7 @@
 	right: 0;
 	height: 100%;
 	background: @dr-lite-liter;
+	//background: linear-gradient(to right, rgba(0,0,0, 0.5) 0%, rgba(0,0,0, 0) 10px, rgba(0,0,0, 0) 100%), @dr-white;
 }
 
 .ui-view-main {
@@ -44,10 +45,13 @@
 	     height: 100%;
 	}
 }
+.screen-1 {
+	background: radial-gradient(circle farthest-side at 50% 50%, @dr-white 0%, @dr-white 75%, @dr-lite 100%), @dr-white;
+}
 
 .screen-2{
 	min-height: 100%;
-	background: radial-gradient(ellipse farthest-corner at 0% 0%, @dr-lite-dark -50%, @dr-lite-liter), @dr-lite-liter;
+	background: radial-gradient(ellipse farthest-corner at 0% 0%, @dr-lite-dark 0%, @dr-lite-liter), @dr-lite-liter;
 	//background: radial-gradient(ellipse farthest-corner at 0% 0%, @dr-blue-dark -50%, @dr-blue-liter), @dr-blue-liter;
 	//color: @dr-white;
 	.big-text {
