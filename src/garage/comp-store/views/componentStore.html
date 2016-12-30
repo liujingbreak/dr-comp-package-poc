@@ -1,6 +1,16 @@
 
 <main ui-view="compMain" class="comp-main">
-	<section class="banner" ng-show="compStoreVm.banner"></section>
+	<section class="banner swiper-container">
+		<!-- Additional required wrapper -->
+		<div class="swiper-wrapper">
+			<!-- Slides -->
+			<div class="swiper-slide slide1">
+				<h1>Waiting for cool banner</h1>
+			</div>
+			<div class="swiper-slide slide2"><h1>Waiting for 2017</h1></div>
+			<div class="swiper-slide slide3"><h1>Waiting for better life</h1></div>
+		</div>
+	</section>
 	<section ng-show="compStoreVm.showNavi" class="comp-navi">
 		<form name="naviForm" class="input-row">
 			<div class="logo-bg"><h4 t>res:Component Store</h4></div><!--

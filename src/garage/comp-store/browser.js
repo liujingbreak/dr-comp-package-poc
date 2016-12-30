@@ -1,6 +1,7 @@
 require('@dr/angularjs');
 var api = require('__api');
 var _ = require('lodash');
+var Swiper = require('swiper/dist/js/swiper.jquery.js');
 
 var initialized = false;
 exports.init = function(app) {
@@ -13,7 +14,8 @@ exports.init = function(app) {
 
 	app.component('compStore', {
 		template: require('./views/componentStore.html'),
-		controller: ['$scope', 'compService', 'drLoadingService', function($scope, compService, drLoadingService) {
+		controller: ['$scope', '$element', 'compService', 'drLoadingService', 'ScrollableAnim',
+		function($scope, $element, compService, drLoadingService, ScrollableAnim) {
 			var compStoreVm = this;
 			compStoreVm.showNavi = true;
 
@@ -22,6 +24,39 @@ exports.init = function(app) {
 				listPackages();
 
 				$scope.$watch('compStoreVm.nameSearch', search);
+			};
+			this.$postLink = function() {
+				var sw = new Swiper('.swiper-container', {
+					// Optional parameters
+					//direction: 'vertical',
+					autoplay: 2500,
+					speed: 800,
+					effect: 'flip',
+					flip: {
+						slideShadows: true,
+						limitRotation: true
+					},
+					cube: {
+						slideShadows: true,
+						shadow: true,
+						shadowOffset: 20,
+						shadowScale: 0.94
+					},
+					loop: true,
+					parallax: true
+				});
+
+				var sc = ScrollableAnim($element.find('.comp-main'));
+				sc.scene({
+					triggerElement: $element.find('comp-group').eq(0),
+					delayPercent: 50,
+					startup: function(reverse, offset) {
+						if (!reverse) {
+							sw.stopAutoplay();
+						} else
+							sw.startAutoplay();
+					}
+				});
 			};
 
 			var searchCount = 0;

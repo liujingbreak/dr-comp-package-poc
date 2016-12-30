@@ -1,5 +1,7 @@
 @import "npm://@dr/doc-ui/browser/less/dr-variables.less";
 @import "npm://@dr/doc-ui/browser/less/dr-mixins.less";
+@import "npm://swiper/dist/css/swiper.css";
+
 @comp-navi-width: 250px;
 @banner-height: @dr-unit * 11;
 comp-store {
@@ -38,7 +40,17 @@ comp-store {
 	padding: 0 0 @dr-unit 0;
 	.banner {
 		height: @banner-height;
-		padding: @dr-unit;
+		background: @dr-dark-dark;
+		color: @dr-lite;
+		h1 {
+			display: inline-block;
+			line-height: @banner-height;
+		}
+		//padding: @dr-unit;
+	}
+	.swiper-slide {
+		background: @dr-dark;
+		text-align: center;
 	}
 	.horizatal-line {
 		position: absolute;
