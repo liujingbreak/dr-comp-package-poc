@@ -213,5 +213,5 @@ livereload:
 # colorfulConsole: false
 
 comp-store:
-  nodeServer: //localhost:14333
+  nodeServer: 'http://dr-npm501-14338.ittun.com'
   verdaccioUrl: http://localhost:4873

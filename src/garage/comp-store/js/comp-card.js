@@ -13,7 +13,7 @@ api.app.component('compCard', {
 			$element.on('mousedown', function(evt) {
 				$element.addClass('press');
 			});
-			$element.on('mouseup', function(evt) {
+			$element.on('mouseup mouseleave', function(evt) {
 				$element.removeClass('press');
 			});
 			$element.on('click', function(evt) {

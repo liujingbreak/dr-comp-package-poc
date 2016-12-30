@@ -46,7 +46,7 @@ exports.init = function(app) {
 					parallax: true
 				});
 
-				var sc = ScrollableAnim($element.find('.comp-main'));
+				var sc = ScrollableAnim(angular.element('body').find('.ui-view-main'));
 				sc.scene({
 					triggerElement: $element.find('comp-group').eq(0),
 					delayPercent: 50,

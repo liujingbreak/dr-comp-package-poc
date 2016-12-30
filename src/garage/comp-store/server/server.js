@@ -4,6 +4,7 @@ var _ = require('lodash');
 exports.activate = function() {
 	const api = require('__api');
 	const log = require('log4js').getLogger(api.packageName);
+	var recipeNameRegs = [/.*?-recipe/, /([^\/]*\/)?recipe-.*?/];
 
 	var verdaccioUrl = api.config.get(api.packageShortName + '.verdaccioUrl', 'http://localhost:4873');
 	verdaccioUrl = _.trimEnd(verdaccioUrl, '/');
@@ -21,10 +22,26 @@ exports.activate = function() {
 					packages: []
 				});
 			} else {
-				res.send(body);
+				res.send(doAllPackages(body));
 			}
 		});
 	});
+
+	function doAllPackages(body) {
+		var packages = [];
+		var recipes = [];
+		_.each(body.packages, json => {
+			if (_.some(recipeNameRegs, reg => reg.test(json.name))) {
+				log.debug('recipe: %s', json.name);
+				recipes.push(json);
+			} else
+				packages.push(json);
+		});
+		return {
+			packages: packages,
+			recipes: recipes
+		};
+	}
 
 	api.router().get('/searchPackage/:anything', (req, res) => {
 		log.debug('search package %s', req.params.anything);
