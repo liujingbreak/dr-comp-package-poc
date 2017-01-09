@@ -23,6 +23,8 @@
 	<section class="error-msg" ng-if="compStoreVm.error">{{ compStoreVm.error }}</section>
 	<div dr-loading-indicator="compStore"></div>
 	<comp-group card-min-width="250" on-change-card-width="compStoreVm.cardWidth = width">
-		<comp-card card-width="compStoreVm.cardWidth" ng-repeat="pk in compStoreVm.packages" package="pk"></comp-card>
+		<comp-card id="comp-{{pk.name}}" card-width="compStoreVm.cardWidth"
+			on-select="compStoreVm.trackSelectedCard(name)"
+			ng-repeat="pk in compStoreVm.packages" package="pk"></comp-card>
 	</comp-group>
 </main>

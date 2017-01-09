@@ -10,6 +10,7 @@ api.app.component('compCard', {
 			}
 		};
 		this.$postLink = function() {
+			var self = this;
 			$element.on('mousedown', function(evt) {
 				$element.addClass('press');
 			});
@@ -18,6 +19,8 @@ api.app.component('compCard', {
 			});
 			$element.on('click', function(evt) {
 				$location.path('/components/' + encodeURIComponent($ctrl.package.name));
+				if (self.onSelect)
+					self.onSelect({name: $ctrl.package.name});
 				$scope.$apply();
 			});
 		};
@@ -25,6 +28,7 @@ api.app.component('compCard', {
 	template: require('../views/comp-card.html'),
 	bindings: {
 		package: '<',
-		cardWidth: '<'
+		cardWidth: '<',
+		onSelect: '&'
 	}
 });

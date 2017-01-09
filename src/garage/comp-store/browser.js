@@ -4,6 +4,8 @@ var _ = require('lodash');
 var Swiper = require('swiper/dist/js/swiper.jquery.js');
 
 var initialized = false;
+var lastSelectedCard;
+
 exports.init = function(app) {
 	// Set app as a property of API instance, so that all the files from this package can access it
 	// There is only one API instance for each package, it can share stuff cross files within same package.
@@ -14,10 +16,11 @@ exports.init = function(app) {
 
 	app.component('compStore', {
 		template: require('./views/componentStore.html'),
-		controller: ['$scope', '$element', 'compService', 'drLoadingService', 'ScrollableAnim',
-		function($scope, $element, compService, drLoadingService, ScrollableAnim) {
+		controller: ['$scope', '$rootScope', '$element', 'compService', 'drLoadingService', 'ScrollableAnim', '$state',
+		function($scope, $rootScope, $element, compService, drLoadingService, ScrollableAnim, $state) {
 			var compStoreVm = this;
 			compStoreVm.showNavi = true;
+			var scrollPanel;
 
 			this.$onInit = function() {
 				compStoreVm.quickSearch = drTranslate('搜索组件和小应用');
@@ -57,7 +60,11 @@ exports.init = function(app) {
 							sw.startAutoplay();
 					}
 				});
+
+				scrollPanel = $element.closest('[comp-store-scroll-pane]');
 			};
+
+			this.encode = encodeURIComponent;
 
 			var searchCount = 0;
 			var search = _.debounce(function(text, old) {
@@ -81,6 +88,29 @@ exports.init = function(app) {
 				}
 			}, 800);
 
+			this.trackSelectedCard = function(name) {
+				lastSelectedCard = name;
+			};
+
+			var off$viewContentLoaded = $rootScope.$on('$viewContentLoaded', function(event, config) {
+				if ($state.is('components') && lastSelectedCard)
+					setTimeout(function() {
+						var scrollTarget = document.getElementById('comp-' + lastSelectedCard);
+						if (scrollTarget && scrollPanel.length > 0) {
+							var scrollTop = angular.element(scrollTarget).offset().top - scrollPanel.offset().top;
+							scrollPanel.prop('scrollTop', scrollTop);
+						}
+					}, 17);
+				else {
+					if (scrollPanel)
+						scrollPanel.prop('scrollTop', 0);
+				}
+			});
+
+			this.$onDestroy = function() {
+				off$viewContentLoaded();
+			};
+
 			function listPackages() {
 				drLoadingService.setLoading('compStore', true);
 				compStoreVm.error = null;
@@ -96,12 +126,6 @@ exports.init = function(app) {
 					drLoadingService.setLoading('compStore', false);
 				});
 			}
-			// this.$onChanges = function(changes) {
-			// 	debugger;
-			// 	if (changes.nameSearch) {
-			// 		console.log('search %s', changes.nameSearch.currentValue);
-			// 	}
-			// };
 		}],
 		controllerAs: 'compStoreVm'
 	});

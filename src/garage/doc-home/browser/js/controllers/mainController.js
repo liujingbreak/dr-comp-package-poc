@@ -8,7 +8,6 @@ function MainController($scope, $timeout, drLoadingService) {
 	});
 	$scope.$on('$routeChangeSuccess', stopLoading);
 	$scope.$on('$routeChangeError', stopLoading);
-
 	function stopLoading() {
 		drLoadingService.setLoading('main', false);
 	}
