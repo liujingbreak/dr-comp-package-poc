@@ -13,7 +13,26 @@ angular.module('example-i18n', [])
 	}, 1000);
 
 	mainVm.templateContent = require('./template.html');
-}]);
+}])
+.directive('cmcPlanCard', [
+	function() {
+		return {
+			restrict: 'EA',
+			controller: ['$scope', function($scope) {
+			}],
+			scope: {
+				plan: '=',
+				onClickInvestBtn: '&'
+			},
+			replace: false,
+			template: require('./template2.html'),
+			link: function($scope, element, attrs) {
+				$scope.btnName = '现在加入';
+				// special check the Dingtou ttz
+			}
+		};
+	}
+]);
 
 angular.element(document).ready(function() {
 	angular.bootstrap(document, ['example-i18n']);

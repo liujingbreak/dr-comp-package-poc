@@ -5,3 +5,4 @@
 "现在时间是 {{ mainVm.time | date : 'medium' }}。": "中文：现在时间是 {{ mainVm.time | date : 'medium' }}。"
 "Hellow I am text from a template html": "中文：Hellow I am text from a template html"
 "Include me in index.html via Swig, see if this line is translated.": "Swig included template 也被翻译了"
+"带换行的\n\t\tkey": "带换行的\n\t\tvalue"
