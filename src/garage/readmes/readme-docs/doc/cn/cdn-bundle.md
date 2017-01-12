@@ -37,27 +37,32 @@ vendorBundleMap:
 
 externalBundleMap:
    foobar:
-      - //www.foobar.com/foobar.js
-      - //www.foobar.com/foobar.css
+      js: //www.foobar.com/foobar.js
+      css: //www.foobar.com/foobar.css
 ```
 4. 执行`gulp build`/`gulp compile`
 
-假如bundle从来没有`npm install`到本地打包环境, Browserify将无法对bundle内容进行
-语法分析，将无从得知包含哪些package module(当然对于第三方非CommonJS style的JS
-library, 并不需要对其语法分析)， 你可以配置另一种形式的**externalBundleMap**, 用
-`URLs`, `modules`明确的告诉bundle包含哪些package可以被`require()`， 这个时候不要
+假如bundle 的JS文件并不支持CommonJS module, 并不需要`npm install`到本地打包环境, Browserify也不需要对bundle内容进行
+语法分析，可以配置另一种形式的**externalBundleMap**, 用
+`css`, `js`, `modules`明确的告诉bundle包含哪些package可以被`require()`， 这个时候不要
 配置对应的**vendorBundleMap**。
 ```yaml
 externalBundleMap:
    foobar:
-      URLs:
-        - //www.foobar.com/foobar.js
-        - //www.foobar.com/foobar.css
+      js: //www.foobar.com/foobar.js
+      css: //www.foobar.com/foobar.css
       modules:
         - @dr/bar
         - @dr/foo
-   jquery:
-       - https://code.jquery.com/jquery-1.12.3.min.js
+```
+JS 文件
+```js
+if (0) {
+  // Since they are not realy CommonJS module, we don't want to execute them in Browser,
+  // the code fragment here is only for compilation process
+  require('@dr/bar');
+  require('@dr/foo');
+}
 ```
 > vendorBundleMap是用来告诉打包时怎样分配package到bundle(覆盖package.json中的"dr"."bundle"属性)，
 会对每个配置过package

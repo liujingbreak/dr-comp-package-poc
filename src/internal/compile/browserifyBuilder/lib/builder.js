@@ -258,6 +258,7 @@ function compile() {
 					pageCompilerParam.getBundleMetadataForEntry = (entryPackage) => {
 						return getBundleMetadataForEntry(entryPackage, pageCompilerParam.revisionMeta);
 					};
+					pageCompilerParam.labjsBundleMetadata = getLabjsBundleMetadata(pageCompilerParam.revisionMeta);
 					runTasks().then(getDataFuncs => {
 						pageCompilerParam.createEntryBootstrapCode = function(entryPackageName, writeCss) {
 							return createEntryBootstrapCode(entryPackageName, pageCompilerParam.revisionMeta, entryDataProvider, writeCss);
@@ -443,11 +444,18 @@ function compile() {
 		var cdnUrls = depCtl.cdnUrls(entryPackage);
 		var metadata = {
 			js: bundles2FilePaths(entryMetadata.bundles, 'js', revisionMeta),
-			css: bundles2FilePaths(entryMetadata.bundles, 'css', revisionMeta),
+			css: bundles2FilePaths(entryMetadata.bundles, 'css', revisionMeta)
 		};
 		[].push.apply(metadata.js, cdnUrls.js);
 		[].push.apply(metadata.css, cdnUrls.css);
 		return metadata;
+	}
+
+	function getLabjsBundleMetadata(revisionMeta) {
+		return {
+			js: bundles2FilePaths([labJSBundle], 'js', revisionMeta),
+			css: bundles2FilePaths([labJSBundle], 'css', revisionMeta)
+		};
 	}
 
 	function bundles2FilePaths(bundles, type, revisionMeta) {
@@ -456,14 +464,22 @@ function compile() {
 			var file = type + '/' + bundle + ((config().devMode || type === 'css') ? '' : '.min') + '.' + type;
 			if (_.has(packageInfo.bundleUrlMap, bundle)) {
 				var urls = packageInfo.bundleUrlMap[bundle];
-				if (urls.length > 0)
-					log.debug(`Replace bundle "${bundle}" with CDN resources:`);
-				_.each(urls, url => {
-					if (url.endsWith('.' + type)) {
+				if (_.isArray(urls)) {
+					if (urls.length > 0)
+						log.info(`Replace bundle "${bundle}" with CDN resources:`);
+					_.each(urls, url => {
+						if (url.endsWith('.' + type)) {
+							paths.push(url);
+							log.info(`   ${type} ${url}`);
+						}
+					});
+				} else if (_.has(urls, type)){
+					log.info(`Replace bundle "${bundle}" with CDN resources:`);
+					_.each([].concat(urls[type]), url => {
 						paths.push(url);
-						log.debug(`    ${url}`);
-					}
-				});
+						log.info(`   ${type} ${url}`);
+					});
+				}
 			} else if (_.has(revisionMeta, file)) {
 				paths.push(api.localeBundleFolder() + revisionMeta[file]);
 			}

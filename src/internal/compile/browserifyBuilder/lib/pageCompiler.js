@@ -10,6 +10,7 @@ var File = require('vinyl');
 //var swig = require('swig');
 var api = require('__api');
 var log = require('@dr/logger').getLogger(api.packageName + '.pageCompiller');
+var browserBundleLoader = require('@dr-core/bundle-loader');
 var packageUtils = api.packageUtils;
 
 module.exports = PageCompiler;
@@ -99,7 +100,7 @@ PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageTyp
 	})
 	.then(content => {
 		var $ = cheerio.load(content, {decodeEntities: false});
-		compiler.injectElements($, buildInfo.bundleDepsGraph[instance.longName], instance,
+		compiler.insertElements($, buildInfo.bundleDepsGraph[instance.longName], instance,
 			buildInfo.config, buildInfo.revisionMeta, pathInfo, bootstrapCode);
 		var hackedHtml = $.html();
 		hackedHtml = api.replaceAssetsUrl(hackedHtml, pathInfo.abs);
@@ -198,7 +199,7 @@ function needUpdateEntryPage(builtBundles, bundleSet) {
 	});
 }
 
-PageCompiler.prototype.injectElements = function($, bundleSet, pkInstance, config, revisionMeta, pathInfo, bootstrapCode) {
+PageCompiler.prototype.insertElements = function($, bundleSet, pkInstance, config, revisionMeta, pathInfo, bootstrapCode) {
 	var body = $('body');
 	var head = $('head');
 	// $cssPrinter, $jsPrinter are used to output these bootstrap HTML fragment to seperate files, which
@@ -207,11 +208,13 @@ PageCompiler.prototype.injectElements = function($, bundleSet, pkInstance, confi
 	var $jsPrinter = cheerio.load('<div></div>', {decodeEntities: false});
 
 	var cssPrinterDiv = $cssPrinter('div');
-	_injectElementsByBundle($, head, body, this.buildInfo.labJSBundleName, config, revisionMeta);
-	_injectElementsByBundle($, cssPrinterDiv, $jsPrinter('div'), this.buildInfo.labJSBundleName, config, revisionMeta);
+	// labjs bundle
+	_insertLabjsBundle($, head, body, this.buildInfo.labjsBundleMetadata, config);
+	_insertLabjsBundle($, cssPrinterDiv, $jsPrinter('div'), this.buildInfo.labjsBundleMetadata, config);
 	// -- Insert CSS bundle <link> tags
-	_.forOwn(bundleSet, function(v, bundleName) {
-		var bundleCss = createCssLinkElement($, bundleName, config, revisionMeta);
+	var metadata = this.buildInfo.getBundleMetadataForEntry(pkInstance.longName);
+	_.each(metadata.css, function(cssPath) {
+		var bundleCss = createCssLinkElement($, cssPath, config);
 		if (bundleCss) {
 			cssPrinterDiv.append(bundleCss);
 			if (head.length === 0) {
@@ -250,9 +253,9 @@ PageCompiler.prototype.dependencyApiData = function() {
 	});
 };
 
-function _injectElementsByBundle($, head, body, bundleName, config, revisionMeta) {
-	var bundleScript = createScriptElement($, bundleName, config, revisionMeta);
-	var bundleCss = createCssLinkElement($, bundleName, config, revisionMeta);
+function _insertLabjsBundle($, head, body, metadata, config) {
+	var bundleScript = createScriptElement($, metadata.js[0], config);
+	var bundleCss = createCssLinkElement($, metadata.css[0], config);
 	if (bundleScript) {
 		body.append(bundleScript);
 	}
@@ -261,38 +264,25 @@ function _injectElementsByBundle($, head, body, bundleName, config, revisionMeta
 	}
 }
 
-var URL_PAT = /^((?:[^:\/]+:)?\/)?(.*)$/;
-
-function createScriptElement($, bundleName, config, revisionMeta) {
+function createScriptElement($, jsPath, config) {
 	var scriptEl = $('<script>');
-	var file = 'js/' + bundleName + (config().devMode ? '' : '.min') + '.js';
-	var mappedFile = revisionMeta ? revisionMeta[file] : file;
-	if (!mappedFile) {
+	if (!jsPath)
 		return null;
-	}
-	log.trace(file + ' -> ' + mappedFile);
-	var src = config().staticAssetsURL + '/' + mappedFile;
-	var rs = URL_PAT.exec(src);
-	src = (rs[1] ? rs[1] : '') + rs[2].replace(/\/\/+/g, '/');
+	var src = browserBundleLoader.resolveBundleUrl(jsPath, config().staticAssetsURL);
+	// var rs = URL_PAT.exec(src);
+	// src = (rs[1] ? rs[1] : '') + rs[2].replace(/\/\/+/g, '/');
 	scriptEl.attr('src', src);
 	return scriptEl;
 }
 
-// function createCssLinkElement($, bundleName, config, revisionMeta) {
-// 	return null;
-// }
-
-function createCssLinkElement($, bundleName, config, revisionMeta) {
+function createCssLinkElement($, cssPath, config) {
 	var element = $('<link/>');
-	var file = 'css/' + bundleName + '.css';
-	var mappedFile = revisionMeta ? revisionMeta[file] : file;
-	if (!mappedFile) {
+	if (!cssPath)
 		return null;
-	}
-	log.trace(file + ' -> ' + mappedFile);
-	var src = config().staticAssetsURL + '/' + api.localeBundleFolder() + mappedFile;
-	var rs = URL_PAT.exec(src);
-	src = (rs[1] ? rs[1] : '') + rs[2].replace(/\/\/+/g, '/');
+	var src = browserBundleLoader.resolveBundleUrl(cssPath, config().staticAssetsURL);
+	//var src = config().staticAssetsURL + '/' + api.localeBundleFolder() + mappedFile;
+	//var rs = URL_PAT.exec(src);
+	//src = (rs[1] ? rs[1] : '') + rs[2].replace(/\/\/+/g, '/');
 	element.attr('rel', 'stylesheet');
 	element.attr('href', src);
 	element.attr('type', 'text/css');

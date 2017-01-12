@@ -235,7 +235,17 @@ function _readBundles(info, compileNodePath, mapConfig, isExternal) {
 			}
 		});
 		if (isExternal) {
-			info.bundleUrlMap[bundle] = _.has(bundleData, 'URLs') ? bundleData.URLs : bundleData;
+			if (_.isArray(bundleData))
+				info.bundleUrlMap[bundle] = bundleData;
+			else if (_.has(bundleData, 'URLs'))
+				info.bundleUrlMap[bundle] = bundleData.URLs;
+			else if (_.isObject(bundleData)) {
+				info.bundleUrlMap[bundle] = bundleData; // bundleData.css, bundleData.js
+				if (!_.has(bundleData, 'js') && !_.has(bundleData, 'css'))
+					throw new Error('config property "externalBundleMap" must be array of object {css: string[], js: string[]}');
+			} else {
+				info.bundleUrlMap[bundle] = [bundleData];
+			}
 		} else
 			bmap[bundle] = modules;
 	});
