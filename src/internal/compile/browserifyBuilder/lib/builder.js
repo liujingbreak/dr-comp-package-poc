@@ -325,6 +325,8 @@ function compile() {
 			if (moduleInfo.browserifyNoParse) {
 				moduleInfo.browserifyNoParse.forEach(function(noParseFile) {
 					var file = Path.resolve(moduleInfo.packagePath, noParseFile);
+					if (fs.existsSync(file))
+						file = fs.realpathSync(file);
 					browserifyOpt.noParse.push(file);
 				});
 			}

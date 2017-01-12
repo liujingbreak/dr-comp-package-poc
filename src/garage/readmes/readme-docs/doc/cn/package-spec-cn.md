@@ -10,7 +10,6 @@ Package.json Specification
   "browser": "browser/js/index.js",
   "main": "server/server.js",
   "style": "browser/style/main.less",
-  "i18n": "i18n/resource-{locale}.json",
   "transforms": [ "@dr/parcelify-module-resolver"],
   "dr": {
 	  "bundle": "home",

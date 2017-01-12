@@ -1,6 +1,6 @@
 {
   "name": "@dr/angularjs",
-  "version": "1.5.8-1",
+  "version": "1.5.8-2",
   "description": "wrapper of angularjs v1.5.8 and jquery as dependency",
   "browser": "main.js",
   "style": "angular-1.5.8/angular-csp.css",
@@ -13,7 +13,7 @@
       "./angular-1.5.8/angular-route.js",
       "./angular-1.5.8/angular-aria.js",
       "./angular-1.5.8/angular-messages.js",
-      "./angular-1.5.8/angular-sanitize"
+      "./angular-1.5.8/angular-sanitize.js"
     ],
     "i18n": "angular-1.5.8/i18n/angular-locale_{locale}.js",
     "noLint": true,

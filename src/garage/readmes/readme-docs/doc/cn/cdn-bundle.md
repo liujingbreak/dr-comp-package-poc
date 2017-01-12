@@ -33,7 +33,7 @@ require('@dr/foo');
 vendorBundleMap:
    foobar:
       - @dr/bar
-	  - @dr/foo
+      - @dr/foo
 
 externalBundleMap:
    foobar:

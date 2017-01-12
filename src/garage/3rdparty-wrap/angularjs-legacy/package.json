@@ -1,6 +1,6 @@
 {
   "name": "@dr/angularjs-legacy",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Angular 1.2.x for IE8",
   "browser": "index.js",
   "style": "angular-1.2.29/angular-csp.css",
@@ -11,7 +11,6 @@
       "./angular-1.2.29/angular-animate.js",
       "./angular-1.2.29/angular-cookies.js",
       "./angular-1.2.29/angular-route.js",
-      "./angular-1.2.29/angular-aria.js",
       "./angular-1.2.29/angular-sanitize"
     ],
     "noLint": true,

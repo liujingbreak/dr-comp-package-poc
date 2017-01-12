@@ -3,4 +3,6 @@ comp-group {
 	text-align: left;
 	position: relative;
 	overflow: hidden;
+	width: 100%;
+	min-height: 1px; // IE hack: DOM must has non-zero height, otherwise it will have no clientHight value when there is no child node
 }
