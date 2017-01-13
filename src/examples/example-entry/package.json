@@ -14,7 +14,7 @@
   "dr": {
     "type": "server",
     "bundle": "example",
-    "entryView": "index.html"
+    "entryView": "*.html"
   },
   "author": "jing.liu.fe@d.com",
   "license": "MIT",

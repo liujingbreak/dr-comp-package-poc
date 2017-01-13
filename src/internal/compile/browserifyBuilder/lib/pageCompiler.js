@@ -11,6 +11,7 @@ var File = require('vinyl');
 var api = require('__api');
 var log = require('@dr/logger').getLogger(api.packageName + '.pageCompiller');
 var browserBundleLoader = require('@dr-core/bundle-loader');
+var glob = require('glob');
 var packageUtils = api.packageUtils;
 
 module.exports = PageCompiler;
@@ -61,14 +62,9 @@ PageCompiler.prototype.compile = function(pageType) {
 				contents: new Buffer(bootstrapCode)
 			}));
 			if (pageType === 'static' && instance.entryPages) {
-				promises = promises.concat(instance.entryPages.map(page => {
-					return compiler.doEntryFile(page, instance, buildInfo, 'static', self, bootstrapCodeNoCss);
-				}));
-			}
-			if (pageType === 'server' && instance.entryViews) {
-				promises = promises.concat(promises, instance.entryViews.map(page => {
-					return compiler.doEntryFile(page, instance, buildInfo, 'server', self, bootstrapCodeNoCss);
-				}));
+				promises.push(compiler.doEntryFiles(instance.entryPages, instance, pageType, bootstrapCodeNoCss, self));
+			} else if (pageType === 'server' && instance.entryViews) {
+				promises.push(compiler.doEntryFiles(instance.entryViews, instance, pageType, bootstrapCodeNoCss, self));
 			}
 		});
 		Promise.all(promises).then(function() {
@@ -78,6 +74,22 @@ PageCompiler.prototype.compile = function(pageType) {
 			self.emit('error', new PluginError('browserifyBuilder.pageCompiler', err.stack, {showStack: true}));
 		});
 	} );
+};
+
+PageCompiler.prototype.doEntryFiles = function(views, entryPackage, type, bootstrapCode, through) {
+	var self = this;
+	var promises = [];
+	views.forEach(page => {
+		var pagePathInfo = resolvePagePath(page, entryPackage, self.buildInfo.packageInfo.moduleMap);
+		glob.sync(pagePathInfo.abs).forEach(singlePath => {
+			var singlePathInfo = _.clone(pagePathInfo);
+			singlePathInfo.abs = singlePath;
+			singlePathInfo.path = Path.relative(singlePathInfo.package, singlePath);
+			promises.push(self.doEntryFile(singlePathInfo, entryPackage, self.buildInfo, type, through, bootstrapCode));
+		});
+		//promises.push(compiler.doEntryFile(page, entryPackage, buildInfo, 'server', self, bootstrapCodeNoCss));
+	});
+	return Promise.all(promises);
 };
 
 var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
@@ -90,9 +102,9 @@ var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
  * @param  {[type]} through   [description]
  * @return {[type]}           [description]
  */
-PageCompiler.prototype.doEntryFile = function(page, instance, buildInfo, pageType, through, bootstrapCode) {
+PageCompiler.prototype.doEntryFile = function(pathInfo, instance, buildInfo, pageType, through, bootstrapCode) {
 	var compiler = this;
-	var pathInfo = resolvePagePath(page, instance, buildInfo.packageInfo.moduleMap);
+	//var pathInfo = resolvePagePath(page, instance, buildInfo.packageInfo.moduleMap);
 
 	return readFileAsync(pathInfo.abs, 'utf-8')
 	.then(function(content) {

@@ -1,9 +1,19 @@
 Updates
 =======
+2017-1-13
+- package.json property "dr.entryPage", "dr.entryView" supports `glob` format for pointing multiple path
+e.g. `*.html`, `views/*.html`
+```json
+"dr": {
+	"entryPage": ["*.html", "views/about.html"]
+}
+```
+
 **web-fun-house** 0.9.1
 - new environment variable `DR_CONFIG_FILE` [配置文档](config.md)
 - package.json 新配置属性
 `"dr.browserSideConfigProp"` [配置文档](config.md)
+
 ### 2016-12-14
 **web-fun-house 0.8.8**
 - 支持新命令行option`gulp compile -c <config.xxx.yaml>`, `node app -c <config.xxx.yaml>`
