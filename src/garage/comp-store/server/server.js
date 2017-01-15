@@ -8,7 +8,7 @@ exports.activate = function() {
 
 	var verdaccioUrl = api.config.get(api.packageShortName + '.verdaccioUrl', 'http://localhost:4873');
 	verdaccioUrl = _.trimEnd(verdaccioUrl, '/');
-
+	api.router().use('/', api.cors());
 	api.router().get('/packageBanner', (req, res) => {
 		request({
 			url: verdaccioUrl + '/-wfh/packages',

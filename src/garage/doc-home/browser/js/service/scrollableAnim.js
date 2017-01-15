@@ -14,8 +14,10 @@ module.exports = function(module) {
 */
 function ScrollableAnim(el, throttleWait) {
 	if (!(this instanceof ScrollableAnim)) {
-		return new ScrollableAnim(el);
+		return new ScrollableAnim(el, throttleWait);
 	}
+	if (throttleWait == null)
+		throttleWait = 0;
 	this.panel = el;
 	this.scenes = [];
 	var self = this;

@@ -29,6 +29,7 @@ exports.init = function(app) {
 				$scope.$watch('compStoreVm.nameSearch', search);
 			};
 			this.$postLink = function() {
+				//http://idangero.us/swiper/api/#.WHpddmR96qA
 				var sw = new Swiper('.swiper-container', {
 					// Optional parameters
 					//direction: 'vertical',
@@ -49,15 +50,24 @@ exports.init = function(app) {
 					parallax: true
 				});
 
-				var sc = ScrollableAnim(angular.element('body').find('.ui-view-main'));
+
+				var banner = $element.find('.banner');
+				var sc = ScrollableAnim(angular.element('body').find('.ui-view-main'), 0);
 				sc.scene({
-					triggerElement: $element.find('comp-group').eq(0),
-					delayPercent: 50,
-					startup: function(reverse, offset) {
-						if (!reverse) {
-							sw.stopAutoplay();
-						} else
-							sw.startAutoplay();
+					begin: 0,
+					duration: banner.prop('offsetHeight'),
+					delayPercent: 0,
+					// tearDown: function(reverse, offset) {
+					// 	if (!reverse) {
+					// 		sw.stopAutoplay();
+					// 	} else
+					// 		sw.startAutoplay();
+					// },
+					onScroll: function(progress, time) {
+						var y = progress * 0.67;
+						banner.css('transform', 'translate3d(0, ' + y + 'px, 0)');
+						banner.css('-webkit-transform', 'translate3d(0, ' + y + 'px, 0)');
+						banner.css('-ms-transform', 'translate3d(0, ' + y + 'px, 0)');
 					}
 				});
 

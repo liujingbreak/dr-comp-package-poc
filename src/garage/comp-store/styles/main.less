@@ -9,6 +9,7 @@ comp-store {
 	width: 100%;
 	height: 100%;
 	.error-msg {
+		z-index: 2;
 		text-align: center;
 		color: @dr-red;
 		padding: @dr-unit-half;
@@ -39,6 +40,7 @@ comp-store {
 	//overflow: hidden;
 	padding: 0 0 @dr-unit 0;
 	.banner {
+		//z-index: -1;
 		overflow: hidden;
 		height: @banner-height;
 		background: @dr-dark-dark;
@@ -46,6 +48,10 @@ comp-store {
 		h1 {
 			display: inline-block;
 			line-height: @banner-height;
+		}
+		.slide1 {
+			background: url(assets://@dr/comp-store/photo-tree-sky-clip.jpg) center/cover no-repeat;
+			background-size: cover;
 		}
 		//padding: @dr-unit;
 	}
