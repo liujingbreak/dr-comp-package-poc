@@ -192,7 +192,7 @@ e2etestHelper:
 # Also call
 #   api.router().use('/api', api.cors());
 # in server javascript
-express-app-enableCORS: false
+express-app-enableCORS: true
 
 translate-generator:
     scanMethodNames:
