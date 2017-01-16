@@ -21,6 +21,7 @@ exports.init = function(app) {
 			var compStoreVm = this;
 			compStoreVm.showNavi = true;
 			var scrollPanel;
+			var swiper;
 
 			this.$onInit = function() {
 				compStoreVm.quickSearch = drTranslate('搜索组件和小应用');
@@ -30,7 +31,7 @@ exports.init = function(app) {
 			};
 			this.$postLink = function() {
 				//http://idangero.us/swiper/api/#.WHpddmR96qA
-				var sw = new Swiper('.swiper-container', {
+				swiper = new Swiper('.swiper-container', {
 					// Optional parameters
 					//direction: 'vertical',
 					autoplay: 2500,
@@ -119,6 +120,7 @@ exports.init = function(app) {
 
 			this.$onDestroy = function() {
 				off$viewContentLoaded();
+				swiper.destroy(true, false);
 			};
 
 			function listPackages() {

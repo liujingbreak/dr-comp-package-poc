@@ -12,7 +12,7 @@ api.app.component('compGroup', {
 		};
 
 		this.$postLink = function() {
-			$timeout(calculateCardWidth, 0);
+			$timeout(calculateCardWidth, 0, false);
 			win.on('resize', resizeHandler);
 		};
 		this.$onDestroy = function() {
@@ -24,6 +24,7 @@ api.app.component('compGroup', {
 			var colCount = parseInt(groupWidth / cardMinWidth, 10);
 			var cardWidth = Math.floor(100 / colCount);
 			$ctrl.onChangeCardWidth({width: cardWidth});
+			$scope.$apply();
 		}
 	}],
 	bindings: {
