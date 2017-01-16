@@ -17,10 +17,7 @@ Object.defineProperty(exports, 'driver', {
 	enumerable: true,
 	configurable: true,
 	get: function() {
-		if (!driver) {
-			log.info('Browser: ' + browser);
-			driver = new webdriver.Builder().forBrowser(browser).build();
-		}
+		ensureDriver();
 		return driver;
 	}
 });
@@ -35,16 +32,20 @@ exports.waitAndFind = waitAndFind;
 /**
  * @param  {function} theConfig  config object
  * @param  {string} browser
- * @param {string} start server file
- * @param {string} direction in which start server
+ * @param {string} serverModule server file
+ * @param {string} cwd in which start server
  * @param  {function} runTest   Start your jasmine test in this callback, must return Promise
  * @return {Promise}
  */
 function run(theConfig, browser, serverModule, cwd, runTest) {
 	config = theConfig;
-	process.env.PATH = process.env.PATH + (isWindows ? ';' : ':') + Path.resolve(config.resolve('e2etestHelper.selenium.driverPath'));
+	if (config.get('e2etestHelper.selenium.driverPath'))
+		process.env.PATH = process.env.PATH + (isWindows ? ';' : ':') + Path.resolve(config.resolve('e2etestHelper.selenium.driverPath'));
 	log.debug(process.env.PATH);
-	if (config.get('sl.enabled')) {
+	var target = config.get('e2etestHelper.target');
+	if (target)
+		exports.urlPrefix = target;
+	if (config.get('ssl.enabled')) {
 		exports.urlPrefix = urlPrefix = 'https://localhost:' + config().ssl.port;
 	} else {
 		exports.urlPrefix = urlPrefix = 'http://localhost:' + config().port;
@@ -75,6 +76,9 @@ function run(theConfig, browser, serverModule, cwd, runTest) {
 	}
 	return waitForServerStart()
 	.then(runTest)
+	.catch(err => {
+		log.error('Test failure', err);
+	})
 	.finally(() => {
 		teardown();
 		if (serverProcess) {
@@ -87,7 +91,11 @@ function run(theConfig, browser, serverModule, cwd, runTest) {
 
 exports.setup = function() {
 	beforeAll(startup);
-	//afterAll(teardown);
+	afterAll(() => {
+		log.debug('Test spec afterall');
+		teardown();
+	});
+	//afterAll(teardown); //Jasmine seems to have a bug: afterAll executed too early for async test case
 };
 
 exports.statusCodeOf = function(path) {
@@ -117,6 +125,13 @@ exports.saveScreen = function(fileName) {
 	});
 };
 
+function ensureDriver() {
+	if (!driver) {
+		log.info('Browser: ' + browser);
+		driver = new webdriver.Builder().forBrowser(browser).build();
+	}
+}
+
 /**
  * @param func {function|WebElement}
  */
@@ -131,8 +146,12 @@ function wait(func, errMsg, timeout) {
 }
 
 function waitForElement(css, errMsg, timeout) {
-	return driver.wait(new webdriver.until.WebElementCondition(errMsg || 'wait() timeout',
-		() => driver.findElement(webdriver.By.css(css))), timeout || 5000, errMsg || 'wait() timeout');
+	var locator = webdriver.By.css(_.isString(css) ? css : css.selector);
+	return driver.wait(
+		webdriver.until.elementLocated(locator),
+		//new webdriver.until.WebElementCondition(errMsg || 'wait() timeout', () => driver.findElement(locator)),
+		timeout || 5000,
+		errMsg || 'wait() timeout');
 }
 
 _.assign(webdriver.WebElement.prototype, {
@@ -176,10 +195,13 @@ function waitAndFind(parentElPromise, css, timeout) {
 
 
 function startup() {
+	ensureDriver();
+	log.debug('test case startup');
 	jasmine.DEFAULT_TIMEOUT_INTERVAL = 10 * 1000;
 }
 
 function teardown(done) {
+	log.debug('test case teardown');
 	if (driver) {
 		log.info('driver close');
 		driver.close();
@@ -215,7 +237,10 @@ function waitForServerStart() {
 			tryCount++;
 			log.debug('try to connect to server for times: ' + tryCount);
 			setTimeout(()=> {
-				request('http://localhost:' + config().port, (error, response, body) => {
+				request({
+					url: 'http://localhost:' + config().port,
+					timeout: 10000
+				}, (error, response, body) => {
 					if (error) {
 						if (error.code === 'ECONNREFUSED') {
 							tryConnectServer();

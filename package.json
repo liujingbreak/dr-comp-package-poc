@@ -1,6 +1,6 @@
 {
   "name": "web-fun-house",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "description": "A company's web platform",
   "main": "lib/main.js",
   "bin": "bin/dr.js",
@@ -74,6 +74,6 @@
   },
   "devDependencies": {
     "gulp": "^3.9.1",
-    "jasmine": "^2.5.2"
+    "jasmine": "^2.5.3"
   }
 }

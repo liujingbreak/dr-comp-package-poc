@@ -13,7 +13,7 @@ function Page(path) {
 	}
 	path = path ? path : '';
 
-	this.url = this._urlPrefix + (_.startsWith(path, '/') ? '' : '/') + path;
+	this.url = this._urlPrefix + '/' + _.trimStart(path, '/');
 	this.elements = {};
 	// lazy restart webdriver
 	Object.defineProperty(this, 'driver', {
@@ -52,10 +52,9 @@ Page.prototype = {
 				log.debug('check element : ' + prop.selector);
 				var errMsg = 'Page object has a required element "' +
 						name + '[' + prop.selector + ']' + '" which is not available';
-				var found = yield helper.waitForElement(prop.selector, errMsg, 5000);
-				log.debug('%s found %j', prop.selector, found);
-				prop.cache = found;
-				//expect(found.length > 0).toBeTruthy();
+				yield helper.waitForElement(prop.selector, errMsg, 5000);
+				log.debug('  found %s', prop.selector);
+				//prop.cache = found; // Do not cache it, it will be stale, http://stackoverflow.com/questions/18225997/stale-element-reference-element-is-not-attached-to-the-page-document
 			})()
 			.catch(e => {
 				log.error('Failed to locate element ', name, ' ', prop.selector, e ? e.stack : '');
@@ -77,7 +76,7 @@ Page.prototype = {
 		if (!_.has(this.elements, name)) {
 			throw new Error('Page element is not defined: ' + name);
 		}
-		log.debug('element ' + this.elements[name].selector);
+		//log.debug('element ' + this.elements[name].selector);
 		var el = this.elements[name].cache;
 		if (!el) {
 			css = this.elements[name].selector;
@@ -85,6 +84,12 @@ Page.prototype = {
 			el = this.elements[name].cache = cache;
 		}
 		return el;
+	},
+
+	waitForEl: function(name) {
+		var self = this;
+		return helper.waitForElement(this.elements[name].selector)
+		.then(() => self.el(name));
 	},
 
 	addElement: function(name, cssSelector, isRequired) {

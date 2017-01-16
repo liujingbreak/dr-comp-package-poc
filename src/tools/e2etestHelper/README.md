@@ -60,6 +60,10 @@ Run test and start server automatically
 ```
 gulp e2e --server <your app.js>
 ```
+Run specific test spec
+```
+gulp e2e --browser chrome -f <spec-file-path>
+```
 
 ### Write your test spec
 Spec file name must ends with `Spec.js`
@@ -130,19 +134,35 @@ module.exports = new YourPage();
 | this.driver | Underneath Webdriver instance
 | this.get(path) | Send get request to load current Page object. `path` is optional, if not empty it will be add to page's `contextPath`, e.g. `page.get('?lang=zh')` if page's context is '/login', the actual URL will be `http://localhost/login?lang=zh`
 | this.el(elementName, selector, isRequired) | Define a page element, if `isRequired` is true, that element be be tested when `.get()` is called on Page object
-| this[elementName] | {`ElementPromise`} Get defined page element, it calls `driver.indElement(selector)` lazily
+| this[elementName] | {`WebElement` or `WebElementPromise`} Get defined page element, it calls `driver.indElement(selector)` lazily
 | this.el(elementName) | Same as `this[elementName]`
+| this.waitForEl(elementName) | return Promise, wait for element DOM ready
 | this.check() | Force do check page elements, invoked by `.get()`
+
 
 ### `e2etest-helper` API
 
 | Name | description
 | - | -
 | .driver | Underneath Webdriver instance
-| .waitForElement(cssSelector [,errMsg , timeout]) | return Promise(WebElement)
+| .waitForElement(cssSelector [,errMsg , timeout]) | {string or el} `cssSelector`, return Promise(WebElement)
 | .wait(func [,errMsg , timeout]) | return Promise(true), `func` is a `function` that returns `true|false`, `timeout` is 5 seconds
 | .statusCodeOf(path) | return a Promise, resolved to a number type `statusCode`
 | .saveScreen(fileName) | Take a screenshot for browser and save to folder `dist` as `config.resolve('destDir')`
+
+.waitForElement()
+```js
+it('Page should be loaded and delayed DOM element shoud be present', done => {
+	Promise.coroutine(function*() {
+		yield page.get();
+		yield helper.waitForElement();
+	})()
+	.catch(e => {
+		done.fail(e);
+	});
+}
+```
+
 If you want to assert a response status code of a local HTTP Path, you may do like this,
 ```javascript
 ...
@@ -183,8 +203,10 @@ function FoobarPage() {
 	// Defined your page elements
 	this.el('body', '.doc-home', true);
 	this.el('mainSection', '.main-section', true);
-	this.el('apiResult', '.api-result', false);
-	this.el('apiError', '.api-error', false);
+	this.el('apiResult', '.api-result');
+	this.el('apiError', '.api-error');
+	this.el('delayedMessage', '.delay-message')
+	this.el('nextButton', '.next-btn');
 }
 
 // If you want to extend Page `check` logic
@@ -234,8 +256,16 @@ describe('When server is started', function() {
 
 			// Expect no errors
 			var errors = yield foobarPage.el('apiError').findElementsByCss('.message');
-			expecr(errors.length === 0).toBe(true);
+			expect(errors.length === 0).toBe(true);
 			done();
+			
+			// Some DOM element is created lately, we need to wait for DOM ready
+			yield foobarPage.waitForEl('delayedMessage');
+			var dm = yield foobarPage.el('delayedMessage').getText();
+			expect(dm).toBe('Success');
+
+			// Wait for some element displayed
+			yield helper.wait(() => foobarPage.el('nextButton').isDisplayed());
 		})()
 		.catch(e => {
 			log.error(e);
