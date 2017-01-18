@@ -257,7 +257,6 @@ describe('When server is started', function() {
 			// Expect no errors
 			var errors = yield foobarPage.el('apiError').findElementsByCss('.message');
 			expect(errors.length === 0).toBe(true);
-			done();
 			
 			// Some DOM element is created lately, we need to wait for DOM ready
 			yield foobarPage.waitForEl('delayedMessage');
@@ -266,6 +265,8 @@ describe('When server is started', function() {
 
 			// Wait for some element displayed
 			yield helper.wait(() => foobarPage.el('nextButton').isDisplayed());
+
+			done();
 		})()
 		.catch(e => {
 			log.error(e);
