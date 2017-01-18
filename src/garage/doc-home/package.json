@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "angular-ui-router": "^0.3.2",
-    "fastclick": "^1.0.6"
+    "fastclick": "^1.0.6",
+    "angular-nicescroll": "^0.0.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
