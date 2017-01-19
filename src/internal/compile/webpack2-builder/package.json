@@ -1,0 +1,26 @@
+{
+  "name": "@dr-core/webpack2-builder",
+  "version": "0.0.1",
+  "description": "Browser side stuff builder module based on Webpack2",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "webpack": "^2.2.0",
+    "webpack-stream": "^3.2.0",
+    "html-loader": "^0.4.4",
+    "raw-loader": "^0.5.1",
+    "yaml-loader": "^0.4.0",
+    "json-loader": "^0.5.4"
+  },
+  "author": "LJ",
+  "license": "MIT",
+  "dr": {
+    "type": [
+      "builder",
+      "server"
+    ],
+    "builderPriority": 7000
+  }
+}

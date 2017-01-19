@@ -55,7 +55,7 @@ devMode: false
 
 # You don't want others read your source code in production environment
 enableSourceMaps: false
-# If we have public CDN domain name like "http://cdn.dianrong.com"
+# If we have public CDN domain name like "http://cdn.dianrong.com", like Webpack's publicPath
 staticAssetsURL: ""
 
 serverURL: ""

@@ -48,6 +48,8 @@ PageCompiler.prototype.compile = function(pageType) {
 		var promises = [];
 		var self = this;
 		_.forOwn(buildInfo.packageInfo.entryPageMap, function(instance, name) {
+			if (instance.compiler && instance.compiler !== 'browserify')
+				return;
 			if (!needUpdateEntryPage(buildInfo.builtBundles, buildInfo.bundleDepsGraph[name])) {
 				return;
 			}

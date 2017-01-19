@@ -196,8 +196,11 @@ function compile() {
 			rejectOnError = reject;
 			log.info('------- building bundles ---------');
 			bundleNames.forEach(function(bundle) {
+				var modulesToCompile = _.filter(packageInfo.bundleMap[bundle], module => module.compiler === 'browserify' || !module.compiler);
+				if (_.size(modulesToCompile) === 0)
+					return;
 				log.info(chalk.inverse(bundle));
-				var buildObj = buildBundle(packageInfo.bundleMap[bundle],
+				var buildObj = buildBundle(modulesToCompile,
 					bundle, config().staticDir);
 				if (buildCss) {
 					cssPromises.push(buildObj.cssPromise.then(filePath => {

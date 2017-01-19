@@ -168,6 +168,8 @@ function createEntryPackageDepGraph() {
 
 	try {
 		_.forOwn(packageInfo.entryPageMap, function(pkInstance, moduleName) {
+			if (pkInstance.compiler !== 'browserify' && pkInstance.compiler)
+				return;
 			var entryDepsSet = packageDepsGraph.entries[moduleName] = {};
 			walkContext.walkDeps(depsMap, moduleName, false, entryDepsSet, true);
 			// API is always depended for entry package

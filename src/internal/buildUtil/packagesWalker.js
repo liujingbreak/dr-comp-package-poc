@@ -112,7 +112,7 @@ function _walkPackages(compileNodePath) {
 				info.entryPageMap[name] = instance;
 			}
 			if (pkJson.dr.browserifyNoParse) {
-				noParseFiles = [].concat(pkJson.dr.browserifyNoParse);
+				noParseFiles = [].concat(pkJson.dr.browserifyNoParse || pkJson.dr.noParse);
 			}
 		} else {
 			return;
@@ -132,6 +132,7 @@ function _walkPackages(compileNodePath) {
 			isEntryServerTemplate: isEntryServerTemplate,
 			translatable: !_.has(pkJson, 'dr.translatable') || _.get(pkJson, 'dr.translatable'),
 			dr: pkJson.dr,
+			compiler: pkJson.dr.compiler,
 			i18n: pkJson.dr ? (pkJson.dr.i18n ? pkJson.dr.i18n : null) : null
 		});
 		addPackageToBundle(instance, info, bundle, configBundleInfo);

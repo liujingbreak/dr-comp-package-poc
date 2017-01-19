@@ -1,0 +1,19 @@
+{
+  "name": "@dr/example-webpack-dependency",
+  "version": "0.0.1",
+  "description": "Test Webpack 2.2",
+  "browser": "browser.js",
+  "main": "server.js",
+  "scripts": {
+    "test": "gulp test example-webpack-dependency"
+  },
+  "author": "LJ",
+  "dr": {
+    "bundle": "example",
+    "entryPage": "index.html",
+    "browserSideConfigProp": ["gulp.watchDebounceDelay", "e2etestHelper"],
+    "type": "server",
+    "compiler": "webpack"
+  },
+  "license": "MIT"
+}
