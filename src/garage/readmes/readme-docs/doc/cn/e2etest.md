@@ -33,6 +33,7 @@ Ideally you should group your test specs in subdirectories like:
 1. In `config.yaml` or `config.local.yaml`, add following lines:
 	```yaml
     e2etestHelper:
+       # target: http://www-demo.foobar.com  for changing test target URL from localhost to another address
        selenium:
            driverPath: '..'
 	```
@@ -259,7 +260,7 @@ describe('When server is started', function() {
 			expect(errors.length === 0).toBe(true);
 			
 			// Some DOM element is created lately, we need to wait for DOM ready
-			yield foobarPage.waitForEl('delayedMessage');
+			yield foobarPage.waitForEl('delayedMessage');x
 			var dm = yield foobarPage.el('delayedMessage').getText();
 			expect(dm).toBe('Success');
 

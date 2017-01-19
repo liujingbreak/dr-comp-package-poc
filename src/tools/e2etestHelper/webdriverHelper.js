@@ -44,8 +44,8 @@ function run(theConfig, browser, serverModule, cwd, runTest) {
 	log.debug(process.env.PATH);
 	var target = config.get('e2etestHelper.target');
 	if (target)
-		exports.urlPrefix = target;
-	if (config.get('ssl.enabled')) {
+		exports.urlPrefix = urlPrefix = target;
+	else if (config.get('ssl.enabled')) {
 		exports.urlPrefix = urlPrefix = 'https://localhost:' + config().ssl.port;
 	} else {
 		exports.urlPrefix = urlPrefix = 'http://localhost:' + config().port;

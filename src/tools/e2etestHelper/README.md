@@ -33,6 +33,7 @@ Ideally you should group your test specs in subdirectories like:
 1. In `config.yaml` or `config.local.yaml`, add following lines:
 	```yaml
     e2etestHelper:
+       # target: http://www-demo.foobar.com  for changing test target URL from localhost to another address
        selenium:
            driverPath: '..'
 	```
