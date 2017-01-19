@@ -70,6 +70,7 @@ vendorBundleMap:
       - fastclick
   ui-lib: # bundle name
       - angular-ui-router
+      - angular-nicescroll/angular-nicescroll
       - fontfaceobserver/fontfaceobserver
   alt-lib:
       - "@dr/light-lodash"
