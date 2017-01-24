@@ -28,6 +28,8 @@
 		"require-injector.node-inject": "info",
 		"gulp.watchPackages": "debug",
 		"@dr/translate-generator": "info",
-		"@dr/comp-store": "debug"
+		"@dr/comp-store": "debug",
+		"@dr-core/webpack2-builder": "debug",
+		"ManualChunkPlugin": "debug"
 	}
 }

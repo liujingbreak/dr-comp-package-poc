@@ -116,17 +116,6 @@ JsBundleEntryMaker.prototype = {
 		var relRealPath = Path.relative(api.config().rootPath, fs.realpathSync(file));
 		delete self.fileSplitPointMap[relRealPath]; // clean up cached data
 
-		// apiVarablePat.lastIndex = 0;
-		// if (apiVarablePat.test(source)) {
-		// 	log.debug('reference __api in ' + file);
-		// 	currPackageName = this.api.findBrowserPackageByPath(file);
-		// 	source = apiVariableTpl({
-		// 		bundle: this.bundleName,
-		// 		packageName: currPackageName,
-		// 		source: source,
-		// 		packageNameAvailable: currPackageName !== null
-		// 	});
-		// }
 		var ast;
 		try {
 			ast = esParser.parse(source, {

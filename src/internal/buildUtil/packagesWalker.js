@@ -9,6 +9,7 @@ var api = require('__api');
 var bResolve = require('browser-resolve');
 var chalk = require('chalk');
 var log = require('log4js').getLogger('buildUtil.' + Path.basename(__filename, '.js'));
+const DirTree = require('require-injector/lib/dir-tree').DirTree;
 
 module.exports = walkPackages;
 module.exports.saveCache = saveCache;
@@ -42,6 +43,7 @@ function walkPackages(_config, _argv, _packageUtils, _compileNodePath, ignoreCac
 		mkdirp.sync(Path.join(config().rootPath, config().destDir));
 		//saveCache(packageInfo);
 	}
+	createPackageDirTree(packageInfo);
 	return packageInfo;
 }
 
@@ -250,4 +252,13 @@ function _readBundles(info, compileNodePath, mapConfig, isExternal) {
 		} else
 			bmap[bundle] = modules;
 	});
+}
+
+function createPackageDirTree(packageInfo) {
+	var tree = new DirTree();
+	packageInfo.allModules.forEach(moduleInstance => {
+		if (moduleInstance.realPackagePath)
+			tree.putData(moduleInstance.realPackagePath, moduleInstance);
+	});
+	packageInfo.dirTree = tree;
 }

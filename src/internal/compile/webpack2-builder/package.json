@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Browser side stuff builder module based on Webpack2",
   "main": "main.js",
+  "browser": "browser-api.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -21,6 +22,6 @@
       "builder",
       "server"
     ],
-    "builderPriority": 7000
+    "builderPriority": 5000
   }
 }

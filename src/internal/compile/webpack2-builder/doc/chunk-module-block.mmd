@@ -1,0 +1,23 @@
+graph TD;
+pChunk["parent chunk"] --> |addChunk| chunk
+chunk["initial/prepared Chunk"] --> |addModule .modules| module["module 0"]
+chunk ---|entryModule| module
+chunk -.-> |addParent| pChunk
+
+module -.-> |addChunk| chunk
+chunk --> |.endpoints| endpoint
+endpoint -.-> |insertChunk| chunk
+module --> |.blocks|block
+block -.-> |.module|module
+
+block --> |.blocks| cBlock["child block"]
+
+block --> |jsonp .chunks|chunk0
+chunk0 -.-> |addBlock, .blocks| block
+chunk0 -.-> |addParent| chunk
+chunk --> |addChunk| chunk0
+
+module --> |.dependencies .variables| dependency
+dependency -.-> |.module| module1["module 1"]
+module1 -.-> |addChunk| chunk
+chunk --> |addModule .modules| module1
