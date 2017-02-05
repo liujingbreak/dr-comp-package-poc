@@ -14,7 +14,26 @@ comp-card {
 	transform: translate3d(0, 0, 0);
 	z-index: 0;
 
+  img {
+    border: none;
+  }
+  
+  .avatar {
+    width: 100%;
+    overflow: hidden;
+
+    img {
+      float: right;
+      display: block;
+      margin-right: 10px;
+      width: @dr-unit-more-double;
+      height: @dr-unit-more-double;
+      border-radius: calc(@dr-unit-more-double);  
+    }
+  }
+
 	.name {
+    margin-top: 15px;
 		font-size: @dr-fontsize-big;
 		font-weight: @dr-fontweight;
 	}

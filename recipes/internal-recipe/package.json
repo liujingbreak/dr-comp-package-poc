@@ -11,10 +11,10 @@
     "@dr-core/bundle-loader": "0.0.5",
     "@dr/parcelify-module-resolver": "0.0.33",
     "@dr/template-builder": "0.1.9",
+    "@dr-core/webpack2-builder": "0.0.1",
     "@dr-core/express-app": "0.2.19",
     "@dr/http-server": "0.1.0",
     "@dr/logger": "0.0.27",
-    "@dr/translate-generator": "0.1.9",
-    "@dr-core/webpack2-builder": "0.0.1"
+    "@dr/translate-generator": "0.1.9"
   }
 }

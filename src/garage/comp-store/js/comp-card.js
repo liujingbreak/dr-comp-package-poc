@@ -3,6 +3,17 @@ var api = require('__api');
 api.app.component('compCard', {
 	controller: ['$scope', '$element', '$location', function($scope, $element, $location) {
 		var $ctrl = this;
+
+		var env = '/comp-store/avatars/';
+		if($ctrl.package.author && $ctrl.package.author.name) {
+			if($ctrl.package.author.name.toLowerCase().indexOf('jing') !== -1) {
+				$ctrl.package.author.name = 'LJ';
+			}
+			$scope.imgUrl = env + decodeURIComponent($ctrl.package.author.name) + '.jpg';
+		}else{
+			$scope.imgUrl = env +'default.png';
+		}
+		
 		this.$onChanges = function(changes) {
 			if (changes.cardWidth) {
 				//$element.css('width', 'calc(' + changes.cardWidth.currentValue + '% - 2px)');
