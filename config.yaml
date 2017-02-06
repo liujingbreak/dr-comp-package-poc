@@ -56,7 +56,19 @@ devMode: false
 # You don't want others read your source code in production environment
 enableSourceMaps: false
 # If we have public CDN domain name like "http://cdn.dianrong.com", like Webpack's publicPath
-staticAssetsURL: ""
+
+staticAssetsURL: "" # Same as 'output.publicPath' in Webpack configuration
+
+# Hash object for mapping each package's assets fold to corresponding package level 'output.publicPath',
+# All resource files under `src/**/<package>/assets` folder are copied to `dist/static/<package-short-name>/`
+# by default, but you can change `<package-short-name>` to some folder else
+# e.g. You want to <your-package>/assets/robot.txt being copied to root URL `/host>/robot.txt` instead of 
+# the default URL `//<host>/your-package/robot.txt`
+# 
+# assetsDirMap:
+#    @dr/your-package: '/'
+
+assetsDirMap:
 
 serverURL: ""
 
@@ -172,6 +184,7 @@ gulp:
 browserSideConfigProp:
     # following are default properties
     # - staticAssetsURL
+    # - assetsDirMap
     # - serverURL
     # - packageContextPathMapping
     # - locales

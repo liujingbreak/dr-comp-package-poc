@@ -112,7 +112,7 @@ function compile() {
 	var helper = helperFactor(config, injector);
 	var defaultBrowserSideConfigProp = [
 		'staticAssetsURL', 'serverURL', 'packageContextPathMapping',
-		'locales', 'devMode'
+		'locales', 'devMode', 'assetsDirMap'
 	];
 
 	//monkey patch new API

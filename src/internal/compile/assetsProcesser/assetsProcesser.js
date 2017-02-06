@@ -67,11 +67,16 @@ function activate(api) {
 	api.packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
 		var assetsFolder = json.dr ? (json.dr.assetsDir ? json.dr.assetsDir : 'assets') : 'assets';
 		var assetsDir = Path.join(packagePath, assetsFolder);
+		var assetsDirMap = api.config.get('assetsDirMap.' + name);
+		if (assetsDirMap != null)
+			assetsDirMap = _.trim(assetsDirMap, '/');
 		if (fs.existsSync(assetsDir)) {
-			var path = '/' + parsedName.name;
+			var path = '/' + (assetsDirMap != null ? assetsDirMap : parsedName.name);
+			if (path.length > 1)
+				path += '/';
 			log.info('route ' + path + ' -> ' + assetsDir);
 
-			api.use(path + '/', staticRoute(assetsDir));
+			api.use(path, staticRoute(assetsDir));
 		}
 	});
 
@@ -134,11 +139,14 @@ function copyAssets() {
 		var assetsFolder = json.dr ? (json.dr.assetsDir ? json.dr.assetsDir : 'assets') : 'assets';
 		var assetsDir = Path.join(packagePath, assetsFolder);
 		if (fs.existsSync(assetsDir)) {
+			var assetsDirMap = api.config.get('assetsDirMap.' + name);
+			if (assetsDirMap != null)
+				assetsDirMap = _.trim(assetsDirMap, '/');
 			var src = [Path.join(packagePath, assetsFolder, '**', '*')];
 			var stream = gulp.src(src, {base: Path.join(packagePath, assetsFolder)})
 			.pipe(through.obj(function(file, enc, next) {
 				var pathInPk = Path.relative(assetsDir, file.path);
-				file.path = Path.join(assetsDir, parsedName.name, pathInPk);
+				file.path = Path.join(assetsDir, assetsDirMap != null ? assetsDirMap : parsedName.name, pathInPk);
 				log.debug(file.path);
 				//file.path = file.path
 				next(null, file);
