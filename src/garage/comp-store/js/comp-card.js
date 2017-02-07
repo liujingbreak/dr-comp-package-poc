@@ -1,19 +1,16 @@
 var api = require('__api');
+var datas = require('./author.json');
 
 api.app.component('compCard', {
 	controller: ['$scope', '$element', '$location', function($scope, $element, $location) {
 		var $ctrl = this;
-
-		var env = '/comp-store/avatars/';
-		if($ctrl.package.author && $ctrl.package.author.name) {
-			if($ctrl.package.author.name.toLowerCase().indexOf('jing') !== -1) {
-				$ctrl.package.author.name = 'LJ';
-			}
-			$scope.imgUrl = env + decodeURIComponent($ctrl.package.author.name) + '.jpg';
-		}else{
-			$scope.imgUrl = env +'default.png';
+		var env = api.assetsUrl('avatars/');
+		if ($ctrl.package.author && $ctrl.package.author.name && datas[$ctrl.package.author.name]) {
+			$ctrl.imgUrl = env + encodeURIComponent(datas[$ctrl.package.author.name]) + '.jpg';
+		} else {
+			$ctrl.imgUrl = env + 'default.png';
 		}
-		
+
 		this.$onChanges = function(changes) {
 			if (changes.cardWidth) {
 				//$element.css('width', 'calc(' + changes.cardWidth.currentValue + '% - 2px)');
