@@ -1,24 +1,23 @@
+var gulp = require('gulp');
+var webpackStream = require('webpack-stream');
 var webpack = require('webpack');
 var api = require('__api');
 var _ = require('lodash');
 var fs = require('fs');
 var Path = require('path');
+var mkdirp = require('mkdirp');
 var log = require('log4js').getLogger(api.packageName);
 const ManualChunkPlugin = require('./manual-chunk-plugin');
-//const HtmlWebpackPlugin = require('html-webpack-plugin');
+const setup = require('./lib/setup').setup;
 const publicDir = '/wp/';
 
 var webpackConfig = {
 	context: api.config().rootPath,
-	entry: {
-		example: '@dr/example-webpack',
-		example2: '@dr/example-webpack-dependency',
-		//partial: '@dr/example-partial'
-		//lodash: 'lodash'
-	},
+	entry: {},
 	output: {
 		filename: '[name].[chunkhash].js',
-		publicPath: api.config().staticAssetsURL + publicDir
+		publicPath: api.config().staticAssetsURL + publicDir,
+		// libraryTarget: 'umd'
 	},
 	module: {
 		noParse: null,
@@ -28,8 +27,7 @@ var webpackConfig = {
 				use: [
 					{loader: '@dr-core/webpack2-builder/api-loader'}
 				]
-			},
-			{
+			}, {
 				test: /\.html$/,
 				use: [
 					{loader: 'html-loader'},
@@ -47,48 +45,44 @@ var webpackConfig = {
 			}
 		]
 	},
-	// externals: {
-	// 	'@dr/example-partial': {
-	// 		commonjs: '@dr/example-partial',
-	// 		commonjs2: '@dr/example-partial'
-	// 	}
-	// },
 	plugins: [
-		// new webpack.optimize.CommonsChunkPlugin({
-		// 	names: ['common', 'init'], // Specify the common bundle's name.
-		// 	minChunks: 2,
-		// 	async: true
-		// 	//children: true
-		// }),
-		new ManualChunkPlugin(),
-		// new HtmlWebpackPlugin({
-		// 	filename: 'auto.html'
-		// }),
-		// new webpack.ProvidePlugin({
-		// 	__api: '@dr-core/browserify-builder-api'
-		// }),
-
+		new ManualChunkPlugin({
+			manifest: 'runtime'
+		})
 	]
 };
 
 exports.compile = (api) => {
-	if (api.config().devMode)
+	if (api.config().devMode) {
 		webpackConfig.output.filename = '[name].js';
-	webpackConfig.module.noParse = api.config().browserifyNoParse ?
-		api.config().browserifyNoParse.map(line => new RegExp('^' + line + '$')) : [];
+		webpackConfig.plugins.push(new webpack.NamedModulesPlugin());
+	} else {
+		webpackConfig.plugins.push(new webpack.HashedModuleIdsPlugin());
+	}
 
-	_.each(api.packageInfo.allModules, function(moduleInfo) {
-		if (moduleInfo.browserifyNoParse) {
-			moduleInfo.browserifyNoParse.forEach(function(noParseFile) {
-				var file = Path.resolve(moduleInfo.packagePath, noParseFile);
-				if (fs.existsSync(file))
-					file = fs.realpathSync(file);
-				webpackConfig.module.noParse.push(new RegExp('^' + file + '$'));
-			});
-		}
+	mkdirp.sync(api.config.resolve('destDir', 'webpack-temp'));
+
+	var entryComponents = setup(webpackConfig);
+	_.each(entryComponents, (moduleInfos, bundle) => {
+		webpackConfig.entry[bundle] = writeEntryFileForBundle(bundle, moduleInfos);
 	});
-	log.debug('noParse: %s', webpackConfig.module.noParse);
+	log.debug('entry: %s', JSON.stringify(webpackConfig.entry));
+
 	return gulp.src('.')
 		.pipe(webpackStream(webpackConfig, webpack))
 		.pipe(gulp.dest(api.config().staticDir + publicDir));
 };
+
+function writeEntryFileForBundle(bundle, packages) {
+	var buf = [];
+	buf.push('var _lego_entryFuncs = {};');
+	[].concat(packages).forEach(package => {
+		buf.push(`_lego_entryFuncs["${package.longName}"]= function() {return require("${package.longName}");}`);
+	});
+	buf.push(`_reqLego = function(name) {`);
+	buf.push(`  return _lego_entryFuncs[name]();`);
+	buf.push(`}`);
+	var file = Path.resolve(api.config().destDir, 'webpack-temp', 'entry_' + bundle + '.js');
+	fs.writeFileSync(file, buf.join('\n'));
+	return file;
+}

@@ -1,6 +1,8 @@
-console.log('In browser.js %s', __filename);
+console.log('example-webpack: %s', __filename);
 //require('__api');
 console.log(require('./test-html.html'));
+require('@dr/example-webpack2');
+require('lodash');
 //require('@dr/example-common');
 // console.log(require('./test-json.json'));
 // console.log(require('./test-text.txt'));
@@ -8,6 +10,6 @@ console.log(require('./test-html.html'));
 
 require.ensure([], function(require) {
 	require('@dr/example-common');
-	require('./test-html.html');
-	require('./test.yaml');
+	require('@dr/example-webpack-dependency');
+	console.log('require.ensure block ends');
 });

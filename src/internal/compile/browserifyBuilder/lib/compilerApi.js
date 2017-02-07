@@ -47,6 +47,9 @@ function findBrowserPackageByPath(file) {
 	return _.get(this.findBrowserPackageInstanceByPath(file), 'longName');
 }
 
+/**
+ * @deprecated should be replaced with api.findPackageByFile(file), check out @dr/build-util/packagesWalker.js
+ */
 function findBrowserPackageInstanceByPath(file) {
 	file = Path.relative(this.config().rootPath, file).replace(/\\/g, '/');
 

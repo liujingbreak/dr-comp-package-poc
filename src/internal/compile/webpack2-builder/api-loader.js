@@ -9,7 +9,6 @@ var apiTmpl = _.template(fs.readFileSync(
 	Path.join(__dirname, 'apiVariable.js.tmpl'), 'utf8'));
 
 module.exports = function(content) {
-
 	var callback = this.async();
 	if (!callback)
 		return load(content, this);

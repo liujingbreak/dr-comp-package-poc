@@ -25,6 +25,8 @@ var config, argv, packageUtils, packageInfoCacheFile;
  * @property {Object.<string, packageBrowserInstance>} moduleMap key is module name
  * @property {Object.<string, packageBrowserInstance[]>} bundleMap key is bundle name
  * @property {Object.<string, packageBrowserInstance>} entryPageMap key is module name
+ * @property dirTree
+ * @property findPackageByFile(path): packageBrowserInstance
  */
 function walkPackages(_config, _argv, _packageUtils, _compileNodePath, ignoreCache) {
 	config = _config;
@@ -221,11 +223,14 @@ function _readBundles(info, compileNodePath, mapConfig, isExternal) {
 			var mainFile;
 			try {
 				mainFile = isExternal ? null : bResolve.sync(moduleName, {paths: compileNodePath});
+				var packagePath = packageUtils.findBrowserPackagePath(moduleName);
 				var instance = packageBrowserInstance(config(), {
 					isVendor: true,
 					bundle: bundle,
 					longName: moduleName,
 					shortName: packageUtils.parseName(moduleName).name,
+					packagePath: packagePath,
+					realPackagePath: fs.realpathSync(packagePath),
 					file: mainFile
 				});
 				mmap[moduleName] = instance;
@@ -261,4 +266,7 @@ function createPackageDirTree(packageInfo) {
 			tree.putData(moduleInstance.realPackagePath, moduleInstance);
 	});
 	packageInfo.dirTree = tree;
+	Object.getPrototypeOf(api).findPackageByFile = function(file) {
+		return tree.getAllData(file).pop();
+	};
 }

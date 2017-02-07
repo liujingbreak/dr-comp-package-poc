@@ -9,8 +9,7 @@
   },
   "author": "LJ",
   "dr": {
-    "bundle": "example",
-    "entryPage": "index.html",
+    "chunk": "example-wp-dep",
     "browserSideConfigProp": ["gulp.watchDebounceDelay", "e2etestHelper"],
     "compiler": "webpack"
   },

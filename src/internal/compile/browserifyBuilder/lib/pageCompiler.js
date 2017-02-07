@@ -89,7 +89,6 @@ PageCompiler.prototype.doEntryFiles = function(views, entryPackage, type, bootst
 			singlePathInfo.path = Path.relative(singlePathInfo.package, singlePath);
 			promises.push(self.doEntryFile(singlePathInfo, entryPackage, self.buildInfo, type, through, bootstrapCode));
 		});
-		//promises.push(compiler.doEntryFile(page, entryPackage, buildInfo, 'server', self, bootstrapCodeNoCss));
 	});
 	return Promise.all(promises);
 };

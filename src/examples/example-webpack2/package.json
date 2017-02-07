@@ -1,17 +1,15 @@
 {
-  "name": "@dr/example-webpack",
+  "name": "@dr/example-webpack2",
   "version": "0.0.1",
   "description": "Test Webpack 2.2",
   "browser": "browser.js",
-  "main": "server.js",
   "scripts": {
-    "test": "gulp test example-webpack"
+    "test": "gulp test example-webpack2"
   },
   "author": "LJ",
   "dr": {
-    "chunk": "example-wp",
+    "chunk": "example-wp2",
     "entryPage": "index.html",
-    "browserSideConfigProp": ["gulp.watchDebounceDelay", "e2etestHelper"],
     "compiler": "webpack"
   },
   "license": "MIT"
