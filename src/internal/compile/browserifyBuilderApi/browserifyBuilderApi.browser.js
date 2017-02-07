@@ -122,7 +122,7 @@ BrowserApi.prototype = {
 	assetsUrl: function(packageName, path) {
 		if (arguments.length === 1) {
 			path = packageName;
-			packageName = this.packageShortName;
+			packageName = this.packageName;
 		}
 		return resolveUrl(this.config, packageName, path);
 	},
