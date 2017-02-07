@@ -1,5 +1,3 @@
-var gulp = require('gulp');
-var webpackStream = require('webpack-stream');
 var webpack = require('webpack');
 var api = require('__api');
 var log = require('log4js').getLogger(api.packageName);
