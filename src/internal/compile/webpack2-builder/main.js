@@ -79,7 +79,7 @@ exports.compile = (api) => {
 	if (api.config().devMode)
 		webpackConfig.output.filename = '[name].js';
 
-	return gulp.src('.')
-		.pipe(webpackStream(webpackConfig, webpack))
-		.pipe(gulp.dest(api.config().staticDir + publicDir));
+	// return gulp.src('.')
+	// 	.pipe(webpackStream(webpackConfig, webpack))
+	// 	.pipe(gulp.dest(api.config().staticDir + publicDir));
 };
