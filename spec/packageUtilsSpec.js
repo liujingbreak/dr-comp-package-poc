@@ -38,7 +38,8 @@ describe('packageUtils', function() {
 				'@dr/template-builder',
 				'@dr/readme-docs',
 				'@dr/light-lodash',
-				'@dr/handlebars-tmpl-builder'
+				'@dr/handlebars-tmpl-builder',
+				'@dr-core/webpack2-builder'
 			];
 			var foundPackages = callback.calls.allArgs().map(row => { return row[0];});
 			expect(_.difference(builders, foundPackages)).toEqual([]);
@@ -60,7 +61,8 @@ describe('packageUtils', function() {
 				'@dr/example-browserify',
 				'@dr/translate-generator',
 				'@dr-core/browserify-builder',
-				'@dr/comp-store'
+				'@dr/comp-store',
+				'@dr-core/webpack2-builder'
 			];
 			var foundPackages = callback.calls.allArgs().map(row => { return row[0];});
 

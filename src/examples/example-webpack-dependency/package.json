@@ -12,7 +12,6 @@
     "bundle": "example",
     "entryPage": "index.html",
     "browserSideConfigProp": ["gulp.watchDebounceDelay", "e2etestHelper"],
-    "type": "server",
     "compiler": "webpack"
   },
   "license": "MIT"
