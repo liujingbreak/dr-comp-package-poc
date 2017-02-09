@@ -28,7 +28,14 @@ module.exports = function(file, options) {
 			// 	sourceMapFileInline: api.config().enableSourceMaps
 			// },
 			plugins: [
-				new LessPluginAutoPrefix({browsers: ['last 3 versions']}),
+				new LessPluginAutoPrefix({browsers: [
+					'ie >= 8',
+					'ff >= 30',
+					'chrome >= 34',
+					'safari >= 7',
+					'ios >= 7',
+					'android >= 4.0'
+				]}),
 				new NpmImportPlugin()
 			]
 		};
