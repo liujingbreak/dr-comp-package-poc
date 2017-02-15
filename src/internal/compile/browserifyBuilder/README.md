@@ -79,7 +79,7 @@ module.exports = {
 ### api
 | name | description
 | -- | --
-| `.packageInfo` | object.<PackageInfo> all browser packages information
+| `.packageInfo` (Moved to packageCompiler.js) | object.<PackageInfo> all browser packages information
 | `.bundleDepsGraph` | object<{string} entryPackageName, Object.<{string} dependencyBundleName, boolean> bundles dependency information for each entry package,  A relationship map of `entry package` -> `dependency bundles` structure
 | `.bundleDepsGraph` | object<{string} entryPackageName, object<{string} locale, object<{string}> dependencyBundleName, boolean>>, A relationship map of `entry package` -> `locale` -> `dependency bundles` structure
 | `.findBrowserPackageByPath(filePath)` | returns package name, it tells you which package a file belongs to

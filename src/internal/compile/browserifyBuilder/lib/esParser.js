@@ -1,6 +1,7 @@
 var acorn = require('acorn');
-var estraverse = require('estraverse');
 var _ = require('lodash');
+var estraverse = require('estraverse-fb');
+var acornjsx = require('acorn-jsx/inject')(acorn);
 
 exports.parse = parse;
 
@@ -10,19 +11,29 @@ exports.parse = parse;
  * @param  {object} handler {
  * @param  {function} handler.splitLoad(packageName)
  * @param  {function} handler.apiIndentity(astNode)
+ * @param  ast: AST, if not null, it will skip acorn parsing
  */
-function parse(text, handler) {
+function parse(text, handler, ast) {
 	if (_.startsWith(text, '#!')) {
 		text = text.substring(text.indexOf('\n'));
 	}
-	var ast = acorn.parse(text, {ranges: true, allowHashBang: true});
+	if (!ast) {
+		try {
+			ast = acornjsx.parse(text, {ranges: true, allowHashBang: true, plugins: {jsx: true}});
+		} catch (err) {
+			ast = acornjsx.parse(text, {ranges: true, allowHashBang: true, plugins: {jsx: true},
+				sourceType: 'module'});
+		}
+	}
 	//console.log('\n---------\n%s', JSON.stringify(ast, null, '  '));
 	estraverse.traverse(ast, {
 		enter: function(node, parent) {
 			if (onIdentity('__api', node, parent)) {
 				handler.apiIndentity(node);
 			} else if (node.type === 'CallExpression') {
-				if (node.callee && node.callee.type === 'MemberExpression' &&
+				if (handler.requireApi && node.callee && node.callee.type === 'Identifier' && node.callee.name === 'require' && _.get(node, 'arguments[0].value') === '__api') {
+					handler.requireApi();
+				} else if (node.callee && node.callee.type === 'MemberExpression' &&
 				node.callee.object.name === 'require' &&
 				node.callee.object.type === 'Identifier' &&
 				node.callee.property.name === 'ensure' &&

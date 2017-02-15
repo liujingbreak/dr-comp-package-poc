@@ -1,5 +1,6 @@
 /* global TweenMax, Power2, TimelineLite */
-require('@dr/gsap');
+//require('@dr/gsap');
+
 var _ = require('lodash');
 var buildScenes = require('./buildScenes');
 

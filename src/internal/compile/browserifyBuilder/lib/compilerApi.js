@@ -18,7 +18,7 @@ function initPackageListInfo(proto) {
 	proto._packagePathList = [];
 	proto._packagePath2Name = {};
 
-	proto.packageInfo.allModules.forEach((instance, idx) => {
+	api.packageInfo.allModules.forEach((instance, idx) => {
 		if (!instance.packagePath) {
 			return;
 		}

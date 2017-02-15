@@ -26,7 +26,7 @@ module.exports = function($stateProvider) {
 
 function loadComponentsStoreModule($q, $timeout) {
 	var defer = $q.defer();
-	require.ensure(['@dr/comp-store'], function() {
+	require.ensure(['@dr/comp-store'], function(require) {
 		//$timeout(function() {
 		require('@dr/comp-store').init(angular.module('lazyModule'), 'components');
 		defer.resolve();

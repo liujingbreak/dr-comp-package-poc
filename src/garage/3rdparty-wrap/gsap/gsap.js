@@ -1,9 +1,10 @@
 
-module.exports = {
-	TimelineLite: require('./src/uncompressed/TimelineLite'),
-	TweenMax: require('./src/uncompressed/TweenMax')
-};
-// TweenMax includes TweenLite, CSSPlugin, EasePack, TimelineLite, TimelineMax,
-//  RoundPropsPlugin, BezierPlugin, AttrPlugin, and DirectionalRotationPlugin
-require('./src/uncompressed/plugins/TextPlugin');
-require('./src/uncompressed/plugins/ScrollToPlugin');
+require('gsap/src/uncompressed/plugins/TextPlugin.js');
+require('gsap/src/uncompressed/plugins/CSSPlugin.js');
+require('gsap/src/uncompressed/plugins/ScrollToPlugin');
+require('gsap/src/uncompressed/plugins/CSSRulePlugin.js');
+require('gsap/src/uncompressed/plugins/DirectionalRotationPlugin.js');
+require('gsap/src/uncompressed/easing/EasePack.js');
+require('gsap/src/uncompressed/plugins/RoundPropsPlugin.js');
+require('gsap/TweenMax');
+require('gsap/src/uncompressed/TimelineLite');

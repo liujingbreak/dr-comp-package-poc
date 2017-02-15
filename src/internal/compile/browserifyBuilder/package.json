@@ -1,6 +1,6 @@
 {
   "name": "@dr-core/browserify-builder",
-  "version": "0.5.27",
+  "version": "0.5.29",
   "description": "The default browser side stuff builder module based on browserify",
   "main": "lib/main.js",
   "scripts": {
@@ -12,8 +12,14 @@
     "gulp-rev-all": "^0.8.22",
     "gulp-filter": "^4.0.0",
     "uglify-js": "^2.6.4",
-    "acorn": "^4.0.3",
-    "tiny-lr": "^1.0.3"
+    "acorn": "^4.0.11",
+    "tiny-lr": "^1.0.3",
+    "acorn-jsx": "^3.0.1",
+    "estraverse-fb": "^1.3.1",
+    "estraverse": "^4.2.0",
+    "browserify": "^13.1.1",
+    "html-browserify": "0.0.6",
+    "parcelify": "^2.1.0"
   },
   "author": "LJ",
   "license": "MIT",

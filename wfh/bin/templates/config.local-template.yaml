@@ -1,0 +1,22 @@
+# If you are not familiar with YAML format
+# read https://en.wikipedia.org/wiki/YAML
+
+# To change chunk setting, add `vendorBundleMap` to partially override `vendorBundleMap` in config.yaml,
+# e.g. to set gsap 's chunk name to "extr-ui", multiple modules can share same chunk name
+# so that they are all packed into that specific chunk
+# vendorBundleMap:
+#   extra-ui:
+#     - gsap
+
+
+# To change `output.path` setting for each package, add `entryPageMapping` to partially override config.yaml
+
+devMode: true
+cacheControlMaxAge: 0
+enableSourceMaps: true
+
+#port: 14334
+# livereload will be enabled when `devMode` is true
+#livereload:
+#     port: 35729
+#     delay: 800

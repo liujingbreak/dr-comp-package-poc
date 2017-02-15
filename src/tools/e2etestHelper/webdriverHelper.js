@@ -78,6 +78,7 @@ function run(theConfig, browser, serverModule, cwd, runTest) {
 	.then(runTest)
 	.catch(err => {
 		log.error('Test failure', err);
+		throw err;
 	})
 	.finally(() => {
 		teardown();
@@ -238,7 +239,7 @@ function waitForServerStart() {
 			log.debug('try to connect to server for times: ' + tryCount);
 			setTimeout(()=> {
 				request({
-					url: 'http://localhost:' + config().port,
+					url: config.get('e2etestHelper.target') || ('http://localhost:' + config().port),
 					timeout: 10000
 				}, (error, response, body) => {
 					if (error) {
@@ -277,7 +278,7 @@ function waitForServer(done) {
 		tryCount++;
 		log.debug('try to connect to server for times: ' + tryCount);
 		setTimeout(()=> {
-			request('http://localhost:' + config().port, (error, response, body) => {
+			request(config.get('e2etestHelper.target') || ('http://localhost:' + config().port), (error, response, body) => {
 				if (error) {
 					if (error.code === 'ECONNREFUSED') {
 						tryConnectServer(done);

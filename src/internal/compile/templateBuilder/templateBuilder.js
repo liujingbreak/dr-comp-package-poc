@@ -8,9 +8,13 @@ var patchText = require('./patch-text.js');
 var api = require('__api');
 var log = require('log4js').getLogger(api.packageName);
 var swigInjectLoader = require('swig-package-tmpl-loader');
+
 var parser = require('./template-parser').parser;
 var injector;
 var transformAdded = false;
+var fileHandler = {
+	onFile: (file) => {}
+};
 
 exports.compile = function() {
 	if (transformAdded)
@@ -22,11 +26,15 @@ exports.compile = function() {
 	swigInjectLoader.swigSetup(swig, {
 		injector: injector,
 		fileContentHandler: function(file, source) {
+			fileHandler.onFile(file);
 			return translateHtml(source, file, api.getBuildLocale());
 		}
 	});
 	return null;
 };
+
+/** To listern file read, set fileHandler.onFile = function(filePath) {} */
+exports.fileHandler = fileHandler;
 
 exports.swig = swig;
 
@@ -37,15 +45,15 @@ exports.testable = {
 var packageCache = {};
 
 function transformFactory(file) {
+	file = fs.realpathSync(file);
 	var ext = Path.extname(file).toLowerCase();
 	if (ext === '.html' || ext === '.swig') {
-		var browserPackage = api.findBrowserPackageInstanceByPath(file);
+		var browserPackage = api.findPackageByFile(file);
 		if (browserPackage) {
-			var packageExports = runPackage(browserPackage, file);
+			var packageExports = runPackage(browserPackage);
 			if (packageExports && _.isFunction(packageExports.onCompileTemplate)) {
-				log.debug('is template: ', file);
 				var swigOptionsProm = Promise.resolve(packageExports.onCompileTemplate(
-					Path.relative(browserPackage.packagePath, file).replace(/\\/g, '/'),
+					Path.relative(browserPackage.realPackagePath, file).replace(/\\/g, '/'),
 					swig))
 				.then(swigOptions => {
 					if (!swigOptions)
@@ -67,15 +75,14 @@ function transformFactory(file) {
 
 function createTransform(swigOptionsProm, absFile) {
 	var str = '';
+
 	return through(function(chunk, enc, next) {
 		str += chunk.toString();
 		next();
 	}, function(next) {
 		swigOptionsProm.then(swigOptions => {
-			var opt = _.assign(_.clone(defaultOptions), {cache: false}, swigOptions);
-			swig.setDefaults(opt);
 			try {
-				var compiled = swig.render(str, {filename: absFile});
+				var compiled = compileTemplate(swigOptions, str, absFile);
 				this.push(compiled);
 			} catch (e) {
 				log.error('failed to compile %s:\n%s', absFile, str);
@@ -87,7 +94,15 @@ function createTransform(swigOptionsProm, absFile) {
 	});
 }
 
-function runPackage(browserPackage, file) {
+exports.compileTemplate = compileTemplate;
+function compileTemplate(swigOptions, str, absFile) {
+	var opt = _.assign(_.clone(defaultOptions), {cache: false}, swigOptions);
+	swig.setDefaults(opt);
+	return swig.render(str, {filename: absFile});
+}
+
+exports.runPackage = runPackage;
+function runPackage(browserPackage) {
 	if (!_.has(packageCache, browserPackage.longName)) {
 		try {
 			var exports = require(browserPackage.longName);
@@ -103,6 +118,8 @@ function runPackage(browserPackage, file) {
 }
 
 var includeTemplCache = {};
+
+exports.renderFile = renderFile;
 /**
  * Unlike Swig include tag, this function accept file path as variable
  */

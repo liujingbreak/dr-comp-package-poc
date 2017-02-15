@@ -9,6 +9,7 @@
   "main": "server.js",
   "dr": {
     "bundle": "example",
+    "compiler": "webpack",
     "entryPage": "index.html"
   },
   "author": "jing.liu.fe@d.com",

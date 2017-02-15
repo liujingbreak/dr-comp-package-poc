@@ -137,17 +137,8 @@ exports.init = function(app) {
 						begin: 0,
 						duration: banner.prop('offsetHeight'),
 						delayPercent: 0,
-						// tearDown: function(reverse, offset) {
-						// 	if (!reverse) {
-						// 		sw.stopAutoplay();
-						// 	} else
-						// 		sw.startAutoplay();
-						// },
-						onScroll: function(progress, time) {
-							var y = progress * 0.67;
-							banner.css('transform', 'translate3d(0, ' + y + 'px, 0)');
-							banner.css('-webkit-transform', 'translate3d(0, ' + y + 'px, 0)');
-							banner.css('-ms-transform', 'translate3d(0, ' + y + 'px, 0)');
+						timeline: function(timeline) {
+							timeline.fromTo(banner[0], 1, {yPercent: 0}, {yPercent: 50, ease: Linear.easeNone});
 						}
 					});
 				}

@@ -3,6 +3,6 @@
   "version": "0.0.12",
   "description": "Recipe package of /Users/liujing/dianrong/web-fun-house/internal-tools-recipe",
   "dependencies": {
-    "@dr/e2etest-helper": "0.3.7"
+    "@dr/e2etest-helper": "0.3.8"
   }
 }

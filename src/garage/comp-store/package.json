@@ -9,7 +9,21 @@
     "type": [
       "server"
     ],
-    "browserSideConfigProp": ["comp-store.nodeServer"]
+    "browserSideConfigProp": ["comp-store.nodeServer"],
+    "compiler": "webpack",
+    "config": {
+      "public": {
+        "nodeServer": "http://dr-npm501-14338.ittun.com"
+      },
+      "server": {
+        "verdaccioUrl": "http://localhost:4873"
+      }
+    },
+    "config.npm501": {
+      "public": {
+        "nodeServer": "http://npm501.dc.dianrong.com:14338"
+      }
+    }
   },
   "style": "styles/main.less",
   "transforms": [

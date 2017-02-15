@@ -1,0 +1,15 @@
+devMode: true
+enableSourceMaps: true
+bundlePerPackage: true
+cacheControlMaxAge: 0
+packageScopes:
+  - dr
+  # dr-core is considered as special packages which will be loaded before other packages
+  - dr-core
+  - lj
+comp-store:
+  nodeServer: ''
+  verdaccioUrl: http://lj-air.local:4873
+
+manual-chunk-plugin:
+#  showDependency: true

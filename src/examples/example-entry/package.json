@@ -14,7 +14,8 @@
   "dr": {
     "type": "server",
     "bundle": "example",
-    "entryView": "*.html"
+    "entryView": "*.html",
+    "compiler": "webpack"
   },
   "author": "jing.liu.fe@d.com",
   "license": "MIT",

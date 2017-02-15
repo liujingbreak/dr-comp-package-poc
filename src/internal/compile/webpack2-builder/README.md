@@ -1,56 +1,71 @@
 The core build component based on Webpack 2
 =========
-Understand Webpack
-```mermaid
-sequenceDiagram;
-? ->> compiler: run()
-Note right of compiler: before-run,<br/> run
-compiler ->> compiler: readRecords()
-compiler ->> +compiler: compile()
-compiler ->> compiler: newCompilationParams()
-Note right of compiler: before-compile, compile
+## Unlike normal Webpack projects
 
-compiler ->> +compiler: newCompilation()
-compiler ->> +compiler: createCompilation()
-compiler ->> +compilation: new
-compilation -->> -compiler: 
-compiler -->> -compiler: 
-Note right of compiler: this-compilation, compilation
-compiler -->> -compiler: return newCompilation()
+- less-loader '@import ~<package>` is hijacked by lib/npmimport-css-loader.js which works with require-injector
 
-Note right of compiler: make
+- Webpack advanced mechanism to resolve files, aka `webpack.config.js`'s `resolve.alias` is not recommended,
+should use require-injector instead, by set `browser-inject.js`.
 
-Note left of SingleEntryPlugin: EntryOptionPlugin
-compiler ->> +SingleEntryPlugin: apply plugin "make"
-SingleEntryPlugin ->> SingleEntryPlugin: createDependency()
-SingleEntryPlugin ->> +compilation: addEntry()
-compilation ->> compilation: this.preparedChunks.push()
-compilation ->> compilation: this._addModuleChain()
-compilation -->> SingleEntryPlugin: return
-SingleEntryPlugin -->> -compiler: return
-compiler ->> compilation: finish()
-compiler ->> +compilation: seal()
-compilation ->> compilation: createChunkAssets()
-compilation -->> -compiler: return
-Note right of compiler: after-compile
-compiler -->> -compiler: return compile()
-loop compilation onCompiled()
-	opt compiler plugin("should-emit") === false
-		compiler ->> compilation: getStats()
-		Note right of compiler: done
-	end
-	compiler ->> compiler: emitAssets()
+- Setting package.json property `"style"` is just like calling `require('xxx.css')` from an package's main JS file.
 
-	opt compilation plugin('need-additional-pass')
-		Note right of compilation: need-additional-pass
-		compiler ->> compilation: needAdditionalPass = true
-		compiler ->> compilation: getStats()
-		Note right of compiler: done
-		Note right of compiler: additional-pass
-		compiler ->> compiler: compile()
-	end
-end
-compiler ->> compiler: .emitRecords()
-compiler ->> compilation: getStats()
-Note right of compiler: done
+### entry-html-loader
+It marks all DR component entry pages in `compiler._lego_entry[pagePath]` which later on will be read by
+**multi-entry-html-plugin**
+
+### manual-chunk-plugin
+Used instead of **CommonsChunkPlugin** which doesn't support real muti-entry chunk project.
+> **CommonsChunkPlugin** works good in case like having one entry chunk and couple of `common library` Js chunk.
+
+### multi-entry-html-plugin
+Used instead of **HtmlWebpackPlugin**, supports inserting `<script>` and `<link>` for multiple HTML file of multiple entry chunk.
+Also it inlines `manifest` chunk in entry HTML file.
+
+### api-loader
+Resolves `require('__api')` and `__api` expression statement, also works with **require-injector**.
+
+### @dr-core/webpack2-builder/lib/html-loader
+Replaces `assets://<component>/...` in *[src|href] from all html files.
+
+### @dr/template-builder
+Compiles all HTML resource as they are Swig-template file.
+For details about how to defined Swig template local variables and other advanced setting,
+please read readme of @dr/template-builder.
+
+TODO: add according Webpack `module.fileDependency` for Swig tag `{% include "<file>" %}`
+
+### Component configuration
+> Each component should be configable, so that we can deal with differenct environment like `demo`, `production`...
+For example, your web app probably wants to connect with different ajax API for different environment or to be more flexable and
+reusable
+
+TODO
+
+## How to extend Webpack config file
+In your main JS file of component
+```js
+require('@dr/webpack2-builder').tapable.plugin('webpackConfig', function(webpackConfig, cb) {
+	// do something to webpackConfig
+	cb(null, webpackConfig);
+	// or encounter errors
+	// cb(error);
+});
 ```
+
+## DR brick Container / playground
+### Container is a NodeJS runtime stack, an addon system and a web project skeleton.
+
+Container compiles and packs components into static web assets (JS, CSS and other resouces).
+
+Container manages a bunch of node components that works togther as a compiler tool based on **gulp**, **Browserify** and **Webpack**.
+
+Container is not like **Yeoman**, it is not a project skeleton generator.
+
+**playground** is local dev environment container for developers.
+
+### Kinds of containers
+- Web desktop app for legacy browser.
+- Web app for advance browsers of desktop and mobile device.
+- **Cordava** based hibrid web app.
+
+
