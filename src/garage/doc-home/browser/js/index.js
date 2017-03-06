@@ -41,6 +41,7 @@ require('./directives/menuAside')(docHome);
 require('./directives/docHome')(docHome);
 require('./directives/showOnReady')(docHome);
 require('./service/scrollableAnim')(docHome);
+require('@dr/dr-ng-widgets').init(docHome);
 angular.element(document).ready(function() {
 	angular.bootstrap(document, ['docHome']);
 });

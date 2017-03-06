@@ -10,13 +10,15 @@ exports.activate = function() {
 	verdaccioUrl = _.trimEnd(verdaccioUrl, '/');
 	api.router().use('/', api.cors());
 	api.router().get('/packageBanner', (req, res) => {
+		var page = req.query.page;
+		var pageSize = req.query.pageSize;
 		request({
-			url: verdaccioUrl + '/-wfh/packages',
+			url: verdaccioUrl + '/-wfh/packages?page=' + page + '&pageSize=' + pageSize,
 			method: 'GET',
 			json: true
 		}, (err, msg, body) => {
 			if (err) {
-				log.error('"/packageBanner" failed' , err);
+				log.error('"/packageBanner" failed', err);
 				res.send({
 					error: err,
 					packages: []
@@ -38,20 +40,25 @@ exports.activate = function() {
 				packages.push(json);
 		});
 		return {
-			packages: packages,
-			recipes: recipes
+			packages: packages || [],
+			recipes: recipes,
+			page: body.page || 0,
+			pageSize: body.pageSize || 0,
+			totalPage: body.totalPage || 0
 		};
 	}
 
 	api.router().get('/searchPackage/:anything', (req, res) => {
 		log.debug('search package %s', req.params.anything);
+		var page = req.query.page;
+		var pageSize = req.query.pageSize;
 		request({
-			url: verdaccioUrl + '/-/search/' + req.params.anything,
+			url: verdaccioUrl + '/-wfh/search/' + req.params.anything + '?page=' + page + '&pageSize=' + pageSize,
 			method: 'GET',
 			json: true
 		}, (err, httpResponse, body) => {
 			if (err) {
-				log.error('/search/:anything failed' , err);
+				log.error('/search/:anything failed', err);
 				res.send({
 					error: err,
 					packages: []
@@ -60,7 +67,10 @@ exports.activate = function() {
 			}
 			log.debug(body.length);
 			res.send({
-				packages: body
+				packages: body.packages || [],
+				page: body.page || 0,
+				pageSize: body.pageSize || 0,
+				totalPage: body.totalPage || 0
 			});
 		});
 	});
@@ -72,7 +82,7 @@ exports.activate = function() {
 			json: true
 		}, (err, httpResponse, body) => {
 			if (err || body.error) {
-				log.error('/-/readme/:package failed' , err);
+				log.error('/-/readme/:package failed', err);
 				res.send({
 					error: err || body.error,
 					readme: ''
@@ -86,4 +96,3 @@ exports.activate = function() {
 		});
 	});
 };
-
