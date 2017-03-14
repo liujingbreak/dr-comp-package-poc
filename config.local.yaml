@@ -7,3 +7,5 @@ packageScopes:
   # dr-core is considered as special packages which will be loaded before other packages
   - dr-core
   - lj
+comp-store:
+  nodeServer: ''

@@ -33,5 +33,6 @@ module.exports = function(injector) {
 		injector.fromPackage('@dr/fabricjs')
 			.value('canvas', null)
 			.value('jsdom', null);
+		injector.fromPackage('@dr/dr-ng-widgets').replaceCode('@dr/dr-css-components', 'null');
 	}
 };

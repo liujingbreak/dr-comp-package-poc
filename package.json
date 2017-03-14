@@ -70,7 +70,9 @@
     "xtend": "^4.0.1",
     "yamlify": "^0.1.3",
     "yamljs": "^0.2.4",
-    "yargs": "^6.4.0"
+    "yargs": "^6.4.0",
+    "@dr/dr-ng-widgets":"^1.2.5",
+    "@dr/dr-css-components":"^0.2.0"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
@@ -117,5 +119,6 @@
     "highlight.js": "~9.2.0",
     "selenium-webdriver": "^2.53.2",
     "source-map-url": "^0.4.0"
+    
   }
 }

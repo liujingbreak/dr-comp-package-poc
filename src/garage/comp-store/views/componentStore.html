@@ -1,4 +1,3 @@
-
 <main ui-view="compMain" class="comp-main">
 	<section class="banner swiper-container">
 		<!-- Additional required wrapper -->
@@ -7,23 +6,26 @@
 			<div class="swiper-slide slide1">
 				<h1>点融前端Web组件库</h1>
 			</div>
-			<div class="swiper-slide slide2"><h1>持续贡献, 持续复用</h1></div>
+			<div class="swiper-slide slide2">
+				<h1>持续贡献, 持续复用</h1>
+			</div>
 		</div>
 	</section>
 	<section ng-show="compStoreVm.showNavi" class="comp-navi">
 		<form name="naviForm" class="input-row">
-			<div class="logo-bg"><h4 t>res:Component Store</h4></div><!--
-		--><i class="fa fa-2x fa-search" aria-hidden="true"></i>
-		<div class="quick-search"><input autocomplete="false" placeholder="{{compStoreVm.quickSearch}}"
-				type="text" ng-model="compStoreVm.nameSearch"/></div><!--
-		-->
+			<div class="logo-bg">
+				<h4 t>res:Component Store</h4>
+			</div>
+			<i class="fa fa-2x fa-search" aria-hidden="true"></i>
+			<div class="quick-search"><input autocomplete="false" placeholder="{{compStoreVm.quickSearch}}" type="text" ng-model="compStoreVm.nameSearch" /></div>
 		</form>
 	</section>
 	<section class="error-msg" ng-if="compStoreVm.error">{{ compStoreVm.error }}</section>
 	<div dr-loading-indicator="compStore"></div>
+
 	<comp-group card-min-width="250" on-change-card-width="compStoreVm.cardWidth = width">
-		<comp-card id="comp-{{pk.name}}" card-width="compStoreVm.cardWidth"
-			on-select="compStoreVm.trackSelectedCard(name)"
-			ng-repeat="pk in compStoreVm.packages" package="pk"></comp-card>
+		<comp-card id="comp-{{pk.name}}" card-width="compStoreVm.cardWidth" on-select="compStoreVm.trackSelectedCard(name)" ng-repeat="pk in compStoreVm.packages" package="pk"></comp-card>
+		<div dr-scroll-loading="compStoreVm.packages" on-nextpage="compStoreVm.loadPage(pageIndex)" parent='.compStorePaginationScroll'>Loading...</div>
 	</comp-group>
+
 </main>
