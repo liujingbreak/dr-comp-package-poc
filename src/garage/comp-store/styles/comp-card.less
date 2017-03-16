@@ -59,6 +59,36 @@ comp-card {
 		box-shadow: inset 0 0 5px 0px rgba(0,0,0,0.5);
 		transform: translate3d(0, 2px, 0);
 	}
+    .category {
+        margin-top: 0px;
+        padding-right: 54px;
+        padding-bottom: 4px;
+        span {
+            margin-top: 5px;
+            margin-left: 5px;
+            display: inline-block;
+            color: #fff;
+            font-weight: bold;
+            padding: 0px 3px 0px 3px;
+            border-radius: 4px;
+            box-shadow: 3px 3px 3px 0px #dadada;
+        }
+        .angular {
+            background: #a62a58
+        }
+        .nodejs {
+            background: #ee6b9c
+        }
+        .ui {
+            background: #ff6b40
+        }
+        .business {
+            background: #c038d3
+        }
+        .build-tool {
+            background: #9bf33d
+        }
+    }
 }
 
 .size-desktop, .size-tablet {
@@ -91,40 +121,33 @@ comp-card {
 
 @keyframes bounceIn {
   from, 20%, 40%, 60%, 80%, to {
-    -webkit-animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
     animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
   }
 
   0% {
     opacity: 0;
-    -webkit-transform: scale3d(.3, .3, .3);
     transform: scale3d(.3, .3, .3);
   }
 
   20% {
-    -webkit-transform: scale3d(1.1, 1.1, 1.1);
     transform: scale3d(1.1, 1.1, 1.1);
   }
 
-  40% {
-    -webkit-transform: scale3d(.9, .9, .9);
+  40% {   
     transform: scale3d(.9, .9, .9);
   }
 
   60% {
-    opacity: 1;
-    -webkit-transform: scale3d(1.03, 1.03, 1.03);
+    opacity: 1;    
     transform: scale3d(1.03, 1.03, 1.03);
   }
 
-  80% {
-    -webkit-transform: scale3d(.97, .97, .97);
+  80% {    
     transform: scale3d(.97, .97, .97);
   }
 
   to {
-    opacity: 1;
-    -webkit-transform: scale3d(1, 1, 1);
+    opacity: 1;  
     transform: scale3d(1, 1, 1);
   }
 }

@@ -54,6 +54,26 @@ api.app.factory('compService', ['$q', '$http', '$timeout', function($q, $http, $
 						throw new Error(res.data.error);
 					return res.data;
 				});
+		},
+
+		select: function(page, pageSize, by, value) {
+			return this.$http({
+					method: 'GET',
+					url: this.nodeServer + api.contextPath + '/select/' + by + '/' + value + '?page=' + page + '&pageSize=' + pageSize,
+				})
+				// .then(function(res) {
+				// 	return $timeout(()=> res, 3000);
+				// })
+				.then(function(res) {
+					if (res.data.error)
+						throw new Error(res.data.error);
+					return {
+						packages: res.data.packages,
+						page: res.data.page,
+						pageSize: res.data.pageSize,
+						totalPage: res.data.totalPage
+					};
+				});
 		}
 	};
 	return new CompService($q, $http, $timeout);

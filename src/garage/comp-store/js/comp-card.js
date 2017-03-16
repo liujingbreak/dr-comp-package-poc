@@ -1,5 +1,6 @@
 var api = require('__api');
 var datas = require('./author.json');
+var _ = require('lodash');
 
 api.app.component('compCard', {
 	controller: ['$scope', '$element', '$location', function($scope, $element, $location) {
@@ -10,7 +11,9 @@ api.app.component('compCard', {
 		} else {
 			$ctrl.imgUrl = env + 'default.png';
 		}
-
+		//使得dr.category一定返回一个数组
+		var dr_category = _.get($ctrl.package, 'dr.category');
+		$ctrl.package.dr.category = [].concat(dr_category);
 		this.$onChanges = function(changes) {
 			if (changes.cardWidth) {
 				//$element.css('width', 'calc(' + changes.cardWidth.currentValue + '% - 2px)');
@@ -28,7 +31,9 @@ api.app.component('compCard', {
 			$element.on('click', function(evt) {
 				$location.path('/components/' + encodeURIComponent($ctrl.package.name));
 				if (self.onSelect)
-					self.onSelect({name: $ctrl.package.name});
+					self.onSelect({
+						name: $ctrl.package.name
+					});
 				$scope.$apply();
 			});
 		};

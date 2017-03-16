@@ -1,0 +1,19 @@
+[{
+	"name": "All",
+	"value": "all"
+},{
+	"name": "Angular",
+	"value": "angular"
+},{
+	"name": "UI",
+	"value": "ui"
+},{
+	"name": "Business",
+	"value": "business"
+},{
+	"name": "Nodejs",
+	"value": "nodejs"
+},{
+	"name": "Build-tool",
+	"value": "build-tool"
+}]

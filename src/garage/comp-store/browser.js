@@ -2,6 +2,7 @@ require('@dr/angularjs');
 var api = require('__api');
 var _ = require('lodash');
 var Swiper = require('swiper/dist/js/swiper.jquery.js');
+var jsonCategory = require('./assets/json/category.json');
 
 var initialized = false;
 var lastSelectedCard;
@@ -32,7 +33,13 @@ exports.init = function(app) {
 					cacheEngine.put('pageSize', 25);
 					//当前分页的目标，列表-list；搜索-search
 					cacheEngine.put('target', 'list');
+					//初始化下拉选项
+					$scope.category = jsonCategory;
+					//初始化选项
+					compStoreVm.category = $rootScope.component_store_category || $scope.category[0].value;
 					$scope.$watch('compStoreVm.nameSearch', search);
+					//监听下拉选项
+					$scope.$watch('compStoreVm.category', select);
 					off$viewContentLoaded = $rootScope.$on('$viewContentLoaded', function(event, config) {
 						if ($state.is('components') && lastSelectedCard)
 							setTimeout(function() {
@@ -75,6 +82,20 @@ exports.init = function(app) {
 					}
 					getData(text);
 				}, 800);
+
+				var select = function(text, old) {
+					if (text !== old) {
+						compStoreVm.packages = null;
+						cacheEngine.put('page', 0);
+						cacheEngine.put('totalPage', 0);
+						$rootScope.component_store_category = text;
+						if (text === 'all') {
+							getData();
+						} else {
+							getData(null, text.toString());
+						}
+					}
+				};
 
 				this.trackSelectedCard = function(name) {
 					lastSelectedCard = name;
@@ -143,11 +164,12 @@ exports.init = function(app) {
 				}
 
 				//获取数据
-				function getData(text) {
+				function getData(searchText, selectText) {
 					compStoreVm.error = null;
 					var page = cacheEngine.get('page');
 					var pageSize = cacheEngine.get('pageSize');
 					var totalPage = cacheEngine.get('totalPage');
+					var param_1, param_2;
 					//判断请求页是否大于总页数
 					if (totalPage && page >= totalPage) {
 						drLoadingService.setLoading('compStore', false);
@@ -159,12 +181,19 @@ exports.init = function(app) {
 					//执行函数标识
 					var func = '';
 					var index = ++searchCount;
-					if (cacheEngine.get('target') === 'list') {
-						func = 'getPackagesAndBanner';
-					} else if (cacheEngine.get('target') === 'search') {
-						func = 'searchPackage';
+					if (selectText) {
+						func = 'select';
+						param_1 = 'dr.category';
+						param_2 = selectText;
+					} else {
+						if (cacheEngine.get('target') === 'list') {
+							func = 'getPackagesAndBanner';
+						} else if (cacheEngine.get('target') === 'search') {
+							func = 'searchPackage';
+							param_1 = searchText;
+						}
 					}
-					return compService[func](page, pageSize, text)
+					return compService[func](page, pageSize, param_1, param_2)
 						.then(function(data) {
 							if (index === searchCount) {
 								//记录搜索总页数
