@@ -6,7 +6,7 @@ var yamljs = require('yamljs');
 var argv = require('yargs').argv;
 require('yamlify/register');
 
-var rootPath = require('../bin/nodePath').getRootPath();
+var rootPath = argv.root;
 var setting;
 var localDisabled = false;
 var localConfigPath = argv.c || process.env.DR_CONFIG_FILE || Path.join(rootPath, 'config.local.yaml');

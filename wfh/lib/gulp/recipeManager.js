@@ -23,18 +23,18 @@ module.exports = {
 
 /**
  * Iterate recipeSrcMapping items
- * @param {string} projectDir optional, if no present, includes all project src folders
+ * @param {string} projectDir optional, if not present or null, includes all project src folders
  * @param  {Function} callback function(srcDir, recipeDir)
  */
 function eachRecipeSrc(projectDir, callback) {
-	// if (!config().dependencyMode) {
-	// 	callback(config.resolve('srcDir'), config.resolve('internalRecipeFolder'));
-	// }
 	if (arguments.length === 1) {
 		callback = arguments[0];
 		_.each(config().projectList, proj => forProject(proj));
 	} else if (arguments.length === 2) {
-		forProject(projectDir);
+		if (projectDir)
+			forProject(projectDir);
+		else
+			_.each(config().projectList, proj => forProject(proj));
 	}
 	if (config().recipeSrcMapping) {
 		_.forOwn(config().recipeSrcMapping, function(src, recipeDir) {
@@ -42,10 +42,33 @@ function eachRecipeSrc(projectDir, callback) {
 		});
 	}
 	function forProject(prjDir) {
-		callback(Path.join(prjDir, 'src'), config.resolve('destDir', 'recipe', Path.basename(prjDir) + '-recipe'));
+		_.each(_projectSrcRecipeMap(prjDir), callback);
 		var e2eDir = Path.join(prjDir, 'e2etest');
-		callback(e2eDir, config.resolve('destDir', 'recipe', require(e2eDir + '/package.json').name + '-recipe' ));
+		callback(e2eDir, null);
 	}
+}
+
+function _projectSrcRecipeMap(projectDir) {
+	var srcRecipeMapFile = Path.resolve(projectDir, 'dr.recipes.json');
+	var recipeSrcMapping = {};
+	var nameSrcSetting = {};
+
+	if (fs.existsSync(srcRecipeMapFile))
+		nameSrcSetting = JSON.parse(fs.readFileSync(srcRecipeMapFile, 'utf8'));
+	else {
+		var pkJsonFile = Path.resolve(projectDir, 'package.json');
+		var projectName = fs.existsSync(pkJsonFile) ? require(pkJsonFile).name : Path.basename(projectDir);
+		if (fs.existsSync(Path.join(projectDir, 'src')))
+			nameSrcSetting['recipes/' + projectName] = 'src';
+		else
+			nameSrcSetting['recipes/' + projectName] = '.';
+	}
+	_.each(nameSrcSetting, (srcDir, recipeName) => {
+		if (!_.endsWith(recipeName, '-recipe'))
+			recipeName += '-recipe';
+		recipeSrcMapping[Path.join(projectDir, recipeName)] = Path.resolve(projectDir, srcDir);
+	});
+	return recipeSrcMapping;
 }
 
 function eachDownloadedRecipe(callback) {
@@ -61,23 +84,21 @@ function eachDownloadedRecipe(callback) {
  * @param  {Function} callback function(recipeDir)
  */
 function eachRecipe(callback) {
-	// if (!config().dependencyMode) {
-	// 	callback(config().internalRecipeFolderPath);
-	// }
-	eachRecipeSrc((srcDir, recipeDir) => callback(recipeDir));
+	eachRecipeSrc((srcDir, recipeDir) => {
+		if (recipeDir)
+			callback(recipeDir);
+	});
 	_.forOwn(config().recipeSrcMapping, function(src, recipeDir) {
 		callback(Path.resolve(config().rootPath, recipeDir));
 	});
 	eachDownloadedRecipe(callback);
-	//if (config().dependencyMode)
-	callback(config().rootPath);
 }
 
 function link() {
 	var streams = [];
 	var linkFiles = [];
 	eachRecipeSrc(function(src, recipeDir) {
-		streams.push(doLinkRecipe(src, recipeDir));
+		streams.push(linkToRecipeFile(src, recipeDir));
 	});
 	return es.merge(streams)
 	.pipe(through.obj(function(file, enc, next) {
@@ -88,7 +109,7 @@ function link() {
 			this.push(file);
 		}
 		next();
-	}, function(next) {
+	}, function flush(next) {
 		var linkFileTrack = new File({
 			base: Path.resolve(config().rootPath),
 			path: Path.relative(config().rootPath, linkListFile),
@@ -122,7 +143,8 @@ function clean() {
 		});
 	}
 	eachRecipeSrc(function(src, recipeDir) {
-		recipes.push(Path.join(recipeDir, 'package.json'));
+		if (recipeDir)
+			recipes.push(Path.join(recipeDir, 'package.json'));
 	});
 	return gulp.src(recipes, {base: config().rootPath})
 	.pipe(rwPackageJson.removeDependency())
@@ -133,17 +155,16 @@ function clean() {
 	.pipe(gulp.dest(config().rootPath));
 }
 
-function doLinkRecipe(srcDir, recipeDir) {
-	var recipeFile = Path.resolve(recipeDir, 'package.json');
+function linkToRecipeFile(srcDir, recipeDir) {
 	return gulp.src(srcDir)
 		.pipe(findPackageJson())
 		.pipe(through.obj(function(file, enc, next) {
-			log.debug('Found ' + file.path);
+			log.debug('Found recipeDir %s: file: %s', recipeDir, file.path);
 			next(null, file);
 		}))
 		//.pipe(rwPackageJson.symbolicLinkPackages(config.resolve('destDir', 'links')))
 		.pipe(rwPackageJson.symbolicLinkPackages(config.resolve('rootPath')))
-		.pipe(rwPackageJson.addDependency(recipeDir, recipeFile))
+		.pipe(rwPackageJson.addDependency(recipeDir))
 		.on('error', function(err) {
 			log.error(err);
 		});

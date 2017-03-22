@@ -1,7 +1,7 @@
 {
   "name": "@dr/internal-recipe",
-  "version": "0.1.34",
-  "description": "Recipe package of package-recipe",
+  "version": "0.1.0",
+  "description": "Component group: internal-recipe",
   "dependencies": {
     "@dr-core/labjs": "0.0.24",
     "@dr-core/build-util": "0.2.5",

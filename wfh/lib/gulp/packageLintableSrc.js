@@ -4,7 +4,7 @@ var packageUtil = require('../packageMgr/packageUtils');
 var config = require('../config');
 module.exports = packageLintableSrc;
 
-function packageLintableSrc(packageList) {
+function packageLintableSrc(packageList, project) {
 	var globs = [];
 	var wfhPath = config.wfhSrcPath();
 	log.info('wfhPath: %s', wfhPath);
@@ -24,6 +24,6 @@ function packageLintableSrc(packageList) {
 		globs.push(packagePath + '/**/*.js',
 			'!' + packagePath + '/spec/**/*.js',
 			'!' + packagePath + '/node_modules/**/*.js');
-	}, 'src');
+	}, 'src', project);
 	return globs;
 }

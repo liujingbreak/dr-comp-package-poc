@@ -81,9 +81,21 @@ vendorBundleMap:
       - jquery
       - "@dr/lodash3"
       - fastclick
+      - style-loader
+      - css-loader
+      - lodash
+      - webpack
+      - process
+
   ui-lib: # bundle name
       - angular-ui-router
       - fontfaceobserver/fontfaceobserver
+      - gsap
+      - swiper
+  babel:
+    - core-js
+    - babel-polyfill
+    - regenerator-runtime
 
 # You may use external JS/CSS resource like CDN service instead of a local hosted bundle file,
 # `gulp compile` replaces those bundles with the URLs you set here in each eatry files.

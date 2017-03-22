@@ -15,7 +15,7 @@
 		<form name="naviForm" class="input-row">
 			<div class="logo-bg">
 				<h4 t>res:Component Store</h4>
-				<select ng-model="compStoreVm.category" ng-options="item.value as item.name for item in category" class='category'>
+				<select ng-model="compStoreVm.category" ng-options="item.value as item.name for item in compStoreVm.categories" class='category'>
 				</select>
 			</div>
 			<i class="fa fa-2x fa-search" aria-hidden="true"></i>

@@ -16,7 +16,7 @@ module.exports = walkPackages;
 module.exports.saveCache = saveCache;
 module.exports.listBundleInfo = listBundleInfo;
 
-var config, argv, packageUtils, packageInfoCacheFile;
+var config, argv, packageUtils, packageInfoCacheFile, isFromCache;
 
 /**
  * @return {PackageInfo}
@@ -37,10 +37,12 @@ function walkPackages(_config, _argv, _packageUtils, _compileNodePath, ignoreCac
 	packageInfoCacheFile = config.resolve('destDir', 'packageInfo.json');
 	var packageInfo;
 	if (!ignoreCache && (argv.p || argv.b) && fs.existsSync(packageInfoCacheFile)) {
+		isFromCache = true;
 		log.info('Reading build info cache from ' + packageInfoCacheFile);
 		packageInfo = JSON.parse(fs.readFileSync(packageInfoCacheFile, {encoding: 'utf8'}));
 		packageInfo = cycle.retrocycle(packageInfo);
 	} else {
+		isFromCache = false;
 		log.info('scan for packages info');
 		packageInfo = _walkPackages(_compileNodePath);
 		mkdirp.sync(Path.join(config().rootPath, config().destDir));
@@ -180,11 +182,13 @@ function _readPackageChunkMap(info) {
 	_.each(config()._package2Chunk, (bundle, moduleName) => {
 		try {
 			var packagePath = packageUtils.findBrowserPackagePath(moduleName);
+			var parsedName = packageUtils.parseName(moduleName);
 			var instance = packageBrowserInstance(config(), {
 				isVendor: true,
 				bundle: bundle,
 				longName: moduleName,
-				shortName: packageUtils.parseName(moduleName).name,
+				parsedName: parsedName,
+				shortName: parsedName.name,
 				packagePath: packagePath,
 				realPackagePath: fs.realpathSync(packagePath)
 			});

@@ -102,24 +102,23 @@ function findNodePackageByType(types, callback, recipeType) {
 /**
  * @param {string[]} optional, package name list (coulde be short name without scope part), if it is not present meaning "all packages"
  * @param {string} recipeType value of 'src', 'installed', or undefined
+ * @param {string} project (optional) the project folder which is stored in dr.project.list.json
  * @param  {packageFoundCallback} callback function(name, entryPath, parsedName, json, packagePath)
  */
-function findAllPackages(packageList, callback, recipeType) {
-	if (_.isFunction(callback)) {
-		if (packageList) {
-			lookForPackages([].concat(packageList), callback);
-			return;
-			//callback = _filterByPackageName(packageList, callback);
-		}
+function findAllPackages(packageList, callback, recipeType, projectDir) {
+	if (_.isFunction(callback) && packageList) {
+		lookForPackages([].concat(packageList), callback);
+		return;
 	} else if (_.isFunction(packageList)) {
 		// arguments.length <= 2
+		projectDir = recipeType;
 		recipeType = callback;
 		callback = packageList;
 	}
 
 	return _findPackageByType('*', callback, function(recipePackageJson, eachCallback) {
 		return _findEntryFiles(recipePackageJson, eachCallback, resolveAny);
-	}, recipeType);
+	}, recipeType, projectDir);
 }
 
 function lookForPackages(packageList, callback) {
@@ -257,22 +256,23 @@ function eachRecipe(callback) {
 	require('../gulp/recipeManager').eachRecipe(callback);
 }
 
-function _findPackageByType(types, callback, findEntryFilesFunc, recipeType) {
+function _findPackageByType(types, callback, findEntryFilesFunc, recipeType, projectDir) {
 	//var callBackList = [];
 	var packageSet = {};
 	types = [].concat(types);
 
 	if (recipeType === 'src') {
-		require('../gulp/recipeManager').eachRecipeSrc((src, recipeDir) => {
-			findEntryFiles(Path.resolve(recipeDir, 'package.json'));
-		});
+		require('../gulp/recipeManager').eachRecipeSrc(projectDir, onEachSrcRecipe);
 	} else {
 		eachRecipe((recipeDir) => {
 			findEntryFiles(Path.resolve(recipeDir, 'package.json'));
 		});
 	}
-	// if (config().dependencyMode)
-	// 	findEntryFiles(Path.resolve(config().rootPath, 'package.json'));
+
+	function onEachSrcRecipe(src, recipeDir) {
+		if (recipeDir)
+			findEntryFiles(Path.resolve(recipeDir, 'package.json'));
+	}
 
 	function findEntryFiles(recipe) {
 		findEntryFilesFunc(recipe, function(name, entryPath, parsedName, pkJson, packagePath) {

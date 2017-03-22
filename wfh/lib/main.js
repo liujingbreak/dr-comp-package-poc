@@ -1,10 +1,17 @@
 //require('./nodeSearchPath');
 require('../bin/nodePath')();
 var argv = require('yargs')
+	.describe('root', 'workspace folder')
+	.default('root', process.env.DR_ROOT_DIR || process.cwd())
 	.describe('p', '<entry-package-name>')
-	.alias('p', 'package').argv;
+	.alias('p', 'package')
+	.describe('webpack-watch', 'Run Webpack in watch mode')
+	.alias('webpack-watch', 'ww').argv;
 
+require('../bin/cli')(argv.root).init();
 var config = require('./config');
+config.reload();
+
 require('./logConfig')(config().rootPath, config().log4jsReloadSeconds);
 var log = require('log4js').getLogger('lib.main');
 var pkMgr = require('./packageMgr');

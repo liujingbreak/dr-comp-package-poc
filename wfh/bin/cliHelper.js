@@ -6,6 +6,8 @@ var recipeManager = require('../lib/gulp/recipeManager');
 var config = require('../lib/config');
 var shell = require('shelljs');
 var jsYaml = require('js-yaml');
+var Path = require('path');
+var fs = require('fs');
 var _ = require('lodash');
 //var buildUtils = require('../lib/gulp/buildUtils');
 require('../lib/logConfig')(config().rootPath);
@@ -14,6 +16,7 @@ var packageUtils = require('../lib/packageMgr/packageUtils');
 exports.writeProjectDep = writeProjectDep;
 exports.listCompDependency = listCompDependency;
 exports.addupConfigs = addupConfigs;
+exports.cleanPackagesWalkerCache = cleanPackagesWalkerCache;
 exports.clean = clean;
 
 function writeProjectDep(projDir) {
@@ -51,6 +54,10 @@ function addupConfigs() {
 		var dr = json.dr;
 		if (!dr)
 			return;
+		// if (dr.globalConfig) {
+		// 	Object.assign(componentConfigs, dr.globalConfig.public);
+		// 	browserSideConfigProp.push(..._.keys(dr.globalConfig.public));
+		// }
 
 		// component customized configuration properties
 		_addupCompConfigProp(componentConfigs, name, browserSideConfigProp, dr.config);
@@ -83,8 +90,13 @@ function addupConfigs() {
 	deeplyMergeJson(superConfig, componentConfigs);
 	var res = {'config.yaml': jsYaml.safeDump(superConfig)};
 	_.each(componentConfigs4Env, (configs, env) => {
+		var tmplFile = Path.join(__dirname, 'templates', 'config.' + env + '-template.yaml');
+		if (fs.existsSync(tmplFile)) {
+			configs = Object.assign(jsYaml.safeLoad(fs.readFileSync(tmplFile, 'utf8'), {filename: tmplFile}), configs);
+		}
 		res['config.' + env + '.yaml'] = jsYaml.safeDump(configs);
 	});
+	cleanPackagesWalkerCache();
 	return Promise.resolve(res);
 }
 
@@ -102,6 +114,12 @@ function _addupCompConfigProp(componentConfigs, compName, browserSideConfigProp,
 
 	// browserSideConfigProp
 	browserSideConfigProp.push(..._.map(_.keys(configJson.public), key => compName + '.' + key));
+}
+
+function cleanPackagesWalkerCache() {
+	var packageInfoCacheFile = config.resolve('destDir', 'packageInfo.json');
+	if (fs.existsSync(packageInfoCacheFile))
+		fs.unlink(packageInfoCacheFile);
 }
 
 function clean() {

@@ -33,10 +33,13 @@ function loadAsync(content, loader) {
 function parse(source, loader) {
 	var file = loader.resourcePath;
 	var hasApi = false;
+	var astFromCache = false;
+	//log.info('js file: %s, %s', file, _.get(currPackage, 'file'));
 
-	//log.debug('js file: %s, %s', file, _.get(currPackage, 'file'));
-
-	var ast;
+	var ast = _.get(loader.query, ['astFromCache', file]);
+	if (ast) {
+		astFromCache = true;
+	}
 	try {
 		ast = esParser.parse(source, {
 			splitLoad: splitPoint => {},
@@ -48,12 +51,14 @@ function parse(source, loader) {
 				hasApi = true;
 				log.debug('require __api in %s', file);
 			}
-		});
+		}, ast);
 	} catch (e) {
 		log.error('Failed to parse %s', file);
 		throw e;
 	}
-	source = loader.query.injector.injectToFile(file, source, ast);
+	if (astFromCache)
+		delete loader.query.astFromCache[file];
+	//source = loader.query.injector.injectToFile(file, source, ast);
 	//loader.query.injector.removeListener('replace', loader.data.onReplaceApiCall);
 	var currPackage = api.findPackageByFile(file);
 	if (hasApi) {

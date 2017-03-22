@@ -1,7 +1,7 @@
 {
   "name": "@dr/examples-recipe",
-  "version": "0.0.32",
-  "description": "Recipe package of examples-recipe",
+  "version": "0.1.0",
+  "description": "Component group: examples-recipe",
   "dependencies": {
     "@dr/example-common": "1.0.27",
     "@dr/example-compile-template": "0.0.8",

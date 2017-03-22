@@ -12,7 +12,8 @@
     "type": "server",
     "bundle": "home",
     "entryPage": "index.html",
-    "compiler": "webpack"
+    "compiler": "webpack",
+    "outputPath": "/"
   },
   "dependencies": {
     "angular-ui-router": "^0.3.2",

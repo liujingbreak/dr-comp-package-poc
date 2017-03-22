@@ -52,20 +52,4 @@ require('@dr/webpack2-builder').tapable.plugin('webpackConfig', function(webpack
 });
 ```
 
-## DR brick Container / playground
-### Container is a NodeJS runtime stack, an addon system and a web project skeleton.
-
-Container compiles and packs components into static web assets (JS, CSS and other resouces).
-
-Container manages a bunch of node components that works togther as a compiler tool based on **gulp**, **Browserify** and **Webpack**.
-
-Container is not like **Yeoman**, it is not a project skeleton generator.
-
-**playground** is local dev environment container for developers.
-
-### Kinds of containers
-- Web desktop app for legacy browser.
-- Web app for advance browsers of desktop and mobile device.
-- **Cordava** based hibrid web app.
-
 

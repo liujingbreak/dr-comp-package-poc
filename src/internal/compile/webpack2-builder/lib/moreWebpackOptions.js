@@ -1,17 +1,11 @@
 var api = require('__api');
 var fs = require('fs');
 var Path = require('path');
-var chalk = require('chalk');
 var _ = require('lodash');
-var MultiEntryHtmlPlugin = require('./multi-entry-html-plugin');
 var glob = require('glob');
 var log = require('log4js').getLogger(api.packageName + '.' + Path.basename(__filename));
-var webpack = require('webpack');
-const ManualChunkPlugin = require('./manual-chunk-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 var noParseHelper = require('./noParseHelper');
 var Promise = require('bluebird');
-const publicPath = require('./publicPath');
 const http = require('http');
 
 var writeFileAsync = Promise.promisify(fs.writeFile.bind(fs));
@@ -21,8 +15,8 @@ const TEMP_DIR = 'webpack-temp';
 exports.chunk4package = chunk4package;
 exports.TEMP_DIR = TEMP_DIR;
 // More customized plugins
-exports.setupAsync = function(webpackConfig) {
-	webpackConfig.module.noParse = api.config().browserifyNoParse ?
+exports.createParamsAsync = function(contextPath) {
+	var noParse = api.config().browserifyNoParse ?
 		api.config().browserifyNoParse.map(line => {
 			var packagePath = api.packageUtils.findBrowserPackagePath(line);
 			log.debug('noParse: %s', packagePath + '/**/*');
@@ -36,10 +30,11 @@ exports.setupAsync = function(webpackConfig) {
 	var entryChunkHtmlAndView = {};
 	var browserPropSet = {};
 	var file2EntryChunkName = {};
+	var webpackConfigEntry = {};
 
 	eachComponent(
 		function onComp(component) {
-			noparse4Package(component, webpackConfig);
+			noparse4Package(component, noParse);
 			var browserSideConfigProp = _.get(component, ['dr', 'browserSideConfigProp']);
 			if (!Array.isArray(browserSideConfigProp))
 				browserSideConfigProp = [browserSideConfigProp];
@@ -65,7 +60,7 @@ exports.setupAsync = function(webpackConfig) {
 			if (!_.has(entryChunkViews, bundle))
 				entryChunkViews[bundle] = [];
 			eachEntryPageForComp(entryComp.entryViews, entryComp, (packagePath, pageAbsPath, pathRelPath) => {
-				entryViewSet[Path.relative(webpackConfig.context || process.cwd(), pageAbsPath)] = 1; // TODO: windows
+				entryViewSet[Path.relative(contextPath || process.cwd(), pageAbsPath)] = 1; // TODO: windows
 				entryChunkHtmlAndView[bundle].push(pageAbsPath);
 				entryChunkViews[bundle].push(pageAbsPath);
 			});
@@ -83,122 +78,48 @@ exports.setupAsync = function(webpackConfig) {
 	var allWritten = _.map(bundleEntryCompsMap, (moduleInfos, bundle) => {
 		return writeEntryFileForBundle(bundle, moduleInfos, entryChunkHtmls[bundle], entryChunkViews[bundle])
 		.then(file => {
-			webpackConfig.entry[bundle] = file;
+			webpackConfigEntry[bundle] = file;
 			file2EntryChunkName[file] = bundle;
 			return null;
 		});
 	});
 
 	return Promise.all(allWritten).then(() => {
-		return log.info('entry: %s', JSON.stringify(webpackConfig.entry, null, '  '));
+		return log.info('entry: %s', JSON.stringify(webpackConfigEntry, null, '  '));
 	})
 	.then(() => {
-		// More plugins here
-		addPlugins(webpackConfig, file2EntryChunkName, entryChunkHtmlAndView, entryViewSet, legoConfig);
-
-		if (!api.config().devMode)
-			webpackConfig.plugins.push(require('./gzipSizePlugin'));
-
-		return bundleEntryCompsMap;
+		// Plugins needed params here
+		return [webpackConfigEntry, noParse, file2EntryChunkName, entryChunkHtmlAndView, legoConfig, chunk4package,
+			sendlivereload, createEntryHtmlOutputPathPlugin(entryViewSet)];
 	});
 };
 
-function addPlugins(webpackConfig, file2EntryChunkName, entryChunkHtmlAndView, entryViewSet, legoConfig) {
-	webpackConfig.plugins.push(
-		new ManualChunkPlugin({
-			manifest: 'runtime',
-			defaultChunkName: 'common-lib',
-			getChunkName: (file) => {
-				var bundle = file2EntryChunkName[file];
-				if (bundle)
-					return bundle;
-				var pk = api.findPackageByFile(file);
-				if (!pk) {
-					log.warn('No chunk(bundle) name for: %s', chalk.red(Path.relative(webpackConfig.context, file)));
-					return null;
-				}
-				return chunk4package(pk);
-			}
-		}),
-		new ExtractTextPlugin({
-			filename: api.config().devMode ? '[name].css' : '[name].[contenthash:10].css'
-		}),
-		new MultiEntryHtmlPlugin({
-			inlineChunk: 'runtime',
-			entryHtml: entryChunkHtmlAndView, // key: chunkName, value: string[]
-			liveReloadJs: api.config().devMode ? `http://${publicPath.getLocalIP()}:${api.config.get('livereload.port')}/livereload.js` : false
-		}),
-		function() {
-			var compiler = this;
-			compiler.plugin('compilation', function(compilation) {
-				compilation.plugin('multi-entry-html-emit-assets', function(htmlAssets, callback) {
-					log.debug('htmlAssets.path: %s', htmlAssets.path);
-					var isView = false;
-					if (_.has(entryViewSet, htmlAssets.path)) {
-						log.info('Entry view: %s', htmlAssets.path);
-						isView = true;
-					}
-					var component = api.findPackageByFile(Path.resolve(compiler.options.context, htmlAssets.path));
-					var dir = api.config.get(['entryPageMapping', component.longName]) ||
-						api.config.get(['entryPageMapping', component.shortName]) || component.shortName;
-
-					var relative = Path.relative(component.realPackagePath, htmlAssets.path);
-					if (!isView)
-						htmlAssets.path = Path.join(_.trimStart(dir, '/'), relative);
-					else
-						htmlAssets.path = Path.join('../server', _.trimStart(dir, '/'), relative);
-
-					var stag = htmlAssets.$('<script>');
-					stag.attr('type', 'text/javascript');
-					stag.text('\nvar __wfhEntryPage = \'' + relative.replace(/\\/g, '/') + '\';\n' +
-						'_reqLego("' + component.longName + '");\n');
-					htmlAssets.$('body').append(stag);
-					callback(null, htmlAssets);
-				});
-			});
-			if (api.config.get('devMode') === true && api.config.get('livereload.enabled', true)) {
-				compiler.plugin('done', function() {
-					log.info('live reload page'); // tiny-lr server is started by @dr-core/browserify-builder
-					sendlivereload();
-				});
-			}
-		},
-		new webpack.DefinePlugin({
-			LEGO_CONFIG: JSON.stringify(legoConfig)
-		})
-	);
-}
-
+var entryJsTemplate = _.template(fs.readFileSync(
+	Path.join(__dirname, 'entry.js.tmpl'), 'utf8'));
 /**
  * @param {*} bundle
  * @param {*} packages
  * @param {*} htmlFiles string[]
  */
 function writeEntryFileForBundle(bundle, packages, htmlFiles, viewFiles) {
-	var buf = ['window.__req = __webpack_require__;'];
-	buf.push('var _lego_entryFuncs = {};');
-	[].concat(packages).forEach(package => {
-		buf.push(`_lego_entryFuncs["${package.longName}"]= function() {return require("${package.longName}");}`);
-	});
-	buf.push(`_reqLego = function(name) {`);
-	buf.push(`  return _lego_entryFuncs[name]();`);
-	buf.push(`}`);
 	var file = Path.resolve(api.config().destDir, TEMP_DIR, 'entry_' + bundle + '.js');
-	htmlFiles.forEach(htmlFile => {
+
+	var requireHtmlNames = htmlFiles.map(eachHtmlName);
+	var requireViewNames = viewFiles.map(eachHtmlName);
+
+	function eachHtmlName(htmlFile) {
 		var requireHtmlName = Path.relative(Path.dirname(file), htmlFile).replace(/\\/g, '/');
 		if (!(requireHtmlName.startsWith('..') || requireHtmlName.startsWith('/')))
 			requireHtmlName = './' + requireHtmlName;
-		buf.push('require("!@dr-core/webpack2-builder/lib/entry-html-loader!@dr-core/webpack2-builder/lib/html-loader!@dr/translate-generator!@dr/template-builder!' + requireHtmlName + '");\n');
-	});
-	viewFiles.forEach(viewFiles => {
-		var requireHtmlName = Path.relative(Path.dirname(file), viewFiles).replace(/\\/g, '/');
-		if (!(requireHtmlName.startsWith('..') || requireHtmlName.startsWith('/')))
-			requireHtmlName = './' + requireHtmlName;
-		buf.push('require("!@dr-core/webpack2-builder/lib/entry-html-loader!@dr-core/webpack2-builder/lib/html-loader!' + requireHtmlName + '");\n');
-	});
+		return requireHtmlName;
+	}
+
 	log.info('write entry file %s', file);
-	return writeFileAsync(file, buf.join('\n'))
-	.delay(2000)
+	return writeFileAsync(file, entryJsTemplate({
+		packages: packages,
+		requireHtmlNames: requireHtmlNames,
+		requireViewNames: requireViewNames
+	}))
 	.then(() => file);
 }
 
@@ -214,6 +135,42 @@ function eachComponent(onComponent, onEntryComponent) {
 			onEntryComponent(component);
 		}
 	});
+}
+
+exports.createEntryHtmlOutputPathPlugin = createEntryHtmlOutputPathPlugin;
+/**
+ * Change output path for each package's entry page or entry view (server render template)
+ */
+function createEntryHtmlOutputPathPlugin(entryViewSet) {
+	return function() {
+		var compiler = this;
+		compiler.plugin('compilation', function(compilation) {
+			compilation.plugin('multi-entry-html-emit-assets', function(htmlAssets, callback) {
+				log.debug('htmlAssets.path: %s', htmlAssets.path);
+				var isView = false;
+				if (_.has(entryViewSet, htmlAssets.path)) {
+					log.info('Entry view: %s', htmlAssets.path);
+					isView = true;
+				}
+				var component = api.findPackageByFile(Path.resolve(compiler.options.context, htmlAssets.path));
+				var dir = api.config.get(['entryPageMapping', component.longName]) ||
+					api.config.get(['entryPageMapping', component.shortName]) || component.shortName;
+
+				var relative = Path.relative(component.realPackagePath, htmlAssets.path);
+				if (!isView)
+					htmlAssets.path = Path.join(_.trimStart(dir, '/'), relative);
+				else
+					htmlAssets.path = Path.join('../server', _.trimStart(dir, '/'), relative);
+
+				var stag = htmlAssets.$('<script>');
+				stag.attr('type', 'text/javascript');
+				stag.text('\nvar __wfhEntryPage = \'' + relative.replace(/\\/g, '/') + '\';\n' +
+					'_reqLego("' + component.longName + '");\n');
+				htmlAssets.$('body').append(stag);
+				callback(null, htmlAssets);
+			});
+		});
+	};
 }
 
 /**
@@ -270,12 +227,12 @@ function sendlivereload() {
 	});
 }
 
-function noparse4Package(component, webpackConfig) {
+function noparse4Package(component, noParse) {
 	if (component.browserifyNoParse) {
 		component.browserifyNoParse.forEach(function(noParseFile) {
 			var item = Path.resolve(component.realPackagePath, noParseFile);
 			log.debug('noParse: %s', item);
-			webpackConfig.module.noParse.push(new RegExp(noParseHelper.glob2regexp(item)));
+			noParse.push(new RegExp(noParseHelper.glob2regexp(item)));
 		});
 	}
 	var setting = _.get(component, 'dr.noParse');
@@ -283,7 +240,7 @@ function noparse4Package(component, webpackConfig) {
 		[].concat(setting).forEach(function(noParse) {
 			var item = Path.resolve(component.realPackagePath, noParse);
 			log.debug('noParse: %s', item);
-			webpackConfig.module.noParse.push(new RegExp(noParseHelper.glob2regexp(item)));
+			noParse.push(new RegExp(noParseHelper.glob2regexp(item)));
 		});
 	}
 }

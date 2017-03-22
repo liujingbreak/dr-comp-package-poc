@@ -20,11 +20,11 @@ var runSequence = require('run-sequence');
 
 var buildUtils = require('./lib/gulp/buildUtils');
 
-var findPackageJson = require('./lib/gulp/findPackageJson');
 var packageLintableSrc = require('./lib/gulp/packageLintableSrc');
 var watchPackages = require('./lib/gulp/watchPackages');
 var recipeManager = require('./lib/gulp/recipeManager');
 var PackageInstall = require('./lib/gulp/packageInstallMgr');
+var packageUtils = require('./lib/packageMgr/packageUtils');
 
 var config = require('./lib/config');
 require('./lib/logConfig')(config().rootPath);
@@ -90,63 +90,25 @@ function _npmInstallCurrFolder() {
 	}
 }
 
-// gulp.task('install-recipe', ['link'], function(cb) {
-// 	//var lookingForDeps = configuredVendors();
-// 	Promise.coroutine(function*() {
-// 		if (config().dependencyMode) {
-// 			var currPkJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-// 			var savedVer = currPkJson.dependencies ? currPkJson.dependencies['@dr/internal-recipe'] :
-// 				(currPkJson.devDependencies ? currPkJson.devDependencies['@dr/internal-recipe'] : false);
-// 			if (savedVer) {
-// 				yield packageInstaller.installRecipeAsync('@dr/internal-recipe@' + savedVer);
-// 			} else {
-// 				yield packageInstaller.installRecipeAsync(config().internalRecipeFolderPath);
-// 			}
-// 		}
-
-// 		yield new Promise((resolve, reject) => {
-// 			process.nextTick(() => {
-// 				// Put it in process.nextTick to hopefully solve a windows install random 'EPERM' error.
-// 				packageInstaller.flattenInstalledRecipes();
-// 				resolve();
-// 			});
-// 		});
-
-// 		var srcDirs = [];
-// 		recipeManager.eachRecipeSrc(function(src, recipe) {
-// 			srcDirs.push(src);
-// 		});
-// 		yield Promise.all([
-// 			packageInstaller.scanSrcDepsAsync(srcDirs),
-// 			buildUtils.npmMajorVersion()
-// 		]);
-// 		yield packageInstaller.installDependsAsync();
-// 		cb();
-// 	})()
-// 	.catch(e => {
-// 		cb(e);
-// 	});
-// });
-
 gulp.task('flatten-recipe', function() {
 	//packageInstaller.flattenInstalledRecipes();
 	gutil.log('flatten-recipe is obsolete');
 });
 
-gulp.task('check-dep', function() {
-	var mgr = new PackageInstall();
-	var srcDirs = [];
-	recipeManager.eachRecipeSrc(function(src, recipe) {
-		srcDirs.push(src);
-	});
-	mgr.scanSrcDepsAsync(srcDirs)
-	.then(_.bind(mgr.printComponentDep, mgr));
-});
+// gulp.task('check-dep', function() {
+// 	var mgr = new PackageInstall();
+// 	var srcDirs = [];
+// 	recipeManager.eachRecipeSrc(function(src, recipe) {
+// 		srcDirs.push(src);
+// 	});
+// 	mgr.scanSrcDepsAsync(srcDirs)
+// 	.then(_.bind(mgr.printComponentDep, mgr));
+// });
 
 gulp.task('lint', function() {
 	var i = 0;
 	return gulp.src(['lib/**/*.js', 'e2etest/**/*.js']
-	.concat(packageLintableSrc(argv.p)))
+	.concat(packageLintableSrc(argv.p, argv.project)))
 	.pipe(jshint())
 	.pipe(jshint.reporter('jshint-stylish'))
 	.pipe(jshint.reporter('fail'))
@@ -167,7 +129,11 @@ gulp.task('link', function() {
 });
 
 gulp.task('compile', function(cb) {
-	runSequence(['link', 'flatten-recipe'], 'compile:dev', cb);
+	require('./bin/cli')(config().rootPath).init()
+	.then(() => {
+		config.reload();
+		runSequence('compile:dev', cb);
+	});
 });
 
 gulp.task('compile:dev', function(cb) {
@@ -192,17 +158,27 @@ gulp.task('bump', function(cb) {
 	}
 	var srcDirs = [];
 	var recipes = [];
-	recipeManager.eachRecipeSrc(function(src, recipe) {
+	recipeManager.eachRecipeSrc(argv.project, function(src, recipe) {
 		srcDirs.push(src);
-		recipes.push(recipe);
+		if (recipe)
+			recipes.push(recipe);
 	});
-	var stream = gulp.src(srcDirs)
-		.pipe(findPackageJson())
+	var realPathAsync = Promise.promisify(fs.realpath.bind(fs));
+	var stream = gulp.src('.')
 		.pipe(through.obj(function(file, enc, next) {
-			file.contents = new Buffer(fs.readFileSync(file.path, 'utf8'));
-			next(null, file);
+			next(null);
 		}, function(next) {
 			var self = this;
+			var proms = [];
+			packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
+				proms.push(realPathAsync(packagePath).then(packagePath => {
+					self.push(new File({
+						base: config().rootPath,
+						path: Path.relative(config().rootPath, Path.join(packagePath, 'package.json')),
+						contents: new Buffer(fs.readFileSync(Path.resolve(packagePath, 'package.json'), 'utf8'))
+					}));
+				}));
+			}, 'src', argv.project);
 			recipes.forEach(function(recipe) {
 				self.push(new File({
 					base: config().rootPath,
@@ -210,14 +186,7 @@ gulp.task('bump', function(cb) {
 					contents: new Buffer(fs.readFileSync(Path.resolve(recipe, 'package.json'), 'utf8'))
 				}));
 			});
-
-			var packageJsonPath = Path.resolve(config().rootPath, 'package.json');
-			this.push(new File({
-				base: config().rootPath,
-				path: packageJsonPath,
-				contents: new Buffer(fs.readFileSync(packageJsonPath, 'utf8'))
-			}));
-			next();
+			Promise.all(proms).then(() => next());
 		}))
 		.pipe(through.obj(function(file, enc, next) {
 			file.base = config().rootPath;
@@ -242,42 +211,38 @@ gulp.task('bump', function(cb) {
 
 
 gulp.task('publish', function(cb) {
-	var srcDirs = [];
-	recipeManager.eachRecipeSrc(function(src, recipe) {
-		srcDirs.push(src);
-	});
 	var promises = [];
 	var count = 0;
-
-	var data = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-	gutil.log('publish ' + data.name + '@' + data.version);
-	promises.push(buildUtils.promisifyExe('npm', 'publish', '.', {silent: true})
-		.then(sucess).catch(handleExption));
-
-	gulp.src(srcDirs)
-		.pipe(findPackageJson())
-		.on('error', gutil.log)
-		.on('data', file => {
-			var data = JSON.parse(fs.readFileSync(file.path, 'utf8'));
-			gutil.log('publish ' + data.name + '@' + data.version);
-			promises.push( buildUtils.promisifyExe('npm', 'publish', Path.dirname(file.path), {silent: true})
-				.then(sucess).catch(handleExption));
-		})
-		.on('end', ()=> {
-			recipeManager.eachRecipeSrc(function(src, recipeDir) {
-				var data = JSON.parse(fs.readFileSync(Path.join(recipeDir, 'package.json'), 'utf8'));
+	var Q = require('promise-queue');
+	var q = new Q(5, Infinity);
+	packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
+		promises.push(
+			q.add(() => {
+				gutil.log('publish ' + json.name + '@' + json.version);
+				return buildUtils.promisifyExe('npm', 'publish', packagePath, {silent: true});
+			})
+			.then(sucess).catch(handleExption)
+		);
+	}, 'src', argv.project);
+	recipeManager.eachRecipeSrc(argv.project, function(src, recipeDir) {
+		if (!recipeDir)
+			return;
+		var data = JSON.parse(fs.readFileSync(Path.join(recipeDir, 'package.json'), 'utf8'));
+		promises.push(
+			q.add(() => {
 				gutil.log('publish ' + data.name + '@' + data.version);
-				promises.push( buildUtils.promisifyExe('npm', 'publish', recipeDir, {silent: true})
-						.then(sucess).catch(handleExption));
-			});
-
-			Promise.all(promises)
-			.catch(gutil.log)
-			.finally(() => {
-				gutil.log(count + ' published');
-				cb();
-			});
-		});
+				return buildUtils.promisifyExe('npm', 'publish', recipeDir, {silent: true});
+			})
+			.then(sucess)
+			.catch(handleExption)
+		);
+	});
+	Promise.all(promises)
+	.catch(gutil.log)
+	.finally(() => {
+		gutil.log(count + ' published');
+		cb();
+	});
 
 	function sucess(m) {
 		count++;
@@ -290,41 +255,42 @@ gulp.task('publish', function(cb) {
 });
 
 gulp.task('unpublish', function(cb) {
-	var srcDirs = [];
 	var promises = [];
-	recipeManager.eachRecipeSrc(function(src, recipe) {
-		srcDirs.push(src);
-	});
-	// var origOutMaxNum = process.stdout.getMaxListeners();
-	// var origErrMaxNum = process.stderr.getMaxListeners();
-	// process.stderr.setMaxListeners(9999);
-	// process.stdout.setMaxListeners(9999);
+	var count = 0;
 
-	gulp.src(srcDirs)
-		.pipe(findPackageJson())
-		.on('error', gutil.log)
-		.on('data', file => {
-			var data = JSON.parse(fs.readFileSync(file.path, 'utf8'));
-			gutil.log('unpublish src ' + data.name + '@' + data.version);
-			promises.push(buildUtils.promisifyExe('npm', 'unpublish', data.name + '@' + data.version).catch(()=>{}));
-		})
-		.on('end', ()=> {
-			recipeManager.eachRecipeSrc(function(src, recipeDir) {
+	var Q = require('promise-queue');
+	var q = new Q(5, Infinity);
+	packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
+		promises.push(
+			q.add(()=> {
+				gutil.log('unpublish ' + json.name + '@' + json.version);
+				return buildUtils.promisifyExe('npm', 'unpublish', json.name + '@' + json.version);
+			})
+			.then(sucess).catch(()=>{})
+		);
+	}, 'src', argv.project);
+	recipeManager.eachRecipeSrc(argv.project, function(src, recipeDir) {
+		if (!recipeDir)
+			return;
+		promises.push(
+			q.add(() => {
 				var data = JSON.parse(fs.readFileSync(Path.join(recipeDir, 'package.json'), 'utf8'));
-				gutil.log('unpublish recipe ' + data.name + '@' + data.version);
-				promises.push(buildUtils.promisifyExe('npm', 'unpublish', data.name + '@' + data.version).catch(()=>{}));
-			});
-			var data = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-			gutil.log('unpublish ' + data.name + '@' + data.version);
-			promises.push(buildUtils.promisifyExe('npm', 'unpublish', data.name + '@' + data.version).catch(()=>{}));
-			Promise.all(promises)
-			.catch(()=>{})
-			.finally(() => {
-				// process.stderr.setMaxListeners(origErrMaxNum);
-				// process.stdout.setMaxListeners(origOutMaxNum);
-				process.nextTick(cb);
-			});
-		});
+				gutil.log('unpublish ' + data.name + '@' + data.version);
+				return buildUtils.promisifyExe('npm', 'unpublish', data.name + '@' + data.version);
+			})
+			.then(sucess).catch(()=>{})
+		);
+	});
+	Promise.all(promises)
+	.catch(()=>{})
+	.finally(() => {
+		gutil.log(count + ' unpublished');
+		cb();
+	});
+
+	function sucess(m) {
+		count++;
+	}
 });
 
 gulp.task('test', function(callback) {

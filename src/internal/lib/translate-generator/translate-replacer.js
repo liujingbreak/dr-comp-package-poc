@@ -115,7 +115,7 @@ function replaceHtml(source, file, locale, skipPackageCache) {
 }
 
 function checkSkipPackageAndGetRes(file, locale, skipPackageCache) {
-	var drPackage = api.findBrowserPackageInstanceByPath(file);
+	var drPackage = api.findPackageByFile(file);
 	if (!drPackage || skipPackageCache && _.has(skipPackageCache, drPackage.longName)) {
 		//log.debug('skip file: %s', file);
 		return false;

@@ -11,8 +11,8 @@
   "dr": {
     "chunk": "example-wp",
     "entryPage": "index.html",
-    "browserSideConfigProp": ["gulp.watchDebounceDelay", "e2etestHelper"],
-    "compiler": "webpack"
+    "compiler": "webpack",
+    "jsLoader": "babel"
   },
   "license": "MIT"
 }

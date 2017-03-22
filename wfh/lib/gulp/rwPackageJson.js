@@ -7,24 +7,20 @@ const mkdirp = require('mkdirp');
 const fs = require('fs');
 const Path = require('path');
 const File = require('vinyl');
-const pkutil = require('../packageMgr/packageUtils');
 const jsonLint = require('json-lint');
-const log = require('log4js').getLogger(Path.basename(__filename, '.js'));
+const log = require('log4js').getLogger('wfh.' + Path.basename(__filename, '.js'));
 const _ = require('lodash');
 const config = require('../config');
 const isWin32 = require('os').platform().indexOf('win32') >= 0;
 
 module.exports = {
 	symbolicLinkPackages: symbolicLinkPackages,
-	linkPkJson: linkPkJson, //deprecated
 	addDependency: addDependency,
 	removeDependency: removeDependency,
 	readAsJson: readAsJson
 };
 
 const readFileAsync = Promise.promisify(fs.readFile);
-//const writeFileAsync = Promise.promisify(fs.writeFile);
-const accessAsync = Promise.promisify(fs.access);
 
 /**
  * [readAsJson description]
@@ -66,7 +62,7 @@ function symbolicLinkPackages(destDir) {
 				return callback();
 			}
 			json = JSON.parse(content);
-			newPath = Path.resolve(destDir, 'node_modules', json.name);
+			newPath = Path.join(destDir, 'node_modules', json.name);
 			var stat, exists;
 			try {
 				stat = fs.lstatSync(newPath);
@@ -82,7 +78,7 @@ function symbolicLinkPackages(destDir) {
 			if (exists) {
 				if (stat.isFile() ||
 					(stat.isSymbolicLink() &&
-						(stat.mtime.getTime() < file.stat.mtime.getTime() || !fileExists(newPath)))) {
+						(stat.mtime.getTime() < file.stat.mtime.getTime() || !fs.existsSync(newPath)))) {
 					fs.unlinkSync(newPath);
 					_symbolicLink(Path.dirname(file.path), newPath);
 				} else if (stat.isDirectory()) {
@@ -91,7 +87,7 @@ function symbolicLinkPackages(destDir) {
 				}
 			}
 			self.push(new File({
-				base: Path.resolve(destDir),
+				base: destDir,
 				path: newPath,
 				contents: new Buffer(JSON.stringify(json, null, '\t'))
 			}));
@@ -107,161 +103,68 @@ function symbolicLinkPackages(destDir) {
 	});
 }
 
-function fileExists(file) {
-	try {
-		fs.accessSync(file, fs.F_OK);
-		return true;
-	} catch (e) {
-		return false;
-	}
-}
-
 function _symbolicLink(dir, link) {
 	mkdirp.sync(Path.dirname(link));
 	fs.symlinkSync(Path.relative(Path.dirname(link), dir), link, isWin32 ? 'junction' : 'dir');
 	log.info('create symbolic link %s', link);
 }
-/**
- * @deprecated
- * create new module which contains package.json that links to the module in `src` folder
- * @param  {string} destDir the `node_module` folder path
- */
-function linkPkJson(destDir, recipeFile) {
-	return through.obj(function(file, encoding, callback) {
-		var self = this;
-		var relativePath, newPath, json;
-		readFileAsync(file.path, {encoding: 'utf-8'})
-		.then(function(content) {
-			var lint = jsonLint(content);
-			if (lint.error) {
-				log.error(lint);
-				this.emit('error', new PluginError('rwPackageJson', lint, {showStack: true}));
-				return callback();
-			}
-			json = JSON.parse(content);
-			if (json.main) {
-				relativePath = _relativeModulePath(file.path, json.main, destDir);
-				//gutil.log('link attribute "main" to ' + relativePath);
-				json.main = relativePath;
-			}
-			if (json.browser && _.isString(json.browser)) {
-				relativePath = _relativeModulePath(file.path, json.browser, destDir);
-				//gutil.log('link attribute "browser" to ' + relativePath);
-				json.browser = relativePath;
-			}
-			if (json.style && _.isString(json.style)) {
-				relativePath = _relativeModulePath(file.path, json.style, destDir);
-				//gutil.log('link attribute "browser" to ' + relativePath);
-				json.style = relativePath;
-			}
-			var packageNameObj = pkutil.parseName(json.name);
-			newPath = Path.resolve(destDir, '@' + packageNameObj.scope,
-				packageNameObj.name,
-				'package.json');
-
-			return accessAsync(newPath, fs.R_OK | fs.W_OK).then(function() {
-				return true;
-			}).catch(function() {
-				return false;
-			});
-		})
-		.then(function(exists) {
-			var targetStat;
-			if (exists) {
-				targetStat = fs.statSync(newPath);
-			}
-			if (!exists || targetStat.mtime.getTime() < file.stat.mtime.getTime()) {
-				// if linking package is outdated, we need to output package.json
-				log.info('linking: ' + newPath);
-				var newFile = new File({
-					base: Path.resolve(destDir),
-					path: newPath,
-					contents: new Buffer(JSON.stringify(json, null, '\t'))
-				});
-				self.push(newFile);
-				return null;
-			} else {
-				// if recipe file is outdated, we still need to output package.json
-				return accessAsync(recipeFile, fs.R_OK | fs.W_OK).then(function() {
-					return fs.statSync(recipeFile).mtime.getTime() < file.stat.mtime.getTime();
-				}, function() {
-					return true;
-				}).then(function(recipeOutdated) {
-					if (recipeOutdated) {
-						var newFile = new File({
-							base: Path.resolve(destDir),
-							path: newPath,
-							contents: new Buffer(JSON.stringify(json, null, '\t'))
-						});
-						self.push(newFile);
-					}
-				});
-			}
-		}).then(function() {
-			callback();
-		})
-		.catch(function(err) {
-			log.error(err);
-			self.emit('error', new PluginError('rwPackageJson', err.stack, {showStack: true}));
-			callback(err);
-		});
-	});
-}
-
-function _relativeModulePath(modulePath, origPath, destDir) {
-	return Path.relative(
-		Path.join(destDir, '@dr', 'someguy'),
-		Path.join(Path.dirname(modulePath), origPath)).replace(/\\/g, '/');
-}
 
 var packageJsonTemp = {
 	name: '@dr/',
-	version: '0.0.0',
-	description: 'Recipe package of ',
+	version: '0.1.0',
+	description: 'Component group: ',
 	dependencies: null
 };
 
-function addDependency(recipeDir, destJsonPath) {
+/**
+ * Write recipe file
+ * Write an array of linked package path, and a recipe package.json file
+ * @param {string} recipeAbsDir null when there is no recipe dir for those linked package file
+ */
+function addDependency(recipeAbsDir) {
 	var linkFiles = [];
-	var destJsonProm = accessAsync(destJsonPath, fs.R_OK | fs.W_OK)
-	.then(function() {
-		var content = fs.readFileSync(destJsonPath);
-		var destJson = JSON.parse(content, 'utf8');
-		return destJson;
-	}, function() {
-		var destJson = _.cloneDeep(packageJsonTemp);
-		var relativeRecipeDir = Path.relative(config().rootPath, recipeDir);
-		destJson.name += relativeRecipeDir.replace(/[\/\\]/g, '-');
-		destJson.description += relativeRecipeDir;
-
-		return destJson;
-	});
+	var destJson;
+	if (recipeAbsDir) {
+		var recipeFile = Path.resolve(recipeAbsDir, 'package.json');
+		if (fs.existsSync(recipeFile)) {
+			log.info('existing recipeFile=', recipeFile);
+			var content = fs.readFileSync(recipeFile, 'utf8');
+			try {
+				destJson = JSON.parse(content);
+			} catch (err) {}
+		}
+		if (!destJson) {
+			destJson = _.cloneDeep(packageJsonTemp);
+			var recipeDirName = Path.basename(recipeAbsDir);
+			destJson.name += recipeDirName.replace(/[\/\\]/g, '-');
+			destJson.description += recipeDirName;
+		}
+	}
 
 	return through.obj(function(file, encoding, callback) {
-		destJsonProm.then(function(destJson) {
-			var json = JSON.parse(file.contents.toString('utf8'));
+		var json = JSON.parse(file.contents.toString('utf8'));
 
-			log.debug('add to recipe: ' + recipeDir + ' : ' + file.path);
-			linkFiles.push(Path.relative(config().rootPath, file.path));
-			if (!destJson.dependencies) {
-				destJson.dependencies = {};
-			}
-			destJson.dependencies[json.name] = json.version;
-			//log.debug(destJson);
-			callback();
-		});
+		log.debug('add to recipe: ' + recipeAbsDir + ' : ' + file.path);
+		linkFiles.push(Path.relative(config().rootPath, file.path));
+		if (!destJson)
+			return callback();
+		if (!destJson.dependencies) {
+			destJson.dependencies = {};
+		}
+		destJson.dependencies[json.name] = json.version;
+		callback();
 	}, function flush(callback) {
 		var self = this;
 		self.push(linkFiles);
-		destJsonProm.then(function(destJson) {
+		if (destJson) {
 			var destFile = new File({
 				base: Path.resolve(config().rootPath),
-				path: Path.resolve(destJsonPath),
+				path: Path.resolve(recipeFile),
 				contents: new Buffer(JSON.stringify(destJson, null, '  '))
 			});
 			self.push(destFile);
-			callback();
-		});
+		}
+		callback();
 	});
 }
 

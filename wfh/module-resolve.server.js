@@ -42,6 +42,24 @@ module.exports = function(injector) {
 		return _resolve;
 	});
 
+	// Hacking less-loader start: to append NpmImportPlugin to less render plugin list
+	var less = require('less');
+	var oldLessRender = less.render;
+	var NpmImportPlugin = require('less-plugin-npm-import');
+
+	injector.fromPackage(['less-loader'])
+	.factory('less', function(file) {
+		if (less.render !== hackedLessRender)
+			less.render = hackedLessRender;
+		return less;
+	});
+
+	function hackedLessRender(source, options, ...others) {
+		options.plugins.push(new NpmImportPlugin());
+		return oldLessRender.call(less, source, options, ...others);
+	}
+	// Hacking less-loader end
+
 	var chalk = require('chalk');
 	injector.fromAllComponents()
 	.factory('chalk', function() {
