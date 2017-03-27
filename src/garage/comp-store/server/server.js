@@ -18,7 +18,7 @@ exports.activate = function() {
 			json: true
 		}, (err, msg, body) => {
 			if (err) {
-				log.error('"/packageBanner" failed', err);
+				log.error('"/-wfh/packageBanner" failed', err);
 				res.send({
 					error: err,
 					packages: []
@@ -93,6 +93,28 @@ exports.activate = function() {
 			res.send({
 				readme: body
 			});
+		});
+	});
+
+	api.router().get('/select/:by/:value', (req, res) => {
+		var page = req.query.page;
+		var pageSize = req.query.pageSize;
+		var by = req.params.by;
+		var value = req.params.value;
+		request({
+			url: verdaccioUrl + '/-wfh/select/' + by + '/' + value + '?page=' + page + '&pageSize=' + pageSize,
+			method: 'GET',
+			json: true
+		}, (err, msg, body) => {
+			if (err) {
+				log.error('"/-wfh/select" failed', err);
+				res.send({
+					error: err,
+					packages: []
+				});
+			} else {
+				res.send(doAllPackages(body));
+			}
 		});
 	});
 };

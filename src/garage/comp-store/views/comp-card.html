@@ -1,5 +1,10 @@
 <div class="avatar">
-  <img src="{{$ctrl.imgUrl}}" >
+	<img ng-src="{{$ctrl.imgUrl}}">
+	<div class="category">
+		<span ng-repeat="x in $ctrl.package.dr.category" class="{{x}}">
+       {{x}}
+    </span>
+	</div>
 </div>
 <h3 class="name">{{$ctrl.package.name}}</h3>
 <div class="ver">{{$ctrl.package.version}}</div>

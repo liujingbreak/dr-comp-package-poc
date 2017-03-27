@@ -15,9 +15,14 @@
 		<form name="naviForm" class="input-row">
 			<div class="logo-bg">
 				<h4 t>res:Component Store</h4>
+				<select ng-model="compStoreVm.category" ng-options="item.value as item.name for item in category" class='category'>
+				</select>
 			</div>
 			<i class="fa fa-2x fa-search" aria-hidden="true"></i>
-			<div class="quick-search"><input autocomplete="false" placeholder="{{compStoreVm.quickSearch}}" type="text" ng-model="compStoreVm.nameSearch" /></div>
+			
+			<div class="quick-search">				
+				<input autocomplete="false" placeholder="{{compStoreVm.quickSearch}}" type="text" ng-model="compStoreVm.nameSearch" />
+			</div>
 		</form>
 	</section>
 	<section class="error-msg" ng-if="compStoreVm.error">{{ compStoreVm.error }}</section>
@@ -25,7 +30,7 @@
 
 	<comp-group card-min-width="250" on-change-card-width="compStoreVm.cardWidth = width">
 		<comp-card id="comp-{{pk.name}}" card-width="compStoreVm.cardWidth" on-select="compStoreVm.trackSelectedCard(name)" ng-repeat="pk in compStoreVm.packages" package="pk"></comp-card>
-		<div dr-scroll-loading="compStoreVm.packages" on-nextpage="compStoreVm.loadPage(pageIndex)" parent='.compStorePaginationScroll'>Loading...</div>
+		<div dr-scroll-loading="compStoreVm.packages" on-nextpage="compStoreVm.loadPage(pageIndex)" parent='.comp-store-pagination-scroll'> </div>
 	</comp-group>
 
 </main>
