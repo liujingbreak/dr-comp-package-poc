@@ -13,7 +13,7 @@ api.app.component('compCard', {
 		}
 		//使得dr.category一定返回一个数组
 		var dr_category = _.get($ctrl.package, 'dr.category');
-		$ctrl.package.dr.category = [].concat(dr_category);
+		_.get($ctrl.package, 'dr.category', [].concat(dr_category));
 		this.$onChanges = function(changes) {
 			if (changes.cardWidth) {
 				//$element.css('width', 'calc(' + changes.cardWidth.currentValue + '% - 2px)');
