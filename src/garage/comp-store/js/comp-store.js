@@ -73,7 +73,8 @@ exports.init = function(app) {
 						cacheEngine.put('target', 'search');
 						if (!text) {
 							cacheEngine.put('target', 'list');
-						}
+						} else
+							compStoreVm.category = 'all';
 					}
 					getData(text);
 				}, 800);
