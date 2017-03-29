@@ -1,5 +1,5 @@
-var log = require('log4js').getLogger('ManualChunkPlugin');
-var divideLog = require('log4js').getLogger('ManualChunkPlugin.divideModule');
+var log = require('log4js').getLogger('wfh.ManualChunkPlugin');
+var divideLog = require('log4js').getLogger('wfh.ManualChunkPlugin.divideModule');
 var _ = require('lodash');
 var Path = require('path');
 var api = require('__api');

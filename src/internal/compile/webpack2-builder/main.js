@@ -33,25 +33,21 @@ exports.activate = function() {
 		return;
 	var webpackMiddleware = require('webpack-dev-middleware');
 	mkdirp.sync(api.config.resolve('destDir', 'webpack-temp'));
-	return api.runBuilder({browserify: false}, api.packageName)
-	.then(() => initWebpackConfig())
-	.then(webpackConfig => {
+
+	return Promise.coroutine(function*() {
+		yield api.runBuilder({browserify: false}, api.packageName);
+		var webpackConfig = yield initWebpackConfig();
 		if (_.size(webpackConfig.entry) === 0)
 			return;
-		api.use(webpackMiddleware(webpack(webpackConfig, (err, stat) => {
-			if (err)
-				onFail(err);
-			else
-				onSuccess(stat);
-		}), {
-			publicPath: '/',
-			noInfo: true,
-			watchOptions: {
-				aggregateTimeout: 700,
-				poll: false
-			}
+		var compiler = webpack(webpackConfig);
+		api.use(webpackMiddleware(compiler, {
+			quiet: false,
+			stats: {
+				colors: true
+			},
 		}));
-	});
+	})()
+	.catch(onFail);
 };
 
 function initWebpackConfig() {
