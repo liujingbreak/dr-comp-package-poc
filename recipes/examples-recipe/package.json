@@ -1,18 +1,18 @@
 {
   "name": "@dr/examples-recipe",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Component group: examples-recipe",
   "dependencies": {
-    "@dr/example-common": "1.0.27",
-    "@dr/example-compile-template": "0.0.8",
-    "@dr/example-entry": "1.0.36",
-    "@dr/example-node": "1.0.37",
+    "@dr/example-common": "1.1.0",
+    "@dr/example-compile-template": "0.1.0",
+    "@dr/example-entry": "1.1.0",
+    "@dr/example-node": "1.1.0",
     "@dr/example-partial": "1.0.1",
     "@dr/example-server-swig-entry": "1.0.2",
     "@dr/example-webpack": "0.0.1",
     "@dr/example-webpack-dependency": "0.0.1",
     "@dr/example-webpack2": "0.0.1",
-    "@dr/example-browserify": "0.0.28",
+    "@dr/example-browserify": "0.1.0",
     "@dr/example-i18n": "0.0.16",
     "@dr/example-locale-zh": "0.0.9"
   }

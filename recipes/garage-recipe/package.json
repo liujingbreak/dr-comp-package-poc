@@ -1,6 +1,6 @@
 {
   "name": "@dr/garage-recipe",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Component group: garage-recipe",
   "dependencies": {
     "@dr/angularjs": "1.5.8-2",
