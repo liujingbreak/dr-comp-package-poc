@@ -49,7 +49,6 @@ function addupConfigs() {
 	var browserSideConfigProp = componentConfigs.browserSideConfigProp;
 	var entryPageMapping = componentConfigs.entryPageMapping;
 	var componentConfigs4Env = {}; // key is env:string, value is componentConfigs
-
 	packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
 		var dr = json.dr;
 		if (!dr)

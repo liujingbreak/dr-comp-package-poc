@@ -251,7 +251,10 @@ InstallManager.prototype = {
 			mainPkjson = JSON.parse(mainPkjson);
 			mainDeps = _.assign({}, mainPkjson.dependencies, mainPkjson.devDependencies);
 		}
-		var nameWidth = _.maxBy(_.keys(this.srcDeps), name => name.length).length;
+		var depNames = _.keys(this.srcDeps);
+		if (depNames.length === 0)
+			return;
+		var nameWidth = _.maxBy(depNames, name => name.length).length;
 
 		_.forOwn(this.srcDeps, (versionList, name) => {
 			var item = versionList[0];

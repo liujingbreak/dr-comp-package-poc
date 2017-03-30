@@ -1,6 +1,6 @@
 {
   "name": "@dr/internal-recipe",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Component group: internal-recipe",
   "dependencies": {
     "@dr-core/labjs": "0.0.24",
@@ -11,7 +11,7 @@
     "@dr-core/bundle-loader": "0.0.5",
     "@dr/parcelify-module-resolver": "0.0.34",
     "@dr/template-builder": "0.2.0",
-    "@dr-core/webpack2-builder": "0.1.0",
+    "@dr-core/webpack2-builder": "0.1.1",
     "@dr-core/express-app": "0.2.19",
     "@dr/http-server": "0.1.0",
     "@dr/logger": "0.0.27",

@@ -29,11 +29,10 @@
 		"require-injector.node-inject": "info",
 		"gulp.watchPackages": "debug",
 		"@dr/translate-generator": "info",
-		"@dr/comp-store": "debug",
-		"@dr-core/webpack2-builder": "debug",
-		"ManualChunkPlugin": "info",
-		"ManualChunkPlugin.divideModule": "info",
-		"MultiEntryHtmlPlugin": "debug",
+		"@dr-core/webpack2-builder": "info",
+		"wfh.ManualChunkPlugin": "debug",
+		"wfh.ManualChunkPlugin.divideModule": "info",
+		"wfh.MultiEntryHtmlPlugin": "debug",
 		"api-loader": "debug",
 		"@dr/template-builder": "debug"
 	}

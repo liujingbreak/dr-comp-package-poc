@@ -61,19 +61,18 @@ module.exports = function(rootPath) {
 
 	function _initProjects() {
 		var projectListFile = Path.join(rootPath, 'dr.project.list.json');
-		if (!fs.existsSync(projectListFile))
-			return;
 		var helper = require('./cliHelper');
-		var projects = require(projectListFile);
-		console.log(_.pad(' Projects directory ', 40, '-'));
-		//var nameLen = _.maxBy(projects, dir => dir.length).length + 3;
-		var promises = _.map(projects, (dir, i) => {
-			dir = Path.resolve(rootPath, dir);
-			console.log(_.padEnd(i + 1 + '. ', 5, ' ') + dir);
-			return _initProject(dir);
-		});
+		if (fs.existsSync(projectListFile)) {
+			var projects = require(projectListFile);
+			console.log(_.pad(' Projects directory ', 40, '-'));
+			//var nameLen = _.maxBy(projects, dir => dir.length).length + 3;
+			_.each(projects, (dir, i) => {
+				dir = Path.resolve(rootPath, dir);
+				console.log(_.padEnd(i + 1 + '. ', 5, ' ') + dir);
+				//return _updateProjectFolder(dir);
+			});
+		}
 		return Promise.coroutine(function*() {
-			yield Promise.all(promises);
 			yield helper.listCompDependency(true);
 			yield require('../lib/gulp/recipeManager').linkComponentsAsync();
 			var configFileContents = yield helper.addupConfigs();
@@ -86,42 +85,26 @@ module.exports = function(rootPath) {
 		});
 	}
 
-	function _initProject(dir) {
-		// Move all config.*.yaml to <project>/conf
-		var cfDir = Path.resolve(dir, 'conf');
-		mkdirp(cfDir);
-		var cf = Path.resolve(dir, 'config.yaml');
-		if (fs.existsSync(cf))
-			shell.mv(cf, cfDir);
-		return Promise.promisify(glob)(Path.resolve(dir, 'config.*.yaml'))
-		.then(files => {
-			_.each(files, cf => {
-				var file = Path.resolve(cfDir, Path.basename(cf));
-				shell.mv(cf, file);
-				console.log('move %s', file);
-			});
-
-			// create package.json
-			// if (!fs.existsSync(Path.join(dir, 'package.json'))) {
-			// 	var pkjson = getPackageJsonTemplate()({
-			// 		project: {name: Path.basename(dir), desc: 'Do not publish me', author: 'noone@dianrong.com'},
-			// 		version: '0.1.0'
-			// 	});
-			// 	pkjson = JSON.parse(pkjson);
-			// 	pkjson.dependencies = {};
-			// 	pkjson.devDependencies = {};
-			// 	writeFile(Path.join(dir, 'package.json'), JSON.stringify(pkjson, null, '  ') + '\n');
-			// }
-
-			// write dependency list to project package.json
-		})
-		.then(() => {
-			// TODO: install project dep
-		})
-		.catch(err => {
-			console.error(chalk.red(err).message, err);
-		});
-	}
+	// function _updateProjectFolder(dir) {
+	// 	return Promise.resolve();
+	// 	// Move all config.*.yaml to <project>/conf
+	// 	var cfDir = Path.resolve(dir, 'conf');
+	// 	mkdirp(cfDir);
+	// 	var cf = Path.resolve(dir, 'config.yaml');
+	// 	if (fs.existsSync(cf))
+	// 		shell.mv(cf, cfDir);
+	// 	return Promise.promisify(glob)(Path.resolve(dir, 'config.*.yaml'))
+	// 	.then(files => {
+	// 		_.each(files, cf => {
+	// 			var file = Path.resolve(cfDir, Path.basename(cf));
+	// 			shell.mv(cf, file);
+	// 			console.log('move %s', file);
+	// 		});
+	// 	})
+	// 	.catch(err => {
+	// 		console.error(chalk.red(err).message, err);
+	// 	});
+	// }
 
 	function addProject(dirs) {
 		var projectListFile = Path.join(rootPath, 'dr.project.list.json');
