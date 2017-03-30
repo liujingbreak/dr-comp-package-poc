@@ -23,7 +23,6 @@ var buildUtils = require('./lib/gulp/buildUtils');
 var packageLintableSrc = require('./lib/gulp/packageLintableSrc');
 var watchPackages = require('./lib/gulp/watchPackages');
 var recipeManager = require('./lib/gulp/recipeManager');
-var PackageInstall = require('./lib/gulp/packageInstallMgr');
 var packageUtils = require('./lib/packageMgr/packageUtils');
 
 var config = require('./lib/config');
