@@ -92,6 +92,7 @@ function eachRecipe(callback) {
 		callback(Path.resolve(config().rootPath, recipeDir));
 	});
 	eachDownloadedRecipe(callback);
+	callback(config().rootPath);
 }
 
 function link() {

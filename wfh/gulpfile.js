@@ -124,7 +124,8 @@ gulp.task('lint', function() {
  * link src/ ** /package.json from node_modules folder
  */
 gulp.task('link', function() {
-	return recipeManager.link();
+	//return recipeManager.link();
+	return require('./bin/cli')(config().rootPath).init();
 });
 
 gulp.task('compile', function(cb) {
@@ -315,6 +316,7 @@ gulp.task('e2e', function(callback) {
 });
 
 gulp.task('ls', ['link'], function(callback) {
+	config.reload();
 	require('log4js').getLogger('lib.injector').setLevel('warn');
 	require('log4js').getLogger('packagePriorityHelper').setLevel('warn');
 	var rj = require('./lib/injectorFactory');

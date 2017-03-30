@@ -204,6 +204,22 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 		webpackConfig.plugins.push(new UglifyJSPlugin({sourceMap: api.config().enableSourceMaps}));
 	}
 
+	function testDrComponentJsFile(componentScopes) {
+		return function(file) {
+			if (!file.endsWith('.js'))
+				return false;
+			if (_.has(file2EntryChunkName, file))
+				return true;
+			var component = api.findPackageByFile(file);
+
+			var isOurs = !!(component && (_.includes(componentScopes, component.parsedName.scope) ||
+				component.dr));
+			if (!isOurs)
+				log.debug('Not ours, skip our loaders for %s', file);
+			return isOurs;
+		};
+	}
+
 	return webpackConfig;
 };
 
@@ -219,16 +235,6 @@ function testPackageDrProperty(fileSuffix, propertyKey, propertyValue) {
 			}
 		}
 		return false;
-	};
-}
-
-function testDrComponentJsFile(componentScopes) {
-	return function(file) {
-		if (!file.endsWith('.js'))
-			return false;
-		var component = api.findPackageByFile(file);
-		return component && (_.includes(componentScopes, component.parsedName.scope) ||
-			component.dr);
 	};
 }
 
