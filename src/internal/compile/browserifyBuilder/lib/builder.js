@@ -29,14 +29,11 @@ var api = require('__api');
 var log = require('@dr/logger').getLogger(api.packageName + '.builder');
 var helperFactor = require('./browserifyHelper');
 var PageCompiler = require('./pageCompiler');
-var walkPackages = require('@dr-core/build-util').walkPackages;
 var depCtl = require('./dependencyControl');
 var esParser = require('./esParser');
-//var packageBrowserInstance = require('@dr-core/build-util').packageInstance;
-var rj = require('__injectorFactory');
 var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
 var fileAccessAsync = Promise.promisify(fs.access, {context: fs});
-var packageUtils, config, injector;
+var packageUtils, config;
 
 var tasks = [];
 var addonTransforms = [];
@@ -73,25 +70,7 @@ var log4jsToNpmLogLevel = {
 	ALL: 'silly'
 };
 
-/**
- * Initialize browser side package injector
- */
-function initInjector(packageInfo) {
-	if (injector)
-		return;
-	injector = rj(null, true);
-	_.each(packageInfo.allModules, pack => {
-		if (pack.packagePath) // no vendor package's path information
-			injector.addPackage(pack.longName, pack.packagePath);
-	});
-	injector.fromAllPackages()
-	.replaceCode('__api', '__api')
-	.substitute(/^([^\{]*)\{locale\}(.*)$/,
-		(filePath, match) => match[1] + api.getBuildLocale() + match[2]);
 
-	injector.readInjectFile('browserify-inject.js');
-	Object.getPrototypeOf(api).browserInjector = injector;
-}
 
 function compile() {
 	gutil.log('Usage: gulp compile [-p <package name with or without scope part> -p <package name> ...]');
@@ -107,17 +86,15 @@ function compile() {
 	var cssPromises = [];
 	var jsStreams = [];
 	var staticDir = Path.resolve(config().staticDir);
-	var packageInfo = walkPackages(config, argv, packageUtils, api.compileNodePath);
-	initInjector(packageInfo);
-	var helper = helperFactor(config, injector);
+	var packageInfo = api.packageInfo;
+	var helper = helperFactor(config, api.browserInjector);
 	var defaultBrowserSideConfigProp = [
 		'staticAssetsURL', 'serverURL', 'packageContextPathMapping',
 		'locales', 'devMode', 'assetsDirMap'
 	];
-
-	//monkey patch new API
-	Object.getPrototypeOf(api).packageInfo = packageInfo;
 	require('./compilerApi')(api);
+	if (!argv.browserify)
+		return;
 
 	var bundleStream;
 	var bundleNames = _.keys(packageInfo.bundleMap);
@@ -176,7 +153,6 @@ function compile() {
 	return Promise.coroutine(function*() {
 		yield depCtl.initAsync(api, packageInfo);
 		yield buildStart();
-		walkPackages.saveCache(packageInfo);
 		return depCtl.tailDown();
 	})()
 	.then(() => {
@@ -319,7 +295,7 @@ function compile() {
 			debug: config().enableSourceMaps,
 			paths: api.compileNodePath,
 			basedir: config().rootPath,
-			noParse: config().browserifyNoParse ? config().browserifyNoParse : []
+			noParse: config().browserifyNoParse ? config().browserifyNoParse.slice() : []
 		};
 		if (config.get([api.packageName, 'standalone']))
 			browserifyOpt.standalone = 'js' + bundle + '.sta';

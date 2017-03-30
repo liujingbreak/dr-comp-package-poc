@@ -8,7 +8,8 @@
     "@dr/parcelify-module-resolver"
   ],
   "dr": {
-    "bundle": "example-locale-zh-bundle"
+    "bundle": "example-locale-zh-bundle",
+    "compiler": "webpack"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

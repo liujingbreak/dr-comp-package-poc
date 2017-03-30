@@ -3,7 +3,7 @@ api.app.factory('compService', ['$q', '$http', '$timeout', function($q, $http, $
 	function CompService($q, $http, $timeout) {
 		this.$q = $q;
 		this.$http = $http;
-		this.nodeServer = api.config.get([api.packageShortName, 'nodeServer'], '');
+		this.nodeServer = api.config.get([api.packageName, 'nodeServer'], '');
 	}
 
 	CompService.prototype = {

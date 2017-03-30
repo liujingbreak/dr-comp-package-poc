@@ -10,7 +10,8 @@
   ],
   "dr": {
     "bundle": "example",
-    "entryPage": "index.html"
+    "entryPage": "index.html",
+    "compiler": "webpack"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

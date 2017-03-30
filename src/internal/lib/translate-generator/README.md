@@ -16,7 +16,7 @@ gulp compile --translate [-p <package-name>]
 	```
 	`KEY1`，`KEY2`都会被认为是i18n message key
 
-- `.js` 文件, 会在esprima语法分析器生成的AST里查找function name是
+- `.js` 文件, 会在`acorn`语法分析器生成的AST里查找function name是
 	`$translate` or `$translate.instant` 的call expression, 第一个参数被视为message key：
 	```javascript
 	$translate('KEY1');

@@ -1,6 +1,6 @@
 {
   "name": "@dr/comp-store",
-  "version": "0.0.27",
+  "version": "0.1.0",
   "description": "Component store",
   "browser": "browser.js",
   "main": "server/server.js",
@@ -9,12 +9,26 @@
     "type": [
       "server"
     ],
-    "browserSideConfigProp": ["comp-store.nodeServer"]
+    "compiler": "webpack",
+    "config": {
+      "public": {
+        "nodeServer": "http://dr-npm501-14338.ittun.com"
+      },
+      "server": {
+        "verdaccioUrl": "http://localhost:4873"
+      }
+    },
+    "config.npm501": {
+      "public": {
+        "nodeServer": "http://npm501.dc.dianrong.com:14338"
+      }
+    },
+    "config.local": {
+      "public": {
+        "nodeServer": ""
+      }
+    }
   },
-  "style": "styles/main.less",
-  "transforms": [
-    "@dr/parcelify-module-resolver"
-  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

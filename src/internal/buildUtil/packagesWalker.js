@@ -7,7 +7,8 @@ var packageBrowserInstance = require('./packageBrowserInstance');
 var _ = require('lodash');
 var api = require('__api');
 var bResolve = require('browser-resolve');
-var chalk = require('chalk');
+var resolve = require('resolve');
+//var chalk = require('chalk');
 var log = require('log4js').getLogger('buildUtil.' + Path.basename(__filename, '.js'));
 const DirTree = require('require-injector/lib/dir-tree').DirTree;
 
@@ -15,7 +16,7 @@ module.exports = walkPackages;
 module.exports.saveCache = saveCache;
 module.exports.listBundleInfo = listBundleInfo;
 
-var config, argv, packageUtils, packageInfoCacheFile;
+var config, argv, packageUtils, packageInfoCacheFile, isFromCache;
 
 /**
  * @return {PackageInfo}
@@ -36,10 +37,12 @@ function walkPackages(_config, _argv, _packageUtils, _compileNodePath, ignoreCac
 	packageInfoCacheFile = config.resolve('destDir', 'packageInfo.json');
 	var packageInfo;
 	if (!ignoreCache && (argv.p || argv.b) && fs.existsSync(packageInfoCacheFile)) {
+		isFromCache = true;
 		log.info('Reading build info cache from ' + packageInfoCacheFile);
 		packageInfo = JSON.parse(fs.readFileSync(packageInfoCacheFile, {encoding: 'utf8'}));
 		packageInfo = cycle.retrocycle(packageInfo);
 	} else {
+		isFromCache = false;
 		log.info('scan for packages info');
 		packageInfo = _walkPackages(_compileNodePath);
 		mkdirp.sync(Path.join(config().rootPath, config().destDir));
@@ -82,54 +85,48 @@ function _walkPackages(compileNodePath) {
 
 	packageUtils.findBrowserPackageByType('*', function(
 		name, entryPath, parsedName, pkJson, packagePath) {
-		var bundle, entryViews, entryPages;
+		var entryViews, entryPages;
 		var isEntryServerTemplate = true;
-		var noParseFiles;
-		var instance = packageBrowserInstance(config());
+		var noParseFiles, instance;
+		if (_.has(info.moduleMap, name))
+			instance = info.moduleMap[name];
+		else {
+			// There are also node packages
+			//log.warn('No chunk setting for package %s', chalk.red(name));
+			instance = packageBrowserInstance(config(), {
+				isVendor: true,
+				bundle: null,
+				longName: name,
+				shortName: packageUtils.parseName(name).name,
+				packagePath: packagePath,
+				realPackagePath: fs.realpathSync(packagePath),
+			});
+		}
 		if (!pkJson.dr) {
 			pkJson.dr = {};
-			// log.error('missing "dr" property in ' + Path.join(packagePath, 'package.json'));
-			// gutil.beep();
 		}
-		if (!pkJson.dr.builder || pkJson.dr.builder === 'browserify') {
-			if (_.has(configBundleInfo.moduleMap, name)) {
-				bundle = configBundleInfo.moduleMap[name].bundle;
-				//delete configBundleInfo.moduleMap[name];
-				log.debug('vendorBundleMap overrides bundle setting for ' + name);
-			} else {
-				bundle = pkJson.dr.bundle || pkJson.dr.chunk;
-				if (!bundle && ( pkJson.dr.entryPage || pkJson.dr.entryView)) {
-					// Entry package must belongs to a bundle
-					bundle = parsedName.name;
-				}
-			}
-			if (bundle && config().bundlePerPackage === true && parsedName.scope !== 'dr-core') {
-				bundle = parsedName.name;// force bundle name to be same as package name
-			}
-			if (pkJson.dr.entryPage) {
-				isEntryServerTemplate = false;
-				entryPages = [].concat(pkJson.dr.entryPage);
-				info.entryPageMap[name] = instance;
-			} else if (pkJson.dr.entryView){
-				isEntryServerTemplate = true;
-				entryViews = [].concat(pkJson.dr.entryView);
-				info.entryPageMap[name] = instance;
-			}
-			if (pkJson.dr.browserifyNoParse) {
-				noParseFiles = [].concat(pkJson.dr.browserifyNoParse || pkJson.dr.noParse);
-			}
-		} else {
-			return;
+		if (pkJson.dr.entryPage) {
+			isEntryServerTemplate = false;
+			entryPages = [].concat(pkJson.dr.entryPage);
+			info.entryPageMap[name] = instance;
+		} else if (pkJson.dr.entryView){
+			isEntryServerTemplate = true;
+			entryViews = [].concat(pkJson.dr.entryView);
+			info.entryPageMap[name] = instance;
 		}
+		if (pkJson.dr.browserifyNoParse) {
+			noParseFiles = [].concat(pkJson.dr.browserifyNoParse || pkJson.dr.noParse);
+		}
+		var mainFile;
+		try {
+			// For package like e2etest, it could have no main file
+			mainFile = bResolve.sync(name, {paths: api.compileNodePath});
+		} catch (err) {}
 		instance.init({
 			isVendor: false,
-			bundle: bundle,
-			longName: name,
-			file: bResolve.sync(name, {paths: api.compileNodePath}),
+			file: mainFile ? fs.realpathSync(mainFile) : null,
+			style: pkJson.style ? resolveStyle(name) : null,
 			parsedName: parsedName,
-			packagePath: packagePath,
-			realPackagePath: fs.realpathSync(packagePath),
-			//active: pkJson.dr ? pkJson.dr.active : false,
 			entryPages: entryPages,
 			entryViews: entryViews,
 			browserifyNoParse: noParseFiles,
@@ -139,34 +136,9 @@ function _walkPackages(compileNodePath) {
 			compiler: pkJson.dr.compiler,
 			i18n: pkJson.dr ? (pkJson.dr.i18n ? pkJson.dr.i18n : null) : null
 		});
-		addPackageToBundle(instance, info, bundle, configBundleInfo);
-		var otherEntries = _.get(pkJson.dr, 'otherEntries');
-		if (otherEntries) {
-			otherEntries = [].concat(otherEntries);
-			for (let otherEntry of otherEntries) {
-				if (otherEntry.startsWith('./'))
-					otherEntry = otherEntry.substring(2);
-				let pk = packageBrowserInstance(config());
-				pk.init({
-					isVendor: false,
-					bundle: bundle,
-					isOtherEntry: true, // the entry file is part of another package
-					longName: name + '/' + otherEntry,
-					file: bResolve.sync(name + '/' + otherEntry, {paths: api.compileNodePath}),
-					parsedName: {scope: parsedName.scope, name: parsedName.name +  '/' + otherEntry},
-					packagePath: packagePath,
-					realPackagePath: fs.realpathSync(packagePath),
-					//active: pkJson.dr ? pkJson.dr.active : false,
-					// entryPages: null,
-					// entryViews: null,
-					browserifyNoParse: noParseFiles,
-					isEntryServerTemplate: isEntryServerTemplate,
-					translatable: !_.has(pkJson, 'dr.translatable') || _.get(pkJson, 'dr.translatable'),
-					i18n: pkJson.dr ? (pkJson.dr.i18n ? pkJson.dr.i18n : null) : null
-				});
-				addPackageToBundle(pk, info, bundle, configBundleInfo);
-			}
-		}
+		info.moduleMap[instance.longName] = instance;
+		if (!instance.bundle)
+			info.noBundlePackageMap[instance.longName] = instance;
 	});
 	_.each(bundleMap, (packageMap, bundle) => {
 		bundleMap[bundle] = _.values(packageMap); // turn Object.<moduleName, packageInstance> to Array.<packageInstance>
@@ -176,21 +148,14 @@ function _walkPackages(compileNodePath) {
 	return info;
 }
 
-function addPackageToBundle(instance, info, bundle, configBundleInfo) {
-	info.moduleMap[instance.longName] = instance;
-	if (!bundle && !_.get(configBundleInfo.moduleMap, [instance.longName, 'bundle'])) {
-		info.noBundlePackageMap[instance.longName] = instance;
-		return;
-	}
-	if (!_.has(info.bundleMap, bundle)) {
-		info.bundleMap[bundle] = {};
-	}
-	if (_.has(configBundleInfo.moduleMap, instance.longName)) {
-		var newBundle = _.get(configBundleInfo.moduleMap, instance.longName).bundle;
-		log.info('Set vendorBundleMap setting of', instance.longName, ':', instance.bundle, '->', newBundle);
-		instance.bundle = newBundle;
-	}
-	info.bundleMap[bundle][instance.longName] = instance;
+function resolveStyle(name) {
+	return fs.realpathSync(resolve.sync(name, {
+		paths: api.compileNodePath,
+		packageFilter: (pkg, pkgfile) => {
+			pkg.main = pkg.style;
+			return pkg;
+		}
+	}));
 }
 
 /**
@@ -206,23 +171,49 @@ function readBundleMapConfig(compileNodePath) {
 		bundleUrlMap: {},
 		urlPackageSet: null
 	};
-	_readBundles(info, compileNodePath, config().externalBundleMap, true);
-	_readBundles(info, compileNodePath, config().vendorBundleMap, false);
+	_readBundles(info, config().externalBundleMap, true);
+	_readPackageChunkMap(info);
 	return info;
 }
 
-function _readBundles(info, compileNodePath, mapConfig, isExternal) {
+function _readPackageChunkMap(info) {
+	var bmap = info.bundleMap;
+	var mmap = info.moduleMap;
+	_.each(config()._package2Chunk, (bundle, moduleName) => {
+		try {
+			var packagePath = packageUtils.findBrowserPackagePath(moduleName);
+			var parsedName = packageUtils.parseName(moduleName);
+			var instance = packageBrowserInstance(config(), {
+				isVendor: true,
+				bundle: bundle,
+				longName: moduleName,
+				parsedName: parsedName,
+				shortName: parsedName.name,
+				packagePath: packagePath,
+				realPackagePath: fs.realpathSync(packagePath)
+			});
+			mmap[moduleName] = instance;
+			info.urlPackageSet[moduleName] = 1;
+			if (_.has(bmap, bundle) && _.isArray(bmap[bundle]))
+				bmap[bundle].push(instance);
+			else
+				bmap[bundle] = [instance];
+		} catch (err) {
+			log.warn(err);
+			throw err;
+		}
+	});
+}
+
+function _readBundles(info, mapConfig, isExternal) {
 	var bmap = info.bundleMap;
 	var mmap = info.moduleMap;
 	if (isExternal)
 		info.urlPackageSet = {};
 	_.forOwn(mapConfig, function(bundleData, bundle) {
 		var moduleNames = _.isArray(bundleData.modules) ? bundleData.modules : bundleData;
-		var modules = {};
-		_.each(moduleNames, function(moduleName) {
-			var mainFile;
+		var bundleModules = _.map(moduleNames, function(moduleName) {
 			try {
-				mainFile = isExternal ? null : bResolve.sync(moduleName, {paths: compileNodePath});
 				var packagePath = packageUtils.findBrowserPackagePath(moduleName);
 				var instance = packageBrowserInstance(config(), {
 					isVendor: true,
@@ -230,16 +221,14 @@ function _readBundles(info, compileNodePath, mapConfig, isExternal) {
 					longName: moduleName,
 					shortName: packageUtils.parseName(moduleName).name,
 					packagePath: packagePath,
-					realPackagePath: fs.realpathSync(packagePath),
-					file: mainFile
+					realPackagePath: fs.realpathSync(packagePath)
 				});
 				mmap[moduleName] = instance;
-				modules[moduleName] = instance;
 				info.urlPackageSet[moduleName] = 1;
+				return instance;
 			} catch (err) {
-				log.warn('This might be a problem:\n' +
-				' browser-resolve can\'t resolve on vendor bundle package: ' + chalk.red(moduleName) +
-				', remove it from ' + chalk.yellow('vendorBundleMap') + ' of config.yaml or `npm install it`');
+				log.warn(err);
+				throw err;
 			}
 		});
 		if (isExternal) {
@@ -255,7 +244,7 @@ function _readBundles(info, compileNodePath, mapConfig, isExternal) {
 				info.bundleUrlMap[bundle] = [bundleData];
 			}
 		} else
-			bmap[bundle] = modules;
+			bmap[bundle] = bundleModules;
 	});
 }
 
@@ -264,6 +253,8 @@ function createPackageDirTree(packageInfo) {
 	packageInfo.allModules.forEach(moduleInstance => {
 		if (moduleInstance.realPackagePath)
 			tree.putData(moduleInstance.realPackagePath, moduleInstance);
+		if (moduleInstance.packagePath !== moduleInstance.realPackagePath)
+			tree.putData(moduleInstance.packagePath, moduleInstance);
 	});
 	packageInfo.dirTree = tree;
 	Object.getPrototypeOf(api).findPackageByFile = function(file) {

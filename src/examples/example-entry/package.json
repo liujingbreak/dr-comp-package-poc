@@ -1,6 +1,6 @@
 {
   "name": "@dr/example-entry",
-  "version": "1.0.36",
+  "version": "1.1.0",
   "description": "sample node package",
   "scripts": {
     "test": "gulp test -p example-entry"
@@ -14,7 +14,8 @@
   "dr": {
     "type": "server",
     "bundle": "example",
-    "entryView": "*.html"
+    "entryView": "*.html",
+    "compiler": "webpack"
   },
   "author": "jing.liu.fe@d.com",
   "license": "MIT",

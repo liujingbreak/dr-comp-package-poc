@@ -1,6 +1,8 @@
 var Path = require('path');
 var through = require('through2');
 var acorn = require('acorn');
+var _ = require('lodash');
+var acornjsx = require('acorn-jsx/inject')(acorn);
 var api = require('__api');
 var _ = require('lodash');
 var log = require('log4js').getLogger(api.packageName);
@@ -55,11 +57,19 @@ function getBrowserifyReplacerTransform(locale) {
 	return tr;
 }
 
+exports.replaceJS = replaceJS;
 function replaceJS(source, file, locale, skipPackageCache) {
 	var res = checkSkipPackageAndGetRes(file, locale, skipPackageCache);
 	if (!res)
 		return source;
-	var ast = acorn.parse(source, {locations: true});
+	var ast;
+	try {
+		ast = acornjsx.parse(source, {locations: true, allowHashBang: true, plugins: {jsx: true}});
+	} catch (err) {
+		ast = acornjsx.parse(source, {locations: true, allowHashBang: true, plugins: {jsx: true},
+			sourceType: 'module'});
+	}
+	//var ast = acorn.parse(source, {locations: true});
 	var replacements = [];
 	jsParser(source, (keyNode, callExpNode) => {
 		if (!_.has(res, keyNode))
@@ -82,6 +92,7 @@ exports.htmlReplacer = function(source, file, locale) {
 	};
 };
 
+exports.replaceHtml = replaceHtml;
 function replaceHtml(source, file, locale, skipPackageCache) {
 	var res = checkSkipPackageAndGetRes(file, locale, skipPackageCache);
 	if (!res)
@@ -104,7 +115,7 @@ function replaceHtml(source, file, locale, skipPackageCache) {
 }
 
 function checkSkipPackageAndGetRes(file, locale, skipPackageCache) {
-	var drPackage = api.findBrowserPackageInstanceByPath(file);
+	var drPackage = api.findPackageByFile(file);
 	if (!drPackage || skipPackageCache && _.has(skipPackageCache, drPackage.longName)) {
 		//log.debug('skip file: %s', file);
 		return false;

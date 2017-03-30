@@ -1,88 +1,86 @@
-var gulp = require('gulp');
-var webpackStream = require('webpack-stream');
-var webpack = require('webpack');
-var api = require('__api');
-var _ = require('lodash');
-var fs = require('fs');
-var Path = require('path');
-var mkdirp = require('mkdirp');
-var log = require('log4js').getLogger(api.packageName);
-const ManualChunkPlugin = require('./manual-chunk-plugin');
-const setup = require('./lib/setup').setup;
-const publicDir = '/wp/';
+// var gulp = require('gulp');
+// var webpackStream = require('webpack-stream');
+const webpack = require('webpack');
+const api = require('__api');
+const mkdirp = require('mkdirp');
+const Tapable = require('tapable');
+const _ = require('lodash');
+const log = require('log4js').getLogger(api.packageName);
+const Promise = require('bluebird');
+const moreWebpackOptions = require('./lib/moreWebpackOptions.js');
+const createWebpackConfig = require('./webpack.config.js');
+//const LiveReloadPlugin = require('webpack-livereload-plugin');
 
-var webpackConfig = {
-	context: api.config().rootPath,
-	entry: {},
-	output: {
-		filename: '[name].[chunkhash].js',
-		publicPath: api.config().staticAssetsURL + publicDir,
-		// libraryTarget: 'umd'
-	},
-	module: {
-		noParse: null,
-		rules: [
-			{
-				test: /\.js$/,
-				use: [
-					{loader: '@dr-core/webpack2-builder/api-loader'}
-				]
-			}, {
-				test: /\.html$/,
-				use: [
-					{loader: 'html-loader'},
-					//{loader: 'swig-template-loader'}
-				]
-			}, {
-				test: /\.txt$/,
-				use: {loader: 'raw-loader'}
-			}, {
-				test: /\.(yaml|yml)$/,
-				use: [
-					{loader: 'json-loader'},
-					{loader: 'yaml-loader'}
-				]
-			}
-		]
-	},
-	plugins: [
-		new ManualChunkPlugin({
-			manifest: 'runtime'
-		})
-	]
-};
+const tapable = new Tapable();
 
-exports.compile = (api) => {
-	if (api.config().devMode) {
-		webpackConfig.output.filename = '[name].js';
-		webpackConfig.plugins.push(new webpack.NamedModulesPlugin());
-	} else {
-		webpackConfig.plugins.push(new webpack.HashedModuleIdsPlugin());
-	}
+exports.tapable = tapable;
 
+exports.compile = () => {
 	mkdirp.sync(api.config.resolve('destDir', 'webpack-temp'));
 
-	var entryComponents = setup(webpackConfig);
-	_.each(entryComponents, (moduleInfos, bundle) => {
-		webpackConfig.entry[bundle] = writeEntryFileForBundle(bundle, moduleInfos);
+	return initWebpackConfig()
+	.then(webpackConfig => {
+		if (_.size(webpackConfig.entry) === 0)
+			return null;
+		return Promise.promisify(webpack)(webpackConfig)
+		.then(onSuccess)
+		.catch(onFail);
 	});
-	log.debug('entry: %s', JSON.stringify(webpackConfig.entry));
-
-	return gulp.src('.')
-		.pipe(webpackStream(webpackConfig, webpack))
-		.pipe(gulp.dest(api.config().staticDir + publicDir));
 };
 
-function writeEntryFileForBundle(bundle, packages) {
-	var buf = [];
-	buf.push('var _lego_entryFuncs = {};');
-	[].concat(packages).forEach(package => {
-		buf.push(`_lego_entryFuncs["${package.longName}"]= function() {return require("${package.longName}");}`);
-	});
-	buf.push(`_reqLego = function(name) {`);
-	buf.push(`  return _lego_entryFuncs[name]();`);
-	buf.push(`}`);
-	var file = Path.resolve(api.config().destDir, 'webpack-temp', 'entry_' + bundle + '.js');
-	fs.writeFileSync(file, buf.join('\n'));
-	return file;
+exports.activate = function() {
+	if (!api.argv.webpackWatch)
+		return;
+	var webpackMiddleware = require('webpack-dev-middleware');
+	mkdirp.sync(api.config.resolve('destDir', 'webpack-temp'));
+
+	return Promise.coroutine(function*() {
+		yield api.runBuilder({browserify: false}, api.packageName);
+		var webpackConfig = yield initWebpackConfig();
+		if (_.size(webpackConfig.entry) === 0)
+			return;
+		var compiler = webpack(webpackConfig);
+		api.use(webpackMiddleware(compiler, {
+			quiet: false,
+			stats: {
+				colors: true
+			},
+		}));
+	})()
+	.catch(onFail);
+};
+
+function initWebpackConfig() {
+	return Promise.coroutine(function*() {
+		var pluginParams = yield moreWebpackOptions.createParamsAsync(api.config().rootPath);
+		var webpackConfig = createWebpackConfig(...pluginParams);
+		// Allow other LEGO component extends this webpack configure object
+		return yield Promise.promisify(tapable.applyPluginsAsyncWaterfall.bind(tapable))('webpackConfig', webpackConfig);
+	})();
 }
+
+function onSuccess(stats) {
+	const info = stats.toJson();
+
+	if (stats.hasErrors()) {
+		_.each([].concat(info.errors), err => log.error('webpack error', err));
+	}
+
+	if (stats.hasWarnings()) {
+		_.each([].concat(info.warnings), err => log.warn('webpack warning', err));
+	}
+	log.info(_.repeat('=', 30));
+	log.info(stats.toString({
+		chunks: false,  // Makes the build much quieter
+		colors: true    // Shows colors in the console
+	}));
+	return stats;
+}
+
+function onFail(err) {
+	log.error(err.stack || err);
+	if (err.details) {
+		_.each([].concat(err.details), err => log.error('webpack failure detail', err));
+	}
+}
+

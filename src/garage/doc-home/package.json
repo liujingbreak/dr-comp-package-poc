@@ -1,6 +1,6 @@
 {
   "name": "@dr/doc-home",
-  "version": "0.1.26",
+  "version": "0.1.28",
   "description": "Home page",
   "browser": "browser/switchLocale.js",
   "main": "server/server.js",
@@ -11,7 +11,9 @@
   "dr": {
     "type": "server",
     "bundle": "home",
-    "entryPage": "index.html"
+    "entryPage": "index.html",
+    "compiler": "webpack",
+    "outputPath": "/"
   },
   "dependencies": {
     "angular-ui-router": "^0.3.2",

@@ -1,5 +1,6 @@
 var acorn = require('acorn');
-var estraverse = require('estraverse');
+var acornjsx = require('acorn-jsx/inject')(acorn);
+var estraverse = require('estraverse-fb');
 var log = require('log4js').getLogger('translate-generator.jsParser');
 var _ = require('lodash');
 var api = require('__api');
@@ -11,10 +12,14 @@ module.exports = function(fileContent, onCallExpNode, filePath, ast) {
 	if (configNames) {
 		[].push.apply(matchFuncNames, [].concat(configNames));
 	}
-	if (!ast)
-		ast = acorn.parse(fileContent, {
-			locations: true
-		});
+	if (!ast) {
+		try {
+			ast = acornjsx.parse(fileContent, {locations: true, allowHashBang: true, plugins: {jsx: true}});
+		} catch (err) {
+			ast = acornjsx.parse(fileContent, {locations: true, allowHashBang: true, plugins: {jsx: true},
+				sourceType: 'module'});
+		}
+	}
 
 	var matchAsts = matchFuncNames.map(name => {
 		return acorn.parse(name).body[0].expression;

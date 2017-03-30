@@ -1,13 +1,14 @@
-/* globals define:true */
-if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
-	// To avoid lodash conflict with some AMD build optimizers
-	var oldDefine = define;
-	define = null;
-	require('lodash');
-	define = oldDefine;
-}
+/* globals LEGO_CONFIG:true */
+// if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
+// 	// To avoid lodash conflict with some AMD build optimizers
+// 	var oldDefine = define;
+// 	define = null;
+// 	require('lodash');
+// 	define = oldDefine;
+// }
 
 var _ = require('lodash');
+window._ = _;
 var resolveUrl = require('@dr-core/browserify-builder-api/resolveUrl');
 // var bundleLoader = require('@dr-core/bundle-loader');
 // var loadCssBundles = bundleLoader.loadCssBundles;
@@ -26,7 +27,8 @@ function BrowserApi(packageName, bundleName) {
 
 	var path = this.config.get(['packageContextPathMapping', this.packageShortName]);
 	path = path != null ? path : '/' + this.packageShortName;
-	this.contextPath = this.config().serverURL + path;
+	if (this.config)
+		this.contextPath = this.config().serverURL + path;
 	BrowserApi.packageApiMap[packageName] = this;
 }
 
@@ -41,7 +43,7 @@ BrowserApi.getCachedApi = function(name) {
 
 BrowserApi.prototype = {
 	i18nLoaded: false,
-
+	_config: LEGO_CONFIG,
 	config: function() {
 		return BrowserApi.prototype._config;
 	},
@@ -64,68 +66,6 @@ BrowserApi.prototype = {
 			packageName = this.packageShortName;
 		}
 		return resolveUrl(this.config, packageName, path);
-	},
-
-	getPrefLanguage: function() {
-		var availables = this.config().locales;
-
-		var chooseLang = [
-			navigator.language,
-			navigator.browserLanguage,
-			navigator.systemLanguage,
-			navigator.userLanguage
-		];
-		if (navigator.languages  && navigator.languages.length > 0) {
-			chooseLang.unshift(navigator.languages[0]);
-		}
-
-		if (navigator.languages && navigator.languages.length > 1) {
-			chooseLang = chooseLang.concat(navigator.languages.slice(1));
-		}
-		var pref;
-		if (!_.some(chooseLang, function(language) {
-			if (language && _.includes(availables, language)) {
-				pref = language;
-				return true;
-			}
-			return false;
-		})) {
-			_.some(chooseLang, function(language) {
-				var forbackLang = /[a-zA-Z]*/.exec(language);
-				forbackLang = forbackLang ? forbackLang[0] : false;
-				if (forbackLang && _.includes(availables, forbackLang)) {
-					pref = forbackLang;
-					return true;
-				}
-			});
-		}
-		pref = pref ? pref : 'en';
-		return pref;
-	},
-
-	getLocaleUrl: function(lang) {
-		lang = _.trim(lang, '/');
-		var url;
-		if (lang === this.config.get('locales[0]', 'zh'))
-			url = this.config().staticAssetsURL + location.pathname;
-		else
-			url = this.config().staticAssetsURL + '/' + lang + location.pathname;
-		return url;
-	},
-
-	reloadToLocale: function(lang) {
-		if (!this.isInDefaultLocale())
-			return false;
-		lang = _.trim(lang, '/');
-		if (this.buildLocale !== lang) {
-			window.location = this.getLocaleUrl(lang);
-			return true;
-		}
-		return false;
-	},
-
-	isInDefaultLocale: function() {
-		return this.buildLocale === this.config.get('locales[0]', 'zh');
 	},
 
 	extend: function(obj) {
@@ -175,3 +115,5 @@ BrowserApi.prototype.config.set = function(path, value) {
 BrowserApi.prototype.config.get = function(propPath, defaultValue) {
 	return _.get(BrowserApi.prototype._config, propPath, defaultValue);
 };
+
+_.assign(BrowserApi.prototype, require('@dr-core/browserify-builder-api/i18n-api'));

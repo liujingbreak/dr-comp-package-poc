@@ -4,7 +4,7 @@ require('angular-ui-router');
 require('@dr/doc-ui');
 require('@dr/markdown-viewer');
 require('@dr/light-respond-js');
-require('angular-nicescroll/angular-nicescroll');
+//require('angular-nicescroll/angular-nicescroll');
 var lazy = require('@dr/angular-lazy');
 
 var textAnim = require('@dr/text-anim-ng');

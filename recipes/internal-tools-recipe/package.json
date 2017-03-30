@@ -1,8 +1,8 @@
 {
   "name": "@dr/internal-tools-recipe",
-  "version": "0.0.12",
-  "description": "Recipe package of /Users/liujing/dianrong/web-fun-house/internal-tools-recipe",
+  "version": "0.1.0",
+  "description": "Component group: internal-tools-recipe",
   "dependencies": {
-    "@dr/e2etest-helper": "0.3.7"
+    "@dr/e2etest-helper": "0.3.8"
   }
 }

@@ -6,8 +6,8 @@ chunk -->|entryModule| module
 chunk -.-> |addParent| pChunk
 
 module -.-> |addChunk| chunk
-chunk --> |.endpoints| endpoint
-endpoint -.-> |insertChunk| chunk
+chunk --> |.entrypoints| entrypoint
+entrypoint -.-> |insertChunk| chunk
 module --> |.blocks|block
 block -.-> |.module|module
 

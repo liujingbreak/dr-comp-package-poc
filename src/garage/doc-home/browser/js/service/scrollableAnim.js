@@ -39,14 +39,14 @@ ScrollableAnim.prototype = {
 	 * attrs: object contains properties like
 	 * @param {number} attrs.duration optional property, default value is Math.max of triggerElement's scrollHeight and window height
 	 * @param {number} attr.begin : number - also you may use triggerElement instead
-	 * @param {element|selector} triggerElement:  -
+	 * @param {element|selector} attrs.triggerElement:  -
 	 * @param 	triggered when scrolled distance (scrollTop) reaches element's offset top - viewport's height
-	 * @param {number} delayPercent: - used conjunction with triggerElement,
+	 * @param {number} attrs.delayPercent: - used conjunction with triggerElement,
 	 * @param 	triggered when offset reaches delayPercent/100 * duration + element's offset top - viewport's height
-	 * @param {TimelineLite | function} pass in a TimelineLite instance or function(timeline: TimelineLite) to abtain a created `TimelineLite({paused: true})` instance
-	 * @param {function} startup: function(reverse: boolean, animScene: AnimScene)  - where you may put startup animation
-	 * @param {function} teardown: function(reverse: boolean, animScene: AnimScene) - where you may put teardown animation
-	 * @param {function} onScroll: function(progress, time) - progress is a number between  0 and duration,
+	 * @param attrs.timeline {TimelineLite|function} pass in a TimelineLite instance or function(timeline: TimelineLite) to abtain a created `TimelineLite({paused: true})` instance
+	 * @param {function} attrs.startup: function(reverse: boolean, animScene: AnimScene)  - where you may put startup animation
+	 * @param {function} attrs.teardown: function(reverse: boolean, animScene: AnimScene) - where you may put teardown animation
+	 * @param {function} attrs.onScroll: function(progress, time) - progress is a number between  0 and duration,
 	 *		time is a number between 0 and 1
 	 *
 	 *	AnimScene instance's property:
