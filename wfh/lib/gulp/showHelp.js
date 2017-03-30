@@ -45,7 +45,7 @@ module.exports = function(yargs) {
 	.describe('root', '<working directory>, optional, used with command `e2e`, indicates which directory as test server start directory')
 	.default('root', process.env.DR_ROOT_DIR || process.cwd())
 	.demand(1)
-	.global(['c', 'b', 'p', 'l', 'only-js', 'only-css', 'd', 'r', 'v', 'f', 'browser', 'server', 'root'])
+	.global(['c', 'b', 'p', 'l', 'only-js', 'only-css', 'd', 'r', 'v', 'f', 'browser', 'server', 'root', 'project'])
 	.help('h').alias('h', 'help')
 	.argv;
 };
