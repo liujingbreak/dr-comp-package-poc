@@ -1,13 +1,14 @@
 {
   "name": "@dr/font-awesome-4",
-  "version": "4.6.3-2",
+  "version": "4.6.3-3",
   "description": "Font awesome",
   "browser": "browser.js",
   "style": "less/font-awesome.less",
   "transforms": [ "@dr/parcelify-module-resolver"],
   "dr": {
     "bundle": "ui-lib",
-    "noWatch": true
+    "noWatch": true,
+    "category": ["thirdparty"]
   },
   "dependencies": {
 	  "fontfaceobserver": "^2.0.7"

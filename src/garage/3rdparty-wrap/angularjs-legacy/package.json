@@ -1,6 +1,6 @@
 {
   "name": "@dr/angularjs-legacy",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Angular 1.2.x for IE8",
   "browser": "index.js",
   "style": "angular-1.2.29/angular-csp.css",
@@ -15,7 +15,8 @@
     ],
     "noLint": true,
     "noWatch": true,
-    "translatable": false
+    "translatable": false,
+    "category": ["angular", "thirdparty"]
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -1,0 +1,22 @@
+- name: 所有分类
+  value: all
+- name: Angular 1.x
+  value: angular
+- name: UI 视觉
+  value: ui
+- name: 业务组件
+  value: business
+- name: Node JS
+  value: nodejs
+- name: 工具
+  value: tool
+- name: 内部组件
+  value: internal
+- name: React
+  value: react
+- name: 第三方库封装
+  value: thirdparty
+- name: Lender 主站
+  value: lender-main
+- name: 组件库文档站
+  value: doc-site

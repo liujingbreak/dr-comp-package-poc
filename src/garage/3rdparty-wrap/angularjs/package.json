@@ -1,6 +1,6 @@
 {
   "name": "@dr/angularjs",
-  "version": "1.5.8-2",
+  "version": "1.5.8-3",
   "description": "wrapper of angularjs v1.5.8 and jquery as dependency",
   "browser": "main.js",
   "style": "angular-1.5.8/angular-csp.css",
@@ -18,7 +18,8 @@
     "i18n": "angular-1.5.8/i18n/angular-locale_{locale}.js",
     "noLint": true,
     "noWatch": true,
-    "translatable": false
+    "translatable": false,
+    "category": ["angular", "thirdparty"]
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

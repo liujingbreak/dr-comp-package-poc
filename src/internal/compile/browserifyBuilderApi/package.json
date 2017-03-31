@@ -1,6 +1,6 @@
 {
   "name": "@dr-core/browserify-builder-api",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Add some useful API to work with browserify-builder",
   "browser": "browserifyBuilderApi.browser.js",
   "main": "browserifyBuilderApi.server.js",
@@ -13,7 +13,8 @@
       "server",
       "core"
     ],
-    "builderPriority": 0
+    "builderPriority": 0,
+    "category": ["internal"]
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

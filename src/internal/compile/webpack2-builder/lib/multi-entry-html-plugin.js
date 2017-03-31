@@ -1,5 +1,5 @@
 const wps = require('webpack-sources');
-var log = require('log4js').getLogger('MultiEntryHtmlPlugin');
+var log = require('log4js').getLogger('wfh.MultiEntryHtmlPlugin');
 var _ = require('lodash');
 const sourceMappingURL = require('source-map-url');
 var cheerio = require('cheerio');

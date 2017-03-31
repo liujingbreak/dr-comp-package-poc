@@ -1,18 +1,19 @@
 {
   "name": "@dr/text-anim-ng",
-  "version": "0.0.23",
-  "description": "An Angular 1.x directive which can split text element into character based elements",
+  "version": "0.1.0",
+  "description": "An Angular 1.x directive which can split text element into character based elements, good for working with GSAP",
   "browser": "textAnim.js",
   "style": "textAnim.less",
   "transforms": [
     "@dr/parcelify-module-resolver"
   ],
   "dr": {
-    "bundle": "ui-lib"
+    "bundle": "ui-lib",
+    "category": ["angular", "ui"]
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "LJ",
   "license": "ISC"
 }

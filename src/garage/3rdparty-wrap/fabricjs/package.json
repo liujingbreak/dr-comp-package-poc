@@ -1,12 +1,13 @@
 {
   "name": "@dr/fabricjs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Fabricjs wrapper for browser only",
   "browser": "fabric-1.5.0.js",
   "dr": {
     "noUglify": true,
     "noLint": true,
-    "noWatch": true
+    "noWatch": true,
+    "category": ["thirdparty"]
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

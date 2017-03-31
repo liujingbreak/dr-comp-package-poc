@@ -1,0 +1,22 @@
+- name: ALL CATEGORIES
+  value: all
+- name: Angular 1.x
+  value: angular
+- name: UI
+  value: ui
+- name: Business Module
+  value: business
+- name: Node JS
+  value: nodejs
+- name: Tool
+  value: tool
+- name: Internal
+  value: internal
+- name: React
+  value: react
+- name: 3rd-party wrap
+  value: thirdparty
+- name: Lender Main Site
+  value: lender-main
+- name: Component Store Site
+  value: doc-site
