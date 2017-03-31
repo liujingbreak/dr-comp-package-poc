@@ -30,7 +30,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 			// In order for assets to maintain correct paths setting output.publicPath property of
 			// webpack configuration must be set, so that absolute paths are generated.
 			publicPath: publicPath(),
-			path: api.config.resolve('staticDir'),
+			path: api.config.resolve('staticDir') + (api.isDefaultLocale() ? '' : '/' + api.getBuildLocale()),
 			pathinfo: api.config().devMode
 		},
 		watch: false,
@@ -64,7 +64,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 					use: [{
 						loader: 'babel-loader',
 						options: {
-							cacheDirectory: api.config.resolve('destDir', 'babel-cache'),
+							cacheDirectory: api.config.resolve('destDir', 'babel-cache' + (api.isDefaultLocale() ? '' : '/' + api.getBuildLocale())),
 							presets: ['es2015', 'stage-0'],
 							plugins: [
 								'transform-decorators-legacy',
@@ -133,7 +133,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 						{loader: 'yaml-loader'}
 					]
 				}, {
-					test: /\.(jpg|png|gif|svg|jpeg)$/,
+					test: /\.(jpg|png|gif|svg|jpeg|eot|woff2|woff|ttf)$/,
 					use: [{loader: 'file-loader', options: {
 						name: '[path][name].[md5:hash:hex:8].[ext]'
 					}}]
@@ -214,8 +214,8 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 
 			var isOurs = !!(component && (_.includes(componentScopes, component.parsedName.scope) ||
 				component.dr));
-			if (!isOurs)
-				log.debug('Not ours, skip our loaders for %s', file);
+			// if (!isOurs)
+			// 	log.debug('Not ours, skip our loaders for %s', file);
 			return isOurs;
 		};
 	}

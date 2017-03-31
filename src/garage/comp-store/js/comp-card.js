@@ -9,7 +9,7 @@ api.app.component('compCard', {
 		if ($ctrl.package.author && $ctrl.package.author.name && datas[$ctrl.package.author.name]) {
 			$ctrl.imgUrl = env + encodeURIComponent(datas[$ctrl.package.author.name]) + '.jpg';
 		} else {
-			$ctrl.imgUrl = env + 'default.png';
+			$ctrl.imgUrl = false;
 		}
 		//使得dr.category一定返回一个数组
 		var dr_category = _.get($ctrl.package, 'dr.category');

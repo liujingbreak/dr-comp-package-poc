@@ -115,7 +115,7 @@ exports.init = function(app) {
 					swiper = new Swiper('.swiper-container', {
 						// Optional parameters
 						//direction: 'vertical',
-						autoplay: 2500,
+						autoplay: 4000,
 						speed: 800,
 						effect: 'flip',
 						flip: {

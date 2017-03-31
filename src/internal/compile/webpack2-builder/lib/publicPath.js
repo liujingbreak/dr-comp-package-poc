@@ -8,11 +8,25 @@ module.exports.getLocalIP = getLocalIP;
 var localIP;
 
 function publicPath() {
-	if (api.config().staticAssetsURL && /^https?:\/\//.test(api.config().staticAssetsURL)) {
-		return _.trimEnd(api.config().staticAssetsURL, '/') + '/';
+	var prefix = api.config().staticAssetsURL ? api.config().staticAssetsURL : '';
+	if (/^https?:\/\//.test(prefix)) {
+		return urlJoin(prefix, (api.isDefaultLocale() ? '' : '/' + api.getBuildLocale()));
 	} else {
-		return getDefaultPublicPath() + '/' + _.trimStart(api.config().staticAssetsURL, '/');
+		return urlJoin(getDefaultPublicPath(), prefix, (api.isDefaultLocale() ? '' : '/' + api.getBuildLocale()));
 	}
+}
+
+function urlJoin(...paths) {
+	var joined = '';
+	paths.forEach((p, i)=> {
+		p = _.trim(p, '/');
+		if (p.length > 0) {
+			if (joined.length > 0)
+				joined += '/';
+			joined += p;
+		}
+	});
+	return joined;
 }
 
 function getDefaultPublicPath() {

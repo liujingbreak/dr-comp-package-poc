@@ -14,7 +14,7 @@
     "@dr-core/webpack2-builder": "0.1.2",
     "@dr-core/express-app": "0.2.20",
     "@dr/http-server": "0.1.1",
-    "@dr/logger": "0.0.27",
+    "@dr/logger": "0.0.28",
     "@dr/translate-generator": "0.2.0"
   }
 }

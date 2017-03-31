@@ -6,7 +6,6 @@ var chalk = require('chalk');
 var shell = require('shelljs');
 
 var Promise = require('bluebird');
-var glob = require('glob');
 var buildUtils = require('../lib/gulp/buildUtils');
 
 module.exports = function(rootPath) {
