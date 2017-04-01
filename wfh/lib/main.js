@@ -5,8 +5,12 @@ var argv = require('yargs')
 	.default('root', process.env.DR_ROOT_DIR || process.cwd())
 	.describe('p', '<entry-package-name>')
 	.alias('p', 'package')
+	.describe('l', '<locale> for specific locale, e.g. "en", "zh", which are configured in config.yaml')
+	.alias('l', 'locale')
 	.describe('webpack-watch', 'Run Webpack in watch mode')
-	.alias('webpack-watch', 'ww').argv;
+	.alias('webpack-watch', 'ww')
+	.global(['root', 'ww', 'p', 'l'])
+	.argv;
 
 require('../bin/cli')(argv.root).init();
 var config = require('./config');

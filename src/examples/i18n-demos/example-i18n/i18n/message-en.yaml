@@ -5,5 +5,5 @@
 "Hellow I am text from a template html": "Hellow I am text from a template html"
 "Include me in index.html via Swig, see if this line is translated.": "Swig included template is also translated"
 "带换行的\n\t\tkey": "带换行的\n\t\tvalue"
-"现在时间是{{ mainVm.time | date : 'medium' }}。": "现在时间是{{ mainVm.time | date : 'medium' }}。"
+"现在时间是{{ mainVm.time | date : 'medium' }}。": "Current time is {{ mainVm.time | date : 'medium' }}。"
 "wrapped\n\tline": "successfully translated"

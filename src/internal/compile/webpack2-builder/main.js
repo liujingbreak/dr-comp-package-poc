@@ -40,8 +40,9 @@ exports.activate = function() {
 		if (_.size(webpackConfig.entry) === 0)
 			return;
 		var compiler = webpack(webpackConfig);
-		api.use(webpackMiddleware(compiler, {
+		api.use((api.isDefaultLocale() ? '/' : '/' + api.getBuildLocale()), webpackMiddleware(compiler, {
 			quiet: false,
+			//noInfo: true,
 			stats: {
 				colors: true
 			},

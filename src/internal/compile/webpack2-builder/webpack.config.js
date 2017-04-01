@@ -29,7 +29,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 			// don't work (they would be relative to chrome:blob or chrome:devtools).
 			// In order for assets to maintain correct paths setting output.publicPath property of
 			// webpack configuration must be set, so that absolute paths are generated.
-			publicPath: publicPath(),
+			publicPath: publicPath() + (api.isDefaultLocale() ? '' : api.getBuildLocale() + '/'),
 			path: api.config.resolve('staticDir') + (api.isDefaultLocale() ? '' : '/' + api.getBuildLocale()),
 			pathinfo: api.config().devMode
 		},

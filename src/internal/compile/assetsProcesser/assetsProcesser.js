@@ -55,6 +55,7 @@ function activate(api) {
 		gif: '365 days',
 		svg: '365 days',
 	});
+	//api.use('/', api.cors());
 	api.use('/', staticRoute(staticFolder));
 	// api.get('/', function(req, res) {
 	// 	res.render('index.html', {});
