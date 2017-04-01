@@ -118,3 +118,13 @@ exports.activate = function() {
 		});
 	});
 };
+
+exports.onCompileTemplate = function(relativeHtmlFilePath, swig) {
+	const api = require('__api');
+	if (relativeHtmlFilePath === 'views/componentStore.html') {
+		return {locals: {
+			npmHost: api.config.get([api.packageName, 'npmHost'], 'npm.dianrong.com')
+		}};
+	}
+	return null;
+};

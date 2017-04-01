@@ -1,6 +1,6 @@
 {
   "name": "@dr/comp-store",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Component store",
   "browser": "browser.js",
   "main": "server/server.js",
@@ -13,7 +13,8 @@
     "compiler": "webpack",
     "config": {
       "public": {
-        "nodeServer": "http://dr-npm501-14338.ittun.com"
+        "nodeServer": "http://dr-npm501-14338.ittun.com",
+        "npmHost": "npm.dianrong.com"
       },
       "server": {
         "verdaccioUrl": "http://localhost:4873"

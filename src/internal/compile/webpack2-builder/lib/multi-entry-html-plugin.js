@@ -37,7 +37,7 @@ MultiEntryHtmlPlugin.prototype.apply = function(compiler) {
 	}
 
 	compiler.plugin('emit', function(compilation, callback) {
-		applyPluginsAsyncWaterfall = Promise.promisify(compilation.applyPluginsAsyncWaterfall, {context: compilation});
+		applyPluginsAsyncWaterfall = Promise.promisify(compilation.applyPluginsAsyncWaterfall.bind(compilation));
 		var inlineAssests = inlineChunk(compilation, plugin.opts.inlineChunk);
 		assetsByEntry(compilation, inlineAssests)
 		.then(() => callback())
