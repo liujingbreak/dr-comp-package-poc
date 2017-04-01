@@ -22,7 +22,7 @@ api.app.component('compGroup', {
 		function calculateCardWidth() {
 			var groupWidth = $element.prop('clientWidth');
 			var colCount = parseInt(groupWidth / cardMinWidth, 10);
-			var cardWidth = Math.floor(100 / colCount);
+			var cardWidth = Math.floor(1000 / colCount) / 10;
 			$ctrl.onChangeCardWidth({width: cardWidth});
 			$scope.$apply();
 		}

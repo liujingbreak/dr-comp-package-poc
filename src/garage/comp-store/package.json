@@ -1,10 +1,11 @@
 {
   "name": "@dr/comp-store",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Component store",
   "browser": "browser.js",
   "main": "server/server.js",
   "dr": {
+    "category": ["angular", "doc-site"],
     "bundle": "component-store",
     "type": [
       "server"

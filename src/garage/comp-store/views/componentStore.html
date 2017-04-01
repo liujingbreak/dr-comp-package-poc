@@ -4,10 +4,10 @@
 		<div class="swiper-wrapper">
 			<!-- Slides -->
 			<div class="swiper-slide slide1">
-				<h1>点融前端Web组件库</h1>
+				<h1>Web组件库, 持续贡献, 持续复用</h1>
 			</div>
 			<div class="swiper-slide slide2">
-				<h1>持续贡献, 持续复用</h1>
+				<h1>It's time to publish your cool shit</h1>
 			</div>
 		</div>
 	</section>
@@ -15,12 +15,16 @@
 		<form name="naviForm" class="input-row">
 			<div class="logo-bg">
 				<h4 t>res:Component Store</h4>
-				<select ng-model="compStoreVm.category" ng-options="item.value as item.name for item in compStoreVm.categories" class='category'>
-				</select>
 			</div>
+			<span class="categories" dr-doc-select options="compStoreVm.categories" model="compStoreVm.category">
+				<!--<i class="fa fa-bars" aria-hidden="true"></i>
+				<span class="category-name">{{compStoreVm.category}}</span>
+				<select id="category-sel" ng-model="compStoreVm.category" ng-options="item.value as item.name for item in compStoreVm.categories" class='category'>
+				</select>-->
+			</span>
 			<i class="fa fa-2x fa-search" aria-hidden="true"></i>
 			
-			<div class="quick-search">				
+			<div class="quick-search">
 				<input autocomplete="false" placeholder="{{compStoreVm.quickSearch}}" type="text" ng-model="compStoreVm.nameSearch" />
 			</div>
 		</form>

@@ -2,7 +2,7 @@ require('@dr/angularjs');
 var api = require('__api');
 var _ = require('lodash');
 var Swiper = require('swiper/dist/js/swiper.jquery.js');
-var jsonCategory = require('../assets/json/category.json');
+var jsonCategory = require('./categories-{locale}.yaml');
 
 var initialized = false;
 var lastSelectedCard;
@@ -115,7 +115,7 @@ exports.init = function(app) {
 					swiper = new Swiper('.swiper-container', {
 						// Optional parameters
 						//direction: 'vertical',
-						autoplay: 2500,
+						autoplay: 4000,
 						speed: 800,
 						effect: 'flip',
 						flip: {

@@ -6,7 +6,6 @@ var chalk = require('chalk');
 var shell = require('shelljs');
 
 var Promise = require('bluebird');
-var glob = require('glob');
 var buildUtils = require('../lib/gulp/buildUtils');
 
 module.exports = function(rootPath) {
@@ -168,10 +167,10 @@ module.exports = function(rootPath) {
 
 	function _drawPuppy(slogon, message) {
 		if (!slogon)
-			slogon = 'Congrads! Remember, all your packages are belong to us!';
+			slogon = 'Congrads! Time to publish your shit!';
 
 		console.log(chalk.magenta('   ' + _.repeat('-', slogon.length)));
-		console.log(chalk.magenta(' < Congrads! Remember, all your packages are belong to us! >'));
+		console.log(chalk.magenta(' < %s >'), slogon);
 		console.log(chalk.magenta('   ' + _.repeat('-', slogon.length)));
 		console.log(chalk.magenta('\t\\   ^__^\n\t \\  (oo)\\_______\n\t    (__)\\       )\\/\\\n\t        ||----w |\n\t        ||     ||'));
 		if (message)

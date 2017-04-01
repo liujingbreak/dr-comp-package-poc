@@ -1,7 +1,7 @@
 {
   "name": "@dr-core/express-app",
   "description": "express app",
-  "version": "0.2.19",
+  "version": "0.2.20",
   "main": "app.js",
   "dependencies": {
     "cors": "^2.8.0",
@@ -18,9 +18,11 @@
     "swig-templates": "^2.0.2"
   },
   "dr": {
+    "category": ["tool", "internal", "nodejs"],
     "type": [
       "core",
       "server"
     ]
-  }
+  },
+  "author": "LJ"
 }

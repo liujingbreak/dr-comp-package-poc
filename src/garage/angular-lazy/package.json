@@ -1,10 +1,11 @@
 {
   "name": "@dr/angular-lazy",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Angular JS lazy load module (Derived from angular-require-lazy)",
   "browser": "lazyAngularUtils.js",
   "dr": {
-    "bundle": "ui-lib"
+    "bundle": "ui-lib",
+    "category": ["angualr", "thirdparty"]
   },
   "transforms": [
     "@dr/parcelify-module-resolver"

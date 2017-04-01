@@ -1,10 +1,11 @@
 {
   "name": "@dr/readme",
-  "version": "0.0.37",
-  "description": "Readme file mapping",
+  "version": "0.1.0",
+  "description": "Menu items for dr-comp-package document site document menu",
   "browser": "browser/index.js",
   "dr": {
-    "bundle": "readme"
+    "bundle": "readme",
+    "category": ["doc-site"]
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

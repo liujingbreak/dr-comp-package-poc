@@ -1,6 +1,6 @@
 {
   "name": "@dr/readme-docs",
-  "version": "0.2.21",
+  "version": "0.3.0",
   "description": "All readme markdown files",
   "main": "lib/compiler.js",
   "scripts": {
@@ -16,6 +16,7 @@
   "dr": {
     "type": "builder",
     "noWatch": true,
+    "category": ["doc-site", "nodejs"],
     "builderPriority": "before @dr-core/browserify-builder"
   }
 }

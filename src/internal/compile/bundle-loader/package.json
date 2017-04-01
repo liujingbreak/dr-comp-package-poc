@@ -1,11 +1,12 @@
 {
   "name": "@dr-core/bundle-loader",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Load CSS bundles, works with LABjs",
   "browser": "bundle-loader.js",
   "main": "bundle-loader.js",
   "dr": {
-    "bundle": "labjs"
+    "bundle": "labjs",
+    "category": ["internal"]
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

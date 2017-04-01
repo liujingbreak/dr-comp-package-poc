@@ -4,18 +4,34 @@ var log = require('log4js').getLogger(api.packageName);
 
 module.exports = publicPath;
 module.exports.getLocalIP = getLocalIP;
+module.exports.getHostnamePath = getHostnamePath;
 
 var localIP;
 
 function publicPath() {
-	if (api.config().staticAssetsURL && /^https?:\/\//.test(api.config().staticAssetsURL)) {
-		return _.trimEnd(api.config().staticAssetsURL, '/') + '/';
+	var prefix = api.config().staticAssetsURL ? api.config().staticAssetsURL : '';
+	prefix = _.trimEnd(prefix, '/');
+	if (/^https?:\/\//.test(prefix)) {
+		return prefix + '/';
 	} else {
-		return getDefaultPublicPath() + '/' + _.trimStart(api.config().staticAssetsURL, '/');
+		return urlJoin(getHostnamePath(), prefix) + '/';
 	}
 }
 
-function getDefaultPublicPath() {
+function urlJoin(...paths) {
+	var joined = '';
+	paths.forEach((p, i)=> {
+		p = _.trim(p, '/');
+		if (p.length > 0) {
+			if (joined.length > 0)
+				joined += '/';
+			joined += p;
+		}
+	});
+	return joined;
+}
+
+function getHostnamePath() {
 	var ssl = api.config.get('ssl.enabled');
 	var port = ssl ? api.config().ssl.port : api.config().port;
 	return (ssl ? 'https' : 'http') + '://' + getLocalIP() + (port ? ':' + port : '');

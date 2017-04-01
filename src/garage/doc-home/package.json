@@ -1,7 +1,7 @@
 {
   "name": "@dr/doc-home",
-  "version": "0.1.28",
-  "description": "Home page",
+  "version": "0.1.29",
+  "description": "dr-comp-package - document site module",
   "browser": "browser/switchLocale.js",
   "main": "server/server.js",
   "style": "browser/style/main.less",
@@ -13,7 +13,8 @@
     "bundle": "home",
     "entryPage": "index.html",
     "compiler": "webpack",
-    "outputPath": "/"
+    "outputPath": "/",
+    "category": ["angular", "doc-site"]
   },
   "dependencies": {
     "angular-ui-router": "^0.3.2",
