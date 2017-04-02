@@ -23,14 +23,22 @@ comp-store {
 	text-align: center;
 }
 
-.size-mobile {
+.size-tablet, .size-mobile {
 	.comp-main {
 		position: static;
 		overflow-y: visible;
 		padding: 0 0 @dr-unit-half 0;
-		// .horizatal-line {
-		// 	position: static;
-		// }
+		.banner {
+			height: auto;
+		}
+		.banner-tips {
+			position: relative;
+			right: auto;
+			width: 100%;
+			z-index: 2;
+			height: auto;
+			background: @dr-black;
+		}
 	}
 }
 .comp-main {
@@ -40,24 +48,29 @@ comp-store {
 	//overflow: hidden;
 	padding: 0 0 @dr-unit 0;
 	.banner-tips {
+	// 	float: right;
+	// 	margin-right: @dr-unit;
 		position: absolute;
+		top: 0;
 		right: @dr-unit;
-		background: rgba(0,0,0, 0.7);
+		background: rgba(0,0,0, 0.5);
 		height: 100%;
 		font-size: @dr-fontsize;
 		color: @dr-lite;
 		padding: @dr-unit;
+		line-height: normal;
 	}
 	.banner {
 		//z-index: -1;
 		overflow: hidden;
-		height: @banner-height;
-		//background: @dr-dark-dark;
+		//height: @banner-height; // Already be denoted by line-height 
 		background: url(assets://@dr/comp-store/photo-blue-mountain.jpg) center/cover no-repeat;
 		color: @dr-lite;
+		line-height: @banner-height; // To make child element vertical align middle
 		h1 {
 			display: inline-block;
-			line-height: @banner-height;
+			vertical-align: middle;
+			//line-height: @banner-height;
 		}
 		// .slide1 {
 		// 	background: url(assets://@dr/comp-store/photo-tree-sky-clip-blur.png) center/cover no-repeat;
