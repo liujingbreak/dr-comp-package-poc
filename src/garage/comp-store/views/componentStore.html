@@ -1,12 +1,12 @@
 <main ui-view="compMain" class="comp-main">
 	<section class="banner swiper-container">
-		<div class="banner-tips">
+		<!-- Additional required wrapper -->
+		<div class="banner-tips size-desktop-only">
 			<code>
-			npm set registry http://{= npmHost =}:4873<br/>
-			npm adduser --registry http://{= npmHost =}:4873
+			npm set registry http://{= npmHost =}<br/>
+			npm adduser --registry http://{= npmHost =}
 			</code>
 		</div>
-		<!-- Additional required wrapper -->
 		<div class="swiper-wrapper">
 			<!-- Slides -->
 			<div class="swiper-slide slide1">
@@ -17,6 +17,12 @@
 			</div>
 		</div>
 	</section>
+	<div class="banner-tips size-desktop-hide">
+		<code>
+		npm set registry http://{= npmHost =}<br/>
+		npm adduser --registry http://{= npmHost =}
+		</code>
+	</div>
 	<section ng-show="compStoreVm.showNavi" class="comp-navi">
 		<form name="naviForm" class="input-row">
 			<div class="logo-bg">

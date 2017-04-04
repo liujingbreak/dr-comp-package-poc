@@ -1,3 +1,5 @@
+
+## Responsive screen width resize detection and top level CSS class name
 This package is a super light function that detects screen size and whether it supports touch event, and puts special CSS class names like `size-desktop`, `size-tablet`, `size-mobile` onto HTML element.
 
 Also Modernizr is used in this package to detect Touch events feature.
@@ -14,6 +16,33 @@ if (Modernizr.touchevents) {
   // not-supported
 }
 ```
+
+## Visibility class name
+You can control visibility by add/remove class name of specific element with
+`size-mobile-hide`, `size-tablet-hide`, `size-desktop-hide`, and `size-mobile-only`, `size-tablet-only`, `size-desktop-only`, because
+according to different screen width, style
+`display: none` is preset for following selectors:
+
+```less
+.size-mobile {
+	.size-mobile-hide, .size-desktop-only, .size-tablet-only {
+		display: none;
+	}
+}
+
+.size-tablet {
+	.size-tablet-hide, .size-desktop-only, .size-mobile-hide {
+		display: none;
+	}
+}
+
+.size-desktop {
+	.size-desktop-hide, .size-mobile-only, .size-tablet-only {
+		display: none;
+	}
+}
+```
+
 
 Copied idea from
 
