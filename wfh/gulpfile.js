@@ -1,6 +1,6 @@
 //var nodeSearchPath = require('./lib/nodeSearchPath');
 require('./bin/nodePath')();
-var argv = require('./lib/gulp/showHelp')(require('yargs'));
+var argv = require('./lib/gulp/showHelp');
 var gulp = require('gulp');
 var Promise = require('bluebird');
 var Path = require('path');
@@ -9,7 +9,7 @@ var jshint = require('gulp-jshint');
 var jscs = require('gulp-jscs');
 var bump = require('gulp-bump');
 var through = require('through2');
-var del = require('del');
+//var del = require('del');
 var jscs = require('gulp-jscs');
 var File = require('vinyl');
 var _ = require('lodash');
@@ -27,36 +27,37 @@ var packageUtils = require('./lib/packageMgr/packageUtils');
 
 var config = require('./lib/config');
 require('./lib/logConfig')(config().rootPath);
+var cli = require('./lib/gulp/cli');
 
 //var packageInstaller = PackageInstall();
 
 //var IS_NPM2 = _.startsWith(shell.exec('npm -v').output, '2.');
 
 gulp.task('default', function() {
-	gutil.log('please individually execute gulp [task]');
-	gutil.log('\tbuild clean, link, compile [-b <bundle> ...], bump, publish');
+	gutil.log('please individually execute with [command]');
 });
 
-gulp.task('clean:installed', function() {
-	var dirs = [];
-	_.each(config().packageScopes, function(packageScope) {
-		var npmFolder = Path.resolve('node_modules', '@' + packageScope);
-		gutil.log('delete ' + npmFolder);
-		dirs.push(npmFolder);
-	});
-	return del(dirs).then(gutil.log, gutil.log);
+gulp.task('init', function() {
+	return cli.init();
 });
 
-gulp.task('clean:recipe', function() {
-	return recipeManager.clean();
+gulp.task('install', function() {
+	return cli.install();
 });
 
-gulp.task('clean:dist', function() {
-	return del([config().staticDir, config().destDir]);
+gulp.task('project', function() {
+	if (argv.a)
+		return cli.addProject([].concat(argv.a));
+	else
+		return cli.listProject();
+});
+
+gulp.task('list-dep', function() {
+	return require('./lib/gulp/cliAdvanced').listCompDependency(false);
 });
 
 gulp.task('clean', (cb) => {
-	runSequence('clean:recipe', 'clean:dist', cb);
+	cli.clean();
 });
 
 gulp.task('build', (cb)=> {
@@ -94,16 +95,6 @@ gulp.task('flatten-recipe', function() {
 	gutil.log('flatten-recipe is obsolete');
 });
 
-// gulp.task('check-dep', function() {
-// 	var mgr = new PackageInstall();
-// 	var srcDirs = [];
-// 	recipeManager.eachRecipeSrc(function(src, recipe) {
-// 		srcDirs.push(src);
-// 	});
-// 	mgr.scanSrcDepsAsync(srcDirs)
-// 	.then(_.bind(mgr.printComponentDep, mgr));
-// });
-
 gulp.task('lint', function() {
 	var i = 0;
 	return gulp.src(['lib/**/*.js', 'e2etest/**/*.js']
@@ -120,16 +111,8 @@ gulp.task('lint', function() {
 	.pipe(jscs.reporter('fail'));
 });
 
-/**
- * link src/ ** /package.json from node_modules folder
- */
-gulp.task('link', function() {
-	//return recipeManager.link();
-	return require('./bin/cli')(config().rootPath).init();
-});
-
 gulp.task('compile', function(cb) {
-	require('./bin/cli')(config().rootPath).init()
+	cli.init()
 	.then(() => {
 		config.reload();
 		runSequence('compile:dev', cb);
@@ -315,7 +298,7 @@ gulp.task('e2e', function(callback) {
 	});
 });
 
-gulp.task('ls', ['link'], function(callback) {
+gulp.task('ls', ['init'], function(callback) {
 	config.reload();
 	require('log4js').getLogger('lib.injector').setLevel('warn');
 	require('log4js').getLogger('packagePriorityHelper').setLevel('warn');

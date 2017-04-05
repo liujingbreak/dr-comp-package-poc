@@ -1,17 +1,17 @@
 /**
- * Do not require this file until wfh dependencies is installed
+ * Do not require this file until wfh dependencies is installed and config.yaml file is generated
  */
-var PackageInstall = require('../lib/gulp/packageInstallMgr');
-var recipeManager = require('../lib/gulp/recipeManager');
-var config = require('../lib/config');
+var PackageInstall = require('./packageInstallMgr');
+var recipeManager = require('./recipeManager');
+var config = require('../config');
 var shell = require('shelljs');
 var jsYaml = require('js-yaml');
 var Path = require('path');
 var fs = require('fs');
 var _ = require('lodash');
-//var buildUtils = require('../lib/gulp/buildUtils');
-require('../lib/logConfig')(config().rootPath);
-var packageUtils = require('../lib/packageMgr/packageUtils');
+//var buildUtils = require('./buildUtils');
+require('../logConfig')(config().rootPath);
+var packageUtils = require('../packageMgr/packageUtils');
 
 exports.writeProjectDep = writeProjectDep;
 exports.listCompDependency = listCompDependency;
@@ -123,7 +123,7 @@ function cleanPackagesWalkerCache() {
 
 function clean() {
 	return new Promise((resolve, reject) => {
-		require('../lib/gulp/recipeManager').clean()
+		require('./recipeManager').clean()
 		.on('end', resolve)
 		.on('error', err => {
 			console.error(err);
