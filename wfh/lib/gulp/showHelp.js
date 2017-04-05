@@ -1,20 +1,29 @@
-module.exports = function(yargs) {
+var yargs = require('yargs');
+
+module.exports = init(yargs);
+
+function init(yargs) {
 	return yargs.usage('Usage: $0 <command> [-b <bundle>] [-p package]\n' +
 	'$0 link [-r <recipe folder>] [-d <src folder>]')
-	.command('build', 'build everything from scratch, including install-recipe, link, npm install, compile')
-	.command('clean', 'cleanup build environment like dist/static folder, cache, recipe package.json, even those private modules in node_modules folder')
-	.command('clean:dist', 'only cleanup dist/static folder, do not cleanup private packages in node_modules')
+	.command(['init', 'init-workspace'], 'Initialize workspace, copy project  and other basic configuration')
+	.command(['install'], 'Install components and their dependency')
+	.command(['project'], '[-a|--add <project-dir>] Add or list project folders')
+	.command(['clean'], 'Clean "destDir" and symbolic links from node_modules')
+	.command(['list-dep'], 'List all component dependencies')
+	//.command('build', 'build everything from scratch, including install-recipe, link, npm install, compile')
+	// .command('clean', 'cleanup build environment like dist/static folder, cache, recipe package.json, even those private modules in node_modules folder')
+	// .command('clean:dist', 'only cleanup dist/static folder, do not cleanup private packages in node_modules')
 	.command('ls', 'If you want to know how many components will actually run, this command prints out a list and the priorities, including installed components')
 	.command('compile', 'link recipe, compile package into static browser bundles')
 	.command('lint', '[--project|pj <project-dir>] source code style check')
 	//.command('install-recipe', 'link newly changed package.json files to recipe folder and `npm install` them, this makes sure all dependencies being installed')
-	.command('watch', '(For Browserify only) automatically rebuild specific bundle file when changes on browser packages source code is detected, if you change any package.json or add/remove packages, you need to restart watch command')
-	.command('link', 'link newly changed package.json files to recipe folder')
+	//.command('watch', '(For Browserify only) automatically rebuild specific bundle file when changes on browser packages source code is detected, if you change any package.json or add/remove packages, you need to restart watch command')
+	//.command('link', 'link newly changed package.json files to recipe folder')
 	.command('build-prod', 'disable config.local.yaml, build for production environment')
 	.command('publish', '[--project|pj <project-dir>] npm publish every pakages in source code folder including all mapped recipes')
 	.command('unpublish', '[--project|pj <project-dir>] npm unpublish every pakages in source code folder including all mapped recipes of version number in current source code')
 	.command('bump', '[--project|pj <project-dir>] [-d <package-dir>] [-v major|minor|patch] bump version number of all package.json or [-d] only specific package, useful to call this before publishing packages, default is increasing patch number by 1')
-	.command('flatten-recipe', 'flattern NPM v2 nodule_modules structure, install-recipe comamnd will execute this command')
+	//.command('flatten-recipe', 'flattern NPM v2 nodule_modules structure, install-recipe comamnd will execute this command')
 	.command('test', '[-p <package-short-name>] [-f <spec-file-path>] run Jasmine for specific or all packages')
 	.command('e2e', '[-d <test-suit-dir] [-f <spec-file-path>] [--server <start-js-file>] [--dir <working directory>] [--browser <chrome|firefox|ie|opera|edge|safari>]run Jasmine for end-to-end tests')
 	// .command('check-dep', 'Print out dependency list of all your source code packages (according to `recipeSrcMapping` value in config.yaml),' +
@@ -24,6 +33,8 @@ module.exports = function(yargs) {
 
 	.describe('c', '<config.xxx.yaml> the config file, default is "config.local.yaml"')
 	.alias('c', 'config')
+	.describe('a', '<project dir> Add project folder')
+	.alias('a', 'add')
 	.describe('b', '<bundle-name> if used with command `compile` or `build`, it will only compile specific bundle, which is more efficient (only for Browserify)')
 	.alias('b', 'bundle')
 	.describe('p', '<package-short-name> if used with command `compile`, `build`, `lint`, it will only build and check style on specific package (component), which is more efficient (for Webpack it must be Entry package)')
@@ -45,7 +56,8 @@ module.exports = function(yargs) {
 	.describe('root', '<working directory>, optional, used with command `e2e`, indicates which directory as test server start directory')
 	.default('root', process.env.DR_ROOT_DIR || process.cwd())
 	.demand(1)
-	.global(['c', 'b', 'p', 'l', 'only-js', 'only-css', 'd', 'r', 'v', 'f', 'browser', 'server', 'root', 'project'])
+	.global(['a', 'c', 'b', 'p', 'l', 'only-js', 'only-css', 'd', 'r', 'v', 'f', 'browser', 'server', 'root', 'project'])
 	.help('h').alias('h', 'help')
+	.epilog('copyright 2016')
 	.argv;
-};
+}

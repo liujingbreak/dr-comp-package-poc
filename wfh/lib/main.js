@@ -12,7 +12,7 @@ var argv = require('yargs')
 	.global(['root', 'ww', 'p', 'l'])
 	.argv;
 
-require('../bin/cli')(argv.root).init();
+//require('./gulp/cli')(argv.root).init();
 var config = require('./config');
 config.reload();
 
