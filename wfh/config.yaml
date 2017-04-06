@@ -86,6 +86,10 @@ vendorBundleMap:
       - lodash
       - webpack
       - process
+      - buffer
+      - base64-js
+      - ieee754
+      - isarray
 
   ui-lib: # bundle name
       - angular-ui-router
