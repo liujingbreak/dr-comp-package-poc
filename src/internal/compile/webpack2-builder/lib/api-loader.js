@@ -32,7 +32,14 @@ function loadAsync(content, loader) {
 
 function parse(source, loader) {
 	var file = loader.resourcePath;
+	var currPackage = api.findPackageByFile(file);
 	var hasApi = false;
+	if (currPackage && currPackage.longName !== api.packageName /*@dr-core/webpack2-builder*/ && file === currPackage.file) {
+		hasApi = true;
+		log.debug('Insert CSS scope classname to:\n %s', file);
+		source = `document.getElementsByTagName(\'html\')[0].className += \' ${currPackage.parsedName.name}\';
+${source}`;
+	}
 	var astFromCache = false;
 	//log.info('js file: %s, %s', file, _.get(currPackage, 'file'));
 
@@ -60,7 +67,7 @@ function parse(source, loader) {
 		delete loader.query.astFromCache[file];
 	//source = loader.query.injector.injectToFile(file, source, ast);
 	//loader.query.injector.removeListener('replace', loader.data.onReplaceApiCall);
-	var currPackage = api.findPackageByFile(file);
+
 	if (hasApi) {
 		source = apiTmpl({
 			packageName: currPackage.longName,

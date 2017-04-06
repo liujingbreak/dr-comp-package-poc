@@ -23,6 +23,11 @@ Also it inlines `manifest` chunk in entry HTML file.
 
 ### api-loader
 Resolves `require('__api')` and `__api` expression statement, also works with **require-injector**.
+#### CSS scope
+If the JS file is a "main" file of a component package, it will be inserted with code:
+```js
+document.getElementsByTagName('html')[0].className += ' <package short name>';
+```
 
 ### @dr-core/webpack2-builder/lib/html-loader
 Replaces `assets://<component>/...` in *[src|href] from all html files.
