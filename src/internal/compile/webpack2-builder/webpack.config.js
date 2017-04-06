@@ -214,7 +214,6 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 			if (_.has(file2EntryChunkName, file))
 				return true;
 			var component = api.findPackageByFile(file);
-
 			var isOurs = !!(component && (_.includes(componentScopes, component.parsedName.scope) ||
 				component.dr));
 			// if (!isOurs)
