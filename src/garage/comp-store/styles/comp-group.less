@@ -6,4 +6,8 @@ comp-group {
 	overflow: hidden;
 	width: 100%;
 	min-height: 1px; // IE hack: DOM must has non-zero height, otherwise it will have no clientHight value when there is no child node
+	.loading-indicator {
+		line-height: @dr-unit * 10;
+		text-align: center;
+	}
 }

@@ -72,18 +72,8 @@ function _initWorkspace() {
 }
 
 function _initProjects() {
-	var projectListFile = Path.join(rootPath, 'dr.project.list.json');
 	var helper = require('./cliAdvanced');
-	if (fs.existsSync(projectListFile)) {
-		var projects = require(projectListFile);
-		console.log(_.pad(' Projects directory ', 40, '-'));
-		//var nameLen = _.maxBy(projects, dir => dir.length).length + 3;
-		_.each(projects, (dir, i) => {
-			dir = Path.resolve(rootPath, dir);
-			console.log(_.padEnd(i + 1 + '. ', 5, ' ') + dir);
-			//return _updateProjectFolder(dir);
-		});
-	}
+	listProject();
 	return Promise.coroutine(function*() {
 		yield helper.listCompDependency(true);
 		yield require('./recipeManager').linkComponentsAsync();
@@ -129,7 +119,8 @@ function addProject(dirs) {
 	}
 	prj = _.uniqBy(prj, dir => Path.resolve(dir));
 	writeFile(projectListFile, JSON.stringify(prj, null, '  '));
-	init();
+	require('../config').reload();
+	return init();
 }
 
 function listProject() {

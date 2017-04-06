@@ -172,12 +172,12 @@ exports.init = function(app) {
 					var param_1, param_2;
 					//判断请求页是否大于总页数
 					if (totalPage != null && page >= totalPage) {
-						drLoadingService.setLoading('compStore', false);
+						//drLoadingService.setLoading('compStore', false);
 						return false;
 					}
-					if (page === 0) {
-						drLoadingService.setLoading('compStore', true);
-					}
+					// if (page === 0) {
+					// 	drLoadingService.setLoading('compStore', true);
+					// }
 					//执行函数标识
 					var func = '';
 					var index = ++searchCount;
@@ -215,10 +215,10 @@ exports.init = function(app) {
 						})
 						.catch(function(err) {
 							compStoreVm.error = err;
-						})
-						.finally(function(data) {
-							drLoadingService.setLoading('compStore', false);
 						});
+					// .finally(function(data) {
+					// 	drLoadingService.setLoading('compStore', false);
+					// });
 				}
 
 				//下拉滚动时调用

@@ -27,7 +27,7 @@ function load(content, loader) {
 		var src = el.attr(attrName);
 		if (src.startsWith('assets://')) {
 			log.debug('Found tag %s, %s: %s', el.prop('tagName'), attrName, el.attr(attrName));
-			el.attr(attrName, replaceAssetsUrl(loader.options.output.publicPath, file, src));
+			el.attr(attrName, replaceAssetsUrl(file, src));
 		}
 	}
 	return $.html();

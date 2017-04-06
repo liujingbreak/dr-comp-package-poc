@@ -154,7 +154,7 @@ function load() {
 
 function mergeFromFile(setting, localConfigPath) {
 	if (!fs.existsSync(localConfigPath)) {
-		log.warn('File does not exist: %s', localConfigPath);
+		log.info('File does not exist: %s', localConfigPath);
 		return;
 	}
 	log.info(`Read ${localConfigPath}`);

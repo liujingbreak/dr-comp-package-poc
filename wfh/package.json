@@ -1,6 +1,6 @@
 {
   "name": "dr-comp-package",
-  "version": "0.1.0-alpha.8",
+  "version": "0.1.0-alpha.9",
   "description": "DR web component package developer toolkit",
   "main": "lib/main.js",
   "bin": "bin/dr.js",
@@ -13,7 +13,7 @@
     "type": "git",
     "url": "git+https://github.com/dr-web-house/web-fun-house.git/wfh"
   },
-  "author": "liujing.break@gmail.com",
+  "author": "jing.liu.FE@dianrong.com",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/dr-web-house/issues"

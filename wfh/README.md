@@ -39,15 +39,19 @@
   ```shell
   npm install -g dr-comp-package-cli # Only need to install once
 
-  mkdir dr-workspace
-  cd dr-workspace
+  mkdir workspace
+  cd workspace
+
   npm install dr-comp-package
-  wfh add <project1-dir> <project2-dir> ...
+
+  drcp project -a <project1-dir> [-a <project2-dir> ...]
+
   npm install
+
   # For development mode, compile web static resource to memory and start node web server
-  node app
+  node app --ww
   # For production mode, compile web static resource to dist/
-  gulp compile
+  drcp compile
   ```
   It creates files: `package.json`, `config.yaml`, `config.local.yaml`, ...
   And folders

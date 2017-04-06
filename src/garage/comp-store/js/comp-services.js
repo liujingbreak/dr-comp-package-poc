@@ -13,7 +13,7 @@ api.app.factory('compService', ['$q', '$http', '$timeout', function($q, $http, $
 					url: this.nodeServer + api.contextPath + '/packageBanner?page=' + page + '&pageSize=' + pageSize,
 				})
 				// .then(function(res) {
-				// 	return $timeout(()=> res, 3000);
+				// 	return $timeout(()=> res, 300000);
 				// })
 				.then(function(res) {
 					if (res.data.error)
