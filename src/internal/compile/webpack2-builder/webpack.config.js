@@ -135,7 +135,10 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 				}, {
 					test: /\.(jpg|png|gif|svg|jpeg|eot|woff2|woff|ttf)$/,
 					use: [{loader: 'file-loader', options: {
-						name: '[path][name].[md5:hash:hex:8].[ext]'
+						name: '[path][name].[md5:hash:hex:8].[ext]',
+						outputPath: url => {
+							return url.replace(/(^|\/)node_modules(\/|$)/g, '$1n-m$2').replace(/@/g, 'a'); // github.io does not support special character like "_" and "@"
+						}
 					}}]
 				}
 			]
