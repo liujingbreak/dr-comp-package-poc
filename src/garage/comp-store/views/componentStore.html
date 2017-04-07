@@ -46,7 +46,7 @@
 
 	<comp-group card-min-width="250" on-change-card-width="compStoreVm.cardWidth = width">
 		<comp-card id="comp-{{pk.name}}" card-width="compStoreVm.cardWidth" on-select="compStoreVm.trackSelectedCard(name)" ng-repeat="pk in compStoreVm.packages" package="pk"></comp-card>
-		<div dr-scroll-loading="compStoreVm.packages" on-nextpage="compStoreVm.loadPage(pageIndex)" parent='.comp-store-pagination-scroll'>
+		<div dr-scroll-loading="compStoreVm.packages" on-nextpage="compStoreVm.loadPage(pageIndex)" parent='window'>
 			<div class="loading-indicator dr-bg-dark"><img src="assets://@dr/doc-ui/loading.svg"/></div>
 		</div>
 	</comp-group>

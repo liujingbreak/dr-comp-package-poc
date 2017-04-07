@@ -21,3 +21,4 @@ module.exports = m;
 require('./animation')(m);
 require('./loading.js').create(m);
 require('./drDocSelect/drDocSelect.js')(m);
+require('./text-anim/textAnim')(m);

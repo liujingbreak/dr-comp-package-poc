@@ -302,21 +302,3 @@ function _checkDuplicate(packageSet, name, parsedName, pkJson, packagePath) {
 		packagePath: packagePath
 	};
 }
-
-
-// function _recursiveLookupPackagejsonFolder(targetPath) {
-// 	if (!targetPath) {
-// 		throw new Error('targetPath can not be null');
-// 	}
-// 	var path = targetPath;
-// 	var folder = Path.dirname(path);
-// 	while (!fs.existsSync(Path.join(folder, 'package.json'))) {
-// 		var parentFolder = Path.dirname(folder);
-// 		if (folder === parentFolder) {
-// 			// root directory is reached
-// 			throw new Error('package.json is not found for ' + targetPath);
-// 		}
-// 		folder = parentFolder;
-// 	}
-// 	return folder;
-// }

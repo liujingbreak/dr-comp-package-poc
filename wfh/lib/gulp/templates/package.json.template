@@ -14,7 +14,9 @@
     "node": ">=6.7.0"
   },
   "dependencies": {
+    <% if(!noDrcp) {%>
     "dr-comp-package": "^<%=version%>"
+    <%}%>
   },
   "devDependencies": {
     "jasmine": "^2.5.3"

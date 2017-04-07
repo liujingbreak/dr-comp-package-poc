@@ -262,8 +262,8 @@ ManualChunkPlugin.prototype.apply = function(compiler) {
 
 	function printChunksByEntry(compilation) {
 		_.each(compilation.entrypoints, (entrypoint, name) => {
-			log.debug('entrypoint %s', name);
-			_.each(entrypoint.chunks, chunk => log.debug('\t%s', chunk.files[0]));
+			log.info('entrypoint %s', chalk.green(name));
+			_.each(entrypoint.chunks, chunk => log.info('\t%s', chunk.files[0]));
 		});
 	}
 };

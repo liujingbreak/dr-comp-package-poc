@@ -11,35 +11,6 @@ printVersion()
 	try {
 		require('../lib/gulp/cli').initGulpfile();
 		require('gulp/bin/gulp');
-		// if (argv._ && argv._[0]) {
-		// 	switch (argv._[0]) {
-		// 		case 'init':
-		// 		case 'init-workspace':
-		// 			cli.init();
-		// 			break;
-		// 		case 'update':
-		// 		case 'u':
-		// 			console.log('This command is deprecated');
-		// 			break;
-		// 		case 'install':
-		// 		case 'install-deps':
-		// 			cli.install();
-		// 			break;
-		// 		case 'add':
-		// 		case 'a':
-		// 			cli.addProject(argv._.slice(1));
-		// 			break;
-		// 		case 'clean':
-		// 			cli.clean();
-		// 			break;
-		// 		case 'list-dep':
-		// 			require('./cliAdvanced').listCompDependency(false);
-		// 			break;
-		// 		default:
-		// 			//console.error('Unknown command "%s"', chalk.red(argv._[0]));
-		// 			require('gulp/bin/gulp');
-		// 	}
-		// }
 	} catch (err) {
 		console.error(err);
 	}

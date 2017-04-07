@@ -1,16 +1,26 @@
 <div dr-scrollable-anim="introVm.scrollableAnim">
-	<div class="screen screen-bground"></div>
 	<div class="screen dr-bg-lite screen-1">
-		<div class="center-box">
-			<h2 t
-				dr-split-text-show="introVm.animStart" duration="0.6" timeline="introVm.screen1Timeline" on-split-done="mainVm.loaded = true">为了支撑越来越多的业务和新技术的尝试</h2>
-			<h1 t timeline="introVm.screen1Timeline" timeline-pos="+=0.5"
-				dr-split-text-show="introVm.animTimeline" duration="0.6">我们需要一个Web<span class="keyword">平台</span>
-			</h1>
+		<div class="parallex-layer scr-1">
+			<div class="center-box">
+				<h1 t dr-split-text-show="introVm.animStart" timeline="introVm.screen1Timeline"
+					on-split-done="mainVm.loaded = true"><span class="keyword">DR </span>component package
+				</h1>
+				<h2 t dr-split-text-show timeline="introVm.screen1Timeline"
+					on-split-done="mainVm.loaded = true">点融Web组件包平台
+				</h2>
+				<div t dr-split-text-show
+					timeline="introVm.screen1Timeline"
+					duration="0.6">跨项目管理和复用Node package组件
+				</div>
+				<div t dr-split-text-show timeline="introVm.screen1Timeline"
+					duration="0.6">合并打包和部署你的Web项目
+				</div>
+			</div>
 		</div>
 	</div>
 	<div class="screen screen-2">
-		<div class="center-box">
+		<header></header>
+		<!--<div class="center-box">
 			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" duration="1.1" timeline="introVm.screen2Timeline">一个可以复用和分享公共组件模块的平台</div>
 			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1.2" timeline="introVm.screen2Timeline">支撑跨越团队，跨越多个产品线的模块复用方案</div>
 			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1" timeline="introVm.screen2Timeline">不仅仅是浏览器，还有NodeJS</div>
@@ -19,7 +29,7 @@
 			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1.2" timeline="introVm.screen2Timeline">强调自动化测试环节和对持续集成的拥抱的工具</div>
 			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1.2" timeline="introVm.screen2Timeline"
 					>每一个想得到的功能都是一个组件化的Node package</div>
-		</div>
+		</div>-->
 	</div>
 	<div class="screen screen-3">
 		<div class="center-box">

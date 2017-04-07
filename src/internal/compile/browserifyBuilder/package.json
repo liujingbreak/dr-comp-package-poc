@@ -1,13 +1,13 @@
 {
   "name": "@dr-core/browserify-builder",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "The default browser side stuff builder module based on browserify",
   "main": "lib/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "cheerio": "^0.20.0",
+    "cheerio": "^0.22.0",
     "babelify": "7.3.0",
     "gulp-rev-all": "^0.8.22",
     "gulp-filter": "^4.0.0",

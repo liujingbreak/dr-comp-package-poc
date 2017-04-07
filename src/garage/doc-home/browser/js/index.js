@@ -7,7 +7,6 @@ require('@dr/light-respond-js');
 //require('angular-nicescroll/angular-nicescroll');
 var lazy = require('@dr/angular-lazy');
 
-var textAnim = require('@dr/text-anim-ng');
 
 
 var docHome = angular.module('docHome', ['ngAnimate', 'ngSanitize', 'ui.router', 'docUi']);
@@ -24,7 +23,6 @@ docHome.config(['$controllerProvider', '$compileProvider', '$filterProvider', '$
 		docHome.$provide            = $provide;
 		docHome.$stateProvider = $stateProvider;
 		docHome.$urlRouterProvider = $urlRouterProvider;
-		textAnim.register(docHome.$compileProvider);
 		require('./routes')($stateProvider, $urlRouterProvider);
 	}]);
 docHome.config(lazy.cacheInternals)

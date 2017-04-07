@@ -15,7 +15,7 @@ function drScrollableAnim(ScrollableAnim, $timeout, $window) {
 		scope: false,
 		link: function(scope, iElement, iAttrs, controller) {
 			iElement.addClass('dr-scrollable-anim');
-			var scrollControl = new ScrollableAnim(iElement, 16);
+			var scrollControl = new ScrollableAnim();
 			_.set(scope, iAttrs.drScrollableAnim, scrollControl);
 			var slogon = iElement.find('.screen-1').find('.center-box');
 
@@ -28,7 +28,7 @@ function drScrollableAnim(ScrollableAnim, $timeout, $window) {
 				scrollControl.seek(0);
 				scrollControl.destory();
 				iElement.scrollTop(0);
-				scrollControl = new ScrollableAnim(iElement, 18);
+				scrollControl = new ScrollableAnim();
 				buildScenes(scrollControl, iElement, scope);
 				scope.$apply();
 			}, 500);

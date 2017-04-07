@@ -11,8 +11,8 @@ function introController($scope, $timeout, drLoadingService) {
 	introVm.screen2Timeline = new TimelineLite({paused: true});
 	drLoadingService.setLoading('main', false);
 	$timeout(function() {
-			introVm.animStart = true;
-		}, 500);
+		introVm.animStart = true;
+	}, 500);
 }
 
 introController.$inject = ['$scope', '$timeout', 'drLoadingService'];

@@ -5,64 +5,92 @@
 	left: @dr-unit-triple;
 	top: 0;
 	right: 0;
-	height: 100%;
+	//height: 100%;
+	//margin-left: @dr-unit-triple;
 	background: @dr-lite-liter;
 	//background: linear-gradient(to right, rgba(0,0,0, 0.5) 0%, rgba(0,0,0, 0) 10px, rgba(0,0,0, 0) 100%), @dr-white;
 }
 
 .ui-view-main {
-	height: 100%;
-	overflow: auto;
+	//height: 100%;
+	//overflow: auto;
 	-webkit-overflow-scrolling: touch;
 }
 
-.viewer {
+.parallex-layer {
+	z-index: 10;
+	position: fixed;
 	width: 100%;
-	height: 100%;
+	height: 100vh;
+	// pointer-events: none;
+	// span, h1, h2 {
+	// 	pointer-events: auto;
+	// }
+	&.scr-1 {
+		background: radial-gradient(circle farthest-side at 50% 50%, @dr-white 0%, @dr-white 75%, @dr-lite 100%), @dr-white;
+		&:after{
+			vertical-align:middle;
+			content: "";
+			display: inline-block;
+			width: 0;
+			font-size: 0;
+			height: 100%;
+		}
+	}
 }
 
 .screen {
-	height: 100%;
+	position: relative;
+	height: 100vh;
 	//width: 100%;
 	overflow-x: auto;
 	text-align: center;
+	white-space: nowrap;
+	> * {
+		white-space: normal;
+	}
 	h1 {
 		font-weight: @dr-fontweight-light;
 	}
 	.keyword {
 		font-size: @fontsize-xxxbig;
-		font-weight: @dr-fontweight-bold;
+		font-weight: @dr-fontweight-light;
 		color: @dr-green;
 	}
 	.keyword-blue {
 		color: @dr-blue;
 	}
-	&:after{
-	     vertical-align:middle;
-	     content: "";
-	     display: inline-block;
-	     width: 0;
-	     font-size: 0;
-	     height: 100%;
-	}
 }
 .screen-1 {
-	background: radial-gradient(circle farthest-side at 50% 50%, @dr-white 0%, @dr-white 75%, @dr-lite 100%), @dr-white;
+	z-index: 1;
+	display: block;
 }
 
 .screen-2{
-	min-height: 100%;
-	background: radial-gradient(ellipse farthest-corner at 0% 0%, @dr-lite-dark 0%, @dr-lite-liter), @dr-lite-liter;
-	//background: radial-gradient(ellipse farthest-corner at 0% 0%, @dr-blue-dark -50%, @dr-blue-liter), @dr-blue-liter;
-	//color: @dr-white;
+	z-index: 2;
+	//background: rgb(225, 225, 225);
+	background-color: @dr-green;
+	//.dr-green-blue-hor-bg();
+	//background: radial-gradient(ellipse farthest-corner at 0% 0%, @dr-lite-dark 0%, @dr-lite-liter), @dr-lite-liter;
 	.big-text {
 		font-size: @dr-fontsize-xbig;
 		margin: @dr-unit-half 0;
 	}
-	padding: @dr-unit-triple 0;
+	//padding: @dr-unit-triple 0;
+	> header {
+		position: absolute;
+		top: 0;
+		width: 100%;
+		display: block;
+		content: '';
+		height: @dr-unit;
+		visibility: hidden;
+		.dr-green-blue-hor-bg();
+	}
 }
 
 .screen-3{
+	z-index: 2;
 	background: radial-gradient(ellipse farthest-corner at 0% 0%, @dr-dark -50%, @dr-dark-lite), @dr-dark-lite;
 	color: @dr-white;
 	.big-text {

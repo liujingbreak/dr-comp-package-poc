@@ -1,32 +1,34 @@
-var _ = require('lodash');
+//var _ = require('lodash');
 module.exports = buildScenes;
 
 function buildScenes(scrollControl, iElement, scope) {
-	var slogon = iElement.find('.screen-1').find('.center-box');
-
+	//var slogon = iElement.find('.screen-1').find('.center-box');
+	var scr1Parallex = angular.element('.parallex-layer.scr-1');
 	var screen2 = iElement.find('.screen-2');
 
+	var d1 = scr1Parallex.prop('offsetHeight');
 	scrollControl.scene({
 		triggerElement: screen2,
-		delayPercent: 5,
-		startup: function(reverse, offset) {
-			if (!reverse) {
-				TweenMax.staggerTo(
-					_.reverse(slogon.children().eq(0).children()), 0.7,
-					{className: '+=invisible', y: 300, rotation: 90,  ease: 'Power2.easeIn'},
-					0.07);
-			}
+		duration: d1,
+		//delayPercent: 5,
+		timeline: function(timeline) {
+			timeline.to(scr1Parallex, 1, {yPercent: -50, ease: 'Linear.easeNone'});
 		}
 	});
 
 	scrollControl.scene({
 		triggerElement: screen2,
-		delayPercent: 50,
+		delayPercent: 20,
+		timeline: function(timeline) {
+			timeline.addLabel('s2');
+			timeline.to(screen2[0], 1, {backgroundColor: '#ffffff', ease: 'Power2.easeOut'});
+			timeline.fromTo(screen2[0].children[0], 1, {autoAlpha: 0}, {autoAlpha: 1, ease: 'Power2.easeOut'}, 's2');
+		},
 		startup: function(reverse, offset) {
-			if (!reverse) {
-				scope.introVm.showScreen2Text = true;
-				scope.$apply();
-			}
+			// if (!reverse) {
+			// 	scope.introVm.showScreen2Text = true;
+			// 	scope.$apply();
+			// }
 		}
 	});
 

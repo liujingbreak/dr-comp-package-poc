@@ -1,6 +1,6 @@
 const Promise = require('bluebird');
 const api = require('__api');
-const log = require('log4js').getLogger('api-loader');
+const log = require('log4js').getLogger('wfh.api-loader');
 const esParser = require('@dr-core/browserify-builder/lib/esParser');
 const _ = require('lodash');
 const fs = require('fs');
