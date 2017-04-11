@@ -12,7 +12,7 @@ function buildScenes(scrollControl, iElement, scope) {
 		duration: d1,
 		//delayPercent: 5,
 		timeline: function(timeline) {
-			timeline.to(scr1Parallex, 1, {yPercent: -50, ease: 'Linear.easeNone'});
+			timeline.to(scr1Parallex, 1, {y: -d1, autoAlpha: 0, ease: 'Power2.easeIn'});
 		}
 	});
 

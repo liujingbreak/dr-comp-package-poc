@@ -140,15 +140,16 @@ exports.init = function(app) {
 				}
 
 				function initScrollableAnim() {
-					var banner = $element.find('.banner');
-					sc = ScrollableAnim(angular.element('body').find('[comp-store-scroll-pane]'), 0);
-					var h = banner.prop('offsetHeight');
+					var bannerParallex = $element.find('.banner');
+					//var banner = $element.find('.banner');
+					sc = ScrollableAnim();
+					var h = bannerParallex.prop('offsetHeight');
 					sc.scene({
 						begin: 0,
 						duration: h,
 						delayPercent: 0,
 						timeline: function(timeline) {
-							timeline.fromTo(banner[0], 1, {y: 0}, {y: h >> 1, ease: Linear.easeNone});
+							timeline.fromTo(bannerParallex[0], 1, {y: 0}, {y: h - (h >> 2), ease: Linear.easeNone});
 						}
 					});
 				}

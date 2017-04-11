@@ -5,21 +5,32 @@
 				<h1 t dr-split-text-show="introVm.animStart" timeline="introVm.screen1Timeline"
 					on-split-done="mainVm.loaded = true"><span class="keyword">DR </span>component package
 				</h1>
-				<h2 t dr-split-text-show timeline="introVm.screen1Timeline"
+				<h2 t dr-split-text-show timeline="introVm.screen1Timeline" timeline-pos="0"
 					on-split-done="mainVm.loaded = true">点融Web组件包平台
 				</h2>
 				<div t dr-split-text-show
-					timeline="introVm.screen1Timeline"
+					timeline="introVm.screen1Timeline" timeline-pos="0"
 					duration="0.6">跨项目管理和复用Node package组件
 				</div>
-				<div t dr-split-text-show timeline="introVm.screen1Timeline"
+				<div t dr-split-text-show timeline="introVm.screen1Timeline" timeline-pos="0"
 					duration="0.6">合并打包和部署你的Web项目
 				</div>
 			</div>
 		</div>
 	</div>
 	<div class="screen screen-2">
-		<header></header>
+		<header>
+			<img class="brands" src="assets://@dr/doc-home/brands/nodejs.svg">
+			<svg class="brands" viewBox="0 0 18 7">
+				<path fill="#CB3837" d="M0,0v6h5v1h4v-1h9v-6"></path>
+				<path fill="#FFF" d="M1,1v4h2v-3h1v3h1v-4h1v5h2v-4h1v2h-1v1h2v-4h1v4h2v-3h1v3h1v-3h1v3h1v-4"></path>
+			</svg>
+			<img class="brands" src="assets://@dr/doc-home/brands/webpack.png">
+			<img class="brands" src="assets://@dr/doc-home/brands/express.png">
+			<img class="brands" src="assets://@dr/doc-home/brands/gulp-2x.png">
+			<img class="brands" src="assets://@dr/doc-home/brands/wizard_hat_blue.png">
+			<img class="brands" src="assets://@dr/doc-home/brands/jasmine.svg">
+		</header>
 		<!--<div class="center-box">
 			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" duration="1.1" timeline="introVm.screen2Timeline">一个可以复用和分享公共组件模块的平台</div>
 			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1.2" timeline="introVm.screen2Timeline">支撑跨越团队，跨越多个产品线的模块复用方案</div>
