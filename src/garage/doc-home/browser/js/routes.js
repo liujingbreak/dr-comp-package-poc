@@ -21,5 +21,15 @@ module.exports = function($stateProvider, $urlRouterProvider) {
 			}
 		}
 	});
+	$stateProvider.state('avatar', {
+		url: '/avatar',
+		views: {
+			main: {
+				template: require('../views/avatar.html'),
+				controller: 'AvatarController',
+				controllerAs: 'avatarVm'
+			}
+		}
+	});
 	require('./comp-store-routes')($stateProvider);
 };
