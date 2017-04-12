@@ -81,7 +81,16 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 						{loader: '@dr/translate-generator'},
 						{loader: '@dr/template-builder'}
 					]
-				}, {
+				},
+				{
+					test: /\.md$/,
+					use: [
+						{loader: 'html-loader', options: {attrs: 'img:src'}},
+						{loader: '@dr-core/webpack2-builder/lib/html-loader'}, // Replace keyward assets:// in *[src|href]
+						{loader: '@dr-core/webpack2-builder/lib/markdown-loader'}
+					]
+				},
+				{
 					test: /\.css$/,
 					use: ExtractTextPlugin.extract({
 						fallback: 'style-loader',
@@ -89,7 +98,8 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 							{loader: 'css-loader', options: {
 								minimize: !api.config().devMode,
 								sourceMap: api.config().enableSourceMaps,
-								importLoaders: 3
+								importLoaders: 3,
+								//modules: true
 							}},
 							{
 								loader: 'autoprefixer-loader',

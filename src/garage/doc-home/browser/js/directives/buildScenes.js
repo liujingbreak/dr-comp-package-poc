@@ -15,36 +15,72 @@ function buildScenes(scrollControl, iElement, scope) {
 		}
 	});
 
+	var funcScreen = iElement.find('.screen-func');
+	var funcBlockTimeline = new TimelineLite({paused: true});
+	var funcBlock = funcScreen.find(' > .func-blocks');
+	funcBlock.children().each(function(idx) {
+		funcBlockTimeline.fromTo(this, 0.75,
+			{autoAlpha: 0, yPercent: -70}, {autoAlpha: 1, yPercent: 0, ease: 'Bounce.easeOut'}, idx * 0.1);
+	});
 	scrollControl.scene({
-		triggerElement: screens.eq(1),
-		delayPercent: 20,
-		startup: function(reverse, offset) {
+		triggerElement: funcScreen,
+		delayPercent: 50,
+		duration: Math.max(angular.element(window).height(), funcScreen.prop('offsetHeight')),
+		startup: function(reverse, scene) {
 			if (!reverse) {
-				// TODO: optimize
-				TweenMax.staggerFromTo([].slice.call(screens[1].children, 0, 2), 0.6, {autoAlpha: 0, xPercent: -50}, {autoAlpha: 1, xPercent: 0, ease: 'Power2.easeOut', paused: false}, 0.1);
-				TweenMax.staggerFromTo([].slice.call(screens[1].children, 2), 0.6, {autoAlpha: 0, xPercent: 50}, {autoAlpha: 1, xPercent: 0, ease: 'Power2.easeOut', paused: false}, 0.1);
+				funcBlockTimeline.play();
+			} else {
+				funcBlockTimeline.pause();
+				funcBlockTimeline.time(0);
 			}
 		}
+		// teardown: function(reverse, scene) {
+		// 	if (!reverse)
+		// 		scrollControl.pin(funcScreen);
+		// 	else
+		// 		scrollControl.unpin(funcScreen);
+		// }
+	});
+
+	// var infraScreen = iElement.children('.screen-infra');
+	// scrollControl.scene({
+	// 	triggerElement: infraScreen,
+	// 	delayPercent: 0,
+	// 	duration: angular.element(window).height() + infraScreen.prop('offsetHeight'),
+	// 	timeline: function(timeline) {
+	// 		timeline.to(funcScreen, 0.5, {yPercent: -100, ease: 'Power2.easeIn'}, 0.5);
+	// 	},
+	// 	teardown: function(reverse, scene) {
+	// 	}
+	// });
+
+
+	//[].slice.call(screens, screens.length - 4, screens.length - 1)
+	[
+		iElement.children('.screen-3rdparty')[0],
+		iElement.children('.screen-concept')[0],
+		iElement.children('.screen-package')[0],
+		iElement.children('.screen-modules')[0],
+		iElement.children('.screen-computer')[0],
+		iElement.children('.screen-project')[0],
+		iElement.children('.screen-workspace')[0],
+		iElement.children('.screen-chunk')[0]
+	]
+	.forEach(function(theScreen) {
+		scrollControl.scene({
+			triggerElement: angular.element(theScreen),
+			duration: Math.min(angular.element(window).height(), angular.element(theScreen).prop('offsetHeight')),
+			delayPercent: 30,
+			timeline: function(timeline) {
+				timeline.addLabel('s2');
+				timeline.from(theScreen, 1, {backgroundColor: 'rgb(0, 171, 144)'});
+				timeline.fromTo(theScreen.children[0], 1, {autoAlpha: 0}, {autoAlpha: 1, ease: 'Power2.easeOut'}, 's2');
+			}
+		});
 	});
 
 	scrollControl.scene({
-		triggerElement: screens.eq(3),
-		delayPercent: 30,
-		timeline: function(timeline) {
-			timeline.addLabel('s2');
-			timeline.to(screens[3], 1, {backgroundColor: '#ffffff', ease: 'Power2.easeOut'});
-			timeline.fromTo(screens[3].children[0], 1, {autoAlpha: 0}, {autoAlpha: 1, ease: 'Power2.easeOut'}, 's2');
-		},
-		startup: function(reverse, offset) {
-			// if (!reverse) {
-			// 	scope.introVm.showScreen2Text = true;
-			// 	scope.$apply();
-			// }
-		}
-	});
-
-	scrollControl.scene({
-		triggerElement: screens.eq(2),
+		triggerElement: iElement.children('.screen-computer'),
 		delayPercent: 50,
 		startup: function(reverse, offset) {
 			if (!reverse) {

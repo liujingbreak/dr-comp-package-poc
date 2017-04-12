@@ -14,11 +14,12 @@
     "node": ">=6.7.0"
   },
   "dependencies": {
-    <% if(!noDrcp) {%>
-    "dr-comp-package": "^<%=version%>"
-    <%}%>
+    "@dr/internal-recipe": "<%=internalRecipeVer%>"
   },
   "devDependencies": {
+    <% if(!noDrcp) {%>
+    "dr-comp-package": "^<%=version%>",
+    <%}%>
     "jasmine": "^2.5.3"
   }
 }

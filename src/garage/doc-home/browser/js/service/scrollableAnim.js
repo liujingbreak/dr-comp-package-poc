@@ -74,7 +74,8 @@ ScrollableAnim.prototype = {
 	 * To avoid memory leak, must call this to remove element onscroll event handler
 	 */
 	destory: function() {
-		this.panel.off('scroll', this.scrollHandler);
+		$(window).off('scroll', this.scrollHandler);
+		//this.panel.off('scroll', this.scrollHandler);
 	},
 
 	addScene: function(scene) {
@@ -123,7 +124,7 @@ ScrollableAnim.prototype = {
 		});
 
 		el.css({
-			top: top + 'px',
+			top: top == null ? '0' : top + 'px',
 			left: left + 'px',
 			position: 'fixed',
 			width: w,
@@ -185,7 +186,7 @@ AnimScene.prototype = {
 
 	_teardown: function(reverse) {
 		if (this.teardown) {
-			this.teardown(reverse);
+			this.teardown(reverse, this);
 		}
 	},
 

@@ -15,12 +15,13 @@ module.exports = function(ngModule) {
 				drSplitTextShow: '<', // if `true` anim starts
 				timeline: '=',
 				onComplete: '&',
-				timelinePos: '@'
+				timelinePos: '@',
+				splitByWord: '@'
 				//duration: '@'
 			},
 			compile: function(iElement, tAttrs, transclude) {
 				iElement.addClass('dr-text-anim');
-				var children = textElementSplit(iElement);
+				var children = textElementSplit(iElement, tAttrs.splitByWord === 'true');
 				iElement.html('');
 				iElement.append(children);
 				//return $compile(iElement);
@@ -70,11 +71,11 @@ module.exports = function(ngModule) {
 	}]);
 };
 
-function textElementSplit(el, copyClassName) {
+function textElementSplit(el, splitByWord, copyClassName) {
 	var appendTo = [];
 	_.each(el[0].childNodes, function(node) {
 		if (node.nodeName === '#text') {
-			_.each(textToWordArray(_.trim(node.textContent)), function(chr) {
+			_.each(splitByWord ? textToWordArray(_.trim(node.textContent)) : node.textContent.split(''), function(chr) {
 				var span = angular.element('<span>');
 				if (copyClassName)
 					span.addClass(el.prop('className'));
@@ -83,7 +84,7 @@ function textElementSplit(el, copyClassName) {
 			});
 		} else {
 			var nodeEl = angular.element(node);
-			var children = textElementSplit(nodeEl, true);
+			var children = textElementSplit(nodeEl, splitByWord, true);
 			[].push.apply(appendTo, children);
 		}
 	});

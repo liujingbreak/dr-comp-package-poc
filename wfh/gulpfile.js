@@ -354,20 +354,18 @@ gulp.task('ls', ['init'], function(callback) {
 
 function bumpDirs(dirs) {
 	var findPackageJson = require('./lib/gulp/findPackageJson');
-	return es.merge(dirs.map(dir => {
-		return gulp.src('')
-		.pipe(findPackageJson(dirs))
-		.pipe(through.obj(function(file, enc, next) {
-			file.base = dir;
-			//file.path = Path.relative(config().rootPath, file.path);
-			console.log(file.path);
-			file.contents = new Buffer(fs.readFileSync(file.path, 'utf8'));
-			this.push(file);
-			next();
-		}))
-		.pipe(bumpVersion())
-		.pipe(gulp.dest(dir));
-	}));
+	return gulp.src('')
+	.pipe(findPackageJson(dirs))
+	.pipe(through.obj(function(file, enc, next) {
+		file.base = '/';
+		//file.path = Path.relative(config().rootPath, file.path);
+		console.log(file.path);
+		file.contents = new Buffer(fs.readFileSync(file.path, 'utf8'));
+		this.push(file);
+		next();
+	}))
+	.pipe(bumpVersion())
+	.pipe(gulp.dest('/'));
 }
 
 function bumpVersion() {

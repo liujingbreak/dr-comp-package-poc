@@ -3,7 +3,7 @@
 		<div class="parallex-layer scr-1">
 			<div class="center-box">
 				<h1 t dr-split-text-show="introVm.animStart" timeline="introVm.screen1Timeline"
-					on-split-done="mainVm.loaded = true"><span class="keyword">DR </span>component package
+					on-split-done="mainVm.loaded = true"><span class="keyword">@dr </span>component package
 				</h1>
 				<h2 t dr-split-text-show timeline="introVm.screen1Timeline" timeline-pos="0"
 					on-split-done="mainVm.loaded = true">点融Web组件包平台
@@ -19,30 +19,73 @@
 		</div>
 	</div>
 	<div class="screen screen-func">
-		<div class="func-dev">
-			<i class="fa fa-laptop"></i>
-			<h2>开发</h2>
-			多项目合并, 组件共享, 测试
-		</div>
-		<div class="func-deploy">
-			<i class="hk-icon hk-icon-deploy"></i>
-			<h2>部署</h2>
-			打包编译静态Web资源, 配置管理, 上传CMS, 持续集成
-		</div>
-		<div class="func-nodeserver">
-			<i class="fa fa-server"></i>
-			<h2>Node HTTP Server</h2>
-			运行Express middleware, router组件
-		</div>
-		<div class="func-npm">
-			<i class="hk-icon hk-icon-spaces"></i>
-			<h2>Private NPM registry server</h2>
-			发布, 安装, 管理组件包
+		<div class="func-blocks">
+			<div class="func-dev">
+				<i class="fa fa-laptop"></i>
+				<h2>开发</h2>
+				多项目合并, 组件共享, 测试
+			</div>
+			<div class="func-nodeserver">
+				<i class="fa fa-server"></i>
+				<h2>Node HTTP Server</h2>
+				运行Express middleware, router组件
+			</div>
+			<div class="func-deploy">
+				<i class="hk-icon hk-icon-deploy"></i>
+				<h2>部署</h2>
+				打包, 配置管理, 上传CMS, 持续集成
+			</div>
+			<div class="func-npm">
+				<i class="hk-icon hk-icon-spaces"></i>
+				<h2>Private NPM registry server</h2>
+				发布, 安装, 管理组件包
+			</div>
 		</div>
 	</div>
-	{% include "dev.html" %}
 	{% include "features.html" %}
+	{% include "dev.html" %}
+	{% include "concept.html" %}
 	{% include "computer.html" %}
+	{% include "package.html" %}
+	<div class="screen screen-modules">
+		<header>基本的组件模块</header>
+		<div class="comp-git comp-git-drcommon">
+			<div class="block-row">
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i><p>点融Angular组件<br/>dr-ng-widgets</p></div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i><p>点融CSS组件<br/>dr-css-components<p></div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i><p>点融Angular组件 Demo<p></div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i><p>入口页链接列表 <br/>entry-list<p></div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i><p>打包Zip文件上传CMS<p></div>
+			</div>
+			<div class="group-git">
+					<i class="fa fa-github" aria-hidden="true"></i>
+					dr-common
+			</div>
+		</div>
+		<div class="comp-git">
+			<div class="block-row">
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>drcp<br/>命令行</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>组件,配置,运行环境管理<br/>dr-comp-package</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>第三方依赖Wrapper</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>http-server</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>HTTP router服务 express-app</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>API</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>Web 打包<br/>webpack2-builder</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>i18n<br/>translate-generator</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>静态资源处理<br/>assets-processer</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>模板预编译<br/>template-builder, webpack loader</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>文档主页模块<br/>doc-home</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>Component store主页模块<br/>comp-store</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>辅助工具<br/>light-respond-js, angular-lazy, markdown-viewer</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>Examples</div>
+			</div>
+			<div class="group-git">
+					<i class="fa fa-github" aria-hidden="true"></i>
+					web-fun-house
+			</div>
+		</div>
+	</div>
+	
 	<div class="screen screen-3rdparty">
 		<header>
 			<img class="brands" src="assets://@dr/doc-home/brands/nodejs.svg">

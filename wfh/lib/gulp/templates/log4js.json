@@ -25,6 +25,8 @@
 		"test": "DEBUG",
 		"@dr-core/browserify-builder": "info",
 		"wfh": "INFO",
+		"wfh.ManualChunkPlugin": "debug",
+		"wfh.ManualChunkPlugin.divideModule": "info",
 		"require-injector": "info",
 		"require-injector.node-inject": "info",
 		"@dr/translate-generator": "info",

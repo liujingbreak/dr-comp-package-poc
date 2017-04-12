@@ -63,9 +63,14 @@ function _initWorkspace() {
 		var jsonStr = packageJsonTmp({
 			project: {name: Path.basename(rootPath), desc: 'Dianrong component workspace', author: 'noone@dianrong.com'},
 			version: getVersion(),
-			noDrcp: isDrcpSymlink
+			noDrcp: isDrcpSymlink,
+			internalRecipeVer: '~0.2.12'
 		});
-		writeFile(Path.join(rootPath, 'package.json'), jsonStr);
+		var parsedPkj = JSON.parse(jsonStr);
+		if (fs.lstatSync(Path.resolve('node_modules', 'dr-comp-package')).isSymbolicLink()) {
+			delete parsedPkj.dependencies['@dr/internal-recipe'];
+		}
+		writeFile(Path.join(rootPath, 'package.json'), JSON.stringify(parsedPkj, null, '  '));
 	}
 
 	// logs

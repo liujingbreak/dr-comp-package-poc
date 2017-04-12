@@ -1,6 +1,6 @@
 {
   "name": "@dr-core/webpack2-builder",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Browser side stuff builder module based on Webpack2",
   "main": "main.js",
   "browser": "browser-api.js",
@@ -39,7 +39,9 @@
     "babel-preset-stage-0": "^6.22.0",
     "babel-runtime": "^6.23.0",
     "babel-plugin-transform-runtime": "^6.23.0",
-    "webpack-dev-middleware": "^1.10.1"
+    "webpack-dev-middleware": "^1.10.1",
+    "markdown-it": "6.0.0",
+    "highlight.js": "~9.2.0"
   },
   "author": "LJ",
   "license": "MIT",

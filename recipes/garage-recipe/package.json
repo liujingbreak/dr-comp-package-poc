@@ -1,6 +1,6 @@
 {
   "name": "@dr/garage-recipe",
-  "version": "0.2.11",
+  "version": "0.2.15",
   "description": "Component group: garage-recipe",
   "dependencies": {
     "@dr/angularjs": "1.5.8-3",
@@ -11,14 +11,14 @@
     "@dr/light-lodash": "0.0.4",
     "@dr/lodash3": "1.0.2",
     "@dr/angular-lazy": "1.0.1",
-    "@dr/comp-store": "0.1.5",
+    "@dr/comp-store": "0.1.7",
     "@dr/doc-banner": "1.0.0",
-    "@dr/doc-home": "0.1.29",
+    "@dr/doc-home": "0.1.32",
     "@dr/doc-ui": "0.0.34",
     "@dr/handlebars-tmpl-builder": "1.0.0",
-    "@dr/light-respond-js": "0.1.0",
+    "@dr/light-respond-js": "0.1.1",
     "@dr/markdown-viewer": "0.1.0",
-    "@dr/readme": "0.1.0",
-    "@dr/readme-docs": "0.3.1"
+    "@dr/readme": "0.1.1",
+    "@dr/readme-docs": "0.3.2"
   }
 }
