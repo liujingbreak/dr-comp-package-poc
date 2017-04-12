@@ -1,7 +1,16 @@
 @import "npm://@dr/doc-ui/browser/less/dr-variables.less";
 @import "npm://@dr/doc-ui/browser/less/dr-mixins.less";
 
+@font-face {
+	font-family: "hk-icon";
+	font-style: normal;
+	font-weight: normal;
+	src: url('https://www-assets2.herokucdn.com/assets/shibori/dist/fonts/hk-icon/hk-icon-2d751b94195e8a3e2657b181db0d7a745cc227d3ecd1d0f3fdcfa44bb023e2be.eot?#iefix') format("embedded-opentype"),
+	url("https://www-assets1.herokucdn.com/assets/shibori/dist/fonts/hk-icon/hk-icon-003a2bbb62b0d1c85a920dbbc1b1989e6035f0ada326a3006e5a62fd48c33b26.woff") format("woff"), url("https://www-assets3.herokucdn.com/assets/shibori/dist/fonts/hk-icon/hk-icon-8d509e79d218f4eba3cfaee8db786fefb664bda6db45937409725ba16b8d846f.ttf") format("truetype"), url("https://www-assets0.herokucdn.com/assets/shibori/dist/fonts/hk-icon/hk-icon-af729098fc3fb4ebecd01db3f51a5c749f12a8df5f074883cc8008430f23ee8b.svg#hk-icon") format("svg")
+}
+
 .doc-home {
+	@import "hk-icons.less";
 	//overflow-x: auto;
 	//overflow-y: auto;
 	.loading-hide {
