@@ -44,6 +44,17 @@ function buildScenes(scrollControl, iElement, scope) {
 	});
 
 	scrollControl.scene({
+		triggerElement: screens.eq(2),
+		delayPercent: 50,
+		startup: function(reverse, offset) {
+			if (!reverse) {
+				scope.introVm.showScreen2Text = true;
+				scope.$apply();
+			}
+		}
+	});
+
+	scrollControl.scene({
 		triggerElement: screens.eq(screens.length - 1),
 		delayPercent: 50,
 		startup: function(reverse, offset) {
