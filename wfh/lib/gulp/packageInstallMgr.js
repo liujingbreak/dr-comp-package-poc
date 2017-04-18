@@ -6,8 +6,6 @@
  * So, this file helps to resolve NPM 2.x's nested node_modules structure issue,
  * and some dependencies conflict check function.
  */
-var gulp = require('gulp');
-var through = require('through2');
 var fs = require('fs');
 var _ = require('lodash');
 var del = require('del');
@@ -20,7 +18,6 @@ var glob = require('glob');
 var Promise = require('bluebird');
 var recipeManager = require('./recipeManager');
 var log = require('log4js').getLogger('wfh.' + Path.basename(__filename, '.js'));
-var findPackageJson = require('./findPackageJson');
 var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
 var semver = require('semver');
 
@@ -75,18 +72,16 @@ function moveFile(src, target) {
 
 var packageNameReg = /^.*?\/((?:@[^\/]+\/)?[^\/]+)$/;
 InstallManager.prototype = {
-	scanSrcDepsAsync: function(srcDirs) {
+	scanSrcDeps: function(jsonFiles) {
 		var self = this;
-		srcDirs = [].concat(srcDirs);
-		return new Promise((resolve, reject) => {
-			gulp.src(srcDirs).pipe(findPackageJson())
-			.pipe(through.obj(function(file, enc, next) {
-				self.checkPackageDep(file.path);
-				next();
-			}, function flush(next) {
-				next();
-				resolve();
-			})).pipe(gulp.dest('.'));
+		jsonFiles.forEach(packageJson => {
+			log.debug('scanSrcDepsAsync() ' + Path.relative(config().rootPath, packageJson));
+			var json = JSON.parse(fs.readFileSync(packageJson, 'utf8'));
+			var deps = json.dependencies;
+			_.forOwn(deps, function(version, name) {
+				log.debug('scanSrcDepsAsync() dep ' + name);
+				self.trackSrcDep(name, version, json.name, packageJson);
+			});
 		});
 	},
 
@@ -142,17 +137,6 @@ InstallManager.prototype = {
 	movePackage: path => {
 		var target = Path.resolve('node_modules', packageNameReg.exec(path)[1]);
 		moveFile(path, target, true);
-	},
-
-	checkPackageDep: function(packageJson) {
-		log.debug('checkPackageDep() ' + Path.relative(config().rootPath, packageJson));
-		var self = this;
-		var json = JSON.parse(fs.readFileSync(packageJson, 'utf8'));
-		var deps = json.dependencies;
-		_.forOwn(deps, function(version, name) {
-			log.debug('checkPackageDep() dep ' + name);
-			self.trackSrcDep(name, version, json.name, packageJson);
-		});
 	},
 
 	trackSrcDep: function(name, version, byWhom, path) {
@@ -263,16 +247,18 @@ InstallManager.prototype = {
 			for (var rest of versionList.slice(1)) {
 				log.info(`${_.repeat(' ', nameWidth)}    ${_.padEnd(rest.ver, 9)} ${rest.by}`);
 			}
-			if (!_.has(mainDeps, name)) {
+			if (!_.has(mainDeps, name) || mainDeps[name] !== versionList[0].ver) {
 				newDepJson[name] = versionList[0].ver;
 			}
 		});
-		_.each(newDepJson, (ver, name) => log.info(chalk.blue('\t+ dependency: %s %s'), name, ver));
+		_.each(newDepJson, (ver, name) => log.info(chalk.blue('\t+ %s: %s'), name, ver));
 
 		mkdirp.sync(config().destDir);
 		//var file = Path.join(config().destDir, 'component-dependencies.json');
 
 		if (write) {
+			if (!mainPkjson.devDependencies)
+				mainPkjson.devDependencies = {};
 			_.assign(mainPkjson.devDependencies, newDepJson);
 			fs.writeFileSync(mainPkFile, JSON.stringify(mainPkjson, null, '  '));
 		}

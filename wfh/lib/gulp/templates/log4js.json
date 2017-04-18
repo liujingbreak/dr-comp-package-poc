@@ -25,15 +25,13 @@
 		"test": "DEBUG",
 		"@dr-core/browserify-builder": "info",
 		"wfh": "INFO",
-		"require-injector": "info",
-		"require-injector.node-inject": "info",
-		"gulp.watchPackages": "debug",
-		"@dr/translate-generator": "info",
-		"@dr-core/webpack2-builder": "info",
 		"wfh.ManualChunkPlugin": "debug",
 		"wfh.ManualChunkPlugin.divideModule": "info",
-		"wfh.MultiEntryHtmlPlugin": "debug",
-		"api-loader": "debug",
+		"require-injector": "info",
+		"require-injector.node-inject": "info",
+		"@dr/translate-generator": "info",
+		"@dr-core/webpack2-builder": "info",
+		"wfh.api-loader": "debug",
 		"@dr/template-builder": "debug"
 	}
 }

@@ -164,7 +164,7 @@ function createEntryHtmlOutputPathPlugin(entryViewSet) {
 
 				var stag = htmlAssets.$('<script>');
 				stag.attr('type', 'text/javascript');
-				stag.text('\nvar __wfhEntryPage = \'' + relative.replace(/\\/g, '/') + '\';\n' +
+				stag.text('\nvar __drcpEntryPage = \'' + relative.replace(/\\/g, '/') + '\';\n' +
 					'_reqLego("' + component.longName + '");\n');
 				htmlAssets.$('body').append(stag);
 				callback(null, htmlAssets);

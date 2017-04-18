@@ -1,8 +1,0 @@
-{
-  "name": "@dr/dr-comp-package-recipe",
-  "version": "0.1.0",
-  "description": "Component group: dr-comp-package-recipe",
-  "dependencies": {
-    "dr-comp-package": "0.1.0-alpha.4"
-  }
-}

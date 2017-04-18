@@ -33,3 +33,8 @@ module.exports.activate = function(api) {
 		}
 	});
 };
+
+module.exports.onCompileTemplate = function(relativeHtmlFilePath, swig) {
+	return {locals: {}};
+};
+

@@ -182,6 +182,8 @@ function _readPackageChunkMap(info) {
 	_.each(config()._package2Chunk, (bundle, moduleName) => {
 		try {
 			var packagePath = packageUtils.findBrowserPackagePath(moduleName);
+			if (!packagePath)
+				return;
 			var parsedName = packageUtils.parseName(moduleName);
 			var instance = packageBrowserInstance(config(), {
 				isVendor: true,

@@ -16,6 +16,7 @@ var _ = require('lodash');
 var chalk = require('chalk');
 var fs = require('fs');
 var runSequence = require('run-sequence');
+var es = require('event-stream');
 //var buildUtils = require('./lib/gulp/buildUtils');
 
 var buildUtils = require('./lib/gulp/buildUtils');
@@ -352,23 +353,19 @@ gulp.task('ls', ['init'], function(callback) {
 });
 
 function bumpDirs(dirs) {
-	var stream = gulp.src('')
-	.pipe(through.obj(function(file, enc, next) {next();},
-		function(next) {
-			for (var d of dirs) {
-				gutil.log(d);
-				var packageJsonPath = Path.resolve(d, 'package.json');
-				this.push(new File({
-					base: Path.resolve(),
-					path: packageJsonPath,
-					contents: new Buffer(fs.readFileSync(packageJsonPath, 'utf8'))
-				}));
-			}
-			next();
-		}))
+	var findPackageJson = require('./lib/gulp/findPackageJson');
+	return gulp.src('')
+	.pipe(findPackageJson(dirs))
+	.pipe(through.obj(function(file, enc, next) {
+		file.base = '/';
+		//file.path = Path.relative(config().rootPath, file.path);
+		console.log(file.path);
+		file.contents = new Buffer(fs.readFileSync(file.path, 'utf8'));
+		this.push(file);
+		next();
+	}))
 	.pipe(bumpVersion())
-	.pipe(gulp.dest(Path.resolve()));
-	return stream;
+	.pipe(gulp.dest('/'));
 }
 
 function bumpVersion() {

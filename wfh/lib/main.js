@@ -14,7 +14,7 @@ var argv = require('yargs')
 
 //require('./gulp/cli')(argv.root).init();
 var config = require('./config');
-config.reload();
+//config.reload();
 
 require('./logConfig')(config().rootPath, config().log4jsReloadSeconds);
 var log = require('log4js').getLogger('lib.main');

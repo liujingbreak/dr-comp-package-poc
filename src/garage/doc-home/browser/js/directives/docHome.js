@@ -31,7 +31,7 @@ function docHome($timeout) {
 					return;
 				}
 				TweenMax.killTweensOf(bodyVm.mainSection[0]);
-				TweenMax.to(bodyVm.mainSection[0], 0.25, {x: 0, ease: 'Power2.easeOut'});
+				TweenMax.to(bodyVm.mainSection[0], 0.25, {x: 0, ease: 'Power2.easeOut', onComplete: function() {bodyVm.mainSection.css('transform', 'none');}});
 				bodyVm.menuOpened = false;
 			};
 		}],

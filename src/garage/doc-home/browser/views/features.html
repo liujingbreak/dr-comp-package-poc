@@ -1,0 +1,82 @@
+<div class="screen screen-features">
+	<h2 t>有些什么样地功能?</h2>
+  <ul class="list">
+    <li class="item">
+      <span class="hk-icon hk-icon-addon icon-green icon-md"></span>
+      <h4 t>灵活的Bundle/chunk文件分配</h4>
+      <div class="info" t>
+		  <p>以Package为单位粒度的切分或合并, 不同与Webpack常用的common chunk插件,
+		  你可以手动修改分配chunk文件, 根据更新的频繁度配置有利客户端下载缓存的chunk组合.
+		  <p/>
+		  <p>支持Splitting load (Code splitting)</p>
+	  </div>
+    </li>
+    <li class="item">
+      <span class="hk-icon hk-icon-data icon-green icon-md"></span>
+      <h4 t>多项目</h4>
+      <div class="info" t>
+		  <p>开发环境可以多个项目合并打包和运行, 共享已经下载的Node package依赖<p/>
+		  <p>多个项目之间可以共享组件, 互相依赖和复用<p/>
+	  </div>
+    </li>
+    <li class="item">
+      <span class="hk-icon hk-icon-buildpack icon-green icon-md"></span>
+      <h4>一切基于组件</h4>
+      <div class="info">
+		  <p>这是一个插件系统, 从业务逻辑, UI控件, NodeJS服务, 到编译工具都是可插入的组件</p>
+		  <p>可以扩展的基础API, 提供对读取配置和组件信息的常用功能</p>
+	  </div>
+    </li>
+    <li class="item">
+      <span class="hk-icon hk-icon-sync icon-green icon-md"></span>
+      <h4 t>Continuous Integration</h4>
+      <div class="info">
+		<p>Out-of-box的单元测试和自动化测试基础命令, 可以简单到的加入Jenkins配置</p>
+		<p>支持组件级别的单元测试代码风格测试, 提高代码质量</p>
+		<p>点融内部CMS系统自动上传, 避免手动</p>
+	  </div>
+    </li>
+    <li class="item">
+      <span class="hk-icon hk-icon-connect icon-green icon-md"></span>
+      <h4>部署模式</h4>
+      <div class="info">
+        <p>打包部署的内容可以不以项目为单位, 你可以有选择, 有组合的安装指定版本的组件包</p>
+        <p>支持组件级别的多环境部署配置</p>
+      </div>
+    </li>
+    <li class="item">
+      <span class="hk-icon hk-icon-spaces icon-green icon-md"></span>
+      <h4>私有的NPM server和组件库中心</h4>
+      <div class="info">
+        组件查找, 分类, 文档和演示, 鼓励团队或个人的贡献
+      </div>
+    </li>
+    <li class="item">
+      <span class="hk-icon hk-icon-pipelines icon-green icon-md"></span>
+      <h4>i18n</h4>
+      <div class="info">
+        <p>从HTML, Javascript文件中扫描可翻译文字, 生成locale resource</p>
+        <p>对指定语言设置打包对web静态资源做</p>
+        <p>基于Locale的代码依赖关系</p>
+        <p>基本的浏览器语言切换API</p>
+      </div>
+    </li>
+    <li class="item">
+      <span class="hk-icon hk-icon-cli icon-green icon-md"></span>
+      <h4>预编译模板渲染</h4>
+      <div class="info">
+        除了客户端渲染, 服务器端动态渲染外, 你可以有第三种渲染方案
+        简单的基于Swig-template等模板引擎打包时静态渲染, 充分利用静态资源可以CDN部署的优势,
+        也能对搜索引擎更友好
+      </div>
+    </li>
+    <li class="item">
+      <span class="hk-icon hk-icon-dyno icon-green icon-md"></span>
+      <h4>组件的依赖替换和注入</h4>
+      <div class="info">
+        就像Webpack resolve.alias那样, 替换组件之间的依赖关系. 不同于Webpack, 我们还支持NodeJS,
+        并且配置粒度小到组件包,甚至文件级别.
+      </div>
+    </li>
+  </ul>
+</div>

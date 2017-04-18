@@ -16,6 +16,7 @@ module.exports = {
 	linkComponentsAsync: linkComponentsAsync,
 	link: link, // return a piped stream
 	clean: clean,
+	//eachSrcPkJson: eachSrcPkJson,
 	eachRecipeSrc: eachRecipeSrc,
 	eachDownloadedRecipe: eachDownloadedRecipe,
 	eachRecipe: eachRecipe
@@ -95,11 +96,11 @@ function eachRecipe(callback) {
 	callback(config().rootPath);
 }
 
-function link() {
+function link(onPkJsonFile) {
 	var streams = [];
 	var linkFiles = [];
 	eachRecipeSrc(function(src, recipeDir) {
-		streams.push(linkToRecipeFile(src, recipeDir));
+		streams.push(linkToRecipeFile(src, recipeDir, onPkJsonFile));
 	});
 	return es.merge(streams)
 	.pipe(through.obj(function(file, enc, next) {
@@ -127,8 +128,10 @@ function link() {
 }
 
 function linkComponentsAsync() {
+	var pkJsonFiles = [];
 	return new Promise((resolve, reject) => {
-		link().on('end', resolve)
+		link(file => pkJsonFiles.push(file))
+		.on('end', () => resolve(pkJsonFiles))
 		.on('error', reject);
 	});
 }
@@ -156,11 +159,13 @@ function clean() {
 	.pipe(gulp.dest(config().rootPath));
 }
 
-function linkToRecipeFile(srcDir, recipeDir) {
-	return gulp.src(srcDir)
-		.pipe(findPackageJson())
+function linkToRecipeFile(srcDir, recipeDir, onPkJsonFile) {
+	return gulp.src('')
+		.pipe(findPackageJson(srcDir))
 		.pipe(through.obj(function(file, enc, next) {
 			log.debug('Found recipeDir %s: file: %s', recipeDir, file.path);
+			if (onPkJsonFile)
+				onPkJsonFile(file.path, recipeDir);
 			next(null, file);
 		}))
 		//.pipe(rwPackageJson.symbolicLinkPackages(config.resolve('destDir', 'links')))
@@ -170,3 +175,56 @@ function linkToRecipeFile(srcDir, recipeDir) {
 			log.error(err);
 		});
 }
+
+// /**
+//  * Not used so far
+//  * @param {*} onFile
+//  */
+// function eachSrcPkJson(onFile) {
+// 	eachRecipeSrc((src, recipe) => {
+// 		scanPackageJsonFiles(src, file => onFile(file));
+// 	});
+// }
+// /**
+//  * Recursively lookup for package.json file, skip any node_modules sub-directory
+//  * @param {string} dir
+//  * @param {function(filePath)} onFind optional
+//  * @return undefined if onFind is present, otherwise return an array of found files
+//  */
+// function scanPackageJsonFiles(dir, onFind) {
+// 	var foundFiles;
+// 	if (!onFind) {
+// 		foundFiles = [];
+// 		onFind = function(jsonFile) {
+// 			foundFiles.push(jsonFile);
+// 		};
+// 	}
+// 	_scanFolder(dir, onFind);
+// 	return foundFiles;
+// }
+
+// function _scanFolder(dir, onFind) {
+// 	if (fs.statSync(dir).isDirectory()) {
+// 		var pkJsonPath = Path.join(dir, 'package.json');
+// 		if (fs.existsSync(pkJsonPath)) {
+// 			onFind(pkJsonPath);
+// 		} else {
+// 			_scanSubFolders(dir, onFind);
+// 		}
+// 	}
+// }
+
+// function _scanSubFolders(parentDir, onFind) {
+// 	var folders = fs.readdirSync(parentDir);
+// 	folders.forEach(function(name) {
+// 		try {
+// 			if (name === 'node_modules') {
+// 				return;
+// 			}
+// 			var dir = Path.join(parentDir, name);
+// 			_scanFolder(dir, onFind);
+// 		} catch (er) {
+// 			console.error(er);
+// 		}
+// 	});
+// }

@@ -37,8 +37,8 @@ function init() {
 	maybeCopyTemplate(Path.resolve(__dirname, 'templates/config.local-template.yaml'), rootPath + '/config.local.yaml');
 	maybeCopyTemplate(Path.resolve(__dirname, 'templates/log4js.json'), rootPath + '/log4js.json');
 	maybeCopyTemplate(Path.resolve(__dirname, 'templates/app-template.js'), rootPath + '/app.js');
-	maybeCopyTemplate(Path.resolve(__dirname, '../.jscsrc'), rootPath + '/.jscsrc');
-	maybeCopyTemplate(Path.resolve(__dirname, '../.jshintrc'), rootPath + '/.jshintrc');
+	maybeCopyTemplate(Path.resolve(__dirname, '../../.jscsrc'), rootPath + '/.jscsrc');
+	maybeCopyTemplate(Path.resolve(__dirname, '../../.jshintrc'), rootPath + '/.jshintrc');
 	maybeCopyTemplate(Path.resolve(__dirname, 'templates', 'module-resolve.server.tmpl.js '), rootPath + '/module-resolve.server.js');
 	maybeCopyTemplate(Path.resolve(__dirname, 'templates', 'module-resolve.browser.tmpl.js'), rootPath + '/module-resolve.browser.js');
 
@@ -55,28 +55,42 @@ function init() {
 
 function _initWorkspace() {
 	mkdirp(Path.join(rootPath, 'node_modules'));
+	var isDrcpSymlink = fs.lstatSync(Path.resolve('node_modules', 'dr-comp-package')).isSymbolicLink();
 	// package.json
 	if (!fs.existsSync(Path.join(rootPath, 'package.json'))) {
 		var packageJsonTmp = getPackageJsonTemplate();
 
 		var jsonStr = packageJsonTmp({
 			project: {name: Path.basename(rootPath), desc: 'Dianrong component workspace', author: 'noone@dianrong.com'},
-			version: getVersion()
+			version: getVersion(),
+			noDrcp: isDrcpSymlink,
+			internalRecipeVer: '~0.2.12'
 		});
-		writeFile(Path.join(rootPath, 'package.json'), jsonStr);
+		var parsedPkj = JSON.parse(jsonStr);
+		if (fs.lstatSync(Path.resolve('node_modules', 'dr-comp-package')).isSymbolicLink()) {
+			delete parsedPkj.dependencies['@dr/internal-recipe'];
+		}
+		writeFile(Path.join(rootPath, 'package.json'), JSON.stringify(parsedPkj, null, '  '));
 	}
 
 	// logs
 	shell.mkdir('-p', Path.join(rootPath, 'logs'));
-	return _initProjects(rootPath);
+	return _initProjects(isDrcpSymlink);
 }
 
-function _initProjects() {
+function _initProjects(isDrcpSymlink) {
+	var rm = require('./recipeManager');
 	var helper = require('./cliAdvanced');
 	listProject();
+	// var pkJsonFiles = [];
+	// rm.eachSrcPkJson(file => pkJsonFiles.push(file));
 	return Promise.coroutine(function*() {
-		yield helper.listCompDependency(true);
-		yield require('./recipeManager').linkComponentsAsync();
+		var pkJsonFiles = yield rm.linkComponentsAsync();
+		if (isDrcpSymlink) {
+			console.log('node_modules/dr-comp-package is symbolic link, add its dependencies to %s', chalk.cyan(Path.resolve('package.json')));
+			pkJsonFiles.push(Path.resolve('node_modules', 'dr-comp-package', 'package.json'));
+		}
+		helper.listCompDependency(pkJsonFiles, true);
 		var configFileContents = yield helper.addupConfigs();
 		_.each(configFileContents, (configContent, file) => {
 			writeFile(file, '\n# DO NOT MODIFIY THIS FILE!\n' + configContent);

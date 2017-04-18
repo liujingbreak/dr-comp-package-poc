@@ -2,7 +2,6 @@
  * Do not require this file until wfh dependencies is installed and config.yaml file is generated
  */
 var PackageInstall = require('./packageInstallMgr');
-var recipeManager = require('./recipeManager');
 var config = require('../config');
 var shell = require('shelljs');
 var jsYaml = require('js-yaml');
@@ -13,34 +12,28 @@ var _ = require('lodash');
 require('../logConfig')(config().rootPath);
 var packageUtils = require('../packageMgr/packageUtils');
 
-exports.writeProjectDep = writeProjectDep;
+//exports.writeProjectDep = writeProjectDep;
 exports.listCompDependency = listCompDependency;
 exports.addupConfigs = addupConfigs;
 exports.cleanPackagesWalkerCache = cleanPackagesWalkerCache;
 exports.clean = clean;
 
-function writeProjectDep(projDir) {
-	var installer = new PackageInstall(projDir);
-	var srcDirs = [];
-	recipeManager.eachRecipeSrc(projDir, function(src, recipe) {
-		srcDirs.push(src);
-	});
-	return installer.scanSrcDepsAsync(srcDirs)
-	.then(() => {
-		return installer.printDep();
-	});
-}
+// function writeProjectDep(projDir) {
+// 	var installer = new PackageInstall(projDir);
+// 	var srcDirs = [];
+// 	recipeManager.eachRecipeSrc(projDir, function(src, recipe) {
+// 		srcDirs.push(src);
+// 	});
+// 	return installer.scanSrcDeps(srcDirs)
+// 	.then(() => {
+// 		return installer.printDep();
+// 	});
+// }
 
-function listCompDependency(write) {
+function listCompDependency(pkJsonFiles, write) {
 	var installer = new PackageInstall();
-	var srcDirs = [];
-	recipeManager.eachRecipeSrc(function(src, recipe) {
-		srcDirs.push(src);
-	});
-	return installer.scanSrcDepsAsync(srcDirs)
-	.then(() => {
-		return installer.printComponentDep(write);
-	});
+	installer.scanSrcDeps(pkJsonFiles);
+	return installer.printComponentDep(write);
 }
 
 function addupConfigs() {
