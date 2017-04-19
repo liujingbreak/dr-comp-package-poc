@@ -4,7 +4,8 @@
 @flag-radius: 3px;
 @flag-new-color: rgba(255, 0, 0, 0.7);
 
-.main-aside {
+.main-aside.dr-navi-aside {
+	//z-index: 10;
 	position: fixed;
 	width: @sub-aside-width + @dr-unit-triple;
 	.logo {
@@ -68,7 +69,7 @@
 	color: @dr-red;
 }
 
-.sub-menu {
+.sub-menu.dr-menu {
 	position: absolute;
 	left: 0;
 	transform: translateX(@dr-navi-aside-width);

@@ -1,11 +1,11 @@
-@dr-navi-aside-width: 240px;
+//@dr-navi-aside-width: 240px;
 @dr-navi-menu-item-height: @dr-unit-triple;
 .dr-navi-aside {
-	width: @dr-navi-aside-width;
+	//width: @dr-navi-aside-width;
 	overflow-x: hidden;
 	overflow-y: auto;
 	height: 100%;
-	position:absolute;
+	//position:absolute;
 	min-width: @dr-unit-triple;
 	.dr-menu {
 		.dr-button {
@@ -16,7 +16,7 @@
 			padding: 0;
 			i {
 				display: inline-block;
-				line-height: @dr-navi-menu-item-height;
+				//line-height: @dr-navi-menu-item-height;
 				text-align: center;
 			}
 			span {
@@ -46,91 +46,3 @@
 	}
 }
 
-/*
-.dr-aside {
-	z-index: @dr-zindex-aside;
-	position: absolute;
-	width: @dr-width-aside;
-	top: 0;
-	bottom: 0;
-	right: 0;
-	background-color: @dr-white;
-	box-shadow: 0 0 5px rgba(0,0,0,0.5);
-	&.dr-left {
-		right: auto;
-		left: 0;
-	}
-	.dr-header {
-		background-color: @dr-blue;
-		color: @dr-white;
-		min-height: @dr-unit-triple;
-		position: relative;
-		.dr-mixin-unselectable();
-		h3 {
-			display: block;
-			padding: @dr-unit;
-			margin: 0;
-			padding-right: @dr-unit-triple + @dr-unit;
-		}
-		button {
-			color: @dr-white;
-			padding: @dr-unit;
-			position: absolute;
-			top: 0;
-			right: 0;
-		}
-	}
-	.dr-panel {
-		padding: @dr-unit;
-		padding-bottom: @dr-unit-half;
-		.dr-menu,
-		.dr-form,
-		.dr-calendar {
-			.dr-mixin-expand ();
-			&:first-child {
-				.dr-mixin-liftup ();
-			}
-		}
-	}
-	&.dr-useflex {
-		.dr-mixin-flexcol();
-		.dr-panel {
-			.dr-mixin-flex();
-		}
-	}
-	&.dr-noflex {
-		.dr-panel {
-			.dr-mixin-maximize();
-		}
-	}
-	&:after {
-		content: "";
-		opacity: 0;
-		background-color: @dr-black;
-		.dr-mixin-transition (opacity, @dr-transition-now, ease-out);
-		.dr-mixin-maximize ();
-		bottom: 100%;
-	}
-	&[data-dr-offset]:after {
-		opacity: 0.15;
-		bottom: 0;
-	}
-	&.dr-open { // transition the stacking offset
-		.dr-mixin-transition-transform(@dr-transition-fast);
-	}
-}
-.dr-mobile-only {
-	.dr-aside {
-		.dr-header {
-			min-height: @dr-unit-double;
-			h3 {
-				padding-top: @dr-unit-half;
-				padding-bottom: @dr-unit-half;
-			}
-			button {
-				padding: @dr-unit-half;
-			}
-		}
-	}
-}
-*/

@@ -11,41 +11,38 @@
 	url("https://www-assets0.herokucdn.com/assets/shibori/dist/fonts/hk-icon/hk-icon-af729098fc3fb4ebecd01db3f51a5c749f12a8df5f074883cc8008430f23ee8b.svg#hk-icon") format("svg")
 }
 
-.doc-home {
-	@import "hk-icons.less";
-	//overflow-x: auto;
-	//overflow-y: auto;
-	.loading-hide {
-		//opacity: 0;
-		visibility: hidden;
-		&.show {
-			//opacity: 1;
-			visibility: visible;
-		}
+@import "hk-icons.less";
+//overflow-x: auto;
+//overflow-y: auto;
+.loading-hide {
+	//opacity: 0;
+	visibility: hidden;
+	&.show {
+		//opacity: 1;
+		visibility: visible;
 	}
-	.spin-loading {
-		color: @dr-white;
-		width: @dr-unit-triple;
-		line-height: @dr-unit-triple;
-	}
-	@import "aside.less";
-	@import "mainSection.less";
-	@import "animate.less";
-	@import "dr-scrollable-anim.less";
-	@import "docSection.less";
-	@import "dev.less";
-	// override dr less
-	h1, h2 {
-		> span {
-			top: 0;
-			position:static;
-		}
+}
+.spin-loading {
+	color: @dr-white;
+	width: @dr-unit-triple;
+	line-height: @dr-unit-triple;
+}
+@import "aside.less";
+@import "mainSection.less";
+@import "animate.less";
+@import "dr-scrollable-anim.less";
+@import "docSection.less";
+@import "dev.less";
+// override dr less
+h1, h2 {
+	> span {
+		top: 0;
+		position:static;
 	}
 }
 
+
 .size-mobile {
-	.doc-home {
-		@import "aside-mobile.less";
-		@import "docSection-mobile.less";
-	}
+	@import "aside-mobile.less";
+	@import "docSection-mobile.less";
 }

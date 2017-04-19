@@ -71,6 +71,9 @@ MultiEntryHtmlPlugin.prototype.apply = function(compiler) {
 		var $ = cheerio.load(compiler._lego_entry[relativePath], {decodeEntities: false});
 		var body = $('body');
 		var head = $('head');
+		if (plugin.opts.onCompile) {
+			plugin.opts.onCompile(file, $);
+		}
 		var scriptIdx = 0;
 		_.each(compilation.entrypoints[entrypointName].chunks, chunk => {
 			var s;

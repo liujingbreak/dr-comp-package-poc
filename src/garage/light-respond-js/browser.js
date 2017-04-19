@@ -8,11 +8,12 @@ module.exports = Modernizr;
 
 var testElement = $('<div>');
 testElement.addClass('respond-test');
-var html = $('html');
+var html, body;
 
 $(document).ready(function() {
 	html = $('html');
-	$('body').append(testElement);
+	body = $(document.body);
+	body.append(testElement);
 	checkSize();
 	$(window).resize(_.debounce(checkSize, 300, true));
 	//detectTouchDevice();
@@ -33,14 +34,20 @@ function checkSize() {
 		case '0px':
 			html.removeClass('size-mobile size-tablet');
 			html.addClass('size-desktop');
+			body.removeClass('size-mobile size-tablet');
+			body.addClass('size-desktop');
 			break;
 		case '1px':
 			html.removeClass('size-mobile size-desktop');
 			html.addClass('size-tablet');
+			body.removeClass('size-mobile size-desktop');
+			body.addClass('size-tablet');
 			break;
 		case '2px':
 			html.removeClass('size-tablet size-desktop');
 			html.addClass('size-mobile');
+			body.removeClass('size-mobile size-desktop');
+			body.addClass('size-mobile');
 			break;
 	}
 	oldValue = newValue;
