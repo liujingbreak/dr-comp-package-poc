@@ -193,7 +193,7 @@ function factory($timeout, $parse, $compile, $q) {
 							highlightMenu(lastHover);
 						});
 					});
-					controller.menuExpand({width: subMenuEl.prop('offsetWidth') + 66});
+					controller.menuExpand({width: subMenuEl.prop('offsetWidth')});
 					scope.$apply();
 					//subMenuEl.on('mouseleave', subMenuLeave);
 				}

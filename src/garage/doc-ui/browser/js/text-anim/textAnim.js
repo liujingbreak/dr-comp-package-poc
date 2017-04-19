@@ -41,7 +41,7 @@ module.exports = function(ngModule) {
 					} else {
 						timeline = new TimelineLite({paused: true});
 					}
-					console.log(0.06 * $element[0].children.length);
+					//console.log(0.06 * $element[0].children.length);
 					timeline.staggerFromTo($element[0].children, $element[0].children.length * 0.02,
 						{autoAlpha: 0, xPercent: -67},
 						{autoAlpha: 1, xPercent: 0, ease: 'Power2.easeout',

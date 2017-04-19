@@ -1,6 +1,6 @@
 {
   "name": "@dr/doc-home",
-  "version": "0.1.32",
+  "version": "0.1.33",
   "description": "dr-comp-package - document site module",
   "browser": "browser/switchLocale.js",
   "main": "server/server.js",
