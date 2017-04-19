@@ -45,7 +45,8 @@ function eachRecipeSrc(projectDir, callback) {
 	function forProject(prjDir) {
 		_.each(_projectSrcRecipeMap(prjDir), callback);
 		var e2eDir = Path.join(prjDir, 'e2etest');
-		callback(e2eDir, null);
+		if (fs.existsSync(e2eDir))
+			callback(e2eDir, null);
 	}
 }
 

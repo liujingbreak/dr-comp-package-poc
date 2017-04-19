@@ -16,7 +16,7 @@ var _ = require('lodash');
 var chalk = require('chalk');
 var fs = require('fs');
 var runSequence = require('run-sequence');
-var es = require('event-stream');
+//var es = require('event-stream');
 //var buildUtils = require('./lib/gulp/buildUtils');
 
 var buildUtils = require('./lib/gulp/buildUtils');
