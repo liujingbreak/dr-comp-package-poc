@@ -3,6 +3,12 @@ var _ = require('lodash');
 module.exports = function(goFunc) {
 	var menuList = [
 		{
+			label: $translate('drcp 内部开发说明'),
+			action: function() {
+				goFunc('drcp-developer.md');
+			}
+		},
+		{
 			label: $translate('[Deprecated] Introduction'),
 			icon: 'fa-file-text',
 			action: function() {

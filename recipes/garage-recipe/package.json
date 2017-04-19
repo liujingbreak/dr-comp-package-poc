@@ -1,6 +1,6 @@
 {
   "name": "@dr/garage-recipe",
-  "version": "0.2.15",
+  "version": "0.2.17",
   "description": "Component group: garage-recipe",
   "dependencies": {
     "@dr/angularjs": "1.5.8-3",
@@ -18,7 +18,7 @@
     "@dr/handlebars-tmpl-builder": "1.0.0",
     "@dr/light-respond-js": "0.1.1",
     "@dr/markdown-viewer": "0.1.0",
-    "@dr/readme": "0.1.1",
-    "@dr/readme-docs": "0.3.2"
+    "@dr/readme": "0.1.2",
+    "@dr/readme-docs": "0.3.4"
   }
 }

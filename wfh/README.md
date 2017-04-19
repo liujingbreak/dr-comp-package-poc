@@ -1,5 +1,7 @@
 @dr web platform command tool
 ===========
+If you are contributor, please read [Contributor doc](http://dr-web-house.github.io/#/doc/drcp-developer.md)
+
 ## Directories
 
 - ### Project directory

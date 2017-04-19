@@ -1,6 +1,6 @@
 {
   "name": "@dr/readme",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Menu items for dr-comp-package document site document menu",
   "browser": "browser/index.js",
   "dr": {
