@@ -11,7 +11,7 @@
   "dr": {
     "type": "server",
     "bundle": "home",
-    "entryPage": "index.html",
+    "entryPage": "*.html",
     "compiler": "webpack",
     "outputPath": "/",
     "category": ["angular", "doc-site"]

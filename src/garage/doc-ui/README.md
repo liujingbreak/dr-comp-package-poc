@@ -29,3 +29,10 @@ Put it at beginning of you LESS files.
 @import "npm://@dr/doc-ui/browser/less/dr-variables.less";
 @import "npm://@dr/doc-ui/browser/less/dr-mixins.less";
 ```
+
+Angular Components
+-----------
+| name | desc
+| -- | --
+| drSplitText | split text DOM node into mutiple HTML element DOM nodes
+| drSplitTextShow |

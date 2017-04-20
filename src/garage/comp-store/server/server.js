@@ -20,7 +20,7 @@ exports.activate = function() {
 	const log = require('log4js').getLogger(api.packageName);
 	var recipeNameRegs = [/.*?-recipe/, /([^\/]*\/)?recipe-.*?/];
 
-	var verdaccioUrl = api.config.get(api.packageShortName + '.verdaccioUrl', 'http://localhost:4873');
+	var verdaccioUrl = api.config.get(api.packageName + '.verdaccioUrl', 'http://localhost:4873');
 	verdaccioUrl = _.trimEnd(verdaccioUrl, '/');
 	api.router().use('/', api.cors());
 	api.router().get('/packageBanner', (req, res) => {

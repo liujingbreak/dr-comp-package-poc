@@ -7,7 +7,6 @@ require('@dr/light-respond-js');
 //require('angular-nicescroll/angular-nicescroll');
 var lazy = require('@dr/angular-lazy');
 
-var textAnim = require('@dr/text-anim-ng');
 
 
 var docHome = angular.module('docHome', ['ngAnimate', 'ngSanitize', 'ui.router', 'docUi']);
@@ -24,14 +23,16 @@ docHome.config(['$controllerProvider', '$compileProvider', '$filterProvider', '$
 		docHome.$provide            = $provide;
 		docHome.$stateProvider = $stateProvider;
 		docHome.$urlRouterProvider = $urlRouterProvider;
-		textAnim.register(docHome.$compileProvider);
 		require('./routes')($stateProvider, $urlRouterProvider);
 	}]);
 docHome.config(lazy.cacheInternals)
-.run(function() {
+.run(['$templateCache', function($templateCache) {
 	var attachFastClick = require('fastclick');
 	attachFastClick(document.body);
-});
+	angular.forEach(['concept', 'package', 'project-recipe', 'workspace', 'chunk-config-api'], function(markdown) {
+		$templateCache.put(markdown + '.md', require('@dr/doc-home/browser/views/' + markdown + '.md'));
+	});
+}]);
 require('./controllers/mainController')(docHome);
 require('./controllers/introController')(docHome);
 require('./controllers/asideController')(docHome);

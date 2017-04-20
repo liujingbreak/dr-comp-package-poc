@@ -1,7 +1,18 @@
 @import "npm://@dr/doc-ui/browser/less/dr-variables.less";
 @import "npm://@dr/doc-ui/browser/less/dr-mixins.less";
 
+@font-face {
+	font-family: "hk-icon";
+	font-style: normal;
+	font-weight: normal;
+	src: url('assets://@doc-home/fonts/hk-icon.eot') format("embedded-opentype"),
+	url("assets://@doc-home/fonts/hk-icon.woff") format("woff"),
+	url("assets://@doc-home/fonts/hk-icon.ttf") format("truetype"),
+	url("https://www-assets0.herokucdn.com/assets/shibori/dist/fonts/hk-icon/hk-icon-af729098fc3fb4ebecd01db3f51a5c749f12a8df5f074883cc8008430f23ee8b.svg#hk-icon") format("svg")
+}
+
 .doc-home {
+	@import "hk-icons.less";
 	//overflow-x: auto;
 	//overflow-y: auto;
 	.loading-hide {
@@ -23,6 +34,7 @@
 	@import "dr-scrollable-anim.less";
 	@import "docSection.less";
 	@import "avatar.less";
+	@import "dev.less";
 	// override dr less
 	h1, h2 {
 		> span {

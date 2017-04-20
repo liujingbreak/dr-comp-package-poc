@@ -60,6 +60,7 @@
 		"Promise": true,
 		"File": true,
 		"__api": true,
+        "__drcpEntryPage": false,
 		"$translate": true,
 	    "jasmine": true,
 	    "describe": true,

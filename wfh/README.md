@@ -1,5 +1,7 @@
 @dr web platform command tool
 ===========
+If you are contributor, please read [Contributor doc](http://dr-web-house.github.io/#/doc/drcp-developer.md)
+
 ## Directories
 
 - ### Project directory
@@ -54,7 +56,7 @@
   drcp compile
   ```
   It creates files: `package.json`, `config.yaml`, `config.local.yaml`, ...
-  And folders
+  and folders
 
  ## Component configuration property
  In each component's package.json file
@@ -101,19 +103,21 @@
  - `module-resolve.browser.js`
  - `module-resolve.server.js`
  
- We even supports NodeJS side module resolve.
+ We even support NodeJS side module resolve.
 
- > Originally in dr-comp-package v0.9.x they are named as `inject.js` and `browserify-inject.js`.
 
-## Share same `node_modules` with multiple work space directories
+## Share `node_modules` with multiple workspaces
 
-Create workspace directory 1 like normal, do `wfh init` in that directory. Then later on, create workspace directory 2, but create a symbolic link to workspace 1's folder `node_modules`. 
+Create the first workspace directory like normal, do `drcp init` in that directory. Then later on, create the second workspace directory, but create a symbolic link which links to workspace 1's folder `node_modules`.
+```shell
+ln -s ../workspace1/node_modules node_modules
+``` 
 
-We will need more than on work space to have different configurations.
+### Mutiple configurations
 For example, one workspace for responsive web projects which runs for all kinds of browser, and another workspace for advance projects which only support mobile browser. 
 
 We can have different configuration like resolving setting, in workspace module `$` should be resolved to jQuery 1.x, but for workspace 2, it should be Zepto. Also chunk setting are probably different for 2 workspaces.
 
-So that we can optimize our bundle and library for different client but also reuse common component as much as possible.
+So that we can optimize our bundle and library for different client but also reuse some common components as much as possible.
 
 

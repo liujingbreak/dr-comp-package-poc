@@ -35,7 +35,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "request": "^2.72.0",
+    "request": "^2.79.0",
     "swiper": "^3.4.1",
     "lowdb":"0.16.2",
     "mkdirp": "^0.5.1"
