@@ -14,7 +14,7 @@ function controller($scope, $timeout, drLoadingService, avatarService) {
 
 	$scope.addOne = function() {
 		//只能新增一列
-		if (avatarVm.list[avatarVm.list.length - 1].id) {
+		if (avatarVm.list.length === 0 || (avatarVm.list[avatarVm.list.length - 1] && avatarVm.list[avatarVm.list.length - 1].id)) {
 			avatarVm.list.push({});
 		}
 	};
