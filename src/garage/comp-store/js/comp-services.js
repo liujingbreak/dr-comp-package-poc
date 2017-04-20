@@ -74,6 +74,22 @@ api.app.factory('compService', ['$q', '$http', '$timeout', function($q, $http, $
 						totalPage: res.data.totalPage
 					};
 				});
+		},
+		selectAvatarByName: function(name) {
+			return this.$http({
+					method: 'POST',
+					url: this.nodeServer + api.contextPath + '/avatar/selectByName',
+					data: {
+						name: name
+					}
+				})
+				.then(function(res) {
+					if (res.data.error)
+						throw new Error(res.data.error);
+					return {
+						data: res.data
+					};
+				});
 		}
 	};
 	return new CompService($q, $http, $timeout);

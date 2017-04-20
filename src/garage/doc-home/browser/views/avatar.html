@@ -1,0 +1,18 @@
+<div class="doc-section markdown-body avatar-setting">
+	<h1 class="title">头像设置</h1>
+	<button class="add-one-btn" type="button" ng-click="addOne()">新增</button>
+    <div class="errMsg" ng-class="{'show':errMsg}">{{errMsg}}</div>
+	<table class="avatar-table">
+		<tr>
+			<th>用户ID</th>
+			<th>头像路径</th>
+			<th>操作</th>
+		</tr>
+		<tr ng-repeat="avatar in avatarVm.list">
+			<td><input type="text" class="input-id" ng-model="avatar.id"></td>
+			<td><input type="text" class="input-url" ng-model="avatar.url"></td>
+			<td><button type="button" ng-click="saveRecord($event,avatar.userId)">保存</button><button type="button" ng-click="delRecord(avatar.userId)">删除</button></td>
+		</tr>
+	</table>
+
+</div>

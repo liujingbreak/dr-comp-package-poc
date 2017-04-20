@@ -1,6 +1,6 @@
 {
   "name": "@dr/comp-store",
-  "version": "0.1.7",
+  "version": "0.2.7",
   "description": "Component store",
   "browser": "browser.js",
   "main": "server/server.js",
@@ -36,7 +36,9 @@
   },
   "dependencies": {
     "request": "^2.79.0",
-    "swiper": "^3.4.1"
+    "swiper": "^3.4.1",
+    "lowdb":"0.16.2",
+    "mkdirp": "^0.5.1"
   },
   "author": "LJ",
   "license": "MIT"

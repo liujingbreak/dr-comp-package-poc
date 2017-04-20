@@ -1,5 +1,19 @@
+var api = require('__api');
 var request = require('request');
 var _ = require('lodash');
+var path = require('path');
+var low = require('lowdb');
+var mkdirp = require('mkdirp');
+//初始化头像数据库
+var workspace = api.config.get('rootPath');
+var avatarDBPath = path.join(workspace, './staticDB/avatars/');
+mkdirp.sync(avatarDBPath);
+var db = low(path.join(workspace, './staticDB/avatars/avatar.json'));
+if (!db.has('avatars').value()) {
+	db.defaults({
+		avatars: []
+	}).write();
+}
 
 exports.activate = function() {
 	const api = require('__api');
@@ -117,14 +131,99 @@ exports.activate = function() {
 			}
 		});
 	});
+
+	api.router().get('/avatar/list', (req, res) => {
+		try {
+			var data = db.get('avatars').value();
+			res.send(data);
+		} catch (e) {
+			res.send('error');
+		}
+	});
+
+	api.router().post('/avatar/add', (req, res) => {
+		try {
+			var id = req.body.id || req.query.id;
+			var url = req.body.url || req.query.url;
+			var userId = guid();
+			var new_obj = {
+				userId: userId,
+				id: id.toString(),
+				url: url.toString()
+			};
+			db.get('avatars').push(new_obj).write();
+			res.send('success');
+		} catch (e) {
+			console.info(e)
+			res.send('error');
+		}
+	});
+
+	api.router().post('/avatar/edit', (req, res) => {
+		try {
+			var id = req.body.id || req.query.id;
+			var url = req.body.url || req.query.url;
+			var userId = req.body.userId || req.query.userId;
+			db.get('avatars')
+				.find({
+					userId: userId
+				})
+				.assign({
+					userId: userId,
+					id: id,
+					url: url
+				})
+				.write();
+			res.send('success');
+		} catch (e) {
+			res.send('error');
+		}
+	});
+
+	api.router().post('/avatar/delete', (req, res) => {
+		try {
+			var userId = req.body.userId || req.query.userId;
+			db.get('avatars')
+				.remove({
+					userId: userId
+				})
+				.write();
+			res.send('success');
+		} catch (e) {
+			res.send('error');
+		}
+	});
+
+	api.router().post('/avatar/selectByName', (req, res) => {
+		try {
+			var name = req.body.name || req.query.name;
+			var data = db.get('avatars')
+				.find({
+					id: name
+				}).value();
+			res.send(data);
+		} catch (e) {
+			console.info(e)
+			res.send('error');
+		}
+	});
 };
+
+function guid() {
+	function S4() {
+		return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+	}
+	return (S4() + S4() + '-' + S4() + '-' + S4() + '-' + S4() + '-' + S4() + S4() + S4());
+}
 
 exports.onCompileTemplate = function(relativeHtmlFilePath, swig) {
 	const api = require('__api');
 	if (relativeHtmlFilePath === 'views/componentStore.html') {
-		return {locals: {
-			npmHost: api.config.get([api.packageName, 'npmHost'], 'npm.dianrong.com')
-		}};
+		return {
+			locals: {
+				npmHost: api.config.get([api.packageName, 'npmHost'], 'npm.dianrong.com')
+			}
+		};
 	}
 	return null;
 };

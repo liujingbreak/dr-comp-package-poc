@@ -93,7 +93,7 @@ function factory($timeout, $parse, $compile, $q) {
 						mainMenuState = EXPANDED;
 						var i = getMenuSelectedIdx(scope);
 						var item = getMenuItem(scope)[i];
-						if (item.subMenu && item.subMenu.length > 0) {
+						if (item && item.subMenu && item.subMenu.length > 0) {
 							openNextSubMenu(i);
 						}
 
