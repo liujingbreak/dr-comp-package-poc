@@ -1,0 +1,18 @@
+{
+  "name": "@dr/example-webpack",
+  "version": "0.0.1",
+  "description": "Test Webpack 2.2",
+  "browser": "browser.js",
+  "main": "server.js",
+  "scripts": {
+    "test": "gulp test example-webpack"
+  },
+  "author": "LJ",
+  "dr": {
+    "chunk": "example-wp",
+    "entryPage": "index.html",
+    "compiler": "webpack",
+    "jsLoader": "babel"
+  },
+  "license": "MIT"
+}

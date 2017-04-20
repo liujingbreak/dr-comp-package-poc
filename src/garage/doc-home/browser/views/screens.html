@@ -1,30 +1,119 @@
 <div dr-scrollable-anim="introVm.scrollableAnim">
-	<div class="screen screen-bground"></div>
 	<div class="screen dr-bg-lite screen-1">
-		<div class="center-box">
-			<h2 class="t"
-				dr-split-text-show="introVm.animStart" duration="0.6" timeline="introVm.screen1Timeline" on-split-done="mainVm.loaded = true">是时候做一件奇怪的事情了</h2>
-			<h1 class="t" timeline="introVm.screen1Timeline" timeline-pos="+=0.5"
-				dr-split-text-show="introVm.animTimeline" duration="0.6">我们需要一个Web<span class="keyword">平台</span>
-			</h1>
+		<div class="parallex-layer scr-1">
+			<div class="center-box">
+				<h1 t dr-split-text-show="introVm.animStart" timeline="introVm.screen1Timeline"
+					on-split-done="mainVm.loaded = true"><span class="keyword">@dr </span>component package
+				</h1>
+				<h2 t dr-split-text-show timeline="introVm.screen1Timeline" timeline-pos="0"
+					on-split-done="mainVm.loaded = true">点融Web组件包平台
+				</h2>
+				<div t dr-split-text-show
+					timeline="introVm.screen1Timeline" timeline-pos="0"
+					duration="0.6">跨项目管理和复用Node package组件
+				</div>
+				<div t dr-split-text-show timeline="introVm.screen1Timeline" timeline-pos="0"
+					duration="0.6">合并打包和部署你的Web项目
+				</div>
+			</div>
 		</div>
 	</div>
-	<div class="screen screen-2">
-		<div class="center-box">
-			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" duration="1.1" timeline="introVm.screen2Timeline">一个可以积累和分享公共组件的平台</div>
-			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1.2" timeline="introVm.screen2Timeline">在这样一个平台上可以组合我们不同的产品</div>
-			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1.2" timeline="introVm.screen2Timeline">每一个人都是组件的贡献者</div>
-			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1" timeline="introVm.screen2Timeline">像一个社区那样合作</div>
-			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1.2" timeline="introVm.screen2Timeline"
-				>它不是一个Framework, 它是一个可以运行的组件库</div>
-			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1.2" timeline="introVm.screen2Timeline"
-					>你想得到的有趣的功能都可以是一个package, 而且.....</div>
+	<div class="screen screen-func">
+		<div class="func-blocks">
+			<div class="func-dev">
+				<i class="fa fa-laptop"></i>
+				<h2>开发</h2>
+				多项目合并, 组件共享, 测试
+			</div>
+			<div class="func-nodeserver">
+				<i class="fa fa-server"></i>
+				<h2>Node HTTP Server</h2>
+				运行Express middleware, router组件
+			</div>
+			<div class="func-deploy">
+				<i class="hk-icon hk-icon-deploy"></i>
+				<h2>部署</h2>
+				打包, 配置管理, 上传CMS, 持续集成
+			</div>
+			<div class="func-npm">
+				<i class="hk-icon hk-icon-spaces"></i>
+				<h2>Private NPM registry server</h2>
+				发布, 安装, 管理组件包
+			</div>
 		</div>
+	</div>
+	{% include "features.html" %}
+	{% include "dev.html" %}
+	{% include "concept.html" %}
+	{% include "computer.html" %}
+	{% include "package.html" %}
+	<div class="screen screen-modules">
+		<header>基本的组件模块</header>
+		<div class="comp-git comp-git-drcommon">
+			<div class="block-row">
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i><p>点融Angular组件<br/>dr-ng-widgets</p></div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i><p>点融CSS组件<br/>dr-css-components<p></div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i><p>点融Angular组件 Demo<p></div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i><p>入口页链接列表 <br/>entry-list<p></div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i><p>打包Zip文件上传CMS<p></div>
+			</div>
+			<div class="group-git">
+					<i class="fa fa-github" aria-hidden="true"></i>
+					dr-common
+			</div>
+		</div>
+		<div class="comp-git">
+			<div class="block-row">
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>drcp<br/>命令行</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>组件,配置,运行环境管理<br/>dr-comp-package</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>第三方依赖Wrapper</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>http-server</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>HTTP router服务 express-app</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>API</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>Web 打包<br/>webpack2-builder</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>i18n<br/>translate-generator</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>静态资源处理<br/>assets-processer</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>模板预编译<br/>template-builder, webpack loader</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>文档主页模块<br/>doc-home</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>Component store主页模块<br/>comp-store</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>辅助工具<br/>light-respond-js, angular-lazy, markdown-viewer</div>
+				<div class="comp-block"><i class="hk-icon hk-icon-buildpack"></i>Examples</div>
+			</div>
+			<div class="group-git">
+					<i class="fa fa-github" aria-hidden="true"></i>
+					web-fun-house
+			</div>
+		</div>
+	</div>
+	
+	<div class="screen screen-3rdparty">
+		<header>
+			<img class="brands" src="assets://@dr/doc-home/brands/nodejs.svg">
+			<svg class="brands" viewBox="0 0 18 7">
+				<path fill="#CB3837" d="M0,0v6h5v1h4v-1h9v-6"></path>
+				<path fill="#FFF" d="M1,1v4h2v-3h1v3h1v-4h1v5h2v-4h1v2h-1v1h2v-4h1v4h2v-3h1v3h1v-3h1v3h1v-4"></path>
+			</svg>
+			<img class="brands" src="assets://@dr/doc-home/brands/webpack.png">
+			<img class="brands" src="assets://@dr/doc-home/brands/express.png">
+			<img class="brands" src="assets://@dr/doc-home/brands/gulp-2x.png">
+			<img class="brands" src="assets://@dr/doc-home/brands/wizard_hat_blue.png">
+			<img class="brands" src="assets://@dr/doc-home/brands/jasmine.svg">
+		</header>
+		<!--<div class="center-box">
+			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" duration="1.1" timeline="introVm.screen2Timeline">一个可以复用和分享公共组件模块的平台</div>
+			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1.2" timeline="introVm.screen2Timeline">支撑跨越团队，跨越多个产品线的模块复用方案</div>
+			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1" timeline="introVm.screen2Timeline">不仅仅是浏览器，还有NodeJS</div>
+			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1" timeline="introVm.screen2Timeline">插件式可扩展Web产品</div>
+			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1" timeline="introVm.screen2Timeline">优化性能的部署和开发工具</div>
+			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1.2" timeline="introVm.screen2Timeline">强调自动化测试环节和对持续集成的拥抱的工具</div>
+			<div class="big-text t" dr-text-anim="introVm.showScreen2Text" timeline-pos="+=0.8" duration="1.2" timeline="introVm.screen2Timeline"
+					>每一个想得到的功能都是一个组件化的Node package</div>
+		</div>-->
 	</div>
 	<div class="screen screen-3">
 		<div class="center-box">
 			<h1 class="big-text t" dr-text-anim="introVm.showScreen3Text" duration="1" timeline="introVm.screen3Timeline"
-				>All your packages are belong to us! :)</h1>
+				>May the packages be with you!</h1>
 <pre class="puppy">\   ^__^
  \  (oo)\_______
     (__)\       )\/\

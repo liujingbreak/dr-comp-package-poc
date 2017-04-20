@@ -1,0 +1,12 @@
+<div class="avatar">
+	<img ng-if="$ctrl.imgUrl" ng-src="{{$ctrl.imgUrl}}">
+	<i ng-if="!$ctrl.imgUrl" class="fa fa-user-circle-o" aria-hidden="true"></i>
+	<div class="category">
+		<span ng-repeat="x in $ctrl.package.dr.category" class="{{x}}">
+       {{x}}
+    </span>
+	</div>
+</div>
+<h3 class="name">{{$ctrl.package.name}}</h3>
+<div class="ver">{{$ctrl.package.version}}</div>
+<div class="desc">{{$ctrl.package.description}}</div>

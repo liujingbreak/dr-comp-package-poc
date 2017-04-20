@@ -1,0 +1,20 @@
+(function() {
+{% if (lrEnabled) { %}
+	var livereload = document.createElement('script');
+	livereload.type='text/javascript';
+	livereload.async = true;
+	livereload.src = 'http://' + (location.host || 'localhost').split(':')[0] + ':{{ lrport }}/livereload.js';
+	var s = document.getElementsByTagName('script')[0];
+	s.parentNode.insertBefore(livereload, s);
+{% } %}
+require('@dr-core/labjs');
+var bl = require('@dr-core/bundle-loader');
+{% if (cssPaths) { %}
+	bl.loadCssBundles({{ cssPaths }}, '{{ staticAssetsURL }}');
+{% } %}
+{% if (typeof preloadJs != 'undefined') { %}
+	bl.preloadJs({{ preloadJsBundles }}, '{{ staticAssetsURL }}', {{ debug }}, {{ preloadJs }});
+{% } %}
+	var jsPaths = {{ jsPaths }};
+	bl.runJsBundles(jsPaths, '{{ staticAssetsURL }}', '{{ entryPackage }}', {{ data }}, {{ debug }}, window.onWfhReady)
+})();

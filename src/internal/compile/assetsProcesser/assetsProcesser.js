@@ -3,46 +3,151 @@ var through = require('through2');
 var Path = require('path');
 var fs = require('fs');
 var es = require('event-stream');
-var log;
-var env = require('@dr/environment');
-var resolveStaticUrl = require('@dr-core/browserify-builder-api').resolveUrl;
-var buildUtils = env.buildUtils;
+var _ = require('lodash');
+var shell = require('shelljs');
+var mkdirp = require('mkdirp');
+var api = require('__api');
+var log = require('log4js').getLogger(api.packageName);
+var serverFavicon = require('serve-favicon');
+var buildUtils = api.buildUtils;
 
-var packageUtils, config;
+var packageUtils = api.packageUtils;
+var config = api.config;
 
 module.exports = {
 	compile: compile,
-	replaceAssetsUrl: replaceAssetsUrl
+	activate: activate
 };
 
 function compile(api) {
-	log = require('log4js').getLogger(api.packageName);
 	var argv = api.argv;
 	packageUtils = api.packageUtils;
 	config = api.config;
-	if (config().devMode && (!argv.p || argv.p && argv.p !== 'assets')) {
+	if (config().devMode && !argv.copyAssets) {
 		log.info('DevMode enabled, skip copying assets to static folder');
 		return;
 	}
+	if (!api.isDefaultLocale() && !argv.copyAssets) {
+		log.info('Build for "%s" which is not default locale, skip copying assets to static folder',
+			api.getBuildLocale());
+		return;
+	}
+
+	copyRootPackageFavicon();
 	return copyAssets();
 }
 
+function activate(api) {
+	var staticFolder = api.config.resolve('staticDir');
+	log.debug('express static path: ' + staticFolder);
+
+	var favicon = findFavicon();
+	if (favicon)
+		require('@dr-core/express-app').app.use(serverFavicon(favicon));
+
+	var maxAgeMap = api.config.get('cacheControlMaxAge', {
+		js: '365 days',
+		css: '365 days',
+		less: '365 days',
+		html: 0,
+		png: '365 days',
+		jpg: '365 days',
+		gif: '365 days',
+		svg: '365 days',
+	});
+	//api.use('/', api.cors());
+	api.use('/', staticRoute(staticFolder));
+	// api.get('/', function(req, res) {
+	// 	res.render('index.html', {});
+	// });
+
+	if (!api.config().devMode) {
+		return;
+	}
+
+	api.packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
+		var assetsFolder = json.dr ? (json.dr.assetsDir ? json.dr.assetsDir : 'assets') : 'assets';
+		var assetsDir = Path.join(packagePath, assetsFolder);
+		var assetsDirMap = api.config.get('assetsDirMap.' + name);
+		if (assetsDirMap != null)
+			assetsDirMap = _.trim(assetsDirMap, '/');
+		if (fs.existsSync(assetsDir)) {
+			var path = '/' + (assetsDirMap != null ? assetsDirMap : parsedName.name);
+			if (path.length > 1)
+				path += '/';
+			log.info('route ' + path + ' -> ' + assetsDir);
+
+			api.use(path, staticRoute(assetsDir));
+		}
+	});
+
+	function staticRoute(staticDir) {
+		return function(req, res, next) {
+			var ext = Path.extname(req.path).toLowerCase();
+			if (ext.startsWith('.'))
+				ext = ext.substring(1);
+			api.express.static(staticDir, {
+				maxAge: _.isObject(maxAgeMap) ?
+					(_.has(maxAgeMap, ext) ? maxAgeMap[ext] : 0) :
+					maxAgeMap,
+				setHeaders: setCORSHeader
+			})(req, res, next);
+		};
+	}
+}
+
+
+
+function copyRootPackageFavicon() {
+	var favicon = findFavicon();
+	if (!favicon)
+		return;
+	log.info('Copy favicon.ico from ' + favicon);
+	mkdirp.sync(config.resolve('staticDir'));
+	shell.cp('-f', Path.resolve(favicon), Path.resolve(config().rootPath, config.resolve('staticDir')));
+}
+
+function findFavicon() {
+	return _findFaviconInConfig('packageContextPathMapping') || _findFaviconInConfig('entryPageMapping');
+}
+
+function _findFaviconInConfig(property) {
+	if (!api.config()[property]) {
+		return null;
+	}
+	var faviconFile = null;
+	var faviconPackage;
+	_.each(config()[property], (path, pkName) => {
+		if (path === '/') {
+			packageUtils.lookForPackages(pkName, (fullName, entryPath, parsedName, json, packagePath) => {
+				var assetsFolder = json.dr ? (json.dr.assetsDir ? json.dr.assetsDir : 'assets') : 'assets';
+				var favicon = Path.join(packagePath, assetsFolder, 'favicon.ico');
+				if (fs.existsSync(favicon)) {
+					if (faviconFile) {
+						log.warn('Found duplicate favicon file in', fullName, 'existing', faviconPackage);
+					}
+					faviconFile = Path.resolve(favicon);
+				}
+			});
+		}
+	});
+	return faviconFile;
+}
+
 function copyAssets() {
-	var src = [];
 	var streams = [];
 	packageUtils.findBrowserPackageByType(['*'], function(name, entryPath, parsedName, json, packagePath) {
-		var baseDir;
-		if (json.dr.assetsDir) {
-			baseDir = Path.join(packagePath, json.dr.assetsDir);
-		} else {
-			baseDir = Path.join(packagePath, 'assets');
-		}
-		if (fs.existsSync(baseDir)) {
-			src.push(Path.join(packagePath, 'assets', '**', '*'));
-			var stream = gulp.src(src, {base: baseDir})
+		var assetsFolder = json.dr ? (json.dr.assetsDir ? json.dr.assetsDir : 'assets') : 'assets';
+		var assetsDir = Path.join(packagePath, assetsFolder);
+		if (fs.existsSync(assetsDir)) {
+			var assetsDirMap = api.config.get('assetsDirMap.' + name);
+			if (assetsDirMap != null)
+				assetsDirMap = _.trim(assetsDirMap, '/');
+			var src = [Path.join(packagePath, assetsFolder, '**', '*')];
+			var stream = gulp.src(src, {base: Path.join(packagePath, assetsFolder)})
 			.pipe(through.obj(function(file, enc, next) {
-				var pathInPk = Path.relative(baseDir, file.path);
-				file.path = Path.join(baseDir, parsedName.name, pathInPk);
+				var pathInPk = Path.relative(assetsDir, file.path);
+				file.path = Path.join(assetsDir, assetsDirMap != null ? assetsDirMap : parsedName.name, pathInPk);
 				log.debug(file.path);
 				//file.path = file.path
 				next(null, file);
@@ -54,24 +159,13 @@ function copyAssets() {
 		return null;
 	}
 	return es.merge(streams)
-	.pipe(gulp.dest(Path.join(config().staticDir)))
+	.pipe(gulp.dest(config.resolve('staticDir')))
 	.on('end', function() {
 		log.debug('flush');
 		buildUtils.writeTimestamp('assets');
 	});
 }
 
-function replaceAssetsUrl(str, getCurrPackage) {
-	return str.replace(/([^a-zA-Z\d_.]|^)assets:\/\/((?:@[^\/]+\/)?[^\/]+)?(\/.*?)(['"),;:!\s]|$)/gm,
-		(match, leading, packageName, path, tail) => {
-			if (!packageName || packageName === '') {
-				packageName = getCurrPackage();
-			}
-			if (packageName) {
-				log.info('resolve assets to ' + packageName);
-			}
-			var resolvedTo = leading + resolveStaticUrl(env.config, packageName, path) + tail;
-			log.debug('-> ' + resolvedTo);
-			return resolvedTo;
-		});
+function setCORSHeader(res) {
+	res.setHeader('Access-Control-Allow-Origin', '*');
 }

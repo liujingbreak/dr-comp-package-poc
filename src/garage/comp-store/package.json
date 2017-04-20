@@ -1,0 +1,43 @@
+{
+  "name": "@dr/comp-store",
+  "version": "0.1.7",
+  "description": "Component store",
+  "browser": "browser.js",
+  "main": "server/server.js",
+  "dr": {
+    "category": ["angular", "doc-site"],
+    "bundle": "component-store",
+    "type": [
+      "server"
+    ],
+    "compiler": "webpack",
+    "config": {
+      "public": {
+        "nodeServer": "http://dr-npm501-14338.ittun.com",
+        "npmHost": "npm.dianrong.com"
+      },
+      "server": {
+        "verdaccioUrl": "http://localhost:4873"
+      }
+    },
+    "config.npm501": {
+      "public": {
+        "nodeServer": "http://npm501.dc.dianrong.com:14338"
+      }
+    },
+    "config.local": {
+      "public": {
+        "nodeServer": ""
+      }
+    }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "request": "^2.79.0",
+    "swiper": "^3.4.1"
+  },
+  "author": "LJ",
+  "license": "MIT"
+}

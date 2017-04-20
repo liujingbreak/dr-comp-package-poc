@@ -14,21 +14,27 @@ module.exports = function(module) {
 */
 function ScrollableAnim(el, throttleWait) {
 	if (!(this instanceof ScrollableAnim)) {
-		return new ScrollableAnim(el);
+		return new ScrollableAnim(el, throttleWait);
 	}
+	if (throttleWait == null)
+		throttleWait = 0;
+	if (!el)
+		el = $(document.body);
 	this.panel = el;
 	this.scenes = [];
 	var self = this;
 
-	this.scrollHandler = _.throttle(function(e) {
+	this.scrollHandler = _.isNumber(throttleWait) ? _.throttle(onScroll, throttleWait, {leading: true, trailing: true}) : onScroll;
+
+	function onScroll(e) {
 		var scrolled = el.scrollTop();
 		if (scrolled < 0) {
 			return;
 		}
 		self.seek(scrolled);
-	}, throttleWait, {leading: true, trailing: true});
+	}
 
-	el.on('scroll', this.scrollHandler);
+	$(window).on('scroll', this.scrollHandler);
 }
 
 ScrollableAnim.prototype = {
@@ -37,14 +43,14 @@ ScrollableAnim.prototype = {
 	 * attrs: object contains properties like
 	 * @param {number} attrs.duration optional property, default value is Math.max of triggerElement's scrollHeight and window height
 	 * @param {number} attr.begin : number - also you may use triggerElement instead
-	 * @param {element|selector} triggerElement:  -
+	 * @param {element|selector} attrs.triggerElement :  -
 	 * @param 	triggered when scrolled distance (scrollTop) reaches element's offset top - viewport's height
-	 * @param {number} delayPercent: - used conjunction with triggerElement,
+	 * @param {number} attrs.delayPercent : - used conjunction with triggerElement,
 	 * @param 	triggered when offset reaches delayPercent/100 * duration + element's offset top - viewport's height
-	 * @param {TimelineLite | function} pass in a TimelineLite instance or function(timeline: TimelineLite) to abtain a created `TimelineLite({paused: true})` instance
-	 * @param {function} startup: function(reverse: boolean, animScene: AnimScene)  - where you may put startup animation
-	 * @param {function} teardown: function(reverse: boolean, animScene: AnimScene) - where you may put teardown animation
-	 * @param {function} onScroll: function(progress, time) - progress is a number between  0 and duration,
+	 * @param {TimelineLite|function} attrs.timeline pass in a TimelineLite instance or function(timeline: TimelineLite) to abtain a created `TimelineLite({paused: true})` instance
+	 * @param {function} attrs.startup : function(reverse: boolean, animScene: AnimScene)  - where you may put startup animation
+	 * @param {function} attrs.teardown : function(reverse: boolean, animScene: AnimScene) - where you may put teardown animation
+	 * @param {function} attrs.onScroll : function(progress, time) - progress is a number between  0 and duration,
 	 *		time is a number between 0 and 1
 	 *
 	 *	AnimScene instance's property:
@@ -68,7 +74,8 @@ ScrollableAnim.prototype = {
 	 * To avoid memory leak, must call this to remove element onscroll event handler
 	 */
 	destory: function() {
-		this.panel.off('scroll', this.scrollHandler);
+		$(window).off('scroll', this.scrollHandler);
+		//this.panel.off('scroll', this.scrollHandler);
 	},
 
 	addScene: function(scene) {
@@ -117,7 +124,7 @@ ScrollableAnim.prototype = {
 		});
 
 		el.css({
-			top: top + 'px',
+			top: top == null ? '0' : top + 'px',
 			left: left + 'px',
 			position: 'fixed',
 			width: w,
@@ -179,7 +186,7 @@ AnimScene.prototype = {
 
 	_teardown: function(reverse) {
 		if (this.teardown) {
-			this.teardown(reverse);
+			this.teardown(reverse, this);
 		}
 	},
 

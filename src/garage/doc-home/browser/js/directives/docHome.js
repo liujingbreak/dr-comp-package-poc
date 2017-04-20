@@ -7,13 +7,14 @@ module.exports = function(compileProvider) {
 function docHome($timeout) {
 	return {
 		scope: false,
-		controller: ['$scope', '$element', '$attrs', '$parse',
-		function($scope, $element, $attrs, $parse) {
+		controller: ['$scope', '$element', '$attrs', '$parse', '$window',
+		function($scope, $element, $attrs, $parse, $window) {
 			this.menuOpened = false;
 			var bodyVm = this;
-			var self = this;
+			//var body = angular.element(document.body);
 
-			self.menuEnter = function(size) {
+			bodyVm.menuEnter = function(size) {
+				//console.log('menuEnter ',size)
 				if (bodyVm.menuOpened) {
 					return;
 				}
@@ -22,17 +23,18 @@ function docHome($timeout) {
 				bodyVm.menuOpened = true;
 			};
 
-			self.menuUnexpand = self.menuExpand = function(size) {
+			bodyVm.menuUnexpand = bodyVm.menuExpand = function(size) {
+				console.log(size);
 				TweenMax.killTweensOf(bodyVm.mainSection[0]);
-				TweenMax.to(bodyVm.mainSection[0], 0.25, {x: size.width - 66, ease: 'Power2.easeOut'});
+				TweenMax.to(bodyVm.mainSection[0], 0.25, {x: size.width, ease: 'Power2.easeOut'});
 			};
 
-			self.menuLeave = function() {
+			bodyVm.menuLeave = function() {
 				if (!bodyVm.menuOpened) {
 					return;
 				}
 				TweenMax.killTweensOf(bodyVm.mainSection[0]);
-				TweenMax.to(bodyVm.mainSection[0], 0.25, {x: 0, ease: 'Power2.easeOut'});
+				TweenMax.to(bodyVm.mainSection[0], 0.25, {x: 0, ease: 'Power2.easeOut', onComplete: function() {bodyVm.mainSection.css('transform', 'none');}});
 				bodyVm.menuOpened = false;
 			};
 		}],

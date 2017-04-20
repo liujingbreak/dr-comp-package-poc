@@ -1,0 +1,176 @@
+comp-card {
+	display: inline-block;
+	//background-color: @dr-lite-lite;
+	.dr-lite-grey-bg();
+	border-right: 1px solid @dr-lite-liter;
+	border-bottom: 1px solid @dr-white;
+	height: @dr-unit * 10;
+	overflow: hidden;
+	padding: @dr-unit-half;
+	vertical-align: middle;
+	text-align: left;
+	box-shadow: 0 0 0 0 @dr-dark;
+	transition: box-shadow 0.25s linear, transform 0.2s linear, background 0.25s linear;
+	transform: translate3d(0, 0, 0);
+	z-index: 0;
+
+	img {
+		border: none;
+	}
+	
+	.avatar {
+		width: 100%;
+		overflow: hidden;
+
+		img {
+			float: right;
+			display: block;
+			margin-right: 10px;
+			width: @dr-unit-double;
+			height: @dr-unit-double;
+			border-radius: calc(@dr-unit-double);
+		}
+		.fa-user-circle-o {
+			float: right;
+			text-align: center;
+			color: @dr-medium-darker;
+			font-size: @dr-unit-double;
+		}
+	}
+
+	.name {
+		margin-top: 15px;
+		color: @dr-black;
+		font-size: @dr-fontsize-big;
+		font-weight: @dr-fontweight;
+	}
+	.ver {
+		color: @dr-green;
+	}
+	.desc {
+		color: @dr-dark-dark;
+		font-weight: @dr-fontweight-light;
+		max-height: @dr-unit-triple;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	&:hover {
+		border-right: 0;
+		border-bottom: 0;
+		//transform: translate3d(0, 0, 0);
+		background: @dr-white;
+		//box-shadow: 0 0 10px 1px rgba(0,0,0,0.5);
+		overflow: hidden;
+		position: relative; // makes box slightly float over others to show box shadow, z-index does not work for this
+	}
+	&.press {
+		z-index: 2;
+		border-right: 0;
+		border-bottom: 0;
+		box-shadow: inset 0 0 5px 0px rgba(0,0,0,0.5);
+		transform: translate3d(0, 2px, 0);
+	}
+	.category {
+			margin-top: 0px;
+			padding-right: 54px;
+			padding-bottom: 4px;
+			span {
+					min-width: @dr-unit;
+					text-align: center;
+					margin-top: 5px;
+					margin-left: 5px;
+					display: inline-block;
+					color: #fff;
+					background: @dr-dark;
+					font-weight: bold;
+					padding: 0px 3px 0px 3px;
+					border-radius: 4px;
+					box-shadow: 3px 3px 3px 0px #dadada;
+			}
+			.angular {
+				background: rgb(226, 50, 55);
+			}
+			.nodejs {
+				background: rgb(2, 108, 0);
+			}
+			.ui {
+				background: #ff6b40
+			}
+			.business {
+				background: #c038d3
+			}
+			.tool {
+				background: rgb(77, 57, 75);
+			}
+			.internal {
+				background: @dr-medium;
+			}
+			.react {
+				background: rgb(97, 218, 251);
+			}
+			.thirdparty {
+				background: rgb(204, 122, 111);
+			}
+	}
+}
+
+.size-desktop, .size-tablet {
+	comp-card {
+		.animate-card();
+	}
+}
+
+.animate-card() {
+	&.ng-enter {
+		opacity: 0;
+		transform: scale3d(0.3); //translate3d(0, -50%, 0);
+		animation: 1s bounceIn;
+		//transition: all 0.2s cubic-bezier(0.215, 0.610, 0.355, 1.000); //cubic-bezier(0.1, -0.6, 0.2, 0);
+		&.ng-enter-active {
+			opacity: 1;
+			transform: scale3d(1); //translate3d(0, 0, 0);
+		}
+	}
+	// &.ng-enter-stagger {
+	// 	/* this will have a 100ms delay between each successive leave animation */
+	// 	transition-delay: 0.1s;
+	// 	transition-duration: 0s;
+	// }
+	&.ng-enter-prepare {
+		transform: scale3d(.3); //translate3d(0, -50%, 0);
+		opacity: 0;
+	}
+}
+
+@keyframes bounceIn {
+	from, 20%, 40%, 60%, 80%, to {
+		animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+	}
+
+	0% {
+		opacity: 0;
+		transform: scale3d(.3, .3, .3);
+	}
+
+	20% {
+		transform: scale3d(1.1, 1.1, 1.1);
+	}
+
+	40% {   
+		transform: scale3d(.9, .9, .9);
+	}
+
+	60% {
+		opacity: 1;    
+		transform: scale3d(1.03, 1.03, 1.03);
+	}
+
+	80% {    
+		transform: scale3d(.97, .97, .97);
+	}
+
+	to {
+		opacity: 1;  
+		transform: scale3d(1, 1, 1);
+	}
+}

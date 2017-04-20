@@ -1,11 +1,12 @@
 {
   "name": "@dr/logger",
-  "version": "0.0.21",
-  "description": "A log4js logger wrapper for both node and browser side ",
+  "version": "0.0.28",
+  "description": "A log4js logger wrapper for both node and browser side",
   "main": "logger.server.js",
   "browser": "logger.browser.js",
   "dr": {
-    "bundle": "core"
+    "bundle": "labjs",
+    "category": ["internal"]
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

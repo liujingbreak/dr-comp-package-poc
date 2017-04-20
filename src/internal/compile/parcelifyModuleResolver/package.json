@@ -1,16 +1,17 @@
 {
   "name": "@dr/parcelify-module-resolver",
-  "version": "0.0.18",
+  "version": "0.0.35",
   "description": "parcelify import transformer",
   "main": "index.js",
   "dr": {
-    "type": "transformer"
+    "type": "transformer",
+    "category": ["internal", "nodejs", "tool"]
   },
   "dependencies": {
     "less": "2.x",
     "browser-resolve": "^1.11.0",
-    "lodash": "^4.0.0",
-    "through": "^2.3.8",
+    "lodash": "^4.13.1",
+    "through2": "^2.0.1",
     "less-plugin-npm-import": "^2.1.0",
     "less-plugin-autoprefix": "^1.5.1"
   },

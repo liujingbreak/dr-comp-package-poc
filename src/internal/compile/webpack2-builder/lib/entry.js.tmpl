@@ -1,0 +1,17 @@
+//require("babel-polyfill");
+window.__req = __webpack_require__;
+var _lego_entryFuncs = {
+<%
+var last = packages.length - 1;
+[].concat(packages).forEach((pk, idx) =>  {%>
+	'<%=pk.longName%>': function() {return require('<%=pk.longName%>');} <% if (idx !== last) {%>,<%}%>
+<% }); %>};
+window._reqLego = function(name) {
+  return _lego_entryFuncs[name]();
+};
+<% for (var requireHtmlName of requireHtmlNames) { %>
+require('!@dr-core/webpack2-builder/lib/entry-html-loader!@dr-core/webpack2-builder/lib/html-loader!@dr/translate-generator!@dr/template-builder!<%=requireHtmlName%>');
+<% } %>
+<% for (var requireViewName of requireViewNames) { %>
+require("!@dr-core/webpack2-builder/lib/entry-html-loader!@dr-core/webpack2-builder/lib/html-loader!<%=requireViewName%>");
+<% } %>

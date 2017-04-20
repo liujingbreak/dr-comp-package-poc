@@ -22,6 +22,26 @@ _2016-3-28 更新_
 	```
 
 ### Gulp 常用
+- #### gulp ls
+	列出当前组件列表和运行优先级
+	```
+	[17:09:34] -- Server Package list  --
+	[17:09:34] 1. @dr/environment                    activate priority: 0
+	[17:09:34] 2. @dr/http-server                    activate priority: 0
+	[17:09:34] 3. @dr-core/browserify-builder-api    activate priority: 5000
+	[17:09:34] 4. @dr-core/express-app               activate priority: 5000
+	[17:09:34] 6. @dr/example-entry                  activate priority: 5000
+	[17:09:34] 7. @dr/example-node                   activate priority: 5000
+	[17:09:34] 8. @dr-core/assets-processer          activate priority: 99999
+	[17:09:34]
+	[17:09:34] -- Builder Package list  --
+	[17:09:34] 1. @dr-core/browserify-builder-api    compile priority: 0
+	[17:09:34] 2. @dr-core/assets-processer          compile priority: 2000
+	[17:09:34] 3. @dr/light-lodash                   compile priority: before @dr-core/browserify-builder
+	[17:09:34] 4. @dr/template-builder               compile priority: before @dr-core/browserify-builder
+	[17:09:34] 6. @dr-core/browserify-builder        compile priority: 3000
+	[17:09:34] 7. @dr/translate-generator            compile priority: 5000
+	```
 
 - #### gulp build
 
@@ -80,12 +100,21 @@ _2016-3-28 更新_
 	比`gulp compile`快速, 只负责编译bundle
 
 - ### gulp watch
-	修改js, less, html, json等文件后，自动编译browser package,浏览器需要手工刷新，对修改node js代码无效
+	修改js, less, html, json等文件后，自动编译browser package，对修改node js代码无效
 
 	`-p`可以指定只编译某些package, 可能节省些资源
 	```
 	gulp watch  -p <package-short-name>  -p <package-short-name>
 	```
+	配合livereload, 在`devMode` true的时候，任何改动都可以会触发自动编译和自动页面刷新，大大方便Web app开发。
+	注意livereload配置端口如果被占用需要修改config.local.yaml
+	```
+	livereload:
+	   port: 135729
+	   delay: 800
+	```
+- ### gulp check-deps
+	列出所有组件package的dependencies, 方便查看组件的第三方依赖有没有版本不一致
 
 - ### gulp build-prod
 	gulp build，但是忽略config.local.yaml配置，用于production环境的build: uglify, revisioning bundles等

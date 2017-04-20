@@ -1,0 +1,12 @@
+language: node_js
+node_js:
+    - "4.4.4"
+install:
+    - npm install
+before_script:
+    - npm install -g gulp
+script:
+    - gulp lint
+    - gulp build-prod
+    - gulp test
+    # - "gulp e2e --server lib/main.js"

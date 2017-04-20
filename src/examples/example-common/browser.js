@@ -1,4 +1,4 @@
-var log = require('@dr/logger').getLogger('exmaple-common');
 
-log.info(__filename + ' is running');
+console.log('example-common ' + __filename + ' is running');
 module.exports = 'greeting from example-common/browser.js';
+require('./commonView.html');

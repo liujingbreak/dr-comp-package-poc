@@ -1,15 +1,14 @@
-Daily Work: 安装平台 & 开发组建
+开发组件
 ============
-_2016-3-29 更新_
-
-让工具变的更简单，如果可以用一天手工完成的工作，请一定花两天的时间用脚本来完成 :)
-
 > 建议安装全局的Gulp 命令行工具:
 > ```
 >	sudo npm install -g gulp-cli
 > ```
 > 如果你没有安装全局的Gulp 命令行工具也没有关系，以下文档所有提到 `gulp`命令的地方请替换使用`node_modules/.bin/gulp`
-
+### 0. 安装全局命令行工具
+```
+npm install -g web-fun-house-cli
+```
 ### 1. 安装平台
 
 创建一个空目录，一定要`npm init`一个package.json文件
@@ -20,8 +19,8 @@ _2016-3-29 更新_
 执行
 ```shell
 
-npm set registry http://10.9.14.9:4873
-
+npm set registry http://npm.dianrong.com
+# For user from Shanghai Office, you may also use http://npm501.dc.dianrong.com:4873
 npm install --save web-fun-house
 ```
 你的目录会是
@@ -29,9 +28,9 @@ npm install --save web-fun-house
 ```
 project-dir/
 	├─ node_modules
-	|		├─ web-fun-house
-	|		└─ .bin
-	|		
+	│		├─ web-fun-house
+	│		└─ .bin
+	│		
 	└─ package.json
 
 ```
@@ -39,7 +38,7 @@ project-dir/
 
 执行命令
 ```
-node_modules/.bin/web-fun-house init
+web-fun-house init
 ```
 _**这命令2016-3-26 做了简化**，自动生成样板源码和安装平台默认组件_:
 - 自动安装gulp
@@ -48,11 +47,32 @@ _**这命令2016-3-26 做了简化**，自动生成样板源码和安装平台�
 
 你还需要手工添加适合你项目的 `.gitignore`, `.npmignore` 文件。
 
-### ~~3. 安装平台默认组件~~
-
-这个步骤已不再需要，已经在`node_modules/.bin/web-fun-house init`中完成了。
-
-### 4. 编译运行！
+##### 查看当前有多少组件package
+```shell
+gulp ls
+```
+例如会显示
+```
+[16:59:52] -- Server Package list  --
+[16:59:52] 1. @dr/environment                    activate priority: 0
+[16:59:52] 2. @dr/http-server                    activate priority: 0
+[16:59:52] 3. @dr-core/browserify-builder-api    activate priority: 5000
+[16:59:52] 4. @dr-core/express-app               activate priority: 5000
+[16:59:52] 5. @dr/doc-home                       activate priority: 5000
+[16:59:52] 6. @dr/example-entry                  activate priority: 5000
+[16:59:52] 7. @dr/example-node                   activate priority: 5000
+[16:59:52] 8. @dr-core/assets-processer          activate priority: 99999
+[16:59:52]
+[16:59:52] -- Builder Package list  --
+[16:59:52] 1. @dr-core/browserify-builder-api    compile priority: 0
+[16:59:52] 2. @dr-core/assets-processer          compile priority: 2000
+[16:59:52] 3. @dr/light-lodash                   compile priority: before @dr-core/browserify-builder
+[16:59:52] 4. @dr/template-builder               compile priority: before @dr-core/browserify-builder
+[16:59:52] 5. @dr/readme-docs                    compile priority: before @dr-core/browserify-builder
+[16:59:52] 6. @dr-core/browserify-builder        compile priority: 3000
+[16:59:52] 7. @dr/translate-generator            compile priority: 5000
+```
+### 3. 编译运行！
 ```shell
 gulp compile
 
@@ -62,20 +82,12 @@ node app.js
 
 http://localhost:14334/example-entry
 
-#### 5. 尝试安装更多的可用组件，比如文档主页
+#### 4. 尝试安装更多的可用组件，比如文档主页
 
 ```
 npm install @dr/garage-recipe
 # no need to run 'gulp install-recipe' anymore
 ```
-~~编辑 `config.yaml` or `config.local.yaml`, 修改`installedRecipes`属性~~
-
-> 确保安装的recipe命名匹配config.yaml的配置
-> ```yaml
-> installedRecipes:
->    - node_modules/@dr/*-recipe
->    - node_modules/@dr/recipe-*
-> ```
 
 再次执行以下命令
 ```
@@ -83,16 +95,29 @@ gulp compile
 
 node app.js
 ```
+
 访问 [http://localhost:14334/example-entry](http://localhost:14334/example-entry)
 
-#### 6. 安装他人贡献的组件
+正式开发时可以用`gulp watch`代替 `gulp compile`， 内置的livereload, 在`devMode`下，任何改动都可以会触发自动编译和自动页面刷新，大大方便浏览器端的开发。
+注意livereload配置端口如果被占用冲突，需要修改config.local.yaml
+```
+livereload:
+	port: 135729
+	delay: 800
+```
+> **livereload** 目前对改动Node端JS没有自动重启Server效果。
+
+#### 5. 安装他人贡献的组件
 可以安装recipe的方式一次安装多个package: `npm install <recipe-name>`
 
-也可以单独安装某个package: `npm install xxx`， ~~然后手工添加到某个recipe `pakcage.json`的属性 `dependencies`中, 再`gulp install-recipe` 确保第三方的依赖也安装正确~~
+也可以单独安装某个package: `npm install xxx`，再执行一次`gulp install-recipe` 确保第三方的依赖也安装正确~~
 
 再次执行`gulp compile` 后就可以了。
 
-#### 7. 修改代码
+> 也可以执行`gulp build`,
+`gulp build` = `gulp install-recipe` + `gulp compile`
+
+#### 6. 修改代码
 
 修改example-entry or example-node目录下的源码后
 ```
@@ -117,23 +142,23 @@ gulp clean
 gulp install-recipe
 ```
 会删除所有dist和node_modules下的私有package，包括核心组建,
-恢复开发环境需要重新执行 `gulp install-recipe` 或者 `node_modules/.bin/web-fun-house update` 来安装核心package, 其他package都需要手动npm install
+恢复开发环境需要重新执行 `gulp install-recipe` 或者 `web-fun-house update` 来安装核心package, 其他package都需要手动npm install
 
-#### 8. 从git repo clone全新的项目
+#### 7. 从git repo clone全新的项目
 由于新下载的项目通常会ignore node_modules目录，所以需要重新install web-fun-house和依赖
 ```
 npm install web-fun-house
-./node_modules/.bin/web-fun-house update
+web-fun-house update
 ```
 > `web-fun-house update`和`web-fun-house init`区别是后者会copy example目录, 所以已有的项目不需要再init，
-> 执行`./node_modules/.bin/web-fun-house`查看帮助
+> 执行`web-fun-house`查看帮助
 
-#### 9. 升级
+#### 8. 升级
 _平台本身和其他组建一定会一直有更新，当别的同学维护的package publish了新版本时，需要更新本地的package_
 - 当有新版本web-fun-house发布后, 在项目根目录下再一次执行
 	```
 	npm install web-fun-house
-	./node_modules/.bin/web-fun-house update
+	web-fun-house update
 	```
 - 更新某个recipe 或者单独更新某个package
 	```
@@ -141,7 +166,7 @@ _平台本身和其他组建一定会一直有更新，当别的同学维护的p
 	```
 好了，再次`gulp compile`吧！
 
-#### 10. build Production版本
+#### 9. build Production版本
 build一个uglified, revisioned, compressed，大块bundle的生产环境版本
 
 ```
@@ -158,10 +183,11 @@ cacheControlMaxAge: 0
 ```
 当然你也可以直接删除config.local.yaml :)
 
-#### 11. 发布
-这将是载入史册的伟大的一步，在此之前请不要忘记`gulp lint`和测试。
+#### 10. 手动发布package
+通常这个可以由持续集成的server来自动完成，当然也可以在本地手工发布，
+在此之前请不要忘记`gulp lint`和测试。
 
-首次发布, 为了简单，通常可以所有的package一起发布
+发布, 为了简单，通常可以所有的package一起发布
 ```
 gulp publish
 ```

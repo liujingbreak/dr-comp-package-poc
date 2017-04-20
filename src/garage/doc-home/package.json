@@ -1,18 +1,26 @@
 {
   "name": "@dr/doc-home",
-  "version": "0.0.20",
-  "description": "Home page",
-  "browser": "browser/loader.js",
+  "version": "0.2.0",
+  "description": "dr-comp-package - document site module",
+  "browser": "browser/switchLocale.js",
   "main": "server/server.js",
   "style": "browser/style/main.less",
   "transforms": [
     "@dr/parcelify-module-resolver"
   ],
   "dr": {
+    "type": "server",
     "bundle": "home",
-    "entryPage": "index.html"
+    "entryPage": "*.html",
+    "compiler": "webpack",
+    "outputPath": "/",
+    "category": ["angular", "doc-site"]
   },
-  "dependencies": {},
+  "dependencies": {
+    "angular-ui-router": "^0.3.2",
+    "fastclick": "^1.0.6",
+    "angular-nicescroll": "^0.0.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

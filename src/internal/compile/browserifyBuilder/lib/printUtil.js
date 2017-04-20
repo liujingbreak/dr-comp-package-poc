@@ -17,6 +17,15 @@ function PrintNode(obj) {
 		this.childIndex = this.parent.children.length;
 	}
 }
+
+PrintNode.prototype.print = function(log) {
+	var node = this;
+	log.info(node.prefix() + node.content);
+	_.each(node.children, child => {
+		child.print(log);
+	});
+};
+
 PrintNode.prototype.hasChild = function() {
 	return this.children && this.children.length > 0;
 };
@@ -41,7 +50,7 @@ function printNodePrefix() {
 	s.push(node.hasChild() ? '┬ ' : '─ ');
 	for (var i = 1; i < level; i++) {
 		node = node.parent;
-		s.unshift(node.isLast() ? '  ' : '| ' );
+		s.unshift(node.isLast() ? '  ' : '│ ' );
 	}
 	return s.join('');
 };

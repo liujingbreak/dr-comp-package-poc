@@ -1,13 +1,25 @@
 
-module.exports = function($routeProvider) {
-	$routeProvider.when('/', {
-		template: require('../views/screens.html'),
-		controller: 'IntroController',
-		controllerAs: 'introVm'
+module.exports = function($stateProvider, $urlRouterProvider) {
+	$urlRouterProvider.when('', '/');
+	$stateProvider.state('home', {
+		url: '/',
+		views: {
+			main: {
+				template: require('../views/screens.html'),
+				controller: 'IntroController',
+				controllerAs: 'introVm'
+			}
+		}
 	});
-	$routeProvider.when('/doc/:name', {
-		template: require('../views/doc.html'),
-		controller: 'DocController',
-		controllerAs: 'docVm'
+	$stateProvider.state('doc', {
+		url: '/doc/:docPath',
+		views: {
+			main: {
+				template: require('../views/doc.html'),
+				controller: 'DocController',
+				controllerAs: 'docVm'
+			}
+		}
 	});
+	require('./comp-store-routes')($stateProvider);
 };

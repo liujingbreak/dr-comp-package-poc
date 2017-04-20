@@ -1,0 +1,37 @@
+{
+	"appenders": [
+		{
+			"type": "console",
+			"layout": {
+				"type": "pattern",
+				"pattern": "%[%r %c -%] %m"
+			}
+		}, {
+			"type": "dateFile",
+		    "filename": "logs/server.log",
+		    "pattern": "-dd",
+		    "alwaysIncludePattern": false,
+			"category": "[all]"
+		}, {
+			"type": "file",
+			"filename": "logs/dependencyControl.log",
+			"category": "@dr-core/browserify-builder",
+			"maxLogSize": 512000,
+			"numBackups": 1
+		}
+	],
+	"levels": {
+		"[all]": "info",
+		"test": "DEBUG",
+		"@dr-core/browserify-builder": "info",
+		"wfh": "INFO",
+		"wfh.ManualChunkPlugin": "debug",
+		"wfh.ManualChunkPlugin.divideModule": "info",
+		"require-injector": "info",
+		"require-injector.node-inject": "info",
+		"@dr/translate-generator": "info",
+		"@dr-core/webpack2-builder": "info",
+		"wfh.api-loader": "debug",
+		"@dr/template-builder": "debug"
+	}
+}

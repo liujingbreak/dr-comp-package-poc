@@ -2,22 +2,22 @@ Quick Start
 ---------
 ### 如果你是平台开发者
 
-1.	你可以使用办公室内的Sinopia server, [http://10.9.14.9:4873](http://10.9.14.9:4873)
+1.	你可以使用办公室内的Verdaccio server, [http://npm.dianrong.com](http://npm.dianrong.com)
 	```shell
-	npm set registry http://10.9.14.9:4873
+	npm set registry http://npm.dianrong.com
 	```
 	跳过一下第1步。
 
-	但是如果你非要安装一个本地Sinopia (private NPM registry):
+	但是如果你非要安装一个本地Verdaccio (private NPM registry):
 
 	```shell
-	npm install -g sinopia
+	npm install -g verdaccio
 	```
 
-	启动本地Sinopia
+	启动本地Verdaccio
 
 	```shell
-	sinopia
+	verdaccio
 	```
 
 	现在尝试访问本地NPM registry [http://localhost:4873/](http://localhost:4873/)
@@ -27,9 +27,9 @@ Quick Start
 	git clone https://github.com/liujingbreak/fe-house-poc.git
 	```
 	~~编辑根目录下`.npmrc`文件,
-	将NPM registry指向你所使用的server地址, 比如`http://10.9.14.9:4873`~~
+	将NPM registry指向你所使用的server地址, 比如`http://npm.dianrong.com`~~
 	```shell
-	npm set registry http://10.9.14.9:4873/
+	npm set registry http://npm.dianrong.com/
 	```
 
 	你需要安装Gulp 命令行工具:
@@ -53,7 +53,7 @@ Quick Start
 
 	> 当你有多个NPM registry endpoint 需要切换时，除了手工配置.npmrc文件外，也可以使用[nrm](https://www.npmjs.com/package/nrm)来管理
 
-3.	如果要尝试在本地Sinopia发布packages
+3.	如果要尝试在本地Verdaccio发布packages
 
 	```shell
 	npm set registry http://localhost:4873/

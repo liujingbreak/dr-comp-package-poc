@@ -1,5 +1,6 @@
 var Path = require('path');
-var log = require('log4js').getLogger('translate-generator');
+var api = require('__api');
+var log = require('log4js').getLogger(api.packageName);
 var glob = require('glob');
 var cheerio = require('cheerio');
 var fs = require('fs');
@@ -10,34 +11,42 @@ var _ = require('lodash');
 var jsParser = require('./jsParser');
 
 var config;
+var transformAdded = false;
 
-module.exports = {
-	compile: function(api) {
-		config = api.config;
-		if (!api.argv.translate) {
-			log.debug('skip');
-			return null;
+exports.compile = function() {
+	config = api.config;
+	if (!api.argv.translate) {
+		log.debug('Replacing translatable text');
+
+		if (!transformAdded) {
+			// Gulp watch will run this function multiple times, needs to avoid do this repeatedly
+			transformAdded = true;
+			require('@dr-core/browserify-builder').addTransform(
+				require('./translate-replacer').getBrowserifyReplacerTransform(api.getBuildLocale()));
 		}
-		var proms = [];
-		if (api.argv.p) {
-			api.packageUtils.findAllPackages(api.argv.p, (name, entryPath, parsedName, json, packagePath) => {
-				proms.push(scanPackage(packagePath, json));
-			}, 'src');
-		} else {
-			api.packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
-				proms.push(scanPackage(packagePath, json));
-			}, 'src');
-		}
-		return Promise.all(proms);
-	},
-	scanPackage: scanPackage
+		return null;
+	}
+	var proms = [];
+	if (api.argv.p) {
+		api.packageUtils.findAllPackages(api.argv.p, (name, entryPath, parsedName, json, packagePath) => {
+			proms.push(scanPackage(packagePath, json));
+		}, 'src');
+	} else {
+		api.packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
+			proms.push(scanPackage(packagePath, json));
+		}, 'src');
+	}
+	return Promise.all(proms);
 };
+exports.scanPackage = scanPackage;
+exports.htmlReplacer = require('./translate-replacer').htmlReplacer;
 
+exports.activate = function() {};
 var readFileAsync = Promise.promisify(fs.readFile);
 var writeFileAsync = Promise.promisify(fs.writeFile);
 
 function scanPackage(packagePath) {
-	log.debug(packagePath);
+	log.info(packagePath);
 	var yamls = {};
 	var i18nDir = Path.join(packagePath, 'i18n');
 	var existings = {};
@@ -46,7 +55,7 @@ function scanPackage(packagePath) {
 	config().locales.forEach(locale => {
 		var file = Path.join(i18nDir, 'message-' + locale + '.yaml');
 		if (fileExists(file)) {
-			log.debug('found existing i18n message file: ' + file);
+			log.info('found existing i18n message file: ' + file);
 			var contents = fs.readFileSync(file, 'utf8');
 			var obj = yaml.safeLoad(contents);
 			obj = obj ? obj : {};
@@ -61,41 +70,42 @@ function scanPackage(packagePath) {
 
 	var proms = glob.sync(Path.join(packagePath, '/**/*.html').replace(/\\/g, '/')).map(path => {
 		return readFileAsync(path, 'utf8').then(content => {
-			log.debug('scan: ' + path);
-			var $ = cheerio.load(content);
-			$('.t').each((i, dom) => {
-				dirty = doElement($(dom), yamls, existings, trackExess);
-			});
-			$('[translate]').each((i, dom) => {
-				dirty = doElement($(dom), yamls, existings, trackExess);
-			});
+			log.info('scan: ' + path);
+			var $ = cheerio.load(content, {decodeEntities: false});
+			$('.t').each(onElement);
+			$('.dr-translate').each(onElement);
+			$('[t]').each(onElement);
+			$('[dr-translate]').each(onElement);
+			function onElement(i, dom) {
+				dirty = doElement($(dom), yamls, existings, trackExess) || dirty;
+				return true;
+			}
 		});
 	});
 
 	var promJS = glob.sync(Path.join(packagePath, '/**/*.js').replace(/\\/g, '/')).map(path => {
 		return readFileAsync(path, 'utf8').then(content => {
-			log.debug('scan: ' + path);
-			jsParser(config, content, (key) => {
-				dirty = onKeyFound(key, yamls, existings, trackExess);
-			});
+			log.info('scan: ' + path);
+			jsParser(content, (key) => {
+				dirty = onKeyFound(key, yamls, existings, trackExess) || dirty;
+			}, path);
 		});
 	});
 
 	return Promise.all(proms.concat(promJS)).then(() => {
+		log.debug('dirty=' + dirty);
 		if (!dirty) {
 			return printRedundant(trackExess);
 		}
-
 		return new Promise((resolve, reject) => {
 			mkdirp(i18nDir, (err) => {
 				var indexFile = Path.join(i18nDir, 'index.js');
 				if (!fileExists(indexFile)) {
 					fs.writeFileSync(indexFile, 'module.exports = require(\'./message-{locale}.yaml\');\n', 'utf8');
 				}
-
 				var writeProms = config().locales.map(locale => {
 					var fileToWrite = Path.join(i18nDir, 'message-' + locale + '.yaml');
-					log.debug('write to file ' + fileToWrite);
+					log.info('write to file ' + fileToWrite);
 					return writeFileAsync(fileToWrite, yamls[locale]);
 				});
 				Promise.all(writeProms).then(resolve);
@@ -108,24 +118,30 @@ function scanPackage(packagePath) {
 
 function doElement(el, yamls, existing, trackExess) {
 	var key;
-	var translateAttr = el.attr('translate');
+	var translateAttr = el.attr('dr-translate');
 	if (translateAttr && translateAttr !== '') {
 		key = translateAttr;
 	} else {
-		key = el.text();
+		key = el.html();
 	}
 	log.debug('found key in HTML: ' + key);
 	return onKeyFound(key, yamls, existing, trackExess);
 }
 
 function onKeyFound(key, yamls, existing, trackExess) {
+	log.debug('found key: ' + key);
 	var quote = JSON.stringify(key);
 	var newLine = quote + ': ' + quote + '\n';
 	var dirty = false;
 	_.forOwn(yamls, (content, locale) => {
-		delete trackExess[locale][key];
-		if (!existing[locale] || !{}.hasOwnProperty.call(existing[locale], key)) {
+		if (yamls[locale].length > 0 && !(_.endsWith(yamls[locale], '\n') || _.endsWith(yamls[locale], '\r')))
+			yamls[locale] += '\n';
+		if (_.has(trackExess, locale))
+			delete trackExess[locale][key];
+		if (!existing[locale] || !_.has(existing[locale], key)) {
 			yamls[locale] += newLine;
+			_.set(existing, [locale, key], key);
+			log.info('+ ' + newLine);
 			dirty = true;
 		}
 	});

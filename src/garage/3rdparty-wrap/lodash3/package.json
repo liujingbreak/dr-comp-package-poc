@@ -1,0 +1,15 @@
+{
+  "name": "@dr/lodash3",
+  "version": "1.0.2",
+  "description": "Browser side lodash 3.10.1 for IE8 (unlike default lodash which is 4.xx)",
+  "browser": "index.js",
+  "dr": {
+    "noLint": true,
+    "category": ["thirdparty"]
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "LJ",
+  "license": "ISC"
+}

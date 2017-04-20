@@ -1,0 +1,4 @@
+<% if (packageNameAvailable) {
+	%>var __api = drApi.getCachedApi('<%=packageName%>') || drApi('<%=packageName%>', '<%=bundle%>');<%
+}%>
+<%= source %>

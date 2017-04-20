@@ -1,0 +1,21 @@
+{
+  "name": "@dr/example-server-swig-entry",
+  "version": "1.0.2",
+  "description": "Demo how api.entryJsHtmlFile, api.entryStyleHtmlFile, api.entryJsHtmlAsync, api.entryStyleHtmlAsync, api.entryJsHtml ... works",
+  "main": "server.js",
+  "browser": "browser.js",
+  "style": "style.less",
+  "transforms": [
+    "@dr/parcelify-module-resolver"
+  ],
+  "dr": {
+    "bundle": "example",
+    "type": "server",
+    "entryView": "views/body.html"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "LJ",
+  "license": "MIT"
+}

@@ -1,76 +1,87 @@
 var express = require('express');
 var path = require('path');
 //var favicon = require('serve-favicon');
-var logger = require('morgan');
+//var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var engines = require('consolidate');
-var swig = require('swig');
+var swig = require('swig-templates');
 var setupApi = require('./setupApi');
-var log = require('log4js').getLogger('server.app');
-var _ = require('lodash');
-var fs = require('fs');
-var Path = require('path');
+var log4js = require('log4js');
+var api = require('__api');
+var log = log4js.getLogger(api.packageName);
 var compression = require('compression');
+var swigInjectLoader = require('swig-package-tmpl-loader');
 
+var app;
 module.exports = {
-	activate: function(api, apiPrototype) {
-		var app = express();
-		setupApi(api, apiPrototype);
+	activate: function() {
+		app = express();
+		setupApi(api, app);
 		api.eventBus.on('packagesActivated', function(packageCache) {
-			process.nextTick(()=> {
+			process.nextTick(() => {
 				create(app, api.config(), packageCache);
-				api.eventBus.emit('expressAppCreated', app);
+				api.eventBus.emit('appCreated', app);
 			});
 		});
 	}
 };
 
+Object.defineProperties(module.exports, {
+	/**
+	 * Express app instance.
+	 * Assign another express app instance instead of a default one,
+	 * otherwise a default express app instance will be created.
+	 * @type {Object}
+	 */
+	app: {
+		enumerable: true,
+		set: expressApp => app = expressApp,
+		get: () => app
+	}
+});
+
 function create(app, setting, packageCache) {
 	// view engine setup
 	swig.setDefaults({
-		varControls: ['{=', '=}']
+		varControls: ['{=', '=}'],
+		cache: setting.devMode ? false : 'memory'
 	});
-	app.engine('html', engines.swig);
-	app.engine('jade', engines.jade);
+	var injector = require('__injector');
+	//var translateHtml = require('@dr/translate-generator').htmlReplacer();
+	swigInjectLoader.swigSetup(swig, {
+		injector: injector
+		// fileContentHandler: function(file, source) {
+		// 	return translateHtml(source, file, api.config.get('locales[0]'));
+		// }
+	});
 
+	engines.requires.swig = swig;
+	app.engine('html', engines.swig);
+	app.set('view cache', false);
+	//app.engine('jade', engines.jade);
+	app.set('trust proxy', true);
 	app.set('views', [path.join(__dirname, 'views'), setting.rootPath]);
 	app.set('view engine', 'html');
-
+	app.set('x-powered-by', false);
+	app.set('env', api.config().devMode ? 'development' : 'production');
+	setupApi.applyPackageDefinedAppSetting(app);
 	// uncomment after placing your favicon in /public
 	//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-	app.use(logger('dev'));
-	app.use(bodyParser.json());
+	//app.use(logger('dev'));
+	app.use(log4js.connectLogger(log, {
+		level: log4js.levels.INFO
+	}));
+	app.use(bodyParser.json({
+		limit: '50mb'
+	}));
 	app.use(bodyParser.urlencoded({
 		extended: false
 	}));
 	app.use(cookieParser());
 	app.use(compression());
-	setupApi.createPackageDefinedMiddleware(app);
+	//setupApi.createPackageDefinedMiddleware(app);
 	setupApi.createPackageDefinedRouters(app);
-
-	var staticFolder = path.resolve(setting.rootPath, setting.staticDir);
-	log.debug('express static path: ' + staticFolder);
-	app.use('/', express.static(staticFolder, {
-		maxAge: setting.cacheControlMaxAge,
-		setHeaders: setCORSHeader
-	}));
-	app.get('/', function(req, res) {
-		res.render('index.html', {});
-	});
-
-	// package level assets folder router
-
-	_.forOwn(packageCache, function(packageInstance, name) {
-		var assetsDir = Path.resolve(setting.rootPath, packageInstance.path, 'assets');
-		if (fs.existsSync(assetsDir)) {
-			log.debug(name + ' -> ' + assetsDir);
-			app.use('/' + name, express.static(assetsDir, {
-				//maxAge: setting.cacheControlMaxAge,
-				setHeaders: setCORSHeader
-			}));
-		}
-	});
 
 	// error handlers
 	// catch 404 and forward to error handler
@@ -82,10 +93,10 @@ function create(app, setting, packageCache) {
 	});
 	// development error handler
 	// will print stacktrace
-	if (app.get('env') === 'development') {
+	if (setting.devMode || app.get('env') === 'development') {
 		app.use(function(err, req, res, next) {
 			res.status(err.status || 500);
-			log.error(err);
+			log.error(req.originalUrl, err);
 			res.render('error.html', {
 				message: err.message,
 				error: err
@@ -97,14 +108,11 @@ function create(app, setting, packageCache) {
 	// no stacktraces leaked to user
 	app.use(function(err, req, res, next) {
 		res.status(err.status || 500);
-		res.render('error.jade', {
+		log.error(req.originalUrl, err);
+		res.render('error.html', {
 			message: err.message,
 			error: {}
 		});
 	});
 	return app;
-}
-
-function setCORSHeader(res) {
-	res.setHeader('Access-Control-Allow-Origin', '*');
 }

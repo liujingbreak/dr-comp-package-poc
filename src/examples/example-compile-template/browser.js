@@ -1,4 +1,4 @@
-require('@dr/angularjs');
+//require('@dr/angularjs');
 
 var view = require('./browser-render.html');
 

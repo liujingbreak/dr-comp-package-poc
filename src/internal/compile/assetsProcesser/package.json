@@ -1,18 +1,26 @@
 {
   "name": "@dr-core/assets-processer",
-  "version": "0.0.18",
+  "version": "0.5.1",
   "description": "Copy assets to destDir folder only when devMode is false",
   "main": "assetsProcesser.js",
   "dr": {
-    "type": "builder",
-    "builderPriority": 2000
+    "type": [
+      "builder",
+      "server"
+    ],
+    "builderPriority": 8000,
+    "serverPriority": 1000,
+    "category": ["internal", "nodejs", "tool"]
   },
   "dependencies": {
-    "through2": "^2.0.1"
+    "through2": "^2.0.1",
+    "shelljs": "^0.7.0",
+    "mkdirp": "^0.5.1",
+    "serve-favicon": "^2.3.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "LJ",
-  "license": "ISC"
+  "license": "MIT"
 }

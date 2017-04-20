@@ -1,0 +1,103 @@
+@import "npm://@dr/doc-ui/browser/less/dr-variables.less";
+@import "npm://@dr/doc-ui/browser/less/dr-mixins.less";
+.comp-navi {
+	z-index: 2;
+	position: relative;
+	width: 100%;
+	padding: 6px @dr-unit-half;
+	white-space: nowrap;
+	overflow: hidden;
+	text-align: center;
+	//.dr-blue-green-bg();
+	.dr-green-blue-hor-bg();
+	> * {
+		margin-top: 0;
+		line-height: @dr-unit-double;
+	}
+	.logo-bg {
+		margin: 0 @dr-unit 0 0;
+		vertical-align: middle;
+		float: left;
+		color: @dr-white;
+		> * {
+			vertical-align: middle;
+		}
+		&:before{
+			content: "";
+			display: inline-block;
+			background: url(assets://@dr/doc-home/dr-logo.png) no-repeat center left/auto 100%;
+			vertical-align: middle;
+			height: 24px;
+			width: 27px;
+		}
+		h4 {
+			display: inline-block;
+			margin: 0 0 0 @dr-unit-half;
+		}
+	}
+	
+	.input-row {
+		display: block;
+		overflow: hidden;
+		color: @dr-white;
+		.categories {
+			font-size: @dr-fontsize-big;
+			padding: 0 @dr-unit-half;
+			min-width: @dr-unit-triple;
+			position: relative;
+			float: left;
+			border-radius: @dr-unit 0 0 @dr-unit;
+			background-color: @dr-green-dark;
+			transition: all 0.3s ease-out;
+		}
+		select.category{
+			color: #fff;
+			height: 100%;
+		}
+	}
+	.company-name {
+		color: @dr-green;
+	}
+	.quick-search{
+		overflow: hidden;
+		//width: calc(~"100% - 44px");
+		margin-right: 0;
+		display: block;
+		//float: left;
+		height: @dr-unit-double;
+		background: @dr-lite-liter;
+	}
+	input[type=text] {
+		height: @dr-unit-double;
+		font-size: @dr-fontsize-big;
+		line-height: @dr-unit-double;
+		padding: 0 @dr-unit-half;
+		width: 100%;
+		&:focus{
+			background-color: @dr-yellow;
+		}
+	}
+	i.fa-search {
+		text-align: center;
+		display: block;
+		float: right;
+		overflow: hidden;
+		// position: absolute;
+		// right: 0;
+		color: @dr-white;
+		height: 100%;
+		line-height: @dr-unit-double;
+		width: @dr-unit-double;
+		opacity: 1;
+		transition: opacity .3s ease-out;
+		border-radius: 0 @dr-unit @dr-unit 0;
+		background-color: @dr-green;
+	}
+}
+
+.size-mobile {
+		.comp-navi .logo-bg {
+			float: none;
+		}
+	}
+

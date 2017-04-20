@@ -1,5 +1,6 @@
 /* global TweenMax, Power2, TimelineLite */
-require('@dr/gsap');
+//require('@dr/gsap');
+
 var _ = require('lodash');
 var buildScenes = require('./buildScenes');
 
@@ -14,29 +15,31 @@ function drScrollableAnim(ScrollableAnim, $timeout, $window) {
 		scope: false,
 		link: function(scope, iElement, iAttrs, controller) {
 			iElement.addClass('dr-scrollable-anim');
-			var scrollControl = new ScrollableAnim(iElement, 16);
+			var scrollControl = new ScrollableAnim();
 			_.set(scope, iAttrs.drScrollableAnim, scrollControl);
-			var slogon = iElement.find('.screen-1').find('.center-box');
+			//var slogon = iElement.find('.screen-1').find('.center-box');
 
 			$timeout(function() {
 				buildScenes(scrollControl, iElement, scope);
 			}, 17, false);
 
+			var win = angular.element($window);
 			var windowResize = _.debounce(function() {
-				scrollControl.unpin(slogon);
+				// scrollControl.unpin(slogon);
 				scrollControl.seek(0);
 				scrollControl.destory();
-				iElement.scrollTop(0);
-				scrollControl = new ScrollableAnim(iElement, 18);
+				win.scrollTop(0);
+
+				scrollControl = new ScrollableAnim();
 				buildScenes(scrollControl, iElement, scope);
 				scope.$apply();
 			}, 500);
 
-			var win = angular.element($window).on('resize', windowResize);
+			var winResizer = win.on('resize', windowResize);
 
 			iElement.on('$destory', function() {
 				scrollControl.destory();
-				win.off('resize', windowResize);
+				winResizer.off('resize', windowResize);
 			});
 		}
 	};

@@ -1,0 +1,25 @@
+{
+  "name": "<%=project.name%>",
+  "version": "1.0.0",
+  "description": "<%=project.desc%>",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "lint": "gulp lint",
+    "e2e": "gulp e2e --browser chrome"
+  },
+  "author": "<%=project.author%>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=6.7.0"
+  },
+  "dependencies": {
+    "@dr/internal-recipe": "<%=internalRecipeVer%>"
+  },
+  "devDependencies": {
+    <% if(!noDrcp) {%>
+    "dr-comp-package": "^<%=version%>",
+    <%}%>
+    "jasmine": "^2.5.3"
+  }
+}

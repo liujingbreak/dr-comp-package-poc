@@ -1,0 +1,54 @@
+<main ui-view="compMain" class="comp-main">
+	<section class="banner swiper-container">
+		<!-- Additional required wrapper -->
+		<div class="banner-tips size-desktop-only">
+			<code>
+			npm set registry http://{= npmHost =}<br/>
+			npm adduser --registry http://{= npmHost =}
+			</code>
+		</div>
+		<div class="swiper-wrapper">
+			<!-- Slides -->
+			<div class="swiper-slide slide1">
+				<h1>Web组件库, 持续贡献, 持续复用</h1>
+			</div>
+			<div class="swiper-slide slide2">
+				<h1>It's time to publish your cool shit</h1>
+			</div>
+		</div>
+	</section>
+	<div class="banner-tips size-desktop-hide">
+		<code>
+		npm set registry http://{= npmHost =}<br/>
+		npm adduser --registry http://{= npmHost =}
+		</code>
+	</div>
+	<section ng-show="compStoreVm.showNavi" class="comp-navi">
+		<form name="naviForm" class="input-row">
+			<div class="logo-bg">
+				<h4 t>res:Component Store</h4>
+			</div>
+			<span class="categories" dr-doc-select options="compStoreVm.categories" model="compStoreVm.category">
+				<!--<i class="fa fa-bars" aria-hidden="true"></i>
+				<span class="category-name">{{compStoreVm.category}}</span>
+				<select id="category-sel" ng-model="compStoreVm.category" ng-options="item.value as item.name for item in compStoreVm.categories" class='category'>
+				</select>-->
+			</span>
+			<i class="fa fa-2x fa-search" aria-hidden="true"></i>
+			
+			<div class="quick-search">
+				<input autocomplete="false" placeholder="{{compStoreVm.quickSearch}}" type="text" ng-model="compStoreVm.nameSearch" />
+			</div>
+		</form>
+	</section>
+	<section class="error-msg" ng-if="compStoreVm.error">{{ compStoreVm.error }}</section>
+	<!--<div dr-loading-indicator="compStore"></div>-->
+
+	<comp-group card-min-width="250" on-change-card-width="compStoreVm.cardWidth = width">
+		<comp-card id="comp-{{pk.name}}" card-width="compStoreVm.cardWidth" on-select="compStoreVm.trackSelectedCard(name)" ng-repeat="pk in compStoreVm.packages" package="pk"></comp-card>
+		<div dr-scroll-loading="compStoreVm.packages" on-nextpage="compStoreVm.loadPage(pageIndex)" parent='window'>
+			<div class="loading-indicator dr-bg-dark"><img src="assets://@dr/doc-ui/loading.svg"/></div>
+		</div>
+	</comp-group>
+
+</main>

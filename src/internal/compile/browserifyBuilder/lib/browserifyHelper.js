@@ -1,17 +1,17 @@
 var through = require('through2');
 var Path = require('path');
+var api = require('__api');
 var stream = require('stream');
-var log = require('log4js').getLogger('browserifyBuilder.browserifyHelper');
-var swig = require('swig');
+var log = require('@dr/logger').getLogger(api.packageName + '.browserifyHelper');
 var fs = require('fs');
-var assetsProcesser = require('@dr-core/assets-processer');
+var esParser = require('./esParser');
 var _ = require('lodash');
-swig.setDefaults({autoescape: false});
-var config;
 
-module.exports = function(_config) {
+var config, injector;
+
+module.exports = function(_config, _injector) {
 	config = _config;
-
+	injector = _injector;
 	var buildins = ['assert', 'buffer', 'child_process', 'cluster', 'console', 'constants', 'crypto', 'dgram', 'dns',
 	'domain', 'events', 'fs', 'http', 'https', 'module', 'net', 'os', 'path', 'punycode', 'querystring',
 	'readline', 'repl', 'stream', '_stream_duplex', '_stream_passthrough', '_stream_readable',
@@ -24,7 +24,7 @@ module.exports = function(_config) {
 	});
 	return {
 		JsBundleEntryMaker: JsBundleEntryMaker,
-		JsBundleWithI18nMaker: JsBundleWithI18nMaker,
+		//JsBundleWithI18nMaker: JsBundleWithI18nMaker,
 		buildins: buildins,
 		buildinSet: buildinSet,
 		str2Stream: str2Stream
@@ -33,26 +33,33 @@ module.exports = function(_config) {
 //exports.dependencyTree = dependencyTree;
 
 var BOOT_FUNCTION_PREFIX = '_deps_';
-var apiVariableTpl = swig.compileFile(Path.join(__dirname, 'templates', 'apiVariable.js.swig'),
-	{autoescape: false});
+var apiVariableTpl = _.template(fs.readFileSync(
+	Path.join(__dirname, 'templates', 'apiVariable.js.tmpl'), 'utf8'));
 
-function JsBundleEntryMaker(api, bundleName, packageBrowserInstances, locale) {
+function JsBundleEntryMaker(api, bundleName, packageBrowserInstances,
+	fileSplitPointMap) {
 	if (!(this instanceof JsBundleEntryMaker)) {
-		return new JsBundleEntryMaker(api, bundleName, packageBrowserInstances, locale);
+		return new JsBundleEntryMaker(api, bundleName, packageBrowserInstances,
+			fileSplitPointMap);
 	}
-	this.api = api;
+	this.api = api; // same as require('__api');
 	this.packages = packageBrowserInstances;
 	this.bundleName = bundleName;
 	this.bundleFileName = bundleName + '_bundle_entry.js';
 	this.activeModules = {}; //key: bundle name, value: array of active module name
-	this.locale = locale;
+
+	this.fileSplitPointMap = fileSplitPointMap;
+	this.CDNDependUrlSet = {}; // external JS library URL
 }
 
-var apiVarablePat = /(?:^|[^\w$\.])__api(?:$|[^\w$])/mg;
-var requireI18nPat = /(^|[^\w$\.])require\s*\(([^)]*)\)/mg;
+//var apiVarablePat = /(?:^|[^\w$\.])__api(?:$|[^\w$])/mg;
 
 JsBundleEntryMaker.prototype = {
-	entryBundleFileTpl: swig.compileFile(Path.join(__dirname, 'templates', 'bundle.js.swig'), {autoescape: false}),
+	entryBundleFileTpl:
+	_.template(fs.readFileSync(Path.join(__dirname, 'templates', 'bundle.js.tmpl'), 'utf8'), {imports: {api: api, _: _}}),
+	setLocale: function(locale) {
+		this.locale = locale;
+	},
 
 	createPackageListFile: function() {
 		var bundleFileListFunction = this.entryBundleFileTpl({
@@ -63,34 +70,22 @@ JsBundleEntryMaker.prototype = {
 		return bundleFileListFunction;
 	},
 
-	jsTranformer: function() {
+	transform: function(locale) {
 		var self = this;
 		return function(file) {
 			var source = '';
 			var ext = Path.extname(file).toLowerCase();
 			var basename = Path.basename(file);
-			if (ext === '.js' && basename !== 'browserifyBuilderApi.browser.js' &&
-				basename !== self.bundleFileName) {
+			if (ext === '.js' && basename !== self.bundleFileName) {
 				return through(function(chunk, enc, next) {
 					source += chunk;
 					next();
 				}, function(cb) {
-					apiVarablePat.lastIndex = 0;
-					if (apiVarablePat.test(source)) {
-						log.debug('reference __api in ' + file);
-						var name = self.api.findBrowserPackageByPath(file);
-						source = apiVariableTpl({
-							bundle: self.bundleName,
-							packageName: name,
-							source: source,
-							packageNameAvailable: name !== null
-						});
+					try {
+						this.push(self.transformJS(source, file, locale));
+					} catch (e) {
+						this.emit('error', e);
 					}
-					source = source.replace(requireI18nPat, (match, leading, path) => {
-						path = path.replace(/\{locale\}/g, self.locale ? self.locale : 'en');
-						return leading + 'require(' + path + ')';
-					});
-					this.push(source);
 					cb();
 				});
 			} else if (ext === '.html'){
@@ -98,14 +93,12 @@ JsBundleEntryMaker.prototype = {
 					source += chunk;
 					next();
 				}, function(cb) {
-					var currPackage;
-					source = assetsProcesser.replaceAssetsUrl(source, ()=> {
-						if (!currPackage) {
-							currPackage = self.api.findBrowserPackageByPath(file);
-						}
-						return currPackage;
-					});
-					this.push(source);
+					try {
+						source = api.replaceAssetsUrl(source, file);
+						this.push(source);
+					} catch (e) {
+						this.emit('error', e);
+					}
 					cb();
 				});
 			} else {
@@ -114,96 +107,66 @@ JsBundleEntryMaker.prototype = {
 		};
 	},
 
+	transformJS: function(source, file, locale) {
+		var currPackageName;
+		var hasRequireEnsure = false;
+		var self = this;
+		var hasApi = false;
+
+		var relRealPath = Path.relative(api.config().rootPath, fs.realpathSync(file));
+		delete self.fileSplitPointMap[relRealPath]; // clean up cached data
+
+		var ast;
+		try {
+			ast = esParser.parse(source, {
+				splitLoad: splitPoint => {
+					hasRequireEnsure = true;
+					if (!_.has(self.fileSplitPointMap, relRealPath)) {
+						self.fileSplitPointMap[relRealPath] = {};
+					}
+					self.fileSplitPointMap[relRealPath][splitPoint] = 1;
+				},
+
+				apiIndentity: () => {hasApi = true;}
+			});
+		} catch (e) {
+			log.error('Failed to parse %s', file);
+			throw e;
+		}
+		function onReplaceApiCall(mName) {
+			if (mName === '__api') {
+				hasApi = true;
+				log.debug('require __api in ' + file);
+			}
+		}
+		injector.on('replace', onReplaceApiCall);
+		source = injector.injectToFile(file, source, ast);
+		injector.removeListener('replace', onReplaceApiCall);
+		if (hasRequireEnsure) {
+			source = 'require.ensure = function(){return drApi.ensureRequire.apply(drApi, arguments)};\n' +
+				source;
+		}
+
+		if (hasApi) {
+			log.debug('reference __api in ' + file);
+			currPackageName = this.api.findBrowserPackageByPath(file);
+			source = apiVariableTpl({
+				bundle: this.bundleName,
+				packageName: currPackageName,
+				source: source,
+				packageNameAvailable: currPackageName !== null
+			});
+		}
+		return source;
+	},
+
 	createPackageListFileStream: function(bundleName, packageInstances) {
 		return str2Stream(this.createPackageListFile.apply(this, arguments));
 	}
 };
 
-function JsBundleWithI18nMaker(api, bundleName, packageBrowserInstances, browserResolve) {
-	if (!(this instanceof JsBundleWithI18nMaker)) {
-		return new JsBundleWithI18nMaker(api, bundleName, packageBrowserInstances, browserResolve);
-	}
-	JsBundleEntryMaker.apply(this, arguments);
-	this.browserResolve = browserResolve;
-	this.pk2LocaleModule = {};
-}
-
-JsBundleWithI18nMaker.prototype = _.create(JsBundleEntryMaker.prototype, {
-	createI18nListFile: function(locale) {
-		var i18nModules = [];
-		this.i18nModuleForRequire = [];
-		this.packages.forEach(pkInstance => {
-			if (pkInstance.isVendor) {
-				return;
-			}
-			var i18nPath = this.i18nPath(pkInstance, locale);
-			var i18nModuleName = pkInstance.longName + '/i18n';
-			if (i18nPath) {
-				var shoftI18nPath = Path.relative(Path.resolve(), i18nPath);
-				i18nModules.push({
-					longName: i18nModuleName
-				});
-				this.i18nModuleForRequire.push({
-					file: i18nPath,
-					opts: {
-						expose: i18nModuleName
-					},
-					id: shoftI18nPath
-				});
-				this.createI18nPackageJson(i18nPath, i18nModuleName, locale);
-				if (!this.pk2LocaleModule[i18nModuleName]) {
-					this.pk2LocaleModule[i18nModuleName] = {};
-				}
-				this.pk2LocaleModule[i18nModuleName][locale] = shoftI18nPath;
-			}
-		});
-		if (i18nModules.length === 0) {
-			return null;
-		}
-		return this.entryBundleFileTpl({
-			bundle: this.bundleName,
-			requireFilesFuncName: '_i18nBundle_' + safeBundleNameOf(this.bundleName),
-			packageInstances: i18nModules
-		});
-	},
-
-	i18nBundleEntryFileName: function(locale) {
-		return this.bundleName + '_bundle_entry_' + locale + '.js';
-	},
-
-	i18nPath: function(pkInstance, locale) {
-		var i18nPath = pkInstance.i18n;
-		if (!i18nPath) {
-			i18nPath = Path.resolve(pkInstance.packagePath, 'i18n');
-			if (!fileExists(i18nPath)) {
-				return null;
-			}
-		}
-		i18nPath = Path.resolve(pkInstance.packagePath, i18nPath.replace(/\{locale\}/g, locale));
-		if (!fileExists(i18nPath)) {
-			log.error('i18n not found: ' + pkInstance.i18n + ' in ' + pkInstance.longName);
-			return null;
-		}
-		return this.browserResolve(i18nPath);
-	},
-
-	createI18nPackageJson: function(i18nPath, i18nModuleName, locale) {
-		if (this.i18nPackageJsonCreated) {
-			return;
-		}
-		var folder = fs.lstatSync(i18nPath).isDirectory() ? i18nPath : Path.dirname(i18nPath);
-		var jsonFile = Path.join(folder, 'package.json');
-		var json = {};
-		if (!fs.existsSync(jsonFile)) {
-			fs.writeFileSync(jsonFile, JSON.stringify(json, null, '  '));
-		}
-		this.i18nPackageJsonCreated = true;
-	}
-});
-JsBundleWithI18nMaker.prototype.constructor = JsBundleWithI18nMaker;
-
 function safeBundleNameOf(bundleName) {
-	return bundleName.replace(/-/g, '_');
+	return bundleName.replace(/[-\.&#@]/g, '_');
 }
 
 function str2Stream(str) {
@@ -214,11 +177,3 @@ function str2Stream(str) {
 	return output;
 }
 
-function fileExists(file) {
-	try {
-		fs.accessSync(file, fs.R_OK);
-		return true;
-	} catch (e) {
-		return false;
-	}
-}

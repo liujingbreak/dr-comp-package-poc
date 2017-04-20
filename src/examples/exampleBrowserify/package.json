@@ -1,19 +1,19 @@
 {
   "name": "@dr/example-browserify",
-  "version": "0.0.21",
+  "version": "0.1.0",
   "description": "Test browserify",
   "browser": "exampleBrowserify.browser.js",
   "main": "exampleBrowserify.server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "gulp test example-browserify"
   },
   "author": "LJ",
   "dr": {
     "bundle": "example",
-    "entryPage": "index.html"
+    "entryPage": "index.html",
+    "browserSideConfigProp": ["gulp.watchDebounceDelay", "e2etestHelper"],
+    "type": "server",
+    "compiler": "webpack"
   },
-  "license": "ISC",
-  "dependencies": {
-    "q": "^1.4.1"
-  }
+  "license": "MIT"
 }

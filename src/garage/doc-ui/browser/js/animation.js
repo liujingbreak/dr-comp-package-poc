@@ -1,4 +1,5 @@
 require('@dr/gsap');
+
 module.exports = function(compileProvider) {
 	compileProvider.directive('drInclude', ['$compile', drInclude]);
 	compileProvider.directive('drIncludeAnim', ['$compile', drIncludeAnim]);

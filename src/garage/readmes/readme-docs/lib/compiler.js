@@ -10,7 +10,7 @@ var cheerio = require('cheerio');
 var RevAll = require('gulp-rev-all');
 var Promise = require('bluebird');
 var File = require('vinyl');
-var buildUtils = require('@dr/environment').buildUtils;
+var buildUtils = require('__api').buildUtils;
 
 module.exports = compile;
 
@@ -18,6 +18,7 @@ var packageUtils, config;
 var distDir = 'readme-docs';
 var srcDir = Path.resolve(__dirname, '..', 'doc');
 var readmeMappingFileName = 'readmeMapping.js';
+var docPath = Path.resolve(__dirname, '..', 'doc');
 
 var mk = new Markdown({
 	html: true,
@@ -46,7 +47,7 @@ function compile(_packageUtils, _config, argv) {
 	});
 	var readmePackagePath = packageUtils.findBrowserPackagePath('@dr/readme');
 
-	return gulp.src([Path.resolve(__dirname, '..', 'doc/**/*.*')], {base: srcDir})
+	return gulp.src([docPath.replace(/\\/g, '/') + '/**/*.*'], {base: srcDir})
 		.pipe(compileMarkdown())
 		.pipe(revAll.revision())
 		.pipe(replaceReference())
@@ -141,8 +142,9 @@ function replaceReference() {
 		if (!_.endsWith(row.path, '.md')) {
 			return next(null, row);
 		}
+		var filePath = Path.relative(Path.resolve(docPath), row.path);
 		var $ = cheerio.load(row.contents.toString());
-		replaceImages($, config);
+		replaceImages(filePath, $, config);
 		replaceAnchors($, config);
 		row.contents = new Buffer($.html());
 		this.push(row);
@@ -150,12 +152,16 @@ function replaceReference() {
 	});
 }
 
-function replaceImages($, config) {
+function replaceImages(filePath, $, config) {
+	var dir = Path.dirname(filePath);
+	if (dir) {
+		dir += '/';
+	}
 	$('img').each(function(index) {
 		var el = $(this);
 		var src = el.attr('src');
 		if (!_.startsWith(src, '/')) {
-			var dest = config().staticAssetsURL + '/' + distDir + '/cn/' + src;
+			var dest = config().staticAssetsURL + '/' + distDir + '/' + dir + src;
 			el.attr('src', dest);
 			log.debug(src + ' -> ' + dest);
 		}

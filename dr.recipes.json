@@ -1,0 +1,6 @@
+{
+	"recipes/garage-recipe": "src/garage",
+	"recipes/examples-recipe": "src/examples",
+	"recipes/internal-recipe": "src/internal",
+	"recipes/internal-tools-recipe": "src/tools"
+}

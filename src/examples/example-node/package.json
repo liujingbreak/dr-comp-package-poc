@@ -1,16 +1,19 @@
 {
 	"name": "@dr/example-node",
-	"version": "1.0.30",
+	"version": "1.1.0",
 	"description": "sample node package",
 	"main": "index.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "gulp test -p example-node"
 	},
-	"author": "",
-	"license": "ISC",
+	"dr": {
+		"type": "server"
+	},
 	"dependencies": {
-		"lodash": "4.6.1"
+		"bluebird": "^3.3.1"
 	},
+	"author": "LJ",
+	"license": "MIT",
 	"drConfig": {
 		"type": "router"
 	}
