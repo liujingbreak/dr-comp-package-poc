@@ -24,7 +24,6 @@ function docHome($timeout) {
 			};
 
 			bodyVm.menuUnexpand = bodyVm.menuExpand = function(size) {
-				console.log(size);
 				TweenMax.killTweensOf(bodyVm.mainSection[0]);
 				TweenMax.to(bodyVm.mainSection[0], 0.25, {x: size.width, ease: 'Power2.easeOut'});
 			};
