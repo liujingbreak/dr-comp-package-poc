@@ -64,7 +64,8 @@ function buildScenes(scrollControl, iElement, scope) {
 		iElement.children('.screen-computer')[0],
 		iElement.children('.screen-project')[0],
 		iElement.children('.screen-workspace')[0],
-		iElement.children('.screen-chunk')[0]
+		iElement.children('.screen-chunk')[0],
+		iElement.children('.screen-dev')[0]
 	]
 	.forEach(function(theScreen) {
 		scrollControl.scene({
