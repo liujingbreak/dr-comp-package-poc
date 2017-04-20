@@ -98,9 +98,10 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 							{loader: 'css-loader', options: {
 								minimize: !api.config().devMode,
 								sourceMap: api.config().enableSourceMaps,
-								importLoaders: 3,
+								//importLoaders: 4,
 								//modules: true
 							}},
+							{loader: '@dr-core/webpack2-builder/lib/css-scope-loader'},
 							{
 								loader: 'autoprefixer-loader',
 								options: cssAutoPrefixSetting
@@ -116,13 +117,13 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 						use: [
 							{loader: 'css-loader', options: {
 								minimize: !api.config().devMode,
-								sourceMap: api.config().enableSourceMaps,
-								importLoaders: 3
+								sourceMap: api.config().enableSourceMaps
 							}},
 							{
 								loader: 'autoprefixer-loader',
 								options: cssAutoPrefixSetting
 							},
+							{loader: '@dr-core/webpack2-builder/lib/css-scope-loader'},
 							{loader: '@dr-core/webpack2-builder/lib/css-url-assets-loader'},
 							// less-loader sucks, too buggy to use
 							// {loader: '@dr/less-loader', options: {sourceMap: false}},
@@ -185,7 +186,13 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 			new MultiEntryHtmlPlugin({
 				inlineChunk: 'runtime',
 				entryHtml: entryChunkHtmlAndView, // key: chunkName, value: string[]
-				liveReloadJs: api.config().devMode ? `http://${publicPath.getLocalIP()}:${api.config.get('livereload.port')}/livereload.js` : false
+				liveReloadJs: api.config().devMode ? `http://${publicPath.getLocalIP()}:${api.config.get('livereload.port')}/livereload.js` : false,
+				onCompile: (file, $) => {
+					var pk = api.findPackageByFile(file);
+					// For adding css scope classname, this will force prerender css before JS file starts
+					if (pk && pk.dr && pk.shortName)
+						$('html').addClass(pk.shortName);
+				}
 			}),
 
 			entryHtmlOutputPathPlugin,

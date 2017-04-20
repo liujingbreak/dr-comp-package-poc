@@ -64,7 +64,7 @@ function _initWorkspace() {
 			project: {name: Path.basename(rootPath), desc: 'Dianrong component workspace', author: 'noone@dianrong.com'},
 			version: getVersion(),
 			noDrcp: isDrcpSymlink,
-			internalRecipeVer: '~0.2.12'
+			internalRecipeVer: '~0.2.13'
 		});
 		var parsedPkj = JSON.parse(jsonStr);
 		if (fs.lstatSync(Path.resolve('node_modules', 'dr-comp-package')).isSymbolicLink()) {

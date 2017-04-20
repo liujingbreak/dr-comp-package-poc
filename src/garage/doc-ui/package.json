@@ -1,6 +1,6 @@
 {
   "name": "@dr/doc-ui",
-  "version": "0.0.35",
+  "version": "0.1.0",
   "description": "UI and LESS components used by dr-comp-package doc home page",
   "style": "browser/less/build.less",
   "browser": "browser/js/index.js",

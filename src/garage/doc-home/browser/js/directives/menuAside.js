@@ -36,7 +36,7 @@ function factory($timeout, $parse, $compile, $q) {
 				'submenu-item-index': '{{$index}}'
 			});
 
-			return function link(scope, iElement, iAttrs, controller) {
+			return function link(scope, iElement, iAttrs, drDocHome) {
 				//var AnimQ = require('../service/animQueue');
 				var animQueue = $q.resolve(null);
 				scope.currSubMenus = [];
@@ -89,7 +89,7 @@ function factory($timeout, $parse, $compile, $q) {
 
 				function expandMenu(evt) {
 					if (mainMenuState === VISIBLE) {
-						controller.menuEnter({width: subMenuLeft});
+						drDocHome.menuEnter({width: subMenuLeft});
 						mainMenuState = EXPANDED;
 						var i = getMenuSelectedIdx(scope);
 						var item = getMenuItem(scope)[i];
@@ -139,7 +139,7 @@ function factory($timeout, $parse, $compile, $q) {
 					if (mainMenuState === VISIBLE) {
 						return;
 					}
-					controller.menuLeave(scope);
+					drDocHome.menuLeave(scope);
 					animQueue = animQueue.then(function() {
 						TweenMax.set(subMenuEl[0], {x: ASIDE_MENU_WIDTH});
 						return $q.resolve(null);
@@ -183,6 +183,7 @@ function factory($timeout, $parse, $compile, $q) {
 					if (subMenuState === EXPANDED) {
 						return;
 					}
+					iElement.css('width', iElement.width() + SUBMENU_EXP_LEFT);
 					//subMenuEl.off('mouseenter');
 					subMenuState = EXPANDED;
 					animQueue = animQueue.then(function() {
@@ -193,7 +194,7 @@ function factory($timeout, $parse, $compile, $q) {
 							highlightMenu(lastHover);
 						});
 					});
-					controller.menuExpand({width: subMenuEl.prop('offsetWidth')});
+					drDocHome.menuExpand({width: subMenuEl.prop('offsetWidth')});
 					scope.$apply();
 					//subMenuEl.on('mouseleave', subMenuLeave);
 				}
@@ -202,6 +203,7 @@ function factory($timeout, $parse, $compile, $q) {
 					if (subMenuState === HIDDEN) {
 						return;
 					}
+					iElement.css('width', '');
 					subMenuState = HIDDEN;
 					animQueue = animQueue.then(function() {
 						return new $q(function(resolve, reject) {
@@ -213,7 +215,7 @@ function factory($timeout, $parse, $compile, $q) {
 							highlightMenu(menuSelectedIdx);
 						});
 					});
-					controller.menuUnexpand({width: subMenuLeft});
+					drDocHome.menuUnexpand({width: subMenuLeft});
 					scope.$apply();
 				}
 

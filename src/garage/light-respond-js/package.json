@@ -1,6 +1,6 @@
 {
   "name": "@dr/light-respond-js",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Managing Javascript with CSS media queries",
   "browser": "browser.js",
   "style": "main.less",
