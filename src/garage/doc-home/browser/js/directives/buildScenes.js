@@ -7,11 +7,18 @@ function buildScenes(scrollControl, iElement, scope) {
 	var screens = iElement.find('.screen');
 	var d1 = scr1Parallex.prop('offsetHeight');
 	scrollControl.scene({
-		triggerElement: screens.eq(1),
+		//duration: Math.max(screens.eq(1), angular.element(window).width()),
+		begin: 1,
 		duration: d1,
 		//delayPercent: 5,
 		timeline: function(timeline) {
 			timeline.to(scr1Parallex, 1, {y: -d1, autoAlpha: 0, ease: 'Power2.easeIn'});
+		},
+		startup: function(reverse, sc) {
+			if (!reverse)
+				scr1Parallex.css({position: 'fixed', left: '66px', width: 'calc(100% - 66px)'});
+			else
+				scr1Parallex.css({position: 'relative', left: '0', width: ''});
 		}
 	});
 
