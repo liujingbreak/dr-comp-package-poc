@@ -154,7 +154,6 @@ exports.activate = function() {
 			db.get('avatars').push(new_obj).write();
 			res.send('success');
 		} catch (e) {
-			console.info(e)
 			res.send('error');
 		}
 	});
@@ -203,7 +202,6 @@ exports.activate = function() {
 				}).value();
 			res.send(data);
 		} catch (e) {
-			console.info(e)
 			res.send('error');
 		}
 	});

@@ -41,7 +41,18 @@ function init() {
 	maybeCopyTemplate(Path.resolve(__dirname, '../../.jshintrc'), rootPath + '/.jshintrc');
 	maybeCopyTemplate(Path.resolve(__dirname, 'templates', 'module-resolve.server.tmpl.js '), rootPath + '/module-resolve.server.js');
 	maybeCopyTemplate(Path.resolve(__dirname, 'templates', 'module-resolve.browser.tmpl.js'), rootPath + '/module-resolve.browser.js');
-
+	//git-hook
+	_.each(returnProject(), (project) => {
+		var gitPath = Path.resolve(project, '.git/hooks');
+		if (fs.existsSync(gitPath)) {
+			var hookStr = '#!/bin/sh\ndrcp lint --pj ' + project + ' --root ' + rootPath + '\nexit $?\n';
+			fs.writeFileSync(gitPath + '/pre-commit', hookStr);
+			var os = require('os');
+			if (os.platform().indexOf('win32') <= 0) {
+				shell.chmod('-R', '+x', project + '/.git/hooks/*');
+			}
+		}
+	});
 	var initProm = Promise.resolve(_initWorkspace());
 	return initProm.then(() => _drawPuppy());
 	// if (fs.existsSync(Path.resolve('.git/hooks'))) {
@@ -151,6 +162,16 @@ function listProject() {
 	} else {
 		console.log('No projects');
 	}
+}
+
+function returnProject() {
+	var projectListFile = Path.join(rootPath, 'dr.project.list.json');
+	var proList = [];
+	if (fs.existsSync(projectListFile)) {
+		var projects = require(projectListFile);
+		proList = _.map(projects, dir => Path.resolve(rootPath, dir));
+	}
+	return proList;
 }
 
 function install() {
