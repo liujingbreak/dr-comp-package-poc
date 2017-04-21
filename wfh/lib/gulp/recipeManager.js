@@ -42,11 +42,13 @@ function eachRecipeSrc(projectDir, callback) {
 			callback(Path.resolve(config().rootPath, src), Path.resolve(config().rootPath, recipeDir));
 		});
 	}
-	function forProject(prjDir) {
-		_.each(_projectSrcRecipeMap(prjDir), callback);
-		var e2eDir = Path.join(prjDir, 'e2etest');
-		if (fs.existsSync(e2eDir))
-			callback(e2eDir, null);
+	function forProject(prjDirs) {
+		[].concat(prjDirs).forEach(prjDir => {
+			_.each(_projectSrcRecipeMap(prjDir), callback);
+			var e2eDir = Path.join(prjDir, 'e2etest');
+			if (fs.existsSync(e2eDir))
+				callback(e2eDir, null);
+		});
 	}
 }
 
