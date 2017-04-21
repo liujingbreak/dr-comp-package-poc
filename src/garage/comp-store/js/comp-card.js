@@ -1,13 +1,10 @@
 var api = require('__api');
-var datas = require('./author.json');
 var _ = require('lodash');
 
 api.app.component('compCard', {
 	controller: ['$scope', '$element', '$location', 'compService', function($scope, $element, $location, compService) {
 		var $ctrl = this;
-		var env = api.assetsUrl('avatars/');
 		if ($ctrl.package.author && $ctrl.package.author.name ) {
-			// $ctrl.imgUrl = env + encodeURIComponent(datas[$ctrl.package.author.name]) + '.jpg';
 			compService.selectAvatarByName($ctrl.package.author.name)
 				.then(function(response) {
 					$ctrl.imgUrl = response.data.url;

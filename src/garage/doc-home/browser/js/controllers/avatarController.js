@@ -57,7 +57,7 @@ function controller($scope, $timeout, drLoadingService, avatarService) {
 			}).finally(function() {
 				getList();
 			});
-	}
+	};
 
 	function getList() {
 		avatarVm.list = [];
