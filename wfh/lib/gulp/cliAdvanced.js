@@ -8,6 +8,7 @@ var jsYaml = require('js-yaml');
 var Path = require('path');
 var fs = require('fs');
 var _ = require('lodash');
+var chalk = require('chalk');
 //var buildUtils = require('./buildUtils');
 require('../logConfig')(config().rootPath);
 var packageUtils = require('../packageMgr/packageUtils');
@@ -42,6 +43,7 @@ function addupConfigs() {
 	var browserSideConfigProp = componentConfigs.browserSideConfigProp;
 	var entryPageMapping = componentConfigs.entryPageMapping;
 	var componentConfigs4Env = {}; // key is env:string, value is componentConfigs
+	var trackOutputPath = {}; // For checking conflict
 	packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
 		var dr = json.dr;
 		if (!dr)
@@ -65,9 +67,17 @@ function addupConfigs() {
 
 		// outputPath
 		var outputPath = dr.outputPath || _.get(json, 'dr.output.path') || parsedName.name;
-		if (dr.entryPage || dr.entryView)
+		if (_.has(trackOutputPath, outputPath)) {
+			console.log(chalk.yellow('[Warning] Conflict outputPath setting "%s" for both %s and %s, resolve conflict by adding a config file,'), outputPath, trackOutputPath[outputPath], name);
+			console.log(chalk.yellow('%s\'s "outputPath" will be changed to %s', name, parsedName.name));
+			outputPath = parsedName.name;
+		}
+		trackOutputPath[outputPath] = name;
+		if (dr.entryPage || dr.entryView) {
 			entryPageMapping[name] = componentConfigs.assetsDirMap[name] = outputPath;
-
+		} else {
+			componentConfigs.assetsDirMap[name] = outputPath;
+		}
 		// chunks
 		var chunk = _.has(json, 'dr.chunk') ? dr.chunk : dr.bundle;
 		if (chunk) {

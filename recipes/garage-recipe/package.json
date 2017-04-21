@@ -1,6 +1,6 @@
 {
   "name": "@dr/garage-recipe",
-  "version": "0.2.20",
+  "version": "0.2.21",
   "description": "Component group: garage-recipe",
   "dependencies": {
     "@dr/angularjs": "1.5.8-3",
@@ -12,7 +12,7 @@
     "@dr/lodash3": "1.0.2",
     "@dr/angular-lazy": "1.0.1",
     "@dr/doc-banner": "1.0.1",
-    "@dr/doc-home": "0.2.1",
+    "@dr/doc-home": "0.2.2",
     "@dr/doc-ui": "0.1.0",
     "@dr/comp-store": "0.2.7",
     "@dr/handlebars-tmpl-builder": "1.0.0",

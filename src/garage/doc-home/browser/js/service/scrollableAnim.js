@@ -19,7 +19,7 @@ function ScrollableAnim(el, throttleWait) {
 	if (throttleWait == null)
 		throttleWait = 0;
 	if (!el)
-		el = $(document.body);
+		el = $(window);
 	this.panel = el;
 	this.scenes = [];
 	var self = this;
@@ -34,7 +34,7 @@ function ScrollableAnim(el, throttleWait) {
 		self.seek(scrolled);
 	}
 
-	$(window).on('scroll', this.scrollHandler);
+	el.on('scroll', this.scrollHandler);
 }
 
 ScrollableAnim.prototype = {

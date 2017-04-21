@@ -8,7 +8,7 @@
 	position: absolute;
 	left: @dr-unit-triple;
 	top: 0;
-	width: 100%;
+	width: ~"calc(100% - @dr-unit-triple)";
 	background: @dr-lite-liter;
 	//background: linear-gradient(to right, rgba(0,0,0, 0.5) 0%, rgba(0,0,0, 0) 10px, rgba(0,0,0, 0) 100%), @dr-white;
 }
@@ -87,7 +87,7 @@
 		.dr-green-blue-hor-bg();
 	}
 	.markdown-body {
-		text-align: initial;
+		text-align: left;
 		max-width: 55*@dr-fontsize;
 		display: inline-block;
 		overflow: visible;
@@ -269,11 +269,19 @@
 			visibility: hidden;
 			.dr-green-blue-hor-bg();
 		}
+		svg.brands {
+			width: @dr-unit * 8;
+		}
 		.brands {
 			display: inline-block;
 			height: @dr-unit-triple;
 			vertical-align: middle;
-			margin: 0 @dr-unit;
+			margin: 0 @dr-unit-half;
+			&.jasmine {
+				width: @dr-unit * 10;
+				height: @dr-unit * 3;
+				background: url(assets://@dr/doc-home/brands/jasmine.svg) center/contain no-repeat;
+			}
 		}
 	}
 
