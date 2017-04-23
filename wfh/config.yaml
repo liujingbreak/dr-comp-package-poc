@@ -60,17 +60,6 @@ enableSourceMaps: false
 
 staticAssetsURL: "" # Same as 'output.publicPath' in Webpack configuration
 
-# Hash object for mapping each package's assets fold to corresponding package level 'output.path',
-# All resource files under `src/**/<package>/assets` folder are copied to `dist/static/<package-short-name>/`
-# by default, but you can change `<package-short-name>` to some folder else
-# e.g. You want to <your-package>/assets/robot.txt being copied to root URL `/host>/robot.txt` instead of 
-# the default URL `//<host>/your-package/robot.txt`
-# 
-# assetsDirMap:
-#    @dr/your-package: '/'
-
-assetsDirMap:
-
 serverURL: ""
 
 # Override bundle file name for installed components (including 3rd-party library),
@@ -145,7 +134,7 @@ packageContextPathMapping:
     #   if package name is "@dr/example-dr", default route root path will be `/example-dr`
     # If you want change this rule, config route path here.
 
-entryPageMapping:
+outputPathMap:
     # Like "output.publicPath" in webpack.config.js.
     # For static browser entry pages, the default entry page is compiled to
     #   dist/static/<package-short-name>/<entry-page-path>
@@ -159,23 +148,6 @@ entryPageMapping:
     #   package-C: entriesC
     # It doesn't matter whether the "value" part startsWith or endsWith slash "/",
     # but if the value is only a slash "/", it means the root folder "dist/static"
-
-# During developing, you can set this to `true` to make every package to a single bundle
-# bundlePerPackage: false
-# If you are not developer of this platform (like you are using this platform as
-# dependency in node_modules folder), please don't override this option, but
-# config `recipeFolder` instead.
-#
-# If you are about to read this property programatically, read `internalRecipeFolderPath`
-# instead, it will be resolved to relative path to this platform package folder,
-# even it is under node_modules folder loaded as dependency
-#internalRecipeFolder: recipes/internal-recipe
-
-# If you want to split your source code to different recipes
-recipeSrcMapping:
-    # recipes/garage-recipe: src/garage
-    # recipes/examples-recipe: src/examples
-    # recipes/internal-tools-recipe: src/tools
 
 # Recipes which are installed from registry server, they are owned by other contributors,
 # add to this list to make them a part of you server.
@@ -197,7 +169,6 @@ gulp:
 browserSideConfigProp:
     # following are default properties
     # - staticAssetsURL
-    # - assetsDirMap
     # - serverURL
     # - packageContextPathMapping
     # - locales

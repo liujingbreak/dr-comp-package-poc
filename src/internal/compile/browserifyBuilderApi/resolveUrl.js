@@ -3,9 +3,9 @@ var packageNameReg = /(?:@([^\/]+)\/)?(\S+)/;
 module.exports = resolveUrl;
 
 function resolveUrl(config, packageName, path) {
-	var assetsDirMap = config.get('assetsDirMap.' + packageName);
+	var assetsDirMap = config.get('outputPathMap.' + packageName);
 	if (assetsDirMap != null)
-		assetsDirMap = _.trim(config.get('assetsDirMap.' + packageName), '/');
+		assetsDirMap = _.trim(config.get('outputPathMap.' + packageName), '/');
 	if (assetsDirMap == null)
 		packageName = packageNameReg.exec(packageName)[2];
 	if (_.startsWith(path, '/')) {

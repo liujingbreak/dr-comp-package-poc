@@ -32,7 +32,7 @@ function loadAsync(content, loader) {
 function parse(content, loader) {
 	var file = loader.resourcePath;
 	var currPackage = api.findPackageByFile(file);
-	if (!currPackage || !currPackage.dr)
+	if (!currPackage || !currPackage.dr || currPackage.dr.cssScope === false)
 		return content;
 	var cssAst = postcss.parse(content);
 	traverseRuleNodes(cssAst.nodes, currPackage, file);

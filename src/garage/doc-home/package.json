@@ -1,6 +1,6 @@
 {
   "name": "@dr/doc-home",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "dr-comp-package - document site module",
   "browser": "browser/switchLocale.js",
   "main": "server/server.js",
@@ -13,7 +13,6 @@
     "bundle": "home",
     "entryPage": "*.html",
     "compiler": "webpack",
-    "outputPath": "/",
     "category": ["angular", "doc-site"]
   },
   "dependencies": {

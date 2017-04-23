@@ -41,7 +41,7 @@ exports.activate = function() {
 			return;
 		var compiler = webpack(webpackConfig);
 		api.use((api.isDefaultLocale() ? '/' : '/' + api.getBuildLocale()), webpackMiddleware(compiler, {
-			quiet: true,
+			//quiet: true,
 			//noInfo: true,
 			stats: {
 				colors: true
@@ -53,10 +53,13 @@ exports.activate = function() {
 
 function initWebpackConfig() {
 	return Promise.coroutine(function*() {
-		var pluginParams = yield moreWebpackOptions.createParamsAsync(api.config().rootPath);
-		var webpackConfig = createWebpackConfig(...pluginParams);
+		var pluginParams = moreWebpackOptions.createParams(api.config().rootPath);
+		var webpackConfig = createWebpackConfig(...pluginParams.params);
 		// Allow other LEGO component extends this webpack configure object
-		return yield Promise.promisify(tapable.applyPluginsAsyncWaterfall.bind(tapable))('webpackConfig', webpackConfig);
+		var changedConfig = yield Promise.promisify(tapable.applyPluginsAsyncWaterfall.bind(tapable))('webpackConfig', webpackConfig);
+		var htmlRule = _.find(changedConfig.module.rules, rule => (rule.test instanceof RegExp) && rule.test.toString() === '/\\.html$/');
+		pluginParams.writeEntryFileAync(htmlRule.use);
+		return changedConfig;
 	})();
 }
 

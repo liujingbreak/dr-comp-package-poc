@@ -13,7 +13,6 @@ var realpathAsync = Promise.promisify(fs.realpath);
 /**
  * @param opts.inlineChunk: array | string
  * @param opts.entryHtml: {[chunName: string]: array|string}, key is Chunk name, value is file path
- * @param opts.liveReloadJs: e.g. 'http://localhost:35729/livereload.js'
  * All plugins registerd on compilation "multi-entry-html-emit-assets", will be invoked with parameter: `{path: string, html: string}`,
  * plugin must return altered object `{path: string, html: string}`
  */
@@ -95,8 +94,8 @@ MultiEntryHtmlPlugin.prototype.apply = function(compiler) {
 				});
 			}
 		});
-		if (plugin.opts.liveReloadJs)
-			body.append(plugin.createScriptLinkElement($, plugin.opts.liveReloadJs));
+		// if (plugin.opts.liveReloadJs)
+		// 	body.append(plugin.createScriptLinkElement($, plugin.opts.liveReloadJs));
 		return applyPluginsAsyncWaterfall('multi-entry-html-emit-assets', {
 			path: relativePath,
 			$: $

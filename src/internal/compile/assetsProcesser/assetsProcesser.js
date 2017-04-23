@@ -68,7 +68,7 @@ function activate(api) {
 	api.packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
 		var assetsFolder = json.dr ? (json.dr.assetsDir ? json.dr.assetsDir : 'assets') : 'assets';
 		var assetsDir = Path.join(packagePath, assetsFolder);
-		var assetsDirMap = api.config.get('assetsDirMap.' + name);
+		var assetsDirMap = api.config.get('outputPathMap.' + name);
 		if (assetsDirMap != null)
 			assetsDirMap = _.trim(assetsDirMap, '/');
 		if (fs.existsSync(assetsDir)) {
@@ -108,7 +108,7 @@ function copyRootPackageFavicon() {
 }
 
 function findFavicon() {
-	return _findFaviconInConfig('packageContextPathMapping') || _findFaviconInConfig('entryPageMapping');
+	return _findFaviconInConfig('packageContextPathMapping') || _findFaviconInConfig('outputPathMap');
 }
 
 function _findFaviconInConfig(property) {
@@ -140,7 +140,7 @@ function copyAssets() {
 		var assetsFolder = json.dr ? (json.dr.assetsDir ? json.dr.assetsDir : 'assets') : 'assets';
 		var assetsDir = Path.join(packagePath, assetsFolder);
 		if (fs.existsSync(assetsDir)) {
-			var assetsDirMap = api.config.get('assetsDirMap.' + name);
+			var assetsDirMap = api.config.get('outputPathMap.' + name);
 			if (assetsDirMap != null)
 				assetsDirMap = _.trim(assetsDirMap, '/');
 			var src = [Path.join(packagePath, assetsFolder, '**', '*')];

@@ -38,10 +38,10 @@ function listCompDependency(pkJsonFiles, write) {
 }
 
 function addupConfigs() {
-	var componentConfigs = {assetsDirMap: {}, vendorBundleMap: {}, browserSideConfigProp: [], entryPageMapping: {}};
+	var componentConfigs = {outputPathMap: {}, vendorBundleMap: {}, browserSideConfigProp: []};
 	var vendorBundleMap = componentConfigs.vendorBundleMap;
 	var browserSideConfigProp = componentConfigs.browserSideConfigProp;
-	var entryPageMapping = componentConfigs.entryPageMapping;
+	//var entryPageMapping = componentConfigs.entryPageMapping;
 	var componentConfigs4Env = {}; // key is env:string, value is componentConfigs
 	var trackOutputPath = {}; // For checking conflict
 	packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
@@ -73,11 +73,11 @@ function addupConfigs() {
 			outputPath = parsedName.name;
 		}
 		trackOutputPath[outputPath] = name;
-		if (dr.entryPage || dr.entryView) {
-			entryPageMapping[name] = componentConfigs.assetsDirMap[name] = outputPath;
-		} else {
-			componentConfigs.assetsDirMap[name] = outputPath;
-		}
+		// if (dr.entryPage || dr.entryView) {
+		// 	entryPageMapping[name] = componentConfigs.outputPathMap[name] = outputPath;
+		// } else {
+		componentConfigs.outputPathMap[name] = outputPath;
+		//}
 		// chunks
 		var chunk = _.has(json, 'dr.chunk') ? dr.chunk : dr.bundle;
 		if (chunk) {

@@ -7,6 +7,7 @@ var shell = require('shelljs');
 var Promise = require('bluebird');
 var buildUtils = require('./buildUtils');
 var argv = require('./showHelp');
+const INTERNAL_RECIPE_VER = '~0.3.1';
 
 module.exports = {
 	init: init,
@@ -45,7 +46,9 @@ function init() {
 	_.each(returnProject(), (project) => {
 		var gitPath = Path.resolve(project, '.git/hooks');
 		if (fs.existsSync(gitPath)) {
-			var hookStr = '#!/bin/sh\ndrcp lint --pj ' + project + ' --root ' + rootPath + '\nexit $?\n';
+			var hookStr = `cd "${rootPath}"
+drcp lint --pj "${project}"
+`;
 			fs.writeFileSync(gitPath + '/pre-commit', hookStr);
 			var os = require('os');
 			if (os.platform().indexOf('win32') <= 0) {
@@ -67,22 +70,31 @@ function init() {
 function _initWorkspace() {
 	mkdirp(Path.join(rootPath, 'node_modules'));
 	var isDrcpSymlink = fs.lstatSync(Path.resolve('node_modules', 'dr-comp-package')).isSymbolicLink();
+	if (isDrcpSymlink) {
+		console.log(chalk.yellow('dr-comp-package is symbolink, consider as drcp development mode,\n@dr/internal-recipe will not be saved to package.json in this mode'));
+	}
 	// package.json
+	var jsonStr;
 	if (!fs.existsSync(Path.join(rootPath, 'package.json'))) {
 		var packageJsonTmp = getPackageJsonTemplate();
-
-		var jsonStr = packageJsonTmp({
+		jsonStr = packageJsonTmp({
 			project: {name: Path.basename(rootPath), desc: 'Dianrong component workspace', author: 'noone@dianrong.com'},
 			version: getVersion(),
-			noDrcp: isDrcpSymlink,
-			internalRecipeVer: '~0.2.13'
+			noDrcp: isDrcpSymlink
 		});
-		var parsedPkj = JSON.parse(jsonStr);
-		if (fs.lstatSync(Path.resolve('node_modules', 'dr-comp-package')).isSymbolicLink()) {
-			delete parsedPkj.dependencies['@dr/internal-recipe'];
-		}
-		writeFile(Path.join(rootPath, 'package.json'), JSON.stringify(parsedPkj, null, '  '));
+	} else {
+		jsonStr = fs.readFileSync(Path.join(rootPath, 'package.json'), 'utf8');
 	}
+
+	let parsedPkj = JSON.parse(jsonStr);
+	//let testInternalComp = Path.resolve(rootPath, 'node_modules', '@dr-core', 'webpack2-builder');
+	if (isDrcpSymlink) {
+		delete parsedPkj.dependencies['@dr/internal-recipe'];
+	} else if (parsedPkj.dependencies['@dr/internal-recipe'] !== INTERNAL_RECIPE_VER) {
+		parsedPkj.dependencies['@dr/internal-recipe'] = INTERNAL_RECIPE_VER;
+		console.log(chalk.blue('+ @dr/internal-recipe: %s'), parsedPkj.dependencies['@dr/internal-recipe']);
+	}
+	writeFile(Path.join(rootPath, 'package.json'), JSON.stringify(parsedPkj, null, '  '));
 
 	// logs
 	shell.mkdir('-p', Path.join(rootPath, 'logs'));

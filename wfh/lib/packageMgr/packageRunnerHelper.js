@@ -29,7 +29,7 @@ function runBuilderComponents(builderComponents, argv) {
 	initWebInjector(packageInfo, proto);
 	proto.packageInfo = packageInfo;
 	return priorityHelper.orderPackages(builderComponents, pkInstance => {
-		log.debug('run builder: ' + pkInstance.longName);
+		log.info('run builder: ' + pkInstance.longName);
 		return runBuilderComponent(pkInstance);
 	}, 'json.dr.builderPriority')
 	.then(() => walkPackages.saveCache(packageInfo));
@@ -118,15 +118,17 @@ function initWebInjector(packageInfo, apiPrototype) {
  * @return a hash object, key is {string} type, value is packageInstance[]
  */
 function traversePackages(needInject) {
-	var packagesTypeMap = mapPackagesByType(['builder', 'server'], needInject ? (pkInstance, name, entryPath, parsedName, pkJson, packagePath) => {
-		setupNodeInjectorFor(pkInstance, name, packagePath);
-	} : null);
+	var packagesTypeMap = mapPackagesByType(['builder', 'server'], needInject ?
+		(pkInstance, name, entryPath, parsedName, pkJson, packagePath) => {
+			setupNodeInjectorFor(pkInstance, name, packagePath);
+		} : null);
 	if (needInject)
 		nodeInjector.readInjectFile();
 	return packagesTypeMap;
 }
 
 function setupNodeInjectorFor(pkInstance, name, packagePath) {
+	log.debug('setupNodeInjectorFor %s resolved to: %s', name, packagePath);
 	nodeInjector.fromPackage(name, packagePath)
 	.value('__injectorFactory', rj)
 	.value('__injector', nodeInjector)

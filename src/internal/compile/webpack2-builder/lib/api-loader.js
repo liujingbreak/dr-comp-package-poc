@@ -34,7 +34,8 @@ function parse(source, loader) {
 	var file = loader.resourcePath;
 	var currPackage = api.findPackageByFile(file);
 	var hasApi = false;
-	if (currPackage && currPackage.longName !== api.packageName /*@dr-core/webpack2-builder*/ && file === currPackage.file) {
+	if (currPackage && currPackage.longName !== api.packageName /*@dr-core/webpack2-builder*/ &&
+		currPackage.dr.cssScope !== false && file === currPackage.file) {
 		hasApi = true;
 		log.debug('Insert CSS scope classname to:\n %s', file);
 		source = `__api._addCssScopeClassname([\'${currPackage.parsedName.name}\']);

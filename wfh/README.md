@@ -68,10 +68,11 @@ If you are contributor, please read [Contributor doc](http://dr-web-house.github
       "entryPage": "*-index.html", // Could be glob format path or array like ["index.html", "other.html"]
       "entryView": "home-view.html", // Node rendering view file
       "compiler": "webpack", // Must be set
-      "outputPath": "", 
+      "outputPath": "",
       // Consider it as Webpack's `output.path` setting, but only affects entry page path,
       // and it is relative to global `output.path`, empty string meaning it is output to root directory of
       // `dist/static`
+      "cssScope": true, // By default CSS scope will be used
       "config": { // default setting which will be added up to <workspace>/config.yaml
           "public": {
               // Exposed to Browser by `webpack.DefinePlugin`,

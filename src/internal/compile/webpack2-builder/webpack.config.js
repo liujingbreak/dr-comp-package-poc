@@ -4,7 +4,6 @@ const _ = require('lodash');
 const chalk = require('chalk');
 const Path = require('path');
 const log = require('log4js').getLogger(api.packageName);
-const publicPath = require('./lib/publicPath');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const ManualChunkPlugin = require('./lib/manual-chunk-plugin');
@@ -29,7 +28,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 			// don't work (they would be relative to chrome:blob or chrome:devtools).
 			// In order for assets to maintain correct paths setting output.publicPath property of
 			// webpack configuration must be set, so that absolute paths are generated.
-			publicPath: publicPath() + (api.isDefaultLocale() ? '' : api.getBuildLocale() + '/'),
+			publicPath: api.config().publicPath + (api.isDefaultLocale() ? '' : api.getBuildLocale() + '/'),
 			path: api.config.resolve('staticDir') + (api.isDefaultLocale() ? '' : '/' + api.getBuildLocale()),
 			pathinfo: api.config().devMode
 		},
@@ -186,7 +185,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 			new MultiEntryHtmlPlugin({
 				inlineChunk: 'runtime',
 				entryHtml: entryChunkHtmlAndView, // key: chunkName, value: string[]
-				liveReloadJs: api.config().devMode ? `http://${publicPath.getLocalIP()}:${api.config.get('livereload.port')}/livereload.js` : false,
+				//liveReloadJs: api.config().devMode ? `//${api.config().localIP}:${api.config.get('livereload.port')}/livereload.js` : false,
 				onCompile: (file, $) => {
 					var pk = api.findPackageByFile(file);
 					// For adding css scope classname, this will force prerender css before JS file starts

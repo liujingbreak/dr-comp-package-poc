@@ -49,7 +49,7 @@ TODO
 ## How to extend Webpack config file
 In your main JS file of component
 ```js
-require('@dr/webpack2-builder').tapable.plugin('webpackConfig', function(webpackConfig, cb) {
+require('@dr-core/webpack2-builder').tapable.plugin('webpackConfig', function(webpackConfig, cb) {
 	// do something to webpackConfig
 	cb(null, webpackConfig);
 	// or encounter errors

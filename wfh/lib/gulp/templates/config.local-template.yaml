@@ -9,7 +9,7 @@
 #     - gsap
 
 
-# To change `output.path` setting for each package, add `entryPageMapping` to partially override config.yaml
+# To change `output.path` setting for each package, add `outputPathMap` to partially override config.yaml
 
 devMode: true
 cacheControlMaxAge: 0
