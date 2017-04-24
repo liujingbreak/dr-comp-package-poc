@@ -1,4 +1,7 @@
 var log = require('log4js').getLogger('wfh.ManualChunkPlugin');
+var logFd = log; //require('log4js').getLogger('wfh.ManualChunkPlugin.fd');
+var logD = log; //require('log4js').getLogger('wfh.ManualChunkPlugin.d');
+
 var divideLog = require('log4js').getLogger('wfh.ManualChunkPlugin.divideModule');
 var _ = require('lodash');
 var Path = require('path');
@@ -8,7 +11,7 @@ var chalk = require('chalk');
 var nextIdent = 0;
 
 var showDependency = api.config.get(['manual-chunk-plugin', 'showDependency'], false);
-var showFileDep = api.config.get(['manual-chunk-plugin', 'showFileDependency'], false);
+var showFileDep = api.config.get(['manual-chunk-plugin', 'showFileDependency'], true);
 
 /**
  * ManualChunkPlugin
@@ -216,7 +219,7 @@ ManualChunkPlugin.prototype.apply = function(compiler) {
 				log.debug('  │  ├─ %s', simpleModuleId(module));
 				if (showFileDep)
 					_.each(module.fileDependencies, filepath => {
-						log.debug('  │  │  ├─ (fileDependency): %s', Path.relative(compiler.options.context, filepath));
+						logFd.debug('  │  │  ├─ %s', chalk.blue('(fileDependency): ' + Path.relative(compiler.options.context, filepath)));
 					});
 				_.each(module.blocks, block => {
 					log.debug('  │  │  ├─ (block %s): %s', block.constructor.name,
@@ -225,19 +228,19 @@ ManualChunkPlugin.prototype.apply = function(compiler) {
 						}).join(', '));
 					if (showDependency) {
 						_.each(block.dependencies, bDep => {
-							log.debug(`  │  │  │  ├─ ${bDep.constructor.name}`);
+							logD.debug(`  │  │  │  ├─ ${bDep.constructor.name}`);
 							if (bDep.module)
-								log.debug(`  │  │  │  │  ├─ .module ${simpleModuleId(bDep.module)}`);
+								logD.debug(`  │  │  │  │  ├─ .module ${simpleModuleId(bDep.module)}`);
 						});
 					}
 				});
 				if (showDependency) {
 					_.each(module.dependencies, dep => {
 						var source = module._source.source();
-						log.debug('  │  │  ├─ (dependency %s): %s', dep.constructor.name,
+						logD.debug('  │  │  ├─ %s', chalk.blue('(dependency %s): ' + dep.constructor.name),
 							dep.range ? source.substring(dep.range[0], dep.range[1]) : '');
 						if (dep.module)
-							log.debug(`  │  │  │  ├─ .module ${simpleModuleId(dep.module)}`);
+							logD.debug(`  │  │  │  ├─ .module ${chalk.blue(simpleModuleId(dep.module))}`);
 					});
 				}
 			});
