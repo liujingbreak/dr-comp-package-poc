@@ -30,18 +30,19 @@ NodeApi.prototype = {
 	assetsUrl: function(packageName, path) {
 		if (arguments.length === 1) {
 			path = packageName;
-			packageName = this.packageShortName;
-		} else {
-			packageName = packageUitls.parseName(packageName).name;
+			packageName = this.packageName;
 		}
 		if (_.startsWith(path, '/')) {
 			path = path.substring(1);
 		}
 		var staticAssetsURL = this.config().staticAssetsURL;
-		if (_.endsWith(staticAssetsURL, '/')) {
-			staticAssetsURL = staticAssetsURL.substring(0, staticAssetsURL.length - 1);
-		}
-		return staticAssetsURL + '/' + this.packageShortName + '/' + path;
+		staticAssetsURL = _.trimEnd(staticAssetsURL, '/');
+		var outputPath = config.get('outputPathMap.' + packageName);
+		if (outputPath != null)
+			outputPath = _.trim(outputPath, '/');
+		else
+			outputPath = packageUitls.parseName(packageName).name;
+		return staticAssetsURL + ('/' + outputPath + '/' + path).replace(/\/\//g, '/');
 	},
 
 	/**
@@ -73,7 +74,7 @@ NodeApi.prototype = {
 		if (!packageName)
 			packageName = this.packageName;
 		var parsedName = this.parsePackageName(packageName);
-		var mappedTo = _.get(this.config(), ['entryPageMapping', parsedName.name]) || _.get(this.config(), ['entryPageMapping', packageName]);
+		var mappedTo = _.get(this.config(), ['outputPathMap', parsedName.name]) || _.get(this.config(), ['outputPathMap', packageName]);
 		if (mappedTo != null)
 			mappedTo = _.trim(mappedTo, '/');
 		var url = this.config().staticAssetsURL;

@@ -23,7 +23,7 @@ module.exports = {
 };
 
 /**
- * Iterate recipeSrcMapping items
+ * Iterate src folder for component items
  * @param {string} projectDir optional, if not present or null, includes all project src folders
  * @param  {Function} callback function(srcDir, recipeDir)
  */
@@ -37,11 +37,7 @@ function eachRecipeSrc(projectDir, callback) {
 		else
 			_.each(config().projectList, proj => forProject(proj));
 	}
-	if (config().recipeSrcMapping) {
-		_.forOwn(config().recipeSrcMapping, function(src, recipeDir) {
-			callback(Path.resolve(config().rootPath, src), Path.resolve(config().rootPath, recipeDir));
-		});
-	}
+
 	function forProject(prjDirs) {
 		[].concat(prjDirs).forEach(prjDir => {
 			_.each(_projectSrcRecipeMap(prjDir), callback);
@@ -91,9 +87,6 @@ function eachRecipe(callback) {
 	eachRecipeSrc((srcDir, recipeDir) => {
 		if (recipeDir)
 			callback(recipeDir);
-	});
-	_.forOwn(config().recipeSrcMapping, function(src, recipeDir) {
-		callback(Path.resolve(config().rootPath, recipeDir));
 	});
 	eachDownloadedRecipe(callback);
 	callback(config().rootPath);

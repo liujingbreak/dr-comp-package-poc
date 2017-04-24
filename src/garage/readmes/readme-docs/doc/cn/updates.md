@@ -1,5 +1,9 @@
 Updates
 =======
+2017-4-24
+- web-fun-house is renamed to **dr-comp-package** v0.1.0
+- config.yaml properties `entryPageMapping` and `assetsDirMap` are replaced with new property `outputPathMap` to be easily understood as Webpack's `output.path` 
+
 2017-1-13
 - package.json property "dr.entryPage", "dr.entryView" supports `glob` format for pointing multiple path
 e.g. `*.html`, `views/*.html`

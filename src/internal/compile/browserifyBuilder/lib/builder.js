@@ -90,7 +90,7 @@ function compile() {
 	var helper = helperFactor(config, api.browserInjector);
 	var defaultBrowserSideConfigProp = [
 		'staticAssetsURL', 'serverURL', 'packageContextPathMapping',
-		'locales', 'devMode', 'assetsDirMap'
+		'locales', 'devMode', 'outputPathMap'
 	];
 	require('./compilerApi')(api);
 	if (!argv.browserify)

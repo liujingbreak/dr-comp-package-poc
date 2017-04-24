@@ -4,6 +4,7 @@ var _ = require('lodash');
 var resolve = require('resolve').sync;
 var config = require('../config');
 var log = require('log4js').getLogger('wfh.packageUtils');
+var chalk = require('chalk');
 module.exports = {
 	parseName: parseName,
 	is3rdParty: is3rdParty,
@@ -163,7 +164,7 @@ function _findEntryFiles(recipePackageJson, eachCallback, resolveFn) {
 
 		var packagePath = resolveFn.findPackagePath(name);
 		if (!packagePath) {
-			log.info('name % does not exist, you may need to install it');
+			log.info('Package %s does not exist, you may need to install it', chalk.red(name));
 			return;
 		}
 		var packageJson = Path.join(packagePath, 'package.json');
@@ -252,7 +253,7 @@ resolveAny.checkPackagJson = function(json) {
 };
 
 /**
- * Iterate recipeSrcMapping and installedRecipes setting items
+ * Iterate project src folder and installedRecipes setting items
  * @param  {Function} callback function(recipeDir)
  * @return {[type]}            [description]
  */

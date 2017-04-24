@@ -5,6 +5,7 @@ var Path = require('path');
 var yamljs = require('yamljs');
 var argv = require('yargs').argv;
 require('yamlify/register');
+var publicPath = require('./publicPath');
 
 var rootPath = argv.root;
 var setting;
@@ -149,6 +150,9 @@ function load() {
 
 	if (!setting.devMode)
 		process.env.NODE_ENV = 'production';
+	setting.publicPath = publicPath(setting);
+	setting.localIP = publicPath.getLocalIP();
+	setting.hostnamePath = publicPath.getHostnamePath(setting);
 	return setting;
 }
 

@@ -119,8 +119,8 @@ PageCompiler.prototype.doEntryFile = function(pathInfo, instance, buildInfo, pag
 		hackedHtml = api.replaceAssetsUrl(hackedHtml, pathInfo.abs);
 
 		var pagePath;
-		var mappedTo = _.get(api.config(), ['entryPageMapping', instance.shortName]) ||
-			_.get(api.config(), ['entryPageMapping', instance.longName]);
+		var mappedTo = _.get(api.config(), ['outputPathMap', instance.shortName]) ||
+			_.get(api.config(), ['outputPathMap', instance.longName]);
 		if (mappedTo) {
 			if (mappedTo === '/')
 				pagePath = Path.resolve(pathInfo.path);

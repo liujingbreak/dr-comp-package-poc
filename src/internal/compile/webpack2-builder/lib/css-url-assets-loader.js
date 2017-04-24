@@ -1,8 +1,7 @@
 const api = require('__api');
-const log = require('log4js').getLogger(api.packageName + __filename.substring(0, __filename.length - 3));
+const log = require('log4js').getLogger('wfh.' + __filename.substring(0, __filename.length - 3));
 const _ = require('lodash');
 const npmimportCssLoader = require('./npmimport-css-loader');
-const publicPath = require('./publicPath');
 
 module.exports = function(content) {
 	var callback = this.async();
@@ -28,19 +27,18 @@ function loadAsync(content, loader) {
 }
 
 var packagePathPat = /assets:\/\/((?:@[^\/]+\/)?[^\/]+)?(\/.*)/;
-var resolveStaticUrl = require('@dr-core/browserify-builder-api').resolveUrl;
 
 function replaceUrl(css, file) {
-	//var loader = this;
+	var loader = this;
 	return css.replace(/(\W)url\(\s*['"]?\s*([^'"\)]*)['"]?\s*\)/g,
 		function(match, preChar, url) {
-			var resolvedTo = preChar + 'url(' + replaceAssetsUrl(file, url) + ')';
+			var resolvedTo = preChar + 'url(' + replaceAssetsUrl(file, url, loader.options.output.publicPath) + ')';
 			log.debug('url: %s  -> %s', url, resolvedTo);
 			return resolvedTo;
 		});
 }
 
-function replaceAssetsUrl(file, url) {
+function replaceAssetsUrl(file, url, publicPath) {
 	var assetsUrlMatch = packagePathPat.exec(url);
 	if (assetsUrlMatch) {
 		var packageName = assetsUrlMatch[1];
@@ -50,10 +48,10 @@ function replaceAssetsUrl(file, url) {
 		try {
 			var injectedPackageName = npmimportCssLoader.getInjectedPackage(packageName, file);
 			if (injectedPackageName)
-				return resolveBlobCssUrl.call(this, api.config, injectedPackageName, path);
+				return resolveUrl(injectedPackageName, path, publicPath);
 			if (injectedPackageName === '')
 				log.error('%s has been replaced with `null` by require-injector, it should not be used as `assets://%s` anymore in file %s:', packageName, packageName, file);
-			return resolveBlobCssUrl.call(this, api.config, packageName, path);
+			return resolveUrl(packageName, path, publicPath);
 		} catch (e) {
 			log.error(e);
 			return url;
@@ -62,12 +60,15 @@ function replaceAssetsUrl(file, url) {
 		return url;
 }
 
-function resolveBlobCssUrl() {
-	var url = resolveStaticUrl.apply(this, [].slice.call(arguments));
-	// Do not use public path, since if locale is not default locale, the actual assets path is always
-	// "/", not "/en"
-	if (!/^https?:\/\//.test(url))
-		return publicPath() + _.trimStart(url, '/');
+function resolveUrl(packageName, path, publicPath) {
+	var assetsDirMap = api.config.get('outputPathMap.' + packageName);
+	if (assetsDirMap != null)
+		assetsDirMap = _.trim(api.config.get('outputPathMap.' + packageName), '/');
 	else
-		return url;
+		assetsDirMap = /(?:@([^\/]+)\/)?(\S+)/.exec(packageName)[2];
+	if (_.startsWith(path, '/')) {
+		path = path.substring(1);
+	}
+	assetsDirMap = _.trimStart(assetsDirMap, '/');
+	return publicPath + _.trimStart((assetsDirMap + '/' + path).replace('//', '/'), '/');
 }

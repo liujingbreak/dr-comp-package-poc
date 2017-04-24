@@ -1,6 +1,5 @@
-var api = require('__api');
 var _ = require('lodash');
-var log = require('log4js').getLogger(api.packageName);
+var log = require('log4js').getLogger('wfh');
 
 module.exports = publicPath;
 module.exports.getLocalIP = getLocalIP;
@@ -8,32 +7,33 @@ module.exports.getHostnamePath = getHostnamePath;
 
 var localIP;
 
-function publicPath() {
-	var prefix = api.config().staticAssetsURL ? api.config().staticAssetsURL : '';
+function publicPath(config) {
+	var prefix = config.staticAssetsURL ? config.staticAssetsURL : '';
 	prefix = _.trimEnd(prefix, '/');
 	if (/^https?:\/\//.test(prefix)) {
 		return prefix + '/';
 	} else {
-		return urlJoin(getHostnamePath(), prefix) + '/';
+		return prefix + '/';
+		//return urlJoin(getHostnamePath(config), prefix) + '/';
 	}
 }
 
-function urlJoin(...paths) {
-	var joined = '';
-	paths.forEach((p, i)=> {
-		p = _.trim(p, '/');
-		if (p.length > 0) {
-			if (joined.length > 0)
-				joined += '/';
-			joined += p;
-		}
-	});
-	return joined;
-}
+// function urlJoin(...paths) {
+// 	var joined = '';
+// 	paths.forEach((p, i)=> {
+// 		p = _.trim(p, '/');
+// 		if (p.length > 0) {
+// 			if (joined.length > 0)
+// 				joined += '/';
+// 			joined += p;
+// 		}
+// 	});
+// 	return joined;
+// }
 
-function getHostnamePath() {
-	var ssl = api.config.get('ssl.enabled');
-	var port = ssl ? api.config().ssl.port : api.config().port;
+function getHostnamePath(config) {
+	var ssl = _.get(config, 'ssl.enabled');
+	var port = ssl ? config.ssl.port : config.port;
 	return (ssl ? 'https' : 'http') + '://' + getLocalIP() + (port ? ':' + port : '');
 }
 

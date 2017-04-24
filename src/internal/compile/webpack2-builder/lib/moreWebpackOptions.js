@@ -15,7 +15,7 @@ const TEMP_DIR = 'webpack-temp';
 exports.chunk4package = chunk4package;
 exports.TEMP_DIR = TEMP_DIR;
 // More customized plugins
-exports.createParamsAsync = function(contextPath) {
+exports.createParams = function(contextPath) {
 	var noParse = api.config().browserifyNoParse ?
 		api.config().browserifyNoParse.map(line => {
 			var packagePath = api.packageUtils.findBrowserPackagePath(line);
@@ -69,43 +69,70 @@ exports.createParamsAsync = function(contextPath) {
 	var legoConfig = {}; // legoConfig is global configuration properties which apply to all entries and modules
 	_.each([
 		'staticAssetsURL', 'serverURL', 'packageContextPathMapping',
-		'locales', 'devMode', 'assetsDirMap'
+		'locales', 'devMode', 'outputPathMap'
 	], prop => browserPropSet[prop] = 1);
 	_.each(api.config().browserSideConfigProp, prop => browserPropSet[prop] = 1);
 	_.forOwn(browserPropSet, (nothing, propPath) => _.set(legoConfig, propPath, _.get(api.config(), propPath)));
 
 	// write webpackConfig.entry
-	var allWritten = _.map(bundleEntryCompsMap, (moduleInfos, bundle) => {
-		return writeEntryFileForBundle(bundle, moduleInfos, entryChunkHtmls[bundle], entryChunkViews[bundle])
-		.then(file => {
-			webpackConfigEntry[bundle] = file;
-			file2EntryChunkName[file] = bundle;
-			return null;
-		});
+	_.each(bundleEntryCompsMap, (moduleInfos, bundle) => {
+		var file = Path.resolve(api.config().destDir, TEMP_DIR, 'entry_' + bundle + '.js');
+		webpackConfigEntry[bundle] = file;
+		file2EntryChunkName[file] = bundle;
 	});
 
-	return Promise.all(allWritten).then(() => {
-		return log.info('entry: %s', JSON.stringify(webpackConfigEntry, null, '  '));
-	})
-	.then(() => {
-		// Plugins needed params here
-		return [webpackConfigEntry, noParse, file2EntryChunkName, entryChunkHtmlAndView, legoConfig, chunk4package,
-			sendlivereload, createEntryHtmlOutputPathPlugin(entryViewSet)];
-	});
+	return {
+		params: [webpackConfigEntry, noParse, file2EntryChunkName, entryChunkHtmlAndView, legoConfig, chunk4package,
+			sendlivereload, createEntryHtmlOutputPathPlugin(entryViewSet)],
+
+		writeEntryFileAync: function(htmlLoaders) {
+			var allWritten = _.map(bundleEntryCompsMap, (moduleInfos, bundle) => {
+				return writeEntryFileForBundle(bundle, moduleInfos, entryChunkHtmls[bundle], entryChunkViews[bundle], htmlLoaders);
+			});
+			return Promise.all(allWritten).then(() => {
+				return log.info('entry: %s', JSON.stringify(webpackConfigEntry, null, '  '));
+			});
+		}
+	};
 };
 
 var entryJsTemplate = _.template(fs.readFileSync(
 	Path.join(__dirname, 'entry.js.tmpl'), 'utf8'));
+
+var excludeEntryPageLoaders = {
+	'html-loader': 1
+};
+var excludeEntryViewLoaders = {
+	'html-loader': 1,
+	'@dr/template-builder': 1,
+	'@dr/translate-generator': 1
+};
 /**
  * @param {*} bundle
  * @param {*} packages
  * @param {*} htmlFiles string[]
  */
-function writeEntryFileForBundle(bundle, packages, htmlFiles, viewFiles) {
+function writeEntryFileForBundle(bundle, packages, htmlFiles, viewFiles, htmlLoaders) {
 	var file = Path.resolve(api.config().destDir, TEMP_DIR, 'entry_' + bundle + '.js');
 
 	var requireHtmlNames = htmlFiles.map(eachHtmlName);
 	var requireViewNames = viewFiles.map(eachHtmlName);
+
+	var htmlLoaderStr = '!@dr-core/webpack2-builder/lib/entry-html-loader';
+	var viewLoaderStr = '!@dr-core/webpack2-builder/lib/entry-html-loader';
+	_.each(htmlLoaders, loader => {
+		if (_.isString(loader) && _.has(excludeEntryPageLoaders, loader) || _.has(excludeEntryPageLoaders, loader.loader))
+			return;
+		htmlLoaderStr += '!' + (loader.loader ? loader.loader : loader);
+	});
+	//log.info('entry html require loaders = ', htmlLoaderStr);
+
+	_.each(htmlLoaders, loader => {
+		if (_.isString(loader) && _.has(excludeEntryViewLoaders, loader) || _.has(excludeEntryPageLoaders, loader.loader))
+			return;
+		viewLoaderStr += '!' + (loader.loader ? loader.loader : loader);
+	});
+	//log.info('entry view require loaders = ', viewLoaderStr);
 
 	function eachHtmlName(htmlFile) {
 		var requireHtmlName = Path.relative(Path.dirname(file), htmlFile).replace(/\\/g, '/');
@@ -118,7 +145,11 @@ function writeEntryFileForBundle(bundle, packages, htmlFiles, viewFiles) {
 	return writeFileAsync(file, entryJsTemplate({
 		packages: packages,
 		requireHtmlNames: requireHtmlNames,
-		requireViewNames: requireViewNames
+		requireViewNames: requireViewNames,
+		requireHtmlLoader: htmlLoaderStr,
+		requireViewLoader: viewLoaderStr,
+		lrEnabled: api.config.get('devMode'),
+		lrPort: api.config.get('livereload.port')
 	}))
 	.then(() => file);
 }
@@ -153,8 +184,8 @@ function createEntryHtmlOutputPathPlugin(entryViewSet) {
 					isView = true;
 				}
 				var component = api.findPackageByFile(Path.resolve(compiler.options.context, htmlAssets.path));
-				var dir = api.config.get(['entryPageMapping', component.longName]) ||
-					api.config.get(['entryPageMapping', component.shortName]) || component.shortName;
+				var dir = api.config.get(['outputPathMap', component.longName]) ||
+					api.config.get(['outputPathMap', component.shortName]) || component.shortName;
 
 				var relative = Path.relative(component.realPackagePath, htmlAssets.path);
 				if (!isView)

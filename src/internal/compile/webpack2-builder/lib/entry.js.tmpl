@@ -1,4 +1,12 @@
 //require("babel-polyfill");
+<% if (lrEnabled) { %>
+var livereload = document.createElement('script');
+livereload.type='text/javascript';
+livereload.async = true;
+livereload.src = 'http://' + (location.host || 'localhost').split(':')[0] + ':<%= lrPort %>/livereload.js';
+var s = document.getElementsByTagName('script')[0];
+s.parentNode.insertBefore(livereload, s);
+<% } %>
 window.__req = __webpack_require__;
 var _lego_entryFuncs = {
 <%
@@ -10,8 +18,8 @@ window._reqLego = function(name) {
   return _lego_entryFuncs[name]();
 };
 <% for (var requireHtmlName of requireHtmlNames) { %>
-require('!@dr-core/webpack2-builder/lib/entry-html-loader!@dr-core/webpack2-builder/lib/html-loader!@dr/translate-generator!@dr/template-builder!<%=requireHtmlName%>');
+require('<%=requireHtmlLoader%>!<%=requireHtmlName%>');
 <% } %>
 <% for (var requireViewName of requireViewNames) { %>
-require("!@dr-core/webpack2-builder/lib/entry-html-loader!@dr-core/webpack2-builder/lib/html-loader!<%=requireViewName%>");
+require("<%=requireViewLoader%>!<%=requireViewName%>");
 <% } %>

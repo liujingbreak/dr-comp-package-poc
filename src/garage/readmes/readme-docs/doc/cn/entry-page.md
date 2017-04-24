@@ -24,7 +24,7 @@ Package.json 里的`entryPage`, `entryView` 可以是Array类型
 通过修改config.yaml, config.local.yaml 可以改变默认的入口页面访问路径，
 默认的entry page 的固定输出目录是`dist/static/<package-short-name>/<entry-page-path>`
 现在这个`<package-short-name>` 可以配置成另一个路径或者是root '/'
-> `entryPageMapping`对 server 渲染的entryView 不起作用，`packageContextPathMapping`是用来配置server端router和entryView的路径的唯一配置项
+> `outputPath`对 server 渲染的entryView 不起作用，`packageContextPathMapping`是用来配置server端router和entryView的路径的唯一配置项
 
 ```yaml
 entryPageMapping:

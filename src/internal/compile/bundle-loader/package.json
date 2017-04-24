@@ -1,6 +1,6 @@
 {
   "name": "@dr-core/bundle-loader",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "description": "Load CSS bundles, works with LABjs",
   "browser": "bundle-loader.js",
   "main": "bundle-loader.js",
