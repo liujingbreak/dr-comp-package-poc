@@ -15,3 +15,8 @@ setTimeout(function() {
 	});
 }, 2000);
 console.log('file-load: %s', require('./files/default.png'));
+
+//require('!@dr-core/webpack2-builder/lib/entry-html-loader!./files/test-md.md');
+
+console.log('test markdown %s',
+require('file-loader!@dr-core/webpack2-builder/lib/html-loader!@dr-core/webpack2-builder/lib/markdown-loader!./files/test-md.md'));

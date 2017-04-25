@@ -12,6 +12,8 @@ const MultiEntryHtmlPlugin = require('./lib/multi-entry-html-plugin');
 
 
 module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entryChunkHtmlAndView, legoConfig, chunk4package, sendlivereload, entryHtmlOutputPathPlugin) {
+	log.info('nodePath: %s', api.config().nodePath);
+
 	var astCache = {};
 	var componentScopes = api.config().packageScopes || [];
 
@@ -190,6 +192,9 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 			]
 		},
 		resolve: {
+			modules: [api.config().nodePath, 'node_modules']
+		},
+		resolveLoader: {
 			modules: [api.config().nodePath, 'node_modules']
 		},
 		devtool: api.config().enableSourceMaps ? 'source-map' : false, //'hidden-source-map',
