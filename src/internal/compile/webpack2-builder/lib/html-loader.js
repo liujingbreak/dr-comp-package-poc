@@ -1,19 +1,37 @@
-const api = require('__api');
-const log = require('log4js').getLogger(api.packageName + '.html-loader');
-//const _ = require('lodash');
+//const api = require('__api');
+const log = require('log4js').getLogger('wfh.html-loader');
+const loaderUtils = require('loader-utils');
+//const Path = require('path');
+const pify = require('pify');
+const _ = require('lodash');
 const cheerio = require('cheerio');
 var replaceAssetsUrl = require('./css-url-assets-loader').replaceAssetsUrl;
 
 module.exports = function(content) {
 	var callback = this.async();
-	if (!callback)
-		return load(content, this);
-	return loadAsync(content, this)
-	.then(result => callback(null, result))
-	.catch(err => callback(err));
+	if (!callback) {
+		this.emitError('loader does not support sync mode');
+		throw new Error('loader does not support sync mode');
+	}
+	loadAsync(content, this)
+	.then(result => this.callback(null, result))
+	.catch(err => {
+		this.callback(err);
+		log.error(err);
+	});
 };
+function loadAsync(content, loader) {
+	try {
+		return load(content, loader);
+	} catch (e) {
+		log.error(e);
+		return Promise.reject(e);
+	}
+}
 
 function load(content, loader) {
+	var proms = [];
+
 	var file = loader.resourcePath;
 	var $ = cheerio.load(content, {decodeEntities: false});
 	$('[href]').each(function(idx) {
@@ -28,17 +46,43 @@ function load(content, loader) {
 		if (src.startsWith('assets://')) {
 			log.debug('Found tag %s, %s: %s', el.prop('tagName'), attrName, el.attr(attrName));
 			el.attr(attrName, replaceAssetsUrl(file, src, loader.options.output.publicPath));
+		} else if (attrName === 'src' && el.prop('tagName') === 'IMG') {
+			var linkedFile;
+			var p = pify(loader.resolve.bind(loader))(loader.context, /^[~.\/]/.test(src) ? src : './' + src)
+			.then(f => {
+				linkedFile = f;
+				return new Promise((resolve, rej) => {
+					try {
+						loader.fs.readFile(f, (err, content) => {
+							if (err)
+								return rej(err);
+							resolve(content);
+						});
+						loader.addDependency(f);
+					} catch (e) {
+						rej(`Failed to read file ${f}: ` + e);
+					}
+				});
+			})
+			.then(content => {
+				var url = loaderUtils.interpolateName(_.assign({}, loader, {resourcePath: linkedFile}),
+					'[path][name].[md5:hash:hex:8].[ext]',
+					{context: loader.options.context, content: content}
+				);
+
+				url = url.replace(/(^|\/)node_modules(\/|$)/g, '$1n-m$2').replace(/@/g, 'a');
+				el.attr('src', loader.options.output.publicPath + url);
+				loader.emitFile(url, content);
+				//loader.addDependency(file);
+			})
+			.catch(e => {
+				loader.emitError(e);
+				log.error(e);
+				throw e;
+			});
+			proms.push(p);
 		}
 	}
-	return $.html();
-}
-
-function loadAsync(content, loader) {
-	try {
-		return Promise.resolve(load(content, loader));
-	} catch (e) {
-		log.error(e);
-		return Promise.reject(e);
-	}
+	return Promise.all(proms).then(() => $.html());
 }
 

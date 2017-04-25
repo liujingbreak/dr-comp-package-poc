@@ -16,7 +16,10 @@ module.exports = function(content) {
 		throw new Error('Must be used as async loader');
 	loadAsync(content, this)
 	.then(result => callback(null, result))
-	.catch(err => callback(err));
+	.catch(err => {
+		this.emitError(err);
+		callback(err);
+	});
 };
 
 function loadAsync(content, loader) {

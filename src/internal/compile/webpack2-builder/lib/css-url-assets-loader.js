@@ -22,6 +22,7 @@ function loadAsync(content, loader) {
 	try {
 		return Promise.resolve(load(content, loader));
 	} catch (e) {
+		loader.emitError(e);
 		return Promise.reject(e);
 	}
 }
