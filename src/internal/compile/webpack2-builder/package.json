@@ -1,6 +1,6 @@
 {
   "name": "@dr-core/webpack2-builder",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Browser side stuff builder module based on Webpack2",
   "main": "main.js",
   "browser": "browser-api.js",
@@ -45,7 +45,9 @@
     "postcss": "^5.2.17",
     "css-selector-tokenizer": "^0.7.0",
     "loader-utils": "^1.1.0",
-    "pify": "^2.3.0"
+    "pify": "^2.3.0",
+    "sass-loader": "^6.0.3",
+    "jade-loader": "^0.8.0"
   },
   "author": "LJ",
   "license": "MIT",

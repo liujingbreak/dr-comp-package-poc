@@ -73,6 +73,16 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 					}]
 				},
 				{
+					test: /\.jade$/,
+					use: [
+						{loader: 'html-loader', options: {attrs: 'img:src'}},
+						{loader: '@dr-core/webpack2-builder/lib/html-loader'}, // Replace keyward assets:// in *[src|href]
+						{loader: '@dr/translate-generator'},
+						{loader: '@dr/template-builder'},
+						{loader: 'jade-loader'}
+					]
+				},
+				{
 					test: /\.html$/,
 					use: [
 						{loader: 'html-loader', options: {attrs: 'img:src'}},
@@ -133,7 +143,33 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 							{loader: '@dr-core/webpack2-builder/lib/npmimport-css-loader'}
 						]
 					})
-				},{
+				},
+				{
+					test: /\.scss$/,
+					use: ExtractTextPlugin.extract({
+						fallback: 'style-loader',
+						use: [
+							{loader: 'css-loader', options: {
+								minimize: !api.config().devMode,
+								sourceMap: api.config().enableSourceMaps
+							}},
+							{
+								loader: 'autoprefixer-loader',
+								options: cssAutoPrefixSetting
+							},
+							{loader: '@dr-core/webpack2-builder/lib/css-scope-loader'},
+							{loader: '@dr-core/webpack2-builder/lib/css-url-assets-loader'},
+							// less-loader sucks, too buggy to use
+							// {loader: '@dr/less-loader', options: {sourceMap: false}},
+							{loader: 'sass-loader', options: {
+								sourceMap: false,
+								//plugins: [new NpmImportPlugin()]
+							}},
+							{loader: '@dr-core/webpack2-builder/lib/npmimport-css-loader'}
+						]
+					})
+				},
+				{
 					test: /\.txt$/,
 					use: {loader: 'raw-loader'}
 				}, {
