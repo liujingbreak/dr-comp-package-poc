@@ -67,6 +67,8 @@ MultiEntryHtmlPlugin.prototype.apply = function(compiler) {
 		var relativePath = Path.relative(compiler.options.context || process.cwd(), file);
 		// return readFile(file, 'utf8')
 		// .then(content => {
+		if (!compiler._lego_entry)
+			return Promise.resolve(`Entry page ${relativePath} is failed to compiled by loader`);
 		var $ = cheerio.load(compiler._lego_entry[relativePath], {decodeEntities: false});
 		var body = $('body');
 		var head = $('head');
@@ -101,6 +103,8 @@ MultiEntryHtmlPlugin.prototype.apply = function(compiler) {
 			$: $
 		})
 		.then(data => {
+			data.path = data.path.replace(/\.([^.]+)$/, '.html');
+
 			compilation.assets[data.path] = new wps.CachedSource(new wps.RawSource(
 				data.html || $.html()));
 			return data.path;

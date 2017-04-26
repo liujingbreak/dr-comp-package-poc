@@ -57,8 +57,7 @@ function initWebpackConfig() {
 		var webpackConfig = createWebpackConfig(...pluginParams.params);
 		// Allow other LEGO component extends this webpack configure object
 		var changedConfig = yield Promise.promisify(tapable.applyPluginsAsyncWaterfall.bind(tapable))('webpackConfig', webpackConfig);
-		var htmlRule = _.find(changedConfig.module.rules, rule => (rule.test instanceof RegExp) && rule.test.toString() === '/\\.html$/');
-		pluginParams.writeEntryFileAync(htmlRule.use);
+		pluginParams.writeEntryFileAync(changedConfig.module.rules);
 		return changedConfig;
 	})();
 }

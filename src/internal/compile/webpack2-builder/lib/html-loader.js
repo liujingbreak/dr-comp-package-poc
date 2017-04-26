@@ -46,7 +46,7 @@ function load(content, loader) {
 		if (src.startsWith('assets://')) {
 			log.debug('Found tag %s, %s: %s', el.prop('tagName'), attrName, el.attr(attrName));
 			el.attr(attrName, replaceAssetsUrl(file, src, loader.options.output.publicPath));
-		} else if (attrName === 'src' && el.prop('tagName') === 'IMG') {
+		} else if (attrName === 'src' && el.prop('tagName') === 'IMG' && !/^(https?:|\/)/.test(src)) {
 			var linkedFile;
 			var p = pify(loader.resolve.bind(loader))(loader.context, /^[~.\/]/.test(src) ? src : './' + src)
 			.then(f => {
@@ -83,6 +83,7 @@ function load(content, loader) {
 			proms.push(p);
 		}
 	}
+	//return Promise.resolve($.html());
 	return Promise.all(proms).then(() => $.html());
 }
 

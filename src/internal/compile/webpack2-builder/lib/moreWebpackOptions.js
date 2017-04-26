@@ -85,9 +85,9 @@ exports.createParams = function(contextPath) {
 		params: [webpackConfigEntry, noParse, file2EntryChunkName, entryChunkHtmlAndView, legoConfig, chunk4package,
 			sendlivereload, createEntryHtmlOutputPathPlugin(entryViewSet)],
 
-		writeEntryFileAync: function(htmlLoaders) {
+		writeEntryFileAync: function(moduleRules) {
 			var allWritten = _.map(bundleEntryCompsMap, (moduleInfos, bundle) => {
-				return writeEntryFileForBundle(bundle, moduleInfos, entryChunkHtmls[bundle], entryChunkViews[bundle], htmlLoaders);
+				return writeEntryFileForBundle(bundle, moduleInfos, entryChunkHtmls[bundle], entryChunkViews[bundle], moduleRules);
 			});
 			return Promise.all(allWritten).then(() => {
 				return log.info('entry: %s', JSON.stringify(webpackConfigEntry, null, '  '));
@@ -112,33 +112,32 @@ var excludeEntryViewLoaders = {
  * @param {*} packages
  * @param {*} htmlFiles string[]
  */
-function writeEntryFileForBundle(bundle, packages, htmlFiles, viewFiles, htmlLoaders) {
+function writeEntryFileForBundle(bundle, packages, htmlFiles, viewFiles, rules) {
 	var file = Path.resolve(api.config().destDir, TEMP_DIR, 'entry_' + bundle + '.js');
+	var htmlLoaderStr4Type = {};
+	var requireHtmlNames = htmlFiles.map(eachHtmlName(excludeEntryPageLoaders));
+	var requireViewNames = viewFiles.map(eachHtmlName(excludeEntryViewLoaders));
 
-	var requireHtmlNames = htmlFiles.map(eachHtmlName);
-	var requireViewNames = viewFiles.map(eachHtmlName);
+	function eachHtmlName(excludeLoades) {
+		return function(htmlFile) {
+			var ext = Path.extname(htmlFile);
+			var htmlLoaderStr = htmlLoaderStr4Type[ext];
+			if (!htmlLoaderStr) {
+				var htmlRule = _.find(rules, rule => (rule.test instanceof RegExp) && rule.test.toString() === '/\\' + ext + '$/');
+				htmlLoaderStr = '!lib/entry-html-loader';
+				_.each(htmlRule.use, loader => {
+					if (_.isString(loader) && _.has(excludeLoades, loader) || _.has(excludeLoades, loader.loader))
+						return;
+					htmlLoaderStr += '!' + (loader.loader ? loader.loader : loader);
+				});
+				htmlLoaderStr4Type[ext] = htmlLoaderStr;
+			}
 
-	var htmlLoaderStr = '!@dr-core/webpack2-builder/lib/entry-html-loader';
-	var viewLoaderStr = '!@dr-core/webpack2-builder/lib/entry-html-loader';
-	_.each(htmlLoaders, loader => {
-		if (_.isString(loader) && _.has(excludeEntryPageLoaders, loader) || _.has(excludeEntryPageLoaders, loader.loader))
-			return;
-		htmlLoaderStr += '!' + (loader.loader ? loader.loader : loader);
-	});
-	//log.info('entry html require loaders = ', htmlLoaderStr);
-
-	_.each(htmlLoaders, loader => {
-		if (_.isString(loader) && _.has(excludeEntryViewLoaders, loader) || _.has(excludeEntryPageLoaders, loader.loader))
-			return;
-		viewLoaderStr += '!' + (loader.loader ? loader.loader : loader);
-	});
-	//log.info('entry view require loaders = ', viewLoaderStr);
-
-	function eachHtmlName(htmlFile) {
-		var requireHtmlName = Path.relative(Path.dirname(file), htmlFile).replace(/\\/g, '/');
-		if (!(requireHtmlName.startsWith('..') || requireHtmlName.startsWith('/')))
-			requireHtmlName = './' + requireHtmlName;
-		return requireHtmlName;
+			var requireHtmlName = Path.relative(Path.dirname(file), htmlFile).replace(/\\/g, '/');
+			if (!(requireHtmlName.startsWith('..') || requireHtmlName.startsWith('/')))
+				requireHtmlName = './' + requireHtmlName;
+			return htmlLoaderStr + '!' + requireHtmlName;
+		};
 	}
 
 	log.info('write entry file %s', file);
@@ -146,8 +145,6 @@ function writeEntryFileForBundle(bundle, packages, htmlFiles, viewFiles, htmlLoa
 		packages: packages,
 		requireHtmlNames: requireHtmlNames,
 		requireViewNames: requireViewNames,
-		requireHtmlLoader: htmlLoaderStr,
-		requireViewLoader: viewLoaderStr,
 		lrEnabled: api.config.get('devMode'),
 		lrPort: api.config.get('livereload.port')
 	}))

@@ -50,7 +50,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 					test: testDrComponentJsFile(componentScopes),
 					use: [
 						{loader: '@dr/translate-generator'},
-						{loader: '@dr-core/webpack2-builder/lib/api-loader', options: {injector: api.browserInjector, astFromCache: astCache}}
+						{loader: 'lib/api-loader', options: {injector: api.browserInjector, astFromCache: astCache}}
 					]
 				},
 				{
@@ -78,9 +78,10 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 					test: /\.jade$/,
 					use: [
 						{loader: 'html-loader', options: {attrs: 'img:src'}},
-						{loader: '@dr-core/webpack2-builder/lib/html-loader'}, // Replace keyward assets:// in *[src|href]
+						{loader: 'lib/html-loader'}, // Replace keyward assets:// in *[src|href]
 						{loader: '@dr/translate-generator'},
 						{loader: '@dr/template-builder'},
+						{loader: 'lib/dr-jade-compiler-loader'},
 						{loader: 'jade-loader'}
 					]
 				},
@@ -88,7 +89,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 					test: /\.html$/,
 					use: [
 						{loader: 'html-loader', options: {attrs: 'img:src'}},
-						{loader: '@dr-core/webpack2-builder/lib/html-loader'}, // Replace keyward assets:// in *[src|href]
+						{loader: 'lib/html-loader'}, // Replace keyward assets:// in *[src|href]
 						{loader: '@dr/translate-generator'},
 						{loader: '@dr/template-builder'}
 					]
@@ -97,8 +98,8 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 					test: /\.md$/,
 					use: [
 						{loader: 'html-loader', options: {attrs: 'img:src'}},
-						{loader: '@dr-core/webpack2-builder/lib/html-loader'}, // Replace keyward assets:// in *[src|href]
-						{loader: '@dr-core/webpack2-builder/lib/markdown-loader'}
+						{loader: 'lib/html-loader'}, // Replace keyward assets:// in *[src|href]
+						{loader: 'lib/markdown-loader'}
 					]
 				},
 				{
@@ -112,13 +113,13 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 								//importLoaders: 4,
 								//modules: true
 							}},
-							{loader: '@dr-core/webpack2-builder/lib/css-scope-loader'},
+							{loader: 'lib/css-scope-loader'},
 							{
 								loader: 'autoprefixer-loader',
 								options: cssAutoPrefixSetting
 							},
-							{loader: '@dr-core/webpack2-builder/lib/css-url-assets-loader'},
-							{loader: '@dr-core/webpack2-builder/lib/npmimport-css-loader'}
+							{loader: 'lib/css-url-assets-loader'},
+							{loader: 'lib/npmimport-css-loader'}
 						]
 					})
 				}, {
@@ -134,15 +135,15 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 								loader: 'autoprefixer-loader',
 								options: cssAutoPrefixSetting
 							},
-							{loader: '@dr-core/webpack2-builder/lib/css-scope-loader'},
-							{loader: '@dr-core/webpack2-builder/lib/css-url-assets-loader'},
+							{loader: 'lib/css-scope-loader'},
+							{loader: 'lib/css-url-assets-loader'},
 							// less-loader sucks, too buggy to use
 							// {loader: '@dr/less-loader', options: {sourceMap: false}},
 							{loader: 'less-loader', options: {
 								sourceMap: false,
 								//plugins: [new NpmImportPlugin()]
 							}},
-							{loader: '@dr-core/webpack2-builder/lib/npmimport-css-loader'}
+							{loader: 'lib/npmimport-css-loader'}
 						]
 					})
 				},
@@ -159,15 +160,15 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 								loader: 'autoprefixer-loader',
 								options: cssAutoPrefixSetting
 							},
-							{loader: '@dr-core/webpack2-builder/lib/css-scope-loader'},
-							{loader: '@dr-core/webpack2-builder/lib/css-url-assets-loader'},
+							{loader: 'lib/css-scope-loader'},
+							{loader: 'lib/css-url-assets-loader'},
 							// less-loader sucks, too buggy to use
 							// {loader: '@dr/less-loader', options: {sourceMap: false}},
 							{loader: 'sass-loader', options: {
 								sourceMap: false,
 								//plugins: [new NpmImportPlugin()]
 							}},
-							{loader: '@dr-core/webpack2-builder/lib/npmimport-css-loader'}
+							{loader: 'lib/npmimport-css-loader'}
 						]
 					})
 				},
@@ -195,7 +196,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 			modules: [api.config().nodePath, 'node_modules']
 		},
 		resolveLoader: {
-			modules: [api.config().nodePath, 'node_modules']
+			modules: [__dirname, api.config().nodePath, 'node_modules']
 		},
 		devtool: api.config().enableSourceMaps ? 'source-map' : false, //'hidden-source-map',
 		plugins: [

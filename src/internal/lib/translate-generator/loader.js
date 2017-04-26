@@ -12,7 +12,7 @@ module.exports = function(source) {
 		var ext = Path.extname(file).toLowerCase();
 		if (ext === '.js') {
 			replaced = tr.replaceJS(source, file, api.getBuildLocale(), skipPackageCache);
-		} else if (ext === '.html') {
+		} else {
 			replaced = tr.replaceHtml(source, file, api.getBuildLocale(), skipPackageCache);
 		}
 	} catch (err) {

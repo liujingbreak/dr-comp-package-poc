@@ -20,3 +20,6 @@ console.log('file-load: %s', require('./files/default.png'));
 
 console.log('test markdown %s',
 require('file-loader!@dr-core/webpack2-builder/lib/html-loader!@dr-core/webpack2-builder/lib/markdown-loader!./files/test-md.md'));
+
+console.log(
+require('./test-jade.jade'));

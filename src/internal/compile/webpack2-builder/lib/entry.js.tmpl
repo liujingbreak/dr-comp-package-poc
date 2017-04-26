@@ -18,8 +18,8 @@ window._reqLego = function(name) {
   return _lego_entryFuncs[name]();
 };
 <% for (var requireHtmlName of requireHtmlNames) { %>
-require('<%=requireHtmlLoader%>!<%=requireHtmlName%>');
+require('<%=requireHtmlName%>');
 <% } %>
 <% for (var requireViewName of requireViewNames) { %>
-require("<%=requireViewLoader%>!<%=requireViewName%>");
+require("<%=requireViewName%>");
 <% } %>

@@ -10,7 +10,7 @@
   "author": "LJ",
   "dr": {
     "chunk": "example-wp",
-    "entryPage": "index.html",
+    "entryPage": ["index.html", "test-jade.jade"],
     "compiler": "webpack",
     "jsLoader": "babel"
   },
