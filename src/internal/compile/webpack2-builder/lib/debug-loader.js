@@ -1,6 +1,7 @@
 //const Promise = require('bluebird');
 const api = require('__api');
 const log = require('log4js').getLogger(api.packageName + '.debug-loader');
+const lu = require('loader-utils');
 
 module.exports = function(content) {
 	var callback = this.async();
@@ -12,8 +13,7 @@ module.exports = function(content) {
 };
 
 function load(content, loader) {
-	log.info(loader._ast);
-	log.info('from %s: %s', loader.query.id, loader.resourcePath);
+	log.info('from %s: %s', lu.getOptions(loader).id, loader.resourcePath);
 	return content;
 }
 

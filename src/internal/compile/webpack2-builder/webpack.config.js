@@ -80,9 +80,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 						{loader: 'html-loader', options: {attrs: 'img:src'}},
 						{loader: 'lib/html-loader'}, // Replace keyward assets:// in *[src|href]
 						{loader: '@dr/translate-generator'},
-						{loader: '@dr/template-builder'},
-						{loader: 'lib/dr-jade-compiler-loader'},
-						{loader: 'jade-loader'}
+						{loader: 'lib/jade-to-html-loader'}
 					]
 				},
 				{
@@ -99,7 +97,8 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 					use: [
 						{loader: 'html-loader', options: {attrs: 'img:src'}},
 						{loader: 'lib/html-loader'}, // Replace keyward assets:// in *[src|href]
-						{loader: 'lib/markdown-loader'}
+						{loader: 'lib/markdown-loader'},
+						{loader: 'lib/debug-loader', options: {id: 0}}
 					]
 				},
 				{
@@ -183,11 +182,11 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 					]
 				}, {
 					test: /\.(jpg|png|gif|svg|jpeg|eot|woff2|woff|ttf)$/,
-					use: [{loader: 'file-loader', options: {
-						name: '[path][name].[md5:hash:hex:8].[ext]',
-						outputPath: url => {
-							return url.replace(/(^|\/)node_modules(\/|$)/g, '$1n-m$2').replace(/@/g, 'a'); // github.io does not support special character like "_" and "@"
-						}
+					use: [{loader: 'lib/dr-file-loader', options: {
+						// name: '[path][name].[md5:hash:hex:8].[ext]',
+						// outputPath: url => {
+						// 	return url.replace(/(^|\/)node_modules(\/|$)/g, '$1n-m$2').replace(/@/g, 'a'); // github.io does not support special character like "_" and "@"
+						// }
 					}}]
 				}
 			]

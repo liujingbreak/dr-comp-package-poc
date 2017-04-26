@@ -1,7 +1,7 @@
-//const api = require('__api');
+const api = require('__api');
 const log = require('log4js').getLogger('wfh.html-loader');
 const loaderUtils = require('loader-utils');
-//const Path = require('path');
+const Path = require('path');
 const pify = require('pify');
 const _ = require('lodash');
 const cheerio = require('cheerio');
@@ -69,8 +69,16 @@ function load(content, loader) {
 					'[path][name].[md5:hash:hex:8].[ext]',
 					{context: loader.options.context, content: content}
 				);
-
-				url = url.replace(/(^|\/)node_modules(\/|$)/g, '$1n-m$2').replace(/@/g, 'a');
+				var outputPath = '';
+				var filePath = loader.context + '/' + src;
+				var browserPackage = api.findPackageByFile(filePath);
+				if (browserPackage) {
+					outputPath = _.trimStart(api.config.get(['outputPathMap', browserPackage.longName]), '/') +
+						'/' + Path.dirname(Path.relative(browserPackage.realPackagePath, filePath)).split(Path.sep).join('/');
+					url = url.split('/').pop();
+				} else
+					url = url.replace(/(^|\/)node_modules(\/|$)/g, '$1n-m$2').replace(/@/g, 'a');
+				url = outputPath + '/' + url;
 				el.attr('src', loader.options.output.publicPath + url);
 				loader.emitFile(url, content);
 				//loader.addDependency(file);

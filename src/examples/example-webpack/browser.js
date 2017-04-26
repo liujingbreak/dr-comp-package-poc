@@ -18,8 +18,8 @@ console.log('file-load: %s', require('./files/default.png'));
 
 //require('!@dr-core/webpack2-builder/lib/entry-html-loader!./files/test-md.md');
 
-console.log('test markdown %s',
-require('file-loader!@dr-core/webpack2-builder/lib/html-loader!@dr-core/webpack2-builder/lib/markdown-loader!./files/test-md.md'));
+console.log('test markdown URL: %s',
+require('!lib/dr-file-loader?name=[path][name].[md5:hash:hex:8].html!lib/html-loader!lib/markdown-loader!./files/test-md.md'));
 
-console.log(
-require('./test-jade.jade'));
+console.log(require('./test-jade.jade'));
+document.getElementById('test-markdown').innerHTML = require('./files/test-md.md');
