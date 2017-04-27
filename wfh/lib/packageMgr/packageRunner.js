@@ -28,13 +28,13 @@ function runServer(argv) {
 	var packagesTypeMap = requireServerPackages();
 
 	NodeApi.prototype.argv = argv;
-	NodeApi.prototype.runBuilder = function(buildArgv, excludeNames) {
+	NodeApi.prototype.runBuilder = function(buildArgv, skipNames) {
 		_.assign(buildArgv, argv);
-		if (!Array.isArray(excludeNames))
-			excludeNames = [excludeNames];
-		var builders = _.filter(packagesTypeMap.builder, packageIns => !_.includes(excludeNames, packageIns.longName) );
+		if (!Array.isArray(skipNames))
+			skipNames = [skipNames];
+		// var builders = _.filter(packagesTypeMap.builder, packageIns => !_.includes(excludeNames, packageIns.longName) );
 
-		return helper.runBuilderComponents(builders, buildArgv);
+		return helper.runBuilderComponents(packagesTypeMap.builder, buildArgv, skipNames);
 	};
 	return activateCoreComponents()
 	.then(() => {

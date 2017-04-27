@@ -181,8 +181,11 @@ function createEntryHtmlOutputPathPlugin(entryViewSet) {
 					isView = true;
 				}
 				var component = api.findPackageByFile(Path.resolve(compiler.options.context, htmlAssets.path));
-				var dir = api.config.get(['outputPathMap', component.longName]) ||
-					api.config.get(['outputPathMap', component.shortName]) || component.shortName;
+				var dir = api.config.get(['outputPathMap', component.longName]);
+				if (dir == null)
+					dir = api.config.get(['outputPathMap', component.shortName]);
+				if (dir == null)
+					dir = component.shortName;
 
 				var relative = Path.relative(component.realPackagePath, htmlAssets.path);
 				if (!isView)

@@ -60,8 +60,8 @@ function getBrowserifyReplacerTransform(locale) {
 exports.replaceJS = replaceJS;
 function replaceJS(source, file, locale, skipPackageCache) {
 	var res = checkSkipPackageAndGetRes(file, locale, skipPackageCache);
-	if (!res)
-		return source;
+	// if (!res)
+	// 	return source;
 	var ast;
 	try {
 		ast = acornjsx.parse(source, {locations: true, allowHashBang: true, plugins: {jsx: true}});
@@ -72,9 +72,14 @@ function replaceJS(source, file, locale, skipPackageCache) {
 	//var ast = acorn.parse(source, {locations: true});
 	var replacements = [];
 	jsParser(source, (keyNode, callExpNode) => {
-		if (!_.has(res, keyNode))
+		var replaced;
+		if (!res)
+			replaced = keyNode;
+		else if (!_.has(res, keyNode)) {
 			log.warn('missing i18n message for: %s', keyNode);
-		var replaced = res[keyNode];
+			replaced = keyNode;
+		} else
+			replaced = res[keyNode];
 		replacements.push({
 			start: callExpNode.start,
 			end: callExpNode.end,

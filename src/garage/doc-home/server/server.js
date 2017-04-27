@@ -38,3 +38,8 @@ module.exports.onCompileTemplate = function(relativeHtmlFilePath, swig) {
 	return {locals: {}};
 };
 
+// require('@dr-core/webpack2-builder').tapable.plugin('webpackConfig', function(webpackConfig, cb) {
+// 	webpackConfig.
+// 	cb(null, webpackConfig);
+// });
+

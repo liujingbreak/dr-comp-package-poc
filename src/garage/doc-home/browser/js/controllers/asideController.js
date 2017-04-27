@@ -1,9 +1,20 @@
-var readme = require('@dr/readme');
+var readme = require('@dr/doc-readme');
+var _ = require('lodash');
 module.exports = function(controllerProvider) {
 	controllerProvider.controller('AsideController', ['$scope',
 	'$location', 'drLoadingService',
 	function($scope, $location, drLoadingService) {
 		var asideVm = this;
+		var docMenu = _.map(readme.list, item => {
+			return {
+				label: item.label,
+				icon: item.icon,
+				flag: item.flag,
+				action: () => {
+					$location.path('doc/' + item.name);
+				}
+			};
+		});
 
 		asideVm.menuItems = [
 			{
@@ -17,7 +28,7 @@ module.exports = function(controllerProvider) {
 			{
 				icon: 'fa-book',
 				label: drTranslate('Documentation'),
-				subMenu: readme.buildMenu(docName2Route)
+				subMenu: docMenu
 			},
 			{
 				label: drTranslate('Component Store'),
@@ -34,10 +45,6 @@ module.exports = function(controllerProvider) {
 				}
 			},
 		];
-
-		function docName2Route(name) {
-			$location.path('doc/' + name);
-		}
 	}]);
 };
 

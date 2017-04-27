@@ -61,35 +61,35 @@ gulp.task('clean', (cb) => {
 	cli.clean();
 });
 
-gulp.task('build', (cb)=> {
-	_npmInstallCurrFolder()
-	.then( ()=> {
-		runSequence('install-recipe', 'compile', cb);
-	});
-});
+// gulp.task('build', (cb)=> {
+// 	_npmInstallCurrFolder()
+// 	.then( ()=> {
+// 		runSequence('install-recipe', 'compile', cb);
+// 	});
+// });
 
-gulp.task('build-prod', ['clean:dist'], (cb)=> {
-	_npmInstallCurrFolder()
-	.then( ()=> {
-		config.disableLocal();
-		runSequence('install-recipe', 'compile', cb);
-	});
-});
+// gulp.task('build-prod', ['clean:dist'], (cb)=> {
+// 	_npmInstallCurrFolder()
+// 	.then( ()=> {
+// 		config.disableLocal();
+// 		runSequence('install-recipe', 'compile', cb);
+// 	});
+// });
 
 gulp.task('compile-prod', (cb)=> {
 	config.disableLocal();
 	runSequence('compile', cb);
 });
 
-function _npmInstallCurrFolder() {
-	if (!config().dependencyMode) {
-		// Use asynchronous `ShellJS.exec()` for long-lived process,
-		// due to ShellJS's high CPU usage issue
-		return buildUtils.promisifyExe('npm', 'install');
-	} else {
-		return Promise.resolve();
-	}
-}
+// function _npmInstallCurrFolder() {
+// 	if (!config().dependencyMode) {
+// 		// Use asynchronous `ShellJS.exec()` for long-lived process,
+// 		// due to ShellJS's high CPU usage issue
+// 		return buildUtils.promisifyExe('npm', 'install');
+// 	} else {
+// 		return Promise.resolve();
+// 	}
+// }
 
 gulp.task('flatten-recipe', function() {
 	//packageInstaller.flattenInstalledRecipes();

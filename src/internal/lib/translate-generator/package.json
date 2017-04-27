@@ -1,6 +1,6 @@
 {
   "name": "@dr/translate-generator",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "A tool to scan source package files and generate translatable files",
   "main": "translate-generator.js",
   "loader": "loader",
@@ -9,7 +9,14 @@
       "builder",
       "server"
     ],
-    "builderPriority": "before @dr-core/browserify-builder"
+    "builderPriority": "before @dr-core/browserify-builder",
+    "config": {
+      "server": {
+        "scanMethodNames": [
+          "drTranslate"
+        ]
+      }
+    }
   },
   "dependencies": {
     "acorn": "^4.0.11",

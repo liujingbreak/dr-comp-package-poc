@@ -173,6 +173,11 @@ function mergeFromFile(setting, localConfigPath) {
 				}
 			});
 			//log.debug('package to chunk: %s', JSON.stringify(package2Chunk, null, '  '));
+		} else if (key === 'outputPathMap') {
+			if (!objValue)
+				objValue = object.outputPathMap = {};
+			return _.assign(objValue, srcValue);
+			//log.debug('package to chunk: %s', JSON.stringify(package2Chunk, null, '  '));
 		}
 	});
 }

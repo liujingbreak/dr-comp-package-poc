@@ -8,7 +8,7 @@ var api = require('__api');
 var matchFuncNames = [];
 
 module.exports = function(fileContent, onCallExpNode, filePath, ast) {
-	var configNames = api.config.get(api.packageShortName + '.scanMethodNames');
+	var configNames = api.config.get(api.packageName + '.scanMethodNames');
 	if (configNames) {
 		[].push.apply(matchFuncNames, [].concat(configNames));
 	}

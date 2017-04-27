@@ -1,10 +1,10 @@
 {
-  "name": "@dr/readme",
+  "name": "@dr/doc-readme",
   "version": "0.1.2",
-  "description": "Menu items for dr-comp-package document site document menu",
-  "browser": "browser/index.js",
+  "description": "dr-comp-package document site docs",
+  "browser": "browser.js",
   "dr": {
-    "bundle": "readme",
+    "chunk": "readme",
     "category": ["doc-site"]
   },
   "scripts": {

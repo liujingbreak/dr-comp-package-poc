@@ -34,6 +34,9 @@ function load(content, loader) {
 
 	var file = loader.resourcePath;
 	var $ = cheerio.load(content, {decodeEntities: false});
+	var html = $('html');
+	if (!html.attr('lang') || html.attr('lang') === '')
+		html.attr('lang', api.getBuildLocale());
 	$('[href]').each(function(idx) {
 		doAttrAssetsUrl.call(this, idx, 'href');
 	});

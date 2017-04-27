@@ -21,7 +21,7 @@ exports.getApiForPackage = getApiForPackage;
 var apiCache = {};
 var initialized = false;
 
-function runBuilderComponents(builderComponents, argv) {
+function runBuilderComponents(builderComponents, argv, skips) {
 	var proto = NodeApi.prototype;
 	proto.argv = argv;
 	var walkPackages = require('@dr-core/build-util').walkPackages;
@@ -29,6 +29,10 @@ function runBuilderComponents(builderComponents, argv) {
 	initWebInjector(packageInfo, proto);
 	proto.packageInfo = packageInfo;
 	return priorityHelper.orderPackages(builderComponents, pkInstance => {
+		if (_.includes(skips, pkInstance.longName)) {
+			log.info('skip builder: %s', pkInstance.longName);
+			return;
+		}
 		log.info('run builder: ' + pkInstance.longName);
 		return runBuilderComponent(pkInstance);
 	}, 'json.dr.builderPriority')

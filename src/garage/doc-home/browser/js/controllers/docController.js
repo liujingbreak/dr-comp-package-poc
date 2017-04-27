@@ -1,6 +1,5 @@
 /* globals DISQUS */
-var readme = require('@dr/readme');
-var locale = 'cn';
+var readme = require('@dr/doc-readme');
 
 module.exports = function(controllerProvider) {
 	controllerProvider.controller('DocController',
@@ -16,9 +15,9 @@ function controller($scope, $timeout, $stateParams, drLoadingService) {
 
 	$scope.mainVm.selectedMenuIdx = 1;
 
-	var file = $stateParams.docPath.substring(0, $stateParams.docPath.lastIndexOf('.'));
+	//var file = $stateParams.docPath.substring(0, $stateParams.docPath.lastIndexOf('.'));
 
-	docVm.docAddress = __api.assetsUrl('readme-docs', docName2Route(file));
+	docVm.docAddress = readme.map[$stateParams.docPath].url;
 
 	$scope.$on('$includeContentRequested', function() {
 		drLoadingService.setLoading('main', true);
@@ -33,7 +32,7 @@ function controller($scope, $timeout, $stateParams, drLoadingService) {
 				DISQUS.reset({
 					reload: true,
 					config: function() {
-						this.page.identifier = file;
+						this.page.identifier = $stateParams.docPath;
 						this.page.url = '//' + docVm.docAddress;
 						this.page.title = docVm.docAddress;
 					}
@@ -42,7 +41,3 @@ function controller($scope, $timeout, $stateParams, drLoadingService) {
 	}
 }
 
-function docName2Route(name) {
-	var mdPath = readme.manifest[locale + '/' + name + '.md'];
-	return mdPath.substring(0, mdPath.lastIndexOf('.')) + '.html';
-}
