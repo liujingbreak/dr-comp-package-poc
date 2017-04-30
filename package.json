@@ -15,5 +15,6 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "jasmine": "^2.5.3"
   }
 }

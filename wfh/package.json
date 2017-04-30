@@ -1,9 +1,12 @@
 {
   "name": "dr-comp-package",
-  "version": "0.1.0-alpha.27",
+  "version": "0.1.0-alpha.28",
   "description": "DR web component package developer toolkit",
   "main": "lib/main.js",
-  "bin": "bin/dr.js",
+  "bin": {
+    "dr": "bin/dr.js",
+    "drcp": "bin/drcp.js"
+  },
   "scripts": {
     "start": "node lib/main.js",
     "check": "gulp lint",

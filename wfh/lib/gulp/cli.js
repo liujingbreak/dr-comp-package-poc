@@ -88,7 +88,7 @@ function _initWorkspace() {
 
 	let parsedPkj = JSON.parse(jsonStr);
 	//let testInternalComp = Path.resolve(rootPath, 'node_modules', '@dr-core', 'webpack2-builder');
-	if (isDrcpSymlink) {
+	if (isDrcpSymlink || process.env.NO_INTERNAL_RECIPE) {
 		delete parsedPkj.dependencies['@dr/internal-recipe'];
 	} else if (_.get(parsedPkj, ['dependencies', '@dr/internal-recipe']) !== INTERNAL_RECIPE_VER) {
 		parsedPkj.dependencies['@dr/internal-recipe'] = INTERNAL_RECIPE_VER;

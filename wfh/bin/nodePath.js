@@ -5,8 +5,6 @@ var Path = require('path');
 var Module = require('module').Module;
 var oldNodePath = Module._nodeModulePaths;
 
-var rootPath;
-
 module.exports = function() {
 	setContextPath(getRootPath());
 };
@@ -29,9 +27,7 @@ function setContextPath(rootPath) {
 
 module.exports.getRootPath = getRootPath;
 function getRootPath() {
-	if (rootPath)
-		return rootPath;
-
+	var rootPath;
 	var containerArgIdx = process.argv.indexOf('--root');
 	if (containerArgIdx >= 0)
 		rootPath = Path.resolve(process.argv[containerArgIdx + 1]);
