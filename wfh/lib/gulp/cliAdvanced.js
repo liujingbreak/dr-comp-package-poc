@@ -9,6 +9,11 @@ var Path = require('path');
 var fs = require('fs');
 var _ = require('lodash');
 var chalk = require('chalk');
+var gulp = require('gulp');
+var through = require('through2');
+var recipeManager = require('./recipeManager');
+var pify = require('pify');
+var File = require('vinyl');
 //var buildUtils = require('./buildUtils');
 require('../logConfig')(config().rootPath);
 var packageUtils = require('../packageMgr/packageUtils');
@@ -18,6 +23,8 @@ exports.listCompDependency = listCompDependency;
 exports.addupConfigs = addupConfigs;
 exports.cleanPackagesWalkerCache = cleanPackagesWalkerCache;
 exports.clean = clean;
+exports.bumpDirsAsync = bumpDirsAsync;
+exports.bumpProjectsAsync = bumpProjectsAsync;
 
 // function writeProjectDep(projDir) {
 // 	var installer = new PackageInstall(projDir);
@@ -152,4 +159,123 @@ function deeplyMergeJson(target, src, customizer) {
 		else
 			target[key] = sValue;
 	});
+}
+
+function bumpDirsAsync(dirs, versionType) {
+	var findPackageJson = require('./findPackageJson');
+	var srcMap = _srcRecipeMap();
+	var srcDirs = Object.keys(srcMap);
+	var bumpDirs = [...dirs];
+	dirs.forEach(dir => {
+		dir = Path.resolve(dir);
+		var foundSrc = _.find(srcDirs, src => dir.startsWith(src));
+		if (!foundSrc)
+			return;
+		var recipeDir = srcMap[foundSrc];
+		if (recipeDir) {
+			bumpDirs.push(recipeDir);
+			console.log('Bump recipe package %s', recipeDir);
+		}
+	});
+
+	var stream = gulp.src('')
+	.pipe(findPackageJson(bumpDirs))
+	.pipe(through.obj(function(file, enc, next) {
+		file.base = '/';
+		//file.path = Path.relative(config().rootPath, file.path);
+		console.log(file.path);
+		file.contents = new Buffer(fs.readFileSync(file.path, 'utf8'));
+		this.push(file);
+		next();
+	}))
+	.pipe(bumpVersion(versionType))
+	.pipe(gulp.dest('/'));
+
+	return new Promise((res, rej) => {
+		stream.on('error', function(err) {
+			rej(err);
+		})
+		.on('end', function() {
+			recipeManager.linkComponentsAsync()
+			.then(res)
+			.catch(rej);
+		});
+	});
+}
+
+function bumpProjectsAsync(projects, versionType) {
+	var srcDirs = [];
+	var recipes = [];
+	recipeManager.eachRecipeSrc(projects, function(src, recipe) {
+		srcDirs.push(src);
+		if (recipe)
+			recipes.push(recipe);
+	});
+	var realPathAsync = pify(fs.realpath.bind(fs));
+	var stream = gulp.src('.')
+		.pipe(through.obj(function(file, enc, next) {
+			next(null);
+		}, function(next) {
+			var self = this;
+			var proms = [];
+			packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
+				proms.push(realPathAsync(packagePath).then(packagePath => {
+					self.push(new File({
+						base: config().rootPath,
+						path: Path.relative(config().rootPath, Path.join(packagePath, 'package.json')),
+						contents: new Buffer(fs.readFileSync(Path.resolve(packagePath, 'package.json'), 'utf8'))
+					}));
+				}));
+			}, 'src', projects);
+			recipes.forEach(function(recipe) {
+				self.push(new File({
+					base: config().rootPath,
+					path: Path.resolve(recipe, 'package.json'),
+					contents: new Buffer(fs.readFileSync(Path.resolve(recipe, 'package.json'), 'utf8'))
+				}));
+			});
+			Promise.all(proms).then(() => next());
+		}))
+		.pipe(through.obj(function(file, enc, next) {
+			file.base = config().rootPath;
+			console.log('bump: ' + file.path);
+			next(null, file);
+		}))
+		.pipe(bumpVersion())
+		.pipe(gulp.dest(config().rootPath));
+
+	return new Promise((res, rej) => {
+		stream.on('error', function(err) {
+			rej(err);
+		})
+		.on('end', function() {
+			recipeManager.linkComponentsAsync()
+			.then(res)
+			.catch(rej);
+		});
+	});
+}
+
+function bumpVersion(versionType) {
+	var type = 'patch';
+	if (versionType) {
+		if (!{major: 1, minor: 1, patch: 1, prerelease: 1}.hasOwnProperty(versionType)) {
+			console.log(chalk.red('expecting bump type is one of "major|minor|patch|prerelease", but get: ' + versionType));
+			throw new Error('Invalid -v parameter');
+		}
+		type = versionType;
+	}
+	return require('gulp-bump')({
+		type: type
+	});
+}
+
+function _srcRecipeMap() {
+	var rsMap = {};
+	recipeManager.eachRecipeSrc((srcDir, recipeDir) => {
+		if (srcDir && recipeDir) {
+			rsMap[Path.resolve(srcDir)] = Path.resolve(recipeDir);
+		}
+	});
+	return rsMap;
 }

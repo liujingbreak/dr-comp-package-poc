@@ -7,7 +7,7 @@ var shell = require('shelljs');
 var Promise = require('bluebird');
 var buildUtils = require('./buildUtils');
 var argv = require('./showHelp');
-const INTERNAL_RECIPE_VER = '~0.3.10';
+const INTERNAL_RECIPE_VER = '~0.3.11';
 
 module.exports = {
 	init: init,
@@ -15,7 +15,9 @@ module.exports = {
 	install: install,
 	addProject: addProject,
 	listProject: listProject,
-	initGulpfile: initGulpfile
+	initGulpfile: initGulpfile,
+	bumpDirs: bumpDirs,
+	bumpProjects: bumpProjects
 };
 
 var wfhHome = Path.resolve(__dirname, '../..');
@@ -198,6 +200,14 @@ function clean() {
 	if (!fs.existsSync(rootPath + '/config.yaml'))
 		return;
 	return require('./cliAdvanced').clean();
+}
+
+function bumpDirs(dirs, versionType) {
+	return require('./cliAdvanced').bumpDirsAsync(dirs, versionType);
+}
+
+function bumpProjects(projects, versionType) {
+	return require('./cliAdvanced').bumpProjectsAsync(projects, versionType);
 }
 
 function writeFile(file, content) {

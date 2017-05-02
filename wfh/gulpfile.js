@@ -7,11 +7,9 @@ var Path = require('path');
 var gutil = require('gulp-util');
 var jshint = require('gulp-jshint');
 var jscs = require('gulp-jscs');
-var bump = require('gulp-bump');
 var through = require('through2');
 //var del = require('del');
 var jscs = require('gulp-jscs');
-var File = require('vinyl');
 var _ = require('lodash');
 var chalk = require('chalk');
 var fs = require('fs');
@@ -137,60 +135,17 @@ gulp.task('watch', function() {
  */
 gulp.task('bump', function(cb) {
 	if (argv.d) {
-		bumpDirs([].concat(argv.d));
+		cli.bumpDirs([].concat(argv.d), argv.v);
 		return cb();
 	}
-	var srcDirs = [];
-	var recipes = [];
-	recipeManager.eachRecipeSrc(argv.project, function(src, recipe) {
-		srcDirs.push(src);
-		if (recipe)
-			recipes.push(recipe);
-	});
-	var realPathAsync = Promise.promisify(fs.realpath.bind(fs));
-	var stream = gulp.src('.')
-		.pipe(through.obj(function(file, enc, next) {
-			next(null);
-		}, function(next) {
-			var self = this;
-			var proms = [];
-			packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
-				proms.push(realPathAsync(packagePath).then(packagePath => {
-					self.push(new File({
-						base: config().rootPath,
-						path: Path.relative(config().rootPath, Path.join(packagePath, 'package.json')),
-						contents: new Buffer(fs.readFileSync(Path.resolve(packagePath, 'package.json'), 'utf8'))
-					}));
-				}));
-			}, 'src', argv.project);
-			recipes.forEach(function(recipe) {
-				self.push(new File({
-					base: config().rootPath,
-					path: Path.resolve(recipe, 'package.json'),
-					contents: new Buffer(fs.readFileSync(Path.resolve(recipe, 'package.json'), 'utf8'))
-				}));
-			});
-			Promise.all(proms).then(() => next());
-		}))
-		.pipe(through.obj(function(file, enc, next) {
-			file.base = config().rootPath;
-			gutil.log('bump: ' + file.path);
-			next(null, file);
-		}))
-		.pipe(bumpVersion())
-		.pipe(gulp.dest(config().rootPath));
-
-	stream.on('error', function(err) {
-		cb(err);
-	})
-	.on('end', function() {
-		runSequence('link', function(err) {
-			if (err) {
-				return cb(err);
-			}
-			cb();
-		});
-	});
+	if (argv.all == null && argv.pj == null) {
+		console.log(`Usage:
+	drcp bump -d <dir> [-d <dir> ...] [-v major|minor|patch]
+	drcp bump --pj <project-dir> [-v major|minor|patch]
+	drcp bump --all [-v major|minor|patch]`);
+		return;
+	}
+	return cli.bumpProjects(argv.pj, argv.v);
 });
 
 
@@ -351,36 +306,6 @@ gulp.task('ls', ['init'], function(callback) {
 	})()
 	.catch(e => callback(e));
 });
-
-function bumpDirs(dirs) {
-	var findPackageJson = require('./lib/gulp/findPackageJson');
-	return gulp.src('')
-	.pipe(findPackageJson(dirs))
-	.pipe(through.obj(function(file, enc, next) {
-		file.base = '/';
-		//file.path = Path.relative(config().rootPath, file.path);
-		console.log(file.path);
-		file.contents = new Buffer(fs.readFileSync(file.path, 'utf8'));
-		this.push(file);
-		next();
-	}))
-	.pipe(bumpVersion())
-	.pipe(gulp.dest('/'));
-}
-
-function bumpVersion() {
-	var type = 'patch';
-	if (argv.v) {
-		if (!{major: 1, minor: 1, patch: 1, prerelease: 1}.hasOwnProperty(argv.v)) {
-			gutil.log(chalk.red('expecting bump type is one of "major|minor|patch|prerelease", but get: ' + argv.v));
-			throw new Error('Invalid -v parameter');
-		}
-		type = argv.v;
-	}
-	return bump({
-		type: type
-	});
-}
 
 gulp.task('t', function(cb) {
 	buildUtils.promisifyExe('ls', '-ls')
