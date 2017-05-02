@@ -36,6 +36,10 @@ function loadAsync(content, loader) {
 		if (packageExports && _.isFunction(packageExports.onCompileTemplate)) {
 			log.debug('swig template: ', file);
 			loader.addDependency(require.resolve(browserPackage.longName));
+			templateBuilder.fileHandler.onFile = includedFile => {
+				loader.addDependency(includedFile);
+				log.info('Swig includes file %s', includedFile);
+			};
 			return Promise.resolve(packageExports.onCompileTemplate(
 				Path.relative(browserPackage.realPackagePath, file).replace(/\\/g, '/'),
 				swig))
@@ -44,7 +48,7 @@ function loadAsync(content, loader) {
 					swigOptions = {locals: {}};
 				if (!swigOptions.locals)
 					swigOptions.locals = {};
-				swigOptions.locals.__api = api;
+				swigOptions.locals.__api = api.apiForPackage(browserPackage.longName);
 				swigOptions.locals.__renderFile = (targetFile) => {
 					return templateBuilder.renderFile(targetFile, file, swigOptions);
 				};

@@ -22,16 +22,25 @@ exports.compile = function() {
 	transformAdded = true;
 	require('@dr-core/browserify-builder').addTransform(transformFactory);
 	injector = require('__injector');
-	var translateHtml = require('@dr/translate-generator/translate-replacer').htmlReplacer();
+	//var translateHtml = require('@dr/translate-generator/translate-replacer').htmlReplacer();
+	_setupSwig();
+	return null;
+};
+
+exports.activate = function() {
+	_setupSwig();
+};
+
+function _setupSwig() {
 	swigInjectLoader.swigSetup(swig, {
 		injector: injector,
 		fileContentHandler: function(file, source) {
 			fileHandler.onFile(file);
-			return translateHtml(source, file, api.getBuildLocale());
+			return source;
+			//return translateHtml(source, file, api.getBuildLocale());
 		}
 	});
-	return null;
-};
+}
 
 /** To listern file read, set fileHandler.onFile = function(filePath) {} */
 exports.fileHandler = fileHandler;
@@ -60,7 +69,7 @@ function transformFactory(file) {
 						swigOptions = {locals: {}};
 					if (!swigOptions.locals)
 						swigOptions.locals = {};
-					swigOptions.locals.__api = api;
+					swigOptions.locals.__api = api.apiForPackage(browserPackage.longName);
 					swigOptions.locals.__renderFile = (targetFile) => {
 						return renderFile(targetFile, file, swigOptions);
 					};
@@ -123,7 +132,7 @@ exports.renderFile = renderFile;
 /**
  * Unlike Swig include tag, this function accept file path as variable
  */
-function renderFile(filePath, fromFile, swigOptions) {
+function renderFile(filePath, fromFile, swigOptions, cb) {
 	if (filePath.startsWith('npm://')) {
 		filePath = swigInjectLoader.resolveTo(filePath, fromFile, injector);
 	}
@@ -131,7 +140,10 @@ function renderFile(filePath, fromFile, swigOptions) {
 		log.warn('Empty __renderFile() file path in %s', fromFile);
 		return;
 	}
-	var str = fs.readFileSync(Path.resolve(Path.dirname(fromFile), filePath), 'utf8');
+	var absPath = Path.resolve(Path.dirname(fromFile), filePath);
+	if (cb)
+		cb(absPath);
+	var str = fs.readFileSync(absPath, 'utf8');
 	var absFile = Path.resolve(fromFile);
 	var template = includeTemplCache[absFile];
 	if (!template)

@@ -172,7 +172,7 @@ function bumpDirsAsync(dirs, versionType) {
 		if (!foundSrc)
 			return;
 		var recipeDir = srcMap[foundSrc];
-		if (recipeDir) {
+		if (recipeDir && !_.includes(bumpDirs, recipeDir)) {
 			bumpDirs.push(recipeDir);
 			console.log('Bump recipe package %s', recipeDir);
 		}
