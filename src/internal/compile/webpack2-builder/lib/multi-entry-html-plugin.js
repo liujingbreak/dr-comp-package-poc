@@ -15,6 +15,10 @@ var realpathAsync = Promise.promisify(fs.realpath);
  * @param opts.entryHtml: {[chunName: string]: array|string}, key is Chunk name, value is file path
  * All plugins registerd on compilation "multi-entry-html-emit-assets", will be invoked with parameter: `{path: string, html: string}`,
  * plugin must return altered object `{path: string, html: string}`
+ * All plugins registerd on compilation "multi-entry-html-compile-html", will be invoked with parameter: `(path: string, $: cheerio)`,
+ *
+ * @param opts.onEmitAssets: function(filePath, html) same as registering plugin on "multi-entry-html-emit-assets"
+ * @param opts.onCompile: function(filePath, cheerio)
  */
 function MultiEntryHtmlPlugin(opts) {
 	this.ident = __filename + (nextIdent++);
@@ -28,6 +32,7 @@ module.exports = MultiEntryHtmlPlugin;
 MultiEntryHtmlPlugin.prototype.apply = function(compiler) {
 	var plugin = this;
 	var applyPluginsAsyncWaterfall;
+	var applyPluginsAsync;
 	// read options.context
 	if (!plugin.opts.context) {
 		compiler.plugin('entry-option', function(context) {
@@ -37,7 +42,12 @@ MultiEntryHtmlPlugin.prototype.apply = function(compiler) {
 
 	compiler.plugin('emit', function(compilation, callback) {
 		applyPluginsAsyncWaterfall = Promise.promisify(compilation.applyPluginsAsyncWaterfall.bind(compilation));
+		// default one in case there is no other plugin registered
+		compilation.plugin('multi-entry-html-emit-assets', function(htmlAssets, callback) {
+			callback(null, htmlAssets);
+		});
 		var inlineAssests = inlineChunk(compilation, plugin.opts.inlineChunk);
+		applyPluginsAsync = Promise.promisify(compilation.applyPluginsAsync.bind(compilation));
 		assetsByEntry(compilation, inlineAssests)
 		.then(() => callback())
 		.catch(err => callback(err));
@@ -64,52 +74,50 @@ MultiEntryHtmlPlugin.prototype.apply = function(compiler) {
 	}
 
 	function doHtmlAsync(compilation, entrypointName, file, inlineAssests) {
-		var relativePath = Path.relative(compiler.options.context || process.cwd(), file);
-		// return readFile(file, 'utf8')
-		// .then(content => {
-		if (!compiler._lego_entry)
-			return Promise.resolve(`Entry page ${relativePath} is failed to compiled by loader`);
-		var $ = cheerio.load(compiler._lego_entry[relativePath], {decodeEntities: false});
-		var body = $('body');
-		var head = $('head');
-		if (plugin.opts.onCompile) {
-			plugin.opts.onCompile(file, $);
-		}
-		var scriptIdx = 0;
-		_.each(compilation.entrypoints[entrypointName].chunks, chunk => {
-			var s;
-			if (_.has(inlineAssests, chunk.name)) {
-				s = plugin.createScriptElement($, inlineAssests[chunk.name]);
-				s.attr('data-mehp-index', (scriptIdx++) + '');
-				body.append(s);
-			} else {
-				_.each(chunk.files, file => {
-					if (_.endsWith(file, '.js')) {
-						s = plugin.createScriptLinkElement($, resolveBundleUrl(file, compiler.options.output.publicPath));
-						s.attr('data-mehp-index', (scriptIdx++) + '');
-						body.append(s);
-					} else if (_.endsWith(file, '.css')) {
-						s = plugin.createCssLinkElement($, resolveBundleUrl(file, compiler.options.output.publicPath));
-						s.attr('data-mehp-index', (scriptIdx++) + '');
-						head.append(s);
-					}
-				});
+		return Promise.coroutine(function*() {
+			var relativePath = Path.relative(compiler.options.context || process.cwd(), file);
+			// return readFile(file, 'utf8')
+			// .then(content => {
+			if (!compiler._lego_entry)
+				return Promise.resolve(`Entry page ${relativePath} is failed to compiled by loader`);
+			var $ = cheerio.load(compiler._lego_entry[relativePath], {decodeEntities: false});
+			var body = $('body');
+			var head = $('head');
+			if (plugin.opts.onCompile) {
+				plugin.opts.onCompile(file, $);
 			}
-		});
-		// if (plugin.opts.liveReloadJs)
-		// 	body.append(plugin.createScriptLinkElement($, plugin.opts.liveReloadJs));
-		return applyPluginsAsyncWaterfall('multi-entry-html-emit-assets', {
-			path: relativePath,
-			$: $
-		})
-		.then(data => {
+			yield applyPluginsAsync('multi-entry-html-compile-html', file, $);
+			var scriptIdx = 0;
+			_.each(compilation.entrypoints[entrypointName].chunks, chunk => {
+				var s;
+				if (_.has(inlineAssests, chunk.name)) {
+					s = plugin.createScriptElement($, inlineAssests[chunk.name]);
+					s.attr('data-mehp-index', (scriptIdx++) + '');
+					body.append(s);
+				} else {
+					_.each(chunk.files, file => {
+						if (_.endsWith(file, '.js')) {
+							s = plugin.createScriptLinkElement($, resolveBundleUrl(file, compiler.options.output.publicPath));
+							s.attr('data-mehp-index', (scriptIdx++) + '');
+							body.append(s);
+						} else if (_.endsWith(file, '.css')) {
+							s = plugin.createCssLinkElement($, resolveBundleUrl(file, compiler.options.output.publicPath));
+							s.attr('data-mehp-index', (scriptIdx++) + '');
+							head.append(s);
+						}
+					});
+				}
+			});
+			var data = yield applyPluginsAsyncWaterfall('multi-entry-html-emit-assets', {
+				path: relativePath,
+				$: $
+			});
 			data.path = data.path.replace(/\.([^.]+)$/, '.html');
 
 			compilation.assets[data.path] = new wps.CachedSource(new wps.RawSource(
 				data.html || $.html()));
 			return data.path;
-		});
-		//});
+		})();
 	}
 
 	/**

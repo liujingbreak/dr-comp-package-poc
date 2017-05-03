@@ -259,7 +259,7 @@ function createPackageDirTree(packageInfo) {
 			tree.putData(moduleInstance.packagePath, moduleInstance);
 	});
 	packageInfo.dirTree = tree;
-	Object.getPrototypeOf(api).findPackageByFile = function(file) {
+	Object.getPrototypeOf(api).findPackageByFile = _.memoize(function(file) {
 		return tree.getAllData(file).pop();
-	};
+	});
 }
