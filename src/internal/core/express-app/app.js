@@ -11,7 +11,7 @@ var log4js = require('log4js');
 var api = require('__api');
 var log = log4js.getLogger(api.packageName);
 var compression = require('compression');
-var swigInjectLoader = require('swig-package-tmpl-loader');
+//var swigInjectLoader = require('swig-package-tmpl-loader');
 
 var app;
 module.exports = {
@@ -47,14 +47,14 @@ function create(app, setting, packageCache) {
 		varControls: ['{=', '=}'],
 		cache: setting.devMode ? false : 'memory'
 	});
-	var injector = require('__injector');
+	//var injector = require('__injector');
 	//var translateHtml = require('@dr/translate-generator').htmlReplacer();
-	swigInjectLoader.swigSetup(swig, {
-		injector: injector
-		// fileContentHandler: function(file, source) {
-		// 	return translateHtml(source, file, api.config.get('locales[0]'));
-		// }
-	});
+	// swigInjectLoader.swigSetup(swig, {
+	// 	injector: injector
+	// 	// fileContentHandler: function(file, source) {
+	// 	// 	return translateHtml(source, file, api.config.get('locales[0]'));
+	// 	// }
+	// });
 
 	engines.requires.swig = swig;
 	app.engine('html', engines.swig);

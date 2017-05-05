@@ -46,6 +46,8 @@ function load(content, loader) {
 	function doAttrAssetsUrl(idx, attrName) {
 		var el = $(this);
 		var src = el.attr(attrName);
+		if (!src)
+			return;
 		if (src.startsWith('assets://')) {
 			log.debug('Found tag %s, %s: %s', el.prop('tagName'), attrName, el.attr(attrName));
 			el.attr(attrName, replaceAssetsUrl(file, src, loader.options.output.publicPath));

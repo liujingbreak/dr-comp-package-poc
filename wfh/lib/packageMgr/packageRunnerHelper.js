@@ -19,6 +19,9 @@ exports.traversePackages = traversePackages;
 exports.getApiForPackage = getApiForPackage;
 
 var apiCache = {};
+NodeApi.prototype.apiForPackage = function(name) {
+	return apiCache[name];
+};
 var initialized = false;
 
 function runBuilderComponents(builderComponents, argv, skips) {

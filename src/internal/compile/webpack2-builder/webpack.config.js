@@ -10,8 +10,8 @@ const ManualChunkPlugin = require('./lib/manual-chunk-plugin');
 const MultiEntryHtmlPlugin = require('./lib/multi-entry-html-plugin');
 
 
-
-module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entryChunkHtmlAndView, legoConfig, chunk4package, sendlivereload, entryHtmlOutputPathPlugin) {
+module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entryChunkHtmlAndView,
+	legoConfig, chunk4package, sendlivereload, entryHtmlOutputPathPlugin, entryHtmlCompilePlugin) {
 	log.info('nodePath: %s', api.config().nodePath);
 
 	var astCache = {};
@@ -227,15 +227,17 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 				inlineChunk: 'runtime',
 				entryHtml: entryChunkHtmlAndView, // key: chunkName, value: string[]
 				//liveReloadJs: api.config().devMode ? `//${api.config().localIP}:${api.config.get('livereload.port')}/livereload.js` : false,
-				onCompile: (file, $) => {
-					var pk = api.findPackageByFile(file);
-					// For adding css scope classname, this will force prerender css before JS file starts
-					if (pk && pk.dr && pk.shortName)
-						$('html').addClass(pk.shortName);
-				}
+				// onCompile: (file, $) => {
+				// 	var pk = api.findPackageByFile(file);
+				// 	// For adding css scope classname, this will force prerender css before JS file starts
+				// 	if (pk && pk.dr && pk.shortName)
+				// 		$('html').addClass(pk.shortName);
+				// }
 			}),
 
 			entryHtmlOutputPathPlugin,
+
+			entryHtmlCompilePlugin,
 
 			new webpack.DefinePlugin({
 				LEGO_CONFIG: JSON.stringify(legoConfig)

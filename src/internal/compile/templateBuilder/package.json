@@ -1,11 +1,11 @@
 {
   "name": "@dr/template-builder",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "A swig based template transform and builder",
   "main": "templateBuilder.js",
   "loader": "swig-template-loader.js",
   "dr": {
-    "type": "builder",
+    "type": ["builder", "server"],
     "noLint": true,
     "builderPriority": "before @dr/translate-generator",
     "category": ["internal", "nodejs", "tool"]
