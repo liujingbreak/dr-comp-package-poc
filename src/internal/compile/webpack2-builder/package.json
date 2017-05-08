@@ -1,6 +1,6 @@
 {
   "name": "@dr-core/webpack2-builder",
-  "version": "0.3.12",
+  "version": "0.3.13",
   "description": "Browser side stuff builder module based on Webpack2",
   "main": "main.js",
   "browser": "browser-api.js",
@@ -58,6 +58,7 @@
       "builder",
       "server"
     ],
+    "jsLoader": "babel",
     "builderPriority": 0
   }
 }

@@ -87,6 +87,8 @@ function addupConfigs() {
 		//}
 		// chunks
 		var chunk = _.has(json, 'dr.chunk') ? dr.chunk : dr.bundle;
+		if (!chunk && (dr.entryPage || dr.entryView))
+			chunk = parsedName.name;
 		if (chunk) {
 			if (_.has(vendorBundleMap, chunk))
 				vendorBundleMap[chunk].push(name);

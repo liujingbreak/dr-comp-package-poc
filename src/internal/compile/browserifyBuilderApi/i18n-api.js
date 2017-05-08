@@ -49,7 +49,7 @@ module.exports = {
 	},
 
 	reloadToLocale: function(lang) {
-		if (!this.isInDefaultLocale())
+		if (!this.isDefaultLocale())
 			return false;
 		lang = _.trim(lang, '/');
 		if (this.buildLocale !== lang) {
@@ -59,7 +59,11 @@ module.exports = {
 		return false;
 	},
 
-	isInDefaultLocale: function() {
+	isDefaultLocale: function() {
 		return this.buildLocale === this.config.get('locales[0]', 'zh');
+	},
+
+	getBuildLocale: function() {
+		return this.buildLocale;
 	}
 };

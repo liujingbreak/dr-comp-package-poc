@@ -1,6 +1,6 @@
 const api = require('__api');
 const log = require('log4js').getLogger('wfh.' + __filename.substring(0, __filename.length - 3));
-const _ = require('lodash');
+//const _ = require('lodash');
 const npmimportCssLoader = require('./npmimport-css-loader');
 
 module.exports = function(content) {
@@ -30,16 +30,15 @@ function loadAsync(content, loader) {
 var packagePathPat = /assets:\/\/((?:@[^\/]+\/)?[^\/]+)?(\/.*)/;
 
 function replaceUrl(css, file) {
-	var loader = this;
 	return css.replace(/(\W)url\(\s*['"]?\s*([^'"\)]*)['"]?\s*\)/g,
 		function(match, preChar, url) {
-			var resolvedTo = preChar + 'url(' + replaceAssetsUrl(file, url, loader.options.output.publicPath) + ')';
+			var resolvedTo = preChar + 'url(' + replaceAssetsUrl(file, url) + ')';
 			log.debug('url: %s  -> %s', url, resolvedTo);
 			return resolvedTo;
 		});
 }
 
-function replaceAssetsUrl(file, url, publicPath) {
+function replaceAssetsUrl(file, url) {
 	var assetsUrlMatch = packagePathPat.exec(url);
 	if (assetsUrlMatch) {
 		var packageName = assetsUrlMatch[1];
@@ -49,10 +48,10 @@ function replaceAssetsUrl(file, url, publicPath) {
 		try {
 			var injectedPackageName = npmimportCssLoader.getInjectedPackage(packageName, file);
 			if (injectedPackageName)
-				return resolveUrl(injectedPackageName, path, publicPath);
+				return api.assetsUrl(injectedPackageName, path);
 			if (injectedPackageName === '')
 				log.error('%s has been replaced with `null` by require-injector, it should not be used as `assets://%s` anymore in file %s:', packageName, packageName, file);
-			return resolveUrl(packageName, path, publicPath);
+			return api.assetsUrl(packageName, path);
 		} catch (e) {
 			log.error(e);
 			return url;
@@ -61,15 +60,15 @@ function replaceAssetsUrl(file, url, publicPath) {
 		return url;
 }
 
-function resolveUrl(packageName, path, publicPath) {
-	var assetsDirMap = api.config.get('outputPathMap.' + packageName);
-	if (assetsDirMap != null)
-		assetsDirMap = _.trim(api.config.get('outputPathMap.' + packageName), '/');
-	else
-		assetsDirMap = /(?:@([^\/]+)\/)?(\S+)/.exec(packageName)[2];
-	if (_.startsWith(path, '/')) {
-		path = path.substring(1);
-	}
-	assetsDirMap = _.trimStart(assetsDirMap, '/');
-	return publicPath + _.trimStart((assetsDirMap + '/' + path).replace('//', '/'), '/');
-}
+// function resolveUrl(packageName, path) {
+// 	var assetsDirMap = api.config.get('outputPathMap.' + packageName);
+// 	if (assetsDirMap != null)
+// 		assetsDirMap = _.trim(api.config.get('outputPathMap.' + packageName), '/');
+// 	else
+// 		assetsDirMap = /(?:@([^\/]+)\/)?(\S+)/.exec(packageName)[2];
+// 	if (_.startsWith(path, '/')) {
+// 		path = path.substring(1);
+// 	}
+// 	assetsDirMap = _.trimStart(assetsDirMap, '/');
+// 	return publicPath + _.trimStart((assetsDirMap + '/' + path).replace('//', '/'), '/');
+// }

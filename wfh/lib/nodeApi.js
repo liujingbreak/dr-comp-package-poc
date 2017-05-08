@@ -37,6 +37,9 @@ NodeApi.prototype = {
 		}
 		var staticAssetsURL = this.config().staticAssetsURL;
 		staticAssetsURL = _.trimEnd(staticAssetsURL, '/');
+		// Different locales share same assets resource, we don't copy duplicate resource
+		//staticAssetsURL += this.isDefaultLocale() ? '' : '/' + this.getBuildLocale();
+
 		var outputPath = config.get('outputPathMap.' + packageName);
 		if (outputPath != null)
 			outputPath = _.trim(outputPath, '/');
@@ -69,8 +72,11 @@ NodeApi.prototype = {
 	 * @return {string}                  [description]
 	 */
 	entryPageUrl: function(packageName, relativePagePath) {
-		if (relativePagePath.startsWith('npm://'))
-			relativePagePath = /npm:\/\/(?:@[^\/]+\/)?[^\/]+\/(.+)/.exec(relativePagePath)[1];
+		if (relativePagePath.startsWith('npm://')) {
+			var m = /^npm:\/\/((?:@[^\/]+\/)?[^\/]+)\/(.+?)$/.exec(relativePagePath);
+			relativePagePath = m[2];
+		}
+		relativePagePath = relativePagePath.replace(/([^.//\\]+\.)[^.\/\\]+$/, '$1html');
 		if (!packageName)
 			packageName = this.packageName;
 		var parsedName = this.parsePackageName(packageName);
@@ -80,6 +86,7 @@ NodeApi.prototype = {
 		var url = this.config().staticAssetsURL;
 		if (!this.config().staticAssetsURL.endsWith('/'))
 			url += '/';
+		url += this.isDefaultLocale() ? '' : this.getBuildLocale() + '/';
 		if (mappedTo != null) {
 			if (mappedTo.length > 0)
 				url += mappedTo + '/';
