@@ -9,7 +9,7 @@
 
 var _ = require('lodash');
 window._ = _;
-var resolveUrl = require('@dr-core/browserify-builder-api/resolveUrl');
+//var resolveUrl = require('@dr-core/browserify-builder-api/resolveUrl');
 // var bundleLoader = require('@dr-core/bundle-loader');
 // var loadCssBundles = bundleLoader.loadCssBundles;
 module.exports = BrowserApi;
@@ -44,6 +44,10 @@ BrowserApi.getCachedApi = function(name) {
 BrowserApi.prototype = {
 	i18nLoaded: false,
 	_config: LEGO_CONFIG,
+	buildLocale: LEGO_CONFIG.buildLocale,
+
+	entryPage: __drcpEntryPage,
+
 	config: function() {
 		return BrowserApi.prototype._config;
 	},
@@ -65,7 +69,23 @@ BrowserApi.prototype = {
 			path = packageName;
 			packageName = this.packageShortName;
 		}
-		return resolveUrl(this.config, packageName, path);
+		//return resolveUrl(this.config, packageName, path);
+
+		if (path.charAt(0) === '/') {
+			path = path.substring(1);
+		}
+		var staticAssetsURL = this.config().staticAssetsURL;
+		while (staticAssetsURL.charAt(staticAssetsURL.length - 1) === '/') {
+			staticAssetsURL = staticAssetsURL.substring(0, staticAssetsURL.length - 1);
+		}
+		//staticAssetsURL += this.isDefaultLocale() ? '' : '/' + this.getBuildLocale();
+
+		var outputPath = this.config().outputPathMap[packageName];
+		if (outputPath != null)
+			outputPath = _.trim(outputPath, '/');
+		else
+			outputPath = /(?:@([^\/]+)\/)?(\S+)/.exec(packageName)[2];
+		return staticAssetsURL + ('/' + outputPath + '/' + path).replace(/\/\//g, '/');
 	},
 
 	extend: function(obj) {

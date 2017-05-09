@@ -65,6 +65,9 @@ function activate(api) {
 		return;
 	}
 
+	var localePrefix = '';
+	// if (!api.isDefaultLocale())
+	// 	localePrefix = api.getBuildLocale() + '/';
 	api.packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
 		var assetsFolder = json.dr ? (json.dr.assetsDir ? json.dr.assetsDir : 'assets') : 'assets';
 		var assetsDir = Path.join(packagePath, assetsFolder);
@@ -72,7 +75,7 @@ function activate(api) {
 		if (assetsDirMap != null)
 			assetsDirMap = _.trim(assetsDirMap, '/');
 		if (fs.existsSync(assetsDir)) {
-			var path = '/' + (assetsDirMap != null ? assetsDirMap : parsedName.name);
+			var path = '/' + localePrefix + (assetsDirMap != null ? assetsDirMap : parsedName.name);
 			if (path.length > 1)
 				path += '/';
 			log.info('route ' + path + ' -> ' + assetsDir);

@@ -15,5 +15,5 @@ function resolveUrl(config, packageName, path) {
 	if (_.endsWith(staticAssetsURL, '/')) {
 		staticAssetsURL = staticAssetsURL.substring(0, staticAssetsURL.length - 1);
 	}
-	return staticAssetsURL + ('/' + (assetsDirMap != null ? assetsDirMap : packageName) + '/' + path).replace('//', '/');
+	return staticAssetsURL + ('/' + (assetsDirMap != null ? assetsDirMap : packageName) + '/' + path).replace(/\/\//g, '/');
 }

@@ -38,7 +38,7 @@ exports.createParams = function(contextPath) {
 		function onComp(component) {
 			noparse4Package(component, noParse);
 			var browserSideConfigProp = _.get(component, ['dr', 'browserSideConfigProp']);
-			if (!Array.isArray(browserSideConfigProp))
+			if (browserSideConfigProp != null && !Array.isArray(browserSideConfigProp))
 				browserSideConfigProp = [browserSideConfigProp];
 			_.each(browserSideConfigProp, prop => browserPropSet[prop] = true);
 		},
@@ -76,6 +76,8 @@ exports.createParams = function(contextPath) {
 	], prop => browserPropSet[prop] = 1);
 	_.each(api.config().browserSideConfigProp, prop => browserPropSet[prop] = 1);
 	_.forOwn(browserPropSet, (nothing, propPath) => _.set(legoConfig, propPath, _.get(api.config(), propPath)));
+	legoConfig.buildLocale = api.getBuildLocale();
+	log.info('DefinePlugin LEGO_CONFIG: ', legoConfig);
 
 	// write webpackConfig.entry
 	_.each(bundleEntryCompsMap, (moduleInfos, bundle) => {
@@ -160,11 +162,14 @@ function writeEntryFileForBundle(bundle, packages, htmlFiles, viewFiles, rules) 
 function _eachComponent(onComponent, onEntryComponent) {
 	_.each(api.packageInfo.allModules, function(component) {
 		onComponent(component);
-		if ((component.entryPages || component.entryViews) && component.compiler === 'webpack') {
+		if ((component.entryPages || component.entryViews) && component.browser/* && component.compiler === 'webpack'*/) {
 			if (api.argv.p != null) {
 				var runNames = [].concat(api.argv.p);
 				if (!_.includes(runNames, component.parsedName.name) && !_.includes(runNames, component.longName))
 					return;
+			}
+			if (!chunk4package(component)) {
+				log.warn('No chunk configured for entry component %s', component.longName);
 			}
 			onEntryComponent(component);
 		}

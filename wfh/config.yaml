@@ -67,24 +67,26 @@ serverURL: ""
 # Bundle file name could also be URL for loading bundle from an external CDN
 vendorBundleMap:
   common-lib:
-      - jquery
-      - "@dr/lodash3"
-      - fastclick
-      - style-loader
-      - css-loader
-      - lodash
-      - webpack
-      - process
-      - buffer
-      - base64-js
-      - ieee754
-      - isarray
+    - jquery
+    - "@dr/lodash3"
+    - fastclick
+    - style-loader
+    - css-loader
+    - lodash
+    - webpack
+    - process
+    - buffer
+    - base64-js
+    - ieee754
+    - isarray
 
   ui-lib: # bundle name
-      - angular-ui-router
-      - fontfaceobserver/fontfaceobserver
-      - gsap
-      - swiper
+    - angular-ui-router
+    - fontfaceobserver/fontfaceobserver
+    - gsap
+    - swiper
+  vendor-gsap:
+    - gsap
   babel:
     - core-js
     - babel-polyfill
