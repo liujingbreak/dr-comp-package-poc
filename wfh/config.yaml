@@ -68,6 +68,9 @@ serverURL: ""
 vendorBundleMap:
   common-lib:
     - jquery
+    - promise-polyfill
+    - node-libs-browser
+    - setimmediate
     - "@dr/lodash3"
     - fastclick
     - style-loader
