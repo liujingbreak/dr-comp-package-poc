@@ -1,9 +1,10 @@
 language: node_js
 node_js:
-    - "6.10.0"
+    - "6.10.3"
 install:
     - npm install wfh
     - npm run-script project
+    - npm install
 before_script:
 script:
     - npm run-script lint

@@ -121,8 +121,9 @@ function _initProjects(isDrcpSymlink) {
 			writeFile(file, '\n# DO NOT MODIFIY THIS FILE!\n' + configContent);
 		});
 		if (needRunInstall) {
-			console.log(chalk.cyan('Executing "npm install" for newly found dependencies...'));
+			console.log(chalk.cyan('Executing "npm install" for newly found dependencies'));
 			yield install();
+			console.log(chalk.cyan('In case above installation is not successful, please manually execute "npm install" again.'));
 		}
 	})()
 	.catch(err => {
@@ -193,6 +194,7 @@ function returnProject() {
 }
 
 function install() {
+	//console.log(fs.readFileSync(Path.join(rootPath, 'package.json'), 'utf8'));
 	return buildUtils.promisifyExe('npm', 'install', {cwd: rootPath});
 }
 
