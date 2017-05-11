@@ -166,6 +166,7 @@ InstallManager.prototype = {
 	versionReg: /(?:\^|~|>=|>|<|<=)?(.*)/,
 
 	/**
+	 * @Deprecated
 	 * install dependencies which are tracked by trackSrcDep()
 	 * @return {[type]} [description]
 	 */
@@ -222,6 +223,9 @@ InstallManager.prototype = {
 		return false;
 	},
 
+	/**
+	 * @return true if there are newly found dependencies added to package.json
+	 */
 	printComponentDep: function(write) {
 		var newDepJson = {};
 		var self = this;
@@ -237,7 +241,7 @@ InstallManager.prototype = {
 		}
 		var depNames = _.keys(this.srcDeps);
 		if (depNames.length === 0)
-			return;
+			return false;
 		var nameWidth = _.maxBy(depNames, name => name.length).length;
 
 		_.forOwn(this.srcDeps, (versionList, name) => {
@@ -251,7 +255,11 @@ InstallManager.prototype = {
 				newDepJson[name] = versionList[0].ver;
 			}
 		});
-		_.each(newDepJson, (ver, name) => log.info(chalk.blue('\t+ %s: %s'), name, ver));
+		var needInstall = _.size(newDepJson) > 0;
+		if (needInstall) {
+			log.warn(chalk.blue('New component\'s dependencies are found:'));
+			_.each(newDepJson, (ver, name) => log.info(chalk.blue('\t+ %s: %s'), name, ver));
+		}
 
 		mkdirp.sync(config().destDir);
 		//var file = Path.join(config().destDir, 'component-dependencies.json');
@@ -261,7 +269,9 @@ InstallManager.prototype = {
 				mainPkjson.devDependencies = {};
 			_.assign(mainPkjson.devDependencies, newDepJson);
 			fs.writeFileSync(mainPkFile, JSON.stringify(mainPkjson, null, '  '));
+			log.info('%s is written.', mainPkFile);
+			return needInstall;
 		}
-		log.info('%s is written.', mainPkFile);
+		return false;
 	}
 };

@@ -1,13 +1,10 @@
 language: node_js
 node_js:
     - "6.5.0"
-env:
-    - NO_INTERNAL_RECIPE=true
 install:
     - npm install wfh
-    - node_modules/.bin/drcp project -a .
-    - npm install
+    - npm run-script project
 before_script:
 script:
-    - node_modules/.bin/drcp lint
-    - node_modules/.bin/drcp test
+    - npm run-script lint
+    - npm run-script test

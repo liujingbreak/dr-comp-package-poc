@@ -38,6 +38,9 @@ exports.bumpProjectsAsync = bumpProjectsAsync;
 // 	});
 // }
 
+/**
+ * @return true if there are newly found dependencies added to package.json
+ */
 function listCompDependency(pkJsonFiles, write) {
 	var installer = new PackageInstall();
 	installer.scanSrcDeps(pkJsonFiles);

@@ -47,7 +47,6 @@
     "loader-utils": "^1.1.0",
     "pify": "^2.3.0",
     "sass-loader": "^6.0.3",
-    "node-sass": "^4.0.0",
     "jade": "^1.11.0",
     "promise-polyfill": "^6.0.2"
   },
