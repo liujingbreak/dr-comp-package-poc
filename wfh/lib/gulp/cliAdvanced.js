@@ -122,7 +122,9 @@ function _addupCompConfigProp(componentConfigs, compName, browserSideConfigProp,
 	if (!configJson)
 		return;
 	// component customized configuration properties
-	var componentConfig = _.assign({}, configJson.public, configJson.server);
+	var componentConfig = _.assign({}, configJson.public);
+	deeplyMergeJson(componentConfig, configJson.server);
+
 	if (_.size(componentConfig) > 0 )
 		componentConfigs[compName] = componentConfig;
 
