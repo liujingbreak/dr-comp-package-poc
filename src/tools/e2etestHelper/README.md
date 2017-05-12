@@ -44,6 +44,7 @@ Ideally you should group your test specs in subdirectories like:
 	```yaml
     e2etestHelper:
        tryConnectTimes: 5
+	   waitTimeout: 10000 # Default wait timeout in ms
 	```
 	By default, end-to-end test waits for server starting, it tries to connect server for 15 times at 1 seconds interval, you can add this `tryConnectTimes` to override this default retry times.
 
@@ -147,7 +148,7 @@ module.exports = new YourPage();
 | - | -
 | .driver | Underneath Webdriver instance
 | .waitForElement(cssSelector [,errMsg , timeout]) | {string or el} `cssSelector`, return Promise(WebElement)
-| .wait(func [,errMsg , timeout]) | return Promise(true), `func` is a `function` that returns `true|false`, `timeout` is 5 seconds
+| .wait(func [,errMsg , timeout]) | return Promise(true), `func` is a `function` that returns `true|false`, `timeout` is 10 seconds
 | .statusCodeOf(path) | return a Promise, resolved to a number type `statusCode`
 | .saveScreen(fileName) | Take a screenshot for browser and save to folder `dist` as `config.resolve('destDir')`
 

@@ -10,6 +10,7 @@ var basePage = require('./basePage');
 
 var isWindows = process.platform.indexOf('win32') >= 0;
 var driver, config, urlPrefix;
+var WAIT_TIMEOUT = 10000;
 var browser = 'firefox'; // default is firefox
 
 // lazy restart webdriver and make it singleton
@@ -50,6 +51,7 @@ function run(theConfig, browser, serverModule, cwd, runTest) {
 	} else {
 		exports.urlPrefix = urlPrefix = 'http://localhost:' + config().port;
 	}
+	WAIT_TIMEOUT = config.get('e2etestHelper.waitTimeout', 10000);
 	// `basePage` relies on `urlPrefix`
 	exports.basePage = basePage;
 	basePage.prototype._urlPrefix = urlPrefix;
@@ -139,7 +141,7 @@ function ensureDriver() {
 function wait(func, errMsg, timeout) {
 	if (_.isFunction(func))
 		return driver.wait(new webdriver.until.Condition(errMsg || 'wait() timeout', func),
-			timeout || 5000,
+			timeout || WAIT_TIMEOUT,
 			errMsg || 'wait() timeout');
 	else {
 		return waitForElement(func, errMsg, timeout);
@@ -151,7 +153,7 @@ function waitForElement(css, errMsg, timeout) {
 	return driver.wait(
 		webdriver.until.elementLocated(locator),
 		//new webdriver.until.WebElementCondition(errMsg || 'wait() timeout', () => driver.findElement(locator)),
-		timeout || 5000,
+		timeout || WAIT_TIMEOUT,
 		errMsg || 'wait() timeout');
 }
 
@@ -226,7 +228,7 @@ function setBrowser(name) {
 
 function waitForServerStart() {
 	var tryCount = 1;
-	log.debug('wait for server starting');//setTimeout(done, 5000);
+	log.debug('wait for server starting');//setTimeout(done, WAIT_TIMEOUT);
 
 	return new Promise((resolve, reject) => {
 		tryConnectServer();
@@ -267,7 +269,7 @@ function waitForServerStart() {
  */
 function waitForServer(done) {
 	var tryCount = 1;
-	log.debug('wait for server starting');//setTimeout(done, 5000);
+	log.debug('wait for server starting');//setTimeout(done, WAIT_TIMEOUT);
 	tryConnectServer(done);
 
 	function tryConnectServer(done) {

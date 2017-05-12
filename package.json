@@ -1,12 +1,18 @@
 {
   "name": "web-fun-house",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Do not publish me",
   "main": "app.js",
+  "config": {
+    "internalRecipe": "no"
+  },
   "scripts": {
     "start": "node app.js",
-    "lint": "gulp lint",
-    "e2e": "gulp e2e --browser chrome"
+    "init": "node_modules/.bin/drcp init",
+    "project": "node_modules/.bin/drcp project -a .",
+    "lint": "node_modules/.bin/drcp lint",
+    "test": "node_modules/.bin/drcp test",
+    "e2e": "node_modules/.bin/drcp e2e --browser chrome"
   },
   "author": "noone@dianrong.com",
   "license": "MIT",

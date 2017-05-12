@@ -7,7 +7,7 @@ var shell = require('shelljs');
 var Promise = require('bluebird');
 var buildUtils = require('./buildUtils');
 var argv = require('./showHelp');
-const INTERNAL_RECIPE_VER = '~0.3.15';
+const INTERNAL_RECIPE_VER = '~0.3.16';
 
 module.exports = {
 	init: init,
@@ -90,7 +90,7 @@ function _initWorkspace() {
 
 	let parsedPkj = JSON.parse(jsonStr);
 	//let testInternalComp = Path.resolve(rootPath, 'node_modules', '@dr-core', 'webpack2-builder');
-	if (isDrcpSymlink || process.env.NO_INTERNAL_RECIPE) {
+	if (isDrcpSymlink || process.env.NO_INTERNAL_RECIPE || process.env.npm_package_config_internalRecipe === 'no') {
 		delete parsedPkj.dependencies['@dr/internal-recipe'];
 	} else if (_.get(parsedPkj, ['dependencies', '@dr/internal-recipe']) !== INTERNAL_RECIPE_VER) {
 		parsedPkj.dependencies['@dr/internal-recipe'] = INTERNAL_RECIPE_VER;
@@ -115,11 +115,16 @@ function _initProjects(isDrcpSymlink) {
 			console.log('node_modules/dr-comp-package is symbolic link, add its dependencies to %s', chalk.cyan(Path.resolve('package.json')));
 			pkJsonFiles.push(Path.resolve('node_modules', 'dr-comp-package', 'package.json'));
 		}
-		helper.listCompDependency(pkJsonFiles, true);
+		var needRunInstall = helper.listCompDependency(pkJsonFiles, true);
 		var configFileContents = yield helper.addupConfigs();
 		_.each(configFileContents, (configContent, file) => {
 			writeFile(file, '\n# DO NOT MODIFIY THIS FILE!\n' + configContent);
 		});
+		if (needRunInstall) {
+			console.log(chalk.cyan('Executing "npm install" for newly found dependencies'));
+			yield install();
+			console.log(chalk.cyan('In case above installation is not successful, please manually execute "npm install" again.'));
+		}
 	})()
 	.catch(err => {
 		console.error(chalk.red(err), err.stack);
@@ -189,11 +194,8 @@ function returnProject() {
 }
 
 function install() {
-	return Promise.all([
-		buildUtils.promisifyExe('npm', 'install', {cwd: rootPath})])
-	.then(() => {
-		console.log('Done');
-	});
+	//console.log(fs.readFileSync(Path.join(rootPath, 'package.json'), 'utf8'));
+	return buildUtils.promisifyExe('npm', 'install', {cwd: rootPath});
 }
 
 function clean() {
