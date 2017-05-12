@@ -7,7 +7,7 @@ var shell = require('shelljs');
 var Promise = require('bluebird');
 var buildUtils = require('./buildUtils');
 var argv = require('./showHelp');
-const INTERNAL_RECIPE_VER = '~0.3.16';
+const INTERNAL_RECIPE_VER = '~0.3.17';
 
 module.exports = {
 	init: init,
@@ -121,9 +121,9 @@ function _initProjects(isDrcpSymlink) {
 			writeFile(file, '\n# DO NOT MODIFIY THIS FILE!\n' + configContent);
 		});
 		if (needRunInstall) {
-			console.log(chalk.cyan('Executing "npm install" for newly found dependencies'));
-			yield install();
-			console.log(chalk.cyan('In case above installation is not successful, please manually execute "npm install" again.'));
+			//console.log(chalk.cyan('Executing "npm install" for newly found dependencies'));
+			//yield install();
+			console.log(chalk.red('There are new dependencies need to be installed. Please execute "npm install"!'));
 		}
 	})()
 	.catch(err => {

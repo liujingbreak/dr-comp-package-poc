@@ -36,7 +36,11 @@ function loadAsync(content, loader) {
 		if (packageExports && _.isFunction(packageExports.onCompileTemplate)) {
 			log.debug('swig template: ', file);
 			loader.addDependency(require.resolve(browserPackage.longName));
+			var includedFileSet = {};
 			templateBuilder.fileHandler.onFile = includedFile => {
+				if (_.has(includedFileSet, includedFile))
+					return;
+				includedFileSet[includedFile] = 1;
 				loader.addDependency(includedFile);
 				log.info('Swig includes file %s', includedFile);
 			};
