@@ -13,6 +13,18 @@ var jsParser = require('./jsParser');
 var config;
 var transformAdded = false;
 
+// add webpack plugin
+require('@dr-core/webpack2-builder').tapable.plugin('webpackConfig', function(webpackConfig, cb) {
+	webpackConfig.plugins.push(function() {
+		this.plugin('watch-run', function(compiler, cb) {
+			log.info('Clear i18n resource cache !');
+			require('./loader').clearCache();
+			cb(null);
+		});
+	});
+	cb(null, webpackConfig);
+});
+
 exports.compile = function() {
 	config = api.config;
 	if (!api.argv.translate) {
