@@ -55,6 +55,7 @@
   "dr": {
     "category": ["tool", "internal", "nodejs"],
     "chunk": "common-app",
+    "cssScope": false,
     "type": [
       "builder",
       "server"

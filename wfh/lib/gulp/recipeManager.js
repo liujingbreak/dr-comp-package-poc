@@ -63,10 +63,13 @@ function _projectSrcRecipeMap(projectDir) {
 		else
 			nameSrcSetting['recipes/' + projectName] = '.';
 	}
-	_.each(nameSrcSetting, (srcDir, recipeName) => {
+	_.each(nameSrcSetting, (srcDirs, recipeName) => {
 		if (!_.endsWith(recipeName, '-recipe'))
 			recipeName += '-recipe';
-		recipeSrcMapping[Path.join(projectDir, recipeName)] = Path.resolve(projectDir, srcDir);
+		if (!Array.isArray(srcDirs))
+			srcDirs = [srcDirs];
+		var recipeDir = Path.join(projectDir, recipeName);
+		srcDirs.forEach(srcDir => recipeSrcMapping[recipeDir] = Path.resolve(projectDir, srcDir));
 	});
 	return recipeSrcMapping;
 }

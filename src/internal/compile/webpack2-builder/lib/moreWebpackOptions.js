@@ -229,12 +229,13 @@ function entryHtmlCompilePlugin(moduleDep) {
 		compilation.plugin('multi-entry-html-compile-html', (file, $, cb) => {
 			var html = $('html');
 			var comp = api.findPackageByFile(file);
-			if (comp) {
+			if (comp && _.get(comp, 'dr.cssScope') !== false) {
 				html.addClass(comp.shortName);
 				if (!map)
 					map = moduleDep.listCommonJsDepMap(compilation);
 				for (let depComp of map.get(comp.longName)) {
-					html.addClass(depComp.shortName);
+					if (_.get(depComp, 'dr.cssScope') !== false)
+						html.addClass(depComp.shortName);
 				}
 			}
 			cb();

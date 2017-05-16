@@ -40,8 +40,9 @@ function init() {
 	maybeCopyTemplate(Path.resolve(__dirname, 'templates/config.local-template.yaml'), rootPath + '/config.local.yaml');
 	maybeCopyTemplate(Path.resolve(__dirname, 'templates/log4js.json'), rootPath + '/log4js.json');
 	maybeCopyTemplate(Path.resolve(__dirname, 'templates/app-template.js'), rootPath + '/app.js');
+	/* It seems that JSCS needs its rc file to be present in Current working directory */
 	maybeCopyTemplate(Path.resolve(__dirname, '../../.jscsrc'), rootPath + '/.jscsrc');
-	maybeCopyTemplate(Path.resolve(__dirname, '../../.jshintrc'), rootPath + '/.jshintrc');
+	// maybeCopyTemplate(Path.resolve(__dirname, '../../.jshintrc'), rootPath + '/.jshintrc');
 	maybeCopyTemplate(Path.resolve(__dirname, 'templates', 'module-resolve.server.tmpl.js '), rootPath + '/module-resolve.server.js');
 	maybeCopyTemplate(Path.resolve(__dirname, 'templates', 'module-resolve.browser.tmpl.js'), rootPath + '/module-resolve.browser.js');
 	//git-hook
@@ -57,6 +58,9 @@ drcp lint --pj "${project}"
 				shell.chmod('-R', '+x', project + '/.git/hooks/*');
 			}
 		}
+		maybeCopyTemplate(Path.resolve(__dirname, '../../.jscsrc'), project + '/.jscsrc');
+		/* It seems that JSHint needs its rc file to be present in source file's upper level directory */
+		maybeCopyTemplate(Path.resolve(__dirname, '../../.jshintrc'), project + '/.jshintrc');
 	});
 	var initProm = Promise.resolve(_initWorkspace());
 	return initProm.then(() => _drawPuppy());
