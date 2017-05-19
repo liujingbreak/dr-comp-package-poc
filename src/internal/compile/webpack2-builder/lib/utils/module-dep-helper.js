@@ -24,13 +24,13 @@ DependencyHelper.prototype = {
 				var packages = new Set();
 				entryPackage2Module.set(comp.longName, packages);
 				log.info('%s depends on:', chalk.cyan(comp.longName));
-				this._traverseDep(m, packages, 0);
+				this._traverseDep(m, packages, {}, 0);
 				packages.forEach(c => log.info(chalk.cyan('├─ %s'), c.longName));
 			}
 		});
 		return entryPackage2Module;
 	},
-	_traverseDep: function(m, packages, level) {
+	_traverseDep: function(m, packages, traveled, level) {
 		_.each(m.dependencies, dep => {
 			if (!dep.module || !dep.request)
 				return;
@@ -44,7 +44,10 @@ DependencyHelper.prototype = {
 					}
 				}
 			}
-			this._traverseDep(dep.module, packages, level + 1);
+			if (_.has(traveled, dep.module.id))
+				return;
+			traveled[dep.module.id] = 1;
+			this._traverseDep(dep.module, packages, traveled, level + 1);
 		});
 	}
 };
