@@ -1,6 +1,6 @@
 {
   "name": "@dr-core/browserify-builder-api",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Add some useful API to work with browserify-builder",
   "browser": "browserifyBuilderApi.browser.js",
   "main": "browserifyBuilderApi.server.js",
@@ -13,6 +13,7 @@
       "server",
       "core"
     ],
+    "cssScope": false,
     "builderPriority": 0,
     "category": ["internal"]
   },

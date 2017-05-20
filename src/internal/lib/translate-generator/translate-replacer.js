@@ -4,7 +4,6 @@ var acorn = require('acorn');
 var _ = require('lodash');
 var acornjsx = require('acorn-jsx/inject')(acorn);
 var api = require('__api');
-var _ = require('lodash');
 var log = require('log4js').getLogger(api.packageName);
 var cheerio = require('cheerio');
 var jsParser = require('./jsParser');
@@ -58,36 +57,38 @@ function getBrowserifyReplacerTransform(locale) {
 }
 
 exports.replaceJS = replaceJS;
-function replaceJS(source, file, locale, skipPackageCache) {
-	var res = checkSkipPackageAndGetRes(file, locale, skipPackageCache);
-	// if (!res)
-	// 	return source;
-	var ast;
-	try {
-		ast = acornjsx.parse(source, {locations: true, allowHashBang: true, plugins: {jsx: true}});
-	} catch (err) {
-		ast = acornjsx.parse(source, {locations: true, allowHashBang: true, plugins: {jsx: true},
-			sourceType: 'module'});
-	}
-	//var ast = acorn.parse(source, {locations: true});
-	var replacements = [];
-	jsParser(source, (keyNode, callExpNode) => {
-		var replaced;
-		if (!res)
-			replaced = keyNode;
-		else if (!_.has(res, keyNode)) {
-			log.warn('missing i18n message for: %s', keyNode);
-			replaced = keyNode;
-		} else
-			replaced = res[keyNode];
-		replacements.push({
-			start: callExpNode.start,
-			end: callExpNode.end,
-			replacement: '"' + replaced + '"'
-		});
-		log.debug('Replace JS i18n message "%s" with:\n%s', keyNode, replaced);
-	}, file, ast);
-	return patchText(source, replacements);
+function replaceJS(source, file, locale, skipPackageCache, onLoadRes) {
+	return checkSkipPackageAndGetRes(file, locale, skipPackageCache, onLoadRes)
+	.then(res => {
+		// if (!res)
+		// 	return source;
+		var ast;
+		try {
+			ast = acornjsx.parse(source, {locations: true, allowHashBang: true, plugins: {jsx: true}});
+		} catch (err) {
+			ast = acornjsx.parse(source, {locations: true, allowHashBang: true, plugins: {jsx: true},
+				sourceType: 'module'});
+		}
+		//var ast = acorn.parse(source, {locations: true});
+		var replacements = [];
+		jsParser(source, (keyNode, callExpNode) => {
+			var replaced;
+			if (!res)
+				replaced = keyNode;
+			else if (!_.has(res, keyNode)) {
+				log.warn('missing i18n message for: %s', keyNode);
+				replaced = keyNode;
+			} else
+				replaced = res[keyNode];
+			replacements.push({
+				start: callExpNode.start,
+				end: callExpNode.end,
+				replacement: '"' + replaced + '"'
+			});
+			log.debug('Replace JS i18n message "%s" with:\n%s', keyNode, replaced);
+		}, file, ast);
+		return patchText(source, replacements);
+	});
 }
 
 exports.htmlReplacer = function(source, file, locale) {
@@ -98,36 +99,43 @@ exports.htmlReplacer = function(source, file, locale) {
 };
 
 exports.replaceHtml = replaceHtml;
-function replaceHtml(source, file, locale, skipPackageCache) {
-	var res = checkSkipPackageAndGetRes(file, locale, skipPackageCache);
-	if (!res)
-		return source;
-	var $ = cheerio.load(source, {decodeEntities: false});
-	$('.t').each(onElement);
-	$('.dr-translate').each(onElement);
-	$('[t]').each(onElement);
-	$('[dr-translate]').each(onElement);
+function replaceHtml(source, file, locale, skipPackageCache, onLoadRes) {
+	return checkSkipPackageAndGetRes(file, locale, skipPackageCache, onLoadRes)
+	.then(res => {
+		if (!res)
+			return source;
+		var $ = cheerio.load(source, {decodeEntities: false});
+		$('.t').each(onElement);
+		$('.dr-translate').each(onElement);
+		$('[t]').each(onElement);
+		$('[dr-translate]').each(onElement);
 
-	function onElement(i, dom) {
-		var el = $(dom);
-		var key = el.html();
-		// if (!_.has(res, key))
-		// 	log.debug('missing i18n message for: %s', key);
-		el.html(res[key]);
-		log.debug('Replace HTML i18n message "%s" with:\n%s', key, res[key]);
-	}
-	return $.html();
+		function onElement(i, dom) {
+			var el = $(dom);
+			var key = el.html();
+			// if (!_.has(res, key))
+			// 	log.debug('missing i18n message for: %s', key);
+			el.html(res[key]);
+			log.debug('Replace HTML i18n message "%s" with:\n%s', key, res[key]);
+		}
+		return $.html();
+	});
 }
 
-function checkSkipPackageAndGetRes(file, locale, skipPackageCache) {
+// var resourceCache = {};
+// exports.cleanCache = function() {
+// 	resourceCache = {};
+// };
+
+function checkSkipPackageAndGetRes(file, locale, skipPackageCache, onLoadRes) {
 	var drPackage = api.findPackageByFile(file);
 	if (!drPackage || skipPackageCache && _.has(skipPackageCache, drPackage.longName)) {
 		//log.debug('skip file: %s', file);
-		return false;
+		return Promise.resolve(false);
 	} else if (!drPackage.translatable) {
 		log.debug('skip non-translatable package file: %s', file);
 		skipPackageCache[drPackage.longName] = 1;
-		return false;
+		return Promise.resolve(false);
 	}
 	var solved;
 	var resName = drPackage.longName + '/i18n/message-' + locale + '.yaml';
@@ -136,5 +144,15 @@ function checkSkipPackageAndGetRes(file, locale, skipPackageCache) {
 	} catch (e) {
 		solved = false;
 	}
-	return solved ? yamljs.parse(fs.readFileSync(require.resolve(resName), 'utf8')) : false;
+	if (solved) {
+		// if (_.has(resourceCache, 'solved'))
+		// 	return resourceCache[solved];
+		if (onLoadRes)
+			return onLoadRes(resName);
+		else
+			return Promise.resolve(yamljs.parse(fs.readFileSync(solved, 'utf8')));
+		//resourceCache[solved] = res;
+		//return res;
+	}
+	return Promise.resolve(false);
 }

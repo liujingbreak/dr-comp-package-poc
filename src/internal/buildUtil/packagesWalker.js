@@ -150,13 +150,19 @@ function _walkPackages(compileNodePath) {
 }
 
 function resolveStyle(name) {
-	return fs.realpathSync(resolve.sync(name, {
-		paths: api.compileNodePath,
-		packageFilter: (pkg, pkgfile) => {
-			pkg.main = pkg.style;
-			return pkg;
-		}
-	}));
+	var entry;
+	try {
+		return fs.realpathSync(resolve.sync(name, {
+			paths: api.compileNodePath,
+			packageFilter: (pkg, pkgfile) => {
+				entry = pkg.main = pkg.style;
+				return pkg;
+			}
+		}));
+	} catch (err) {
+		log.warn('Can not resolve style file "%s" of package %s', entry, name);
+		return null;
+	}
 }
 
 /**
