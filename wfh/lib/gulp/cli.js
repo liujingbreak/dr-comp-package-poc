@@ -97,7 +97,7 @@ function _initWorkspace() {
 	if (isDrcpSymlink || process.env.NO_INTERNAL_RECIPE || process.env.npm_package_config_internalRecipe === 'no') {
 		delete parsedPkj.dependencies['@dr/internal-recipe'];
 	} else if (_.get(parsedPkj, ['dependencies', '@dr/internal-recipe']) !== INTERNAL_RECIPE_VER) {
-		parsedPkj.dependencies['@dr/internal-recipe'] = INTERNAL_RECIPE_VER;
+		_.set(parsedPkj, ['dependencies', '@dr/internal-recipe'], INTERNAL_RECIPE_VER);
 		console.log(chalk.blue('+ @dr/internal-recipe: %s'), parsedPkj.dependencies['@dr/internal-recipe']);
 	}
 	writeFile(Path.join(rootPath, 'package.json'), JSON.stringify(parsedPkj, null, '  '));
