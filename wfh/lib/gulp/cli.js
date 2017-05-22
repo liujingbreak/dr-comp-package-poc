@@ -7,7 +7,7 @@ var shell = require('shelljs');
 var Promise = require('bluebird');
 var buildUtils = require('./buildUtils');
 var argv = require('./showHelp');
-const INTERNAL_RECIPE_VER = '~0.3.20';
+const INTERNAL_RECIPE_VER = '~0.3.21';
 
 module.exports = {
 	init: init,
@@ -27,7 +27,7 @@ function initGulpfile() {
 	var gulpfile = Path.join(rootPath, 'gulpfile.js');
 	if (!fs.existsSync(gulpfile)) {
 		var content = fs.readFileSync(Path.join(__dirname, 'templates', 'gulpfile-template.js'), 'utf8');
-		var relativePath = Path.relative(rootPath, wfhHome);
+		var relativePath = Path.relative(rootPath, wfhHome).replace(/\\/g, '/');
 		if (!_.startsWith(relativePath, '.')) {
 			relativePath = './' + relativePath;
 		}

@@ -42,6 +42,9 @@ function parse(content, loader) {
 
 function traverseRuleNodes(nodes, currPackage, file) {
 	var selector = null;
+	var cls = currPackage.dr.cssScope;
+	if (!_.isString(cls))
+		cls = currPackage.shortName;
 	_.each(nodes, node => {
 		if (node.type === 'atrule' && node.name === 'media') {
 			traverseRuleNodes(node.nodes, currPackage, file);
@@ -59,7 +62,7 @@ function traverseRuleNodes(nodes, currPackage, file) {
 		if (i >= 0) {
 			log.info('Found HTML css selector: %s in %s', selector, file);
 			selectorNode.nodes.splice(i + 1, 0, {
-				type: 'class', name: currPackage.shortName
+				type: 'class', name: cls
 			});
 		} else {
 			var firstType = _.get(selectorNode, 'nodes[0].type');
@@ -67,12 +70,12 @@ function traverseRuleNodes(nodes, currPackage, file) {
 				log.info('Skip :global css selector: %s in %s', selector, file);
 				return;
 			}
-			if (firstType === 'class' && selectorNode.nodes[0].name === currPackage.shortName) {
+			if (firstType === 'class' && selectorNode.nodes[0].name === cls) {
 				log.debug('Skip duplicate package short name css selector: %s in %s', selector, file);
 				return;
 			}
 			selectorNode.nodes.unshift({
-					type: 'class', name: currPackage.shortName
+					type: 'class', name: cls
 				},
 				{type: 'spacing', value: ' '}
 			);

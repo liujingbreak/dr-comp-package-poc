@@ -230,12 +230,15 @@ function entryHtmlCompilePlugin(moduleDep) {
 			var html = $('html');
 			var comp = api.findPackageByFile(file);
 			if (comp && _.get(comp, 'dr.cssScope') !== false) {
-				html.addClass(comp.shortName);
+				var cls = _.get(comp, 'dr.cssScope');
+				html.addClass(_.isString(cls) ? cls : comp.shortName);
 				if (!map)
 					map = moduleDep.listCommonJsDepMap(compilation);
 				for (let depComp of map.get(comp.longName)) {
-					if (_.get(depComp, 'dr.cssScope') !== false)
-						html.addClass(depComp.shortName);
+					if (_.get(depComp, 'dr.cssScope') !== false) {
+						let cls = _.get(depComp, 'dr.cssScope');
+						html.addClass(_.isString(cls) ? cls : depComp.shortName);
+					}
 				}
 			}
 			cb();
