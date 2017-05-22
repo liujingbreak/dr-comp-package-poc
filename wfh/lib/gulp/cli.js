@@ -7,7 +7,7 @@ var shell = require('shelljs');
 var Promise = require('bluebird');
 var buildUtils = require('./buildUtils');
 var argv = require('./showHelp');
-const INTERNAL_RECIPE_VER = '~0.3.19';
+const INTERNAL_RECIPE_VER = '~0.3.20';
 
 module.exports = {
 	init: init,
