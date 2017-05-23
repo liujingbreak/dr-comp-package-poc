@@ -7,7 +7,7 @@ var shell = require('shelljs');
 var Promise = require('bluebird');
 var buildUtils = require('./buildUtils');
 var argv = require('./showHelp');
-const INTERNAL_RECIPE_VER = '~0.3.21';
+const INTERNAL_RECIPE_VER = '~0.3.27';
 
 module.exports = {
 	init: init,
@@ -96,7 +96,7 @@ function _initWorkspace() {
 	//let testInternalComp = Path.resolve(rootPath, 'node_modules', '@dr-core', 'webpack2-builder');
 	if (isDrcpSymlink || process.env.NO_INTERNAL_RECIPE || process.env.npm_package_config_internalRecipe === 'no') {
 		delete parsedPkj.dependencies['@dr/internal-recipe'];
-	} else if (_.get(parsedPkj, ['dependencies', '@dr/internal-recipe']) !== INTERNAL_RECIPE_VER) {
+	} else if (_.get(parsedPkj, ['dependencies', '@dr/internal-recipe']) == null) {
 		_.set(parsedPkj, ['dependencies', '@dr/internal-recipe'], INTERNAL_RECIPE_VER);
 		console.log(chalk.blue('+ @dr/internal-recipe: %s'), parsedPkj.dependencies['@dr/internal-recipe']);
 	}
