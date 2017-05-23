@@ -62,7 +62,7 @@ function symbolicLinkPackages(destDir) {
 				return callback();
 			}
 			json = JSON.parse(content);
-			newPath = Path.join(destDir, 'node_modules', json.name);
+			newPath = Path.join(fs.realpathSync(Path.join(destDir, 'node_modules')), json.name);
 			var stat, exists;
 			try {
 				stat = fs.lstatSync(newPath);

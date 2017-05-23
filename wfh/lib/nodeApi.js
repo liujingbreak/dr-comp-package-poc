@@ -31,6 +31,11 @@ NodeApi.prototype = {
 		if (arguments.length === 1) {
 			path = packageName;
 			packageName = this.packageName;
+			var m = /assets:\/\/((?:@[^\/]+\/)?[^\/]+)?(\/.*)/.exec(path);
+			if (m) {
+				packageName = m[1];
+				path = m[2];
+			}
 		}
 		if (_.startsWith(path, '/')) {
 			path = path.substring(1);

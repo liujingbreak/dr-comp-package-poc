@@ -38,8 +38,11 @@ function parse(source, loader) {
 	if (currPackage && currPackage.longName !== api.packageName /*@dr-core/webpack2-builder*/ &&
 		currPackage.dr.cssScope !== false && file === currPackage.file) {
 		hasApi = true;
+		var cls = currPackage.dr.cssScope;
+		if (typeof cls !== 'string')
+			cls = currPackage.parsedName.name;
 		log.debug('Insert CSS scope classname to:\n %s', file);
-		source = `__api._addCssScopeClassname([\'${currPackage.parsedName.name}\']);
+		source = `__api._addCssScopeClassname([\'${cls}\']);
 ${source}`;
 	}
 	var astFromCache = false;

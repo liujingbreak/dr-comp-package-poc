@@ -68,6 +68,11 @@ BrowserApi.prototype = {
 		if (arguments.length === 1) {
 			path = packageName;
 			packageName = this.packageShortName;
+			var m = /assets:\/\/((?:@[^\/]+\/)?[^\/]+)?(\/.*)/.exec(path);
+			if (m) {
+				packageName = m[1];
+				path = m[2];
+			}
 		}
 		//return resolveUrl(this.config, packageName, path);
 
