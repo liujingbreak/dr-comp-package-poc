@@ -2,9 +2,9 @@ const gutil = require('gulp-util');
 const PluginError = gutil.PluginError;
 const through = require('through2');
 const Promise = require('bluebird');
-const del = require('del');
+const fs = require('fs-extra');
 const mkdirp = require('mkdirp');
-const fs = require('fs');
+//const fs = require('fs');
 const Path = require('path');
 const File = require('vinyl');
 const jsonLint = require('json-lint');
@@ -82,7 +82,9 @@ function symbolicLinkPackages(destDir) {
 					fs.unlinkSync(newPath);
 					_symbolicLink(Path.dirname(file.path), newPath);
 				} else if (stat.isDirectory()) {
-					del.sync([newPath]);
+					log.info('Remove installed package "%s"', Path.relative(process.cwd(), newPath));
+					//del.sync([newPath]);
+					yield fs.remove(newPath);
 					_symbolicLink(Path.dirname(file.path), newPath);
 				}
 			}
@@ -106,7 +108,7 @@ function symbolicLinkPackages(destDir) {
 function _symbolicLink(dir, link) {
 	mkdirp.sync(Path.dirname(link));
 	fs.symlinkSync(Path.relative(Path.dirname(link), dir), link, isWin32 ? 'junction' : 'dir');
-	log.info('create symbolic link %s', link);
+	log.info('Create symbolic link %s', Path.relative(process.cwd(), link));
 }
 
 var packageJsonTemp = {
@@ -127,7 +129,7 @@ function addDependency(recipeAbsDir) {
 	if (recipeAbsDir) {
 		var recipeFile = Path.resolve(recipeAbsDir, 'package.json');
 		if (fs.existsSync(recipeFile)) {
-			log.info('existing recipeFile=', recipeFile);
+			log.info('Existing recipeFile %s', recipeFile);
 			var content = fs.readFileSync(recipeFile, 'utf8');
 			try {
 				destJson = JSON.parse(content);
