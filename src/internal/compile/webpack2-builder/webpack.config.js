@@ -204,7 +204,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 
 			new ManualChunkPlugin({
 				manifest: 'runtime',
-				defaultChunkName: api.config.get([api.packageName, 'defaultChunkName'], 'common-lib'),
+				defaultChunkName: api.config.get([api.packageName, 'defaultChunkName'], 'default-chunk'),
 				getChunkName: (file) => {
 					var bundle = file2EntryChunkName[file];
 					if (bundle)

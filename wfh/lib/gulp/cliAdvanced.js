@@ -3,10 +3,9 @@
  */
 var PackageInstall = require('./packageInstallMgr');
 var config = require('../config');
-var shell = require('shelljs');
 var jsYaml = require('js-yaml');
 var Path = require('path');
-var fs = require('fs');
+var fs = require('fs-extra');
 var _ = require('lodash');
 var chalk = require('chalk');
 var gulp = require('gulp');
@@ -90,8 +89,10 @@ function addupConfigs() {
 		//}
 		// chunks
 		var chunk = _.has(json, 'dr.chunk') ? dr.chunk : dr.bundle;
-		if (!chunk && (dr.entryPage || dr.entryView))
-			chunk = parsedName.name;
+		if (!chunk) {
+			if ((dr.entryPage || dr.entryView))
+				chunk = parsedName.name; // Entry package should have a default chunk name as its package short name
+		}
 		if (chunk) {
 			if (_.has(vendorBundleMap, chunk))
 				vendorBundleMap[chunk].push(name);
@@ -139,17 +140,10 @@ function cleanPackagesWalkerCache() {
 }
 
 function clean() {
-	return new Promise((resolve, reject) => {
-		require('./recipeManager').clean()
-		.on('end', resolve)
-		.on('error', err => {
-			console.error(err);
-			reject(new Error(err));
-		});
-	})
+	return require('./recipeManager').clean()
 	.then(()=> {
-		shell.rm('-rf', config().staticDir);
-		shell.rm('-rf', config().destDir);
+		fs.removeSync(config().staticDir);
+		fs.removeSync(config().destDir);
 	});
 }
 

@@ -8,7 +8,7 @@ const findPackageJson = require('./findPackageJson');
 const rwPackageJson = require('./rwPackageJson');
 const glob = require('glob');
 const log = require('log4js').getLogger('wfh.' + Path.basename(__filename, '.js'));
-const fs = require('fs');
+const fs = require('fs-extra');
 const File = require('vinyl');
 
 const linkListFile = config.resolve('destDir', 'link-list.json');
@@ -137,25 +137,32 @@ function linkComponentsAsync() {
 
 function clean() {
 	var recipes = [];
+	var removalProms = [];
 	if (fs.existsSync(linkListFile)) {
 		var list = fs.readFileSync(linkListFile, 'utf8');
 		list = JSON.parse(list);
-		list.forEach(linkPath => {
+		removalProms = list.map(linkPath => {
 			log.info('Removing symbolic link file %s', linkPath);
-			fs.unlink(Path.resolve(config().rootPath, linkPath));
+			return fs.remove(Path.resolve(config().rootPath, linkPath));
 		});
 	}
-	eachRecipeSrc(function(src, recipeDir) {
-		if (recipeDir)
-			recipes.push(Path.join(recipeDir, 'package.json'));
+	return Promise.all(removalProms).then(() => {
+		eachRecipeSrc(function(src, recipeDir) {
+			if (recipeDir)
+				recipes.push(Path.join(recipeDir, 'package.json'));
+		});
+		return new Promise((resolve, j) => {
+			gulp.src(recipes, {base: config().rootPath})
+			.pipe(rwPackageJson.removeDependency())
+			.pipe(through.obj(function(file, enc, next) {
+				log.debug('out: ' + file.path);
+				next(null, file);
+			}))
+			.pipe(gulp.dest(config().rootPath))
+			.on('end', () => resolve())
+			.on('error', j);
+		});
 	});
-	return gulp.src(recipes, {base: config().rootPath})
-	.pipe(rwPackageJson.removeDependency())
-	.pipe(through.obj(function(file, enc, next) {
-		log.debug('out: ' + file.path);
-		next(null, file);
-	}))
-	.pipe(gulp.dest(config().rootPath));
 }
 
 function linkToRecipeFile(srcDir, recipeDir, onPkJsonFile) {
