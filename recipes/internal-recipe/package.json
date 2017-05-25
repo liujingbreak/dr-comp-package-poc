@@ -1,10 +1,10 @@
 {
   "name": "@dr/internal-recipe",
-  "version": "0.3.28",
+  "version": "0.3.29",
   "description": "Component group: internal-recipe",
   "dependencies": {
     "@dr-core/labjs": "0.2.0",
-    "@dr-core/build-util": "0.3.4",
+    "@dr-core/build-util": "0.3.5",
     "@dr-core/assets-processer": "0.6.1",
     "@dr-core/browserify-builder": "0.7.2",
     "@dr-core/browserify-builder-api": "0.5.2",

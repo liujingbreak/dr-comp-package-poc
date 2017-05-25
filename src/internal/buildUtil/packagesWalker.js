@@ -137,6 +137,8 @@ function _walkPackages(compileNodePath) {
 			browser: pkJson.browser,
 			i18n: pkJson.dr ? (pkJson.dr.i18n ? pkJson.dr.i18n : null) : null
 		});
+		if (instance.file == null && (instance.entryPages || instance.entryViews))
+			throw new Error(`Entry package "${instance.longName}"\'s "browser" or "main" file ${mainFile} doesn\'t exist!`);
 		info.moduleMap[instance.longName] = instance;
 		if (!instance.bundle)
 			info.noBundlePackageMap[instance.longName] = instance;
