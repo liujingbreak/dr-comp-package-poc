@@ -1,6 +1,6 @@
 {
   "name": "dr-comp-package",
-  "version": "0.1.5",
+  "version": "0.1.12",
   "description": "DR web component package developer toolkit",
   "main": "lib/main.js",
   "bin": {
@@ -44,7 +44,6 @@
     "gulp-jshint": "^2.0.2",
     "gulp-rename": "^1.2.2",
     "gulp-size": "^2.0.0",
-    "gulp-uglify": "^2.0.0",
     "gulp-util": "^3.0.7",
     "js-yaml": "^3.7.0",
     "jshint": "^2.9.4",
@@ -72,6 +71,7 @@
     "yargs": "^6.4.0",
     "gulp": "^3.9.1",
     "promise-queue": "^2.2.3",
-    "pify": "^2.3.0"
+    "pify": "^2.3.0",
+    "fs-extra": "^3.0.1"
   }
 }

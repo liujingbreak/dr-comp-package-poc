@@ -5,7 +5,6 @@ const chalk = require('chalk');
 const Path = require('path');
 const log = require('log4js').getLogger(api.packageName);
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const ManualChunkPlugin = require('./lib/manual-chunk-plugin');
 const MultiEntryHtmlPlugin = require('./lib/multi-entry-html-plugin');
 
@@ -97,8 +96,8 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 					use: [
 						{loader: 'html-loader', options: {attrs: 'img:src'}},
 						{loader: 'lib/html-loader'}, // Replace keyward assets:// in *[src|href]
-						{loader: 'lib/markdown-loader'},
-						{loader: 'lib/debug-loader', options: {id: 0}}
+						{loader: 'lib/markdown-loader'}//,
+						//{loader: 'lib/debug-loader', options: {id: 0}}
 					]
 				},
 				{
@@ -205,7 +204,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 
 			new ManualChunkPlugin({
 				manifest: 'runtime',
-				defaultChunkName: api.config.get([api.packageName, 'defaultChunkName'], 'common-lib'),
+				defaultChunkName: api.config.get([api.packageName, 'defaultChunkName'], 'default-chunk'),
 				getChunkName: (file) => {
 					var bundle = file2EntryChunkName[file];
 					if (bundle)
@@ -264,7 +263,14 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 	};
 	if (!api.config().devMode) {
 		webpackConfig.plugins.push(require('./lib/gzipSizePlugin'));
-		webpackConfig.plugins.push(new UglifyJSPlugin({sourceMap: api.config().enableSourceMaps}));
+		webpackConfig.plugins.push(new webpack.optimize.UglifyJsPlugin({
+			sourceMap: api.config().enableSourceMaps,
+			compress: {
+				hoist_vars: false,
+				unsafe: false,
+				warnings: false
+			}
+		}));
 	}
 
 	function testDrComponentJsFile(componentScopes) {

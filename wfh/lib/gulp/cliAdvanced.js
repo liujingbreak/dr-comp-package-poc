@@ -3,10 +3,9 @@
  */
 var PackageInstall = require('./packageInstallMgr');
 var config = require('../config');
-var shell = require('shelljs');
 var jsYaml = require('js-yaml');
 var Path = require('path');
-var fs = require('fs');
+var fs = require('fs-extra');
 var _ = require('lodash');
 var chalk = require('chalk');
 var gulp = require('gulp');
@@ -77,7 +76,16 @@ function addupConfigs() {
 
 		// outputPath
 		var outputPath = dr.outputPath || _.get(json, 'dr.output.path') || parsedName.name;
-		if (_.has(trackOutputPath, outputPath)) {
+		if (dr.outputPath != null)
+			outputPath = dr.outputPath;
+		else {
+			var p = _.get(json, 'dr.output.path');
+			if (p != null)
+				outputPath = p;
+			else
+				outputPath = parsedName.name;
+		}
+		if (_.has(trackOutputPath, outputPath) && trackOutputPath[outputPath] !== name) {
 			console.log(chalk.yellow('[Warning] Conflict outputPath setting "%s" for both %s and %s, resolve conflict by adding a config file,'), outputPath, trackOutputPath[outputPath], name);
 			console.log(chalk.yellow('%s\'s "outputPath" will be changed to %s', name, parsedName.name));
 			outputPath = parsedName.name;
@@ -90,8 +98,10 @@ function addupConfigs() {
 		//}
 		// chunks
 		var chunk = _.has(json, 'dr.chunk') ? dr.chunk : dr.bundle;
-		if (!chunk && (dr.entryPage || dr.entryView))
-			chunk = parsedName.name;
+		if (!chunk) {
+			if ((dr.entryPage || dr.entryView))
+				chunk = parsedName.name; // Entry package should have a default chunk name as its package short name
+		}
 		if (chunk) {
 			if (_.has(vendorBundleMap, chunk))
 				vendorBundleMap[chunk].push(name);
@@ -139,17 +149,10 @@ function cleanPackagesWalkerCache() {
 }
 
 function clean() {
-	return new Promise((resolve, reject) => {
-		require('./recipeManager').clean()
-		.on('end', resolve)
-		.on('error', err => {
-			console.error(err);
-			reject(new Error(err));
-		});
-	})
+	return require('./recipeManager').clean()
 	.then(()=> {
-		shell.rm('-rf', config().staticDir);
-		shell.rm('-rf', config().destDir);
+		fs.removeSync(config().staticDir);
+		fs.removeSync(config().destDir);
 	});
 }
 

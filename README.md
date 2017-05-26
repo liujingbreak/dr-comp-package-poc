@@ -9,4 +9,7 @@ Main purpose of this platform or tool is helping web developers, a team or a com
 
 in a way of packing and run mutiple web apps on one platform.
 
-Refer to the offcial doc at [http://dr-web-house.github.io](http://dr-web-house.github.io)
+Refer to the offcial doc in Chinese at [http://dr-web-house.github.io](http://dr-web-house.github.io), English version is still in progress [http://dr-web-house.github.io/en](http://dr-web-house.github.io/en)
+
+此项目由**点融**大前段团队维护
+![Dianrong logo](http://s.dianrong.com/static/image/lender-logo-1@mobile.png)
