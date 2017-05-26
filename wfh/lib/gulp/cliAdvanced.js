@@ -76,6 +76,15 @@ function addupConfigs() {
 
 		// outputPath
 		var outputPath = dr.outputPath || _.get(json, 'dr.output.path') || parsedName.name;
+		if (dr.outputPath != null)
+			outputPath = dr.outputPath;
+		else {
+			var p = _.get(json, 'dr.output.path');
+			if (p != null)
+				outputPath = p;
+			else
+				outputPath = parsedName.name;
+		}
 		if (_.has(trackOutputPath, outputPath) && trackOutputPath[outputPath] !== name) {
 			console.log(chalk.yellow('[Warning] Conflict outputPath setting "%s" for both %s and %s, resolve conflict by adding a config file,'), outputPath, trackOutputPath[outputPath], name);
 			console.log(chalk.yellow('%s\'s "outputPath" will be changed to %s', name, parsedName.name));
