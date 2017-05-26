@@ -29,7 +29,7 @@ exports.compile = () => {
 };
 
 exports.activate = function() {
-	if (!api.argv.webpackWatch)
+	if (!api.argv.webpackWatch && !api.argv.poll)
 		return;
 	var webpackMiddleware = require('webpack-dev-middleware');
 	mkdirp.sync(api.config.resolve('destDir', 'webpack-temp'));
@@ -43,6 +43,10 @@ exports.activate = function() {
 		api.use((api.isDefaultLocale() ? '/' : '/' + api.getBuildLocale()), webpackMiddleware(compiler, {
 			//quiet: true,
 			//noInfo: true,
+			watchOptions: {
+				poll: api.argv.poll ? true : false,
+				aggregateTimeout: 300
+			},
 			stats: {
 				colors: true
 			},

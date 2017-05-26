@@ -9,7 +9,8 @@ var argv = require('yargs')
 	.alias('l', 'locale')
 	.describe('webpack-watch', 'Run Webpack in watch mode')
 	.alias('webpack-watch', 'ww')
-	.global(['root', 'ww', 'p', 'l'])
+	.alias('poll', 'wwp')
+	.global(['root', 'ww', 'p', 'l', 'wwp'])
 	.argv;
 
 //require('./gulp/cli')(argv.root).init();
