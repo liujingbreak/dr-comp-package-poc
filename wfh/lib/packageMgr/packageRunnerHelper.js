@@ -20,7 +20,7 @@ exports.getApiForPackage = getApiForPackage;
 
 var apiCache = {};
 NodeApi.prototype.apiForPackage = function(name) {
-	return apiCache[name];
+	return apiCache[name] || getApiForPackage(name);
 };
 var initialized = false;
 
