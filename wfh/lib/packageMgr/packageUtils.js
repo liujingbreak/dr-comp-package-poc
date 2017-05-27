@@ -140,6 +140,9 @@ function lookForPackages(packageList, callback) {
 				}
 			}
 		}
+		if (packagePath == null) {
+			throw new Error(`Package ${fullName} is not found`);
+		}
 		var entryPath = resolveAny(fullName);
 		var packageJson = Path.join(packagePath, 'package.json');
 

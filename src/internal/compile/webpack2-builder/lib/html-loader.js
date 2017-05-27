@@ -37,11 +37,10 @@ function load(content, loader) {
 	var html = $('html');
 	if (!html.attr('lang') || html.attr('lang') === '')
 		html.attr('lang', api.getBuildLocale());
-	$('[href]').each(function(idx) {
-		doAttrAssetsUrl.call(this, idx, 'href');
-	});
-	$('[src]').each(function(idx) {
-		doAttrAssetsUrl.call(this, idx, 'src');
+	['href', 'src', 'srcset', 'ng-src'].forEach(attrName => {
+		$('[' + attrName + ']').each(function(idx) {
+			doAttrAssetsUrl.call(this, idx, attrName);
+		});
 	});
 	function doAttrAssetsUrl(idx, attrName) {
 		var el = $(this);
