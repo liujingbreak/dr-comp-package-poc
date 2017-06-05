@@ -263,12 +263,15 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 	};
 	if (!api.config().devMode) {
 		webpackConfig.plugins.push(require('./lib/gzipSizePlugin'));
+		// https://webpack.js.org/plugins/uglifyjs-webpack-plugin
 		webpackConfig.plugins.push(new webpack.optimize.UglifyJsPlugin({
 			sourceMap: api.config().enableSourceMaps,
 			compress: {
 				hoist_vars: false,
 				unsafe: false,
-				warnings: false
+				warnings: false,
+				drop_debugger: true,
+				drop_console: true
 			}
 		}));
 	}
