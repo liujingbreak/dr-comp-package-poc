@@ -77,7 +77,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 					test: /\.jade$/,
 					use: [
 						{loader: 'html-loader', options: {attrs: 'img:src'}},
-						{loader: 'lib/html-loader'}, // Replace keyward assets:// in *[src|href]
+						{loader: 'lib/html-loader'}, // Replace keyward assets:// in *[src|href|srcset|ng-src]
 						{loader: '@dr/translate-generator'},
 						{loader: 'lib/jade-to-html-loader'}
 					]
@@ -86,7 +86,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 					test: /\.html$/,
 					use: [
 						{loader: 'html-loader', options: {attrs: 'img:src'}},
-						{loader: 'lib/html-loader'}, // Replace keyward assets:// in *[src|href]
+						{loader: 'lib/html-loader'}, // Replace keyward assets:// in *[src|href|srcset|ng-src]
 						{loader: '@dr/translate-generator'},
 						{loader: '@dr/template-builder'}
 					]
@@ -95,7 +95,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 					test: /\.md$/,
 					use: [
 						{loader: 'html-loader', options: {attrs: 'img:src'}},
-						{loader: 'lib/html-loader'}, // Replace keyward assets:// in *[src|href]
+						{loader: 'lib/html-loader'}, // Replace keyward assets:// in *[src|href|srcset|ng-src]
 						{loader: 'lib/markdown-loader'}//,
 						//{loader: 'lib/debug-loader', options: {id: 0}}
 					]
