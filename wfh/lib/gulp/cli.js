@@ -1,4 +1,4 @@
-var fs = require('fs');
+var fs = require('fs-extra');
 var Path = require('path');
 const mkdirp = require('mkdirp');
 var _ = require('lodash');
@@ -7,7 +7,8 @@ var shell = require('shelljs');
 var Promise = require('bluebird');
 var buildUtils = require('./buildUtils');
 var argv = require('./showHelp');
-const INTERNAL_RECIPE_VER = '~0.3.33';
+
+const INTERNAL_RECIPE_VER = '~0.3.34';
 
 module.exports = {
 	init: init,
@@ -205,6 +206,8 @@ function install() {
 function clean() {
 	if (!fs.existsSync(rootPath + '/config.yaml'))
 		return;
+	fs.remove(Path.resolve(rootPath, 'config.yaml'));
+	fs.remove(Path.resolve(rootPath, 'config.local.yaml'));
 	return require('./cliAdvanced').clean();
 }
 
