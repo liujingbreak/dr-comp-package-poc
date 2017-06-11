@@ -65,10 +65,11 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 						loader: 'babel-loader',
 						options: {
 							cacheDirectory: api.config.resolve('destDir', 'babel-cache' + (api.isDefaultLocale() ? '' : '/' + api.getBuildLocale())),
-							presets: ['es2015', 'stage-0'],
+							presets: [['es2015', {modules: false}]],
 							plugins: [
 								'transform-decorators-legacy',
-								'transform-object-assign'
+								'transform-object-assign',
+								'syntax-dynamic-import'
 							]
 						}
 					}]
@@ -240,6 +241,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 
 			new webpack.DefinePlugin({
 				LEGO_CONFIG: JSON.stringify(legoConfig),
+				'LEGO_CONFIG.buildLocale': JSON.stringify(legoConfig.buildLocale),
 				'process.env.NODE_ENV': legoConfig.devMode ? '"development"' : '"production"'
 			}),
 
@@ -301,7 +303,6 @@ function testPackageDrProperty(fileSuffix, propertyKey, propertyValue) {
 		var component = api.findPackageByFile(file);
 		if (component) {
 			if (_.get(component, ['dr', propertyKey]) === propertyValue) {
-				log.debug('use babel on %s', file);
 				return true;
 			}
 		}
