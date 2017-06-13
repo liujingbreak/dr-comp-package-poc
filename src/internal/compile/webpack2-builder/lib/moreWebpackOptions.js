@@ -38,8 +38,11 @@ exports.createParams = function(contextPath) {
 		function onComp(component) {
 			noparse4Package(component, noParse);
 			var browserSideConfigProp = _.get(component, ['dr', 'browserSideConfigProp']);
-			if (browserSideConfigProp != null && !Array.isArray(browserSideConfigProp))
+			if (browserSideConfigProp != null && !Array.isArray(browserSideConfigProp)) {
 				browserSideConfigProp = [browserSideConfigProp];
+			}
+			if (browserSideConfigProp)
+				log.info('Found "dr.browserSideConfigProp" in %s, %s', component.longName, browserSideConfigProp);
 			_.each(browserSideConfigProp, prop => browserPropSet[prop] = true);
 		},
 		function onEntryComp(entryComp) {
@@ -74,7 +77,7 @@ exports.createParams = function(contextPath) {
 		'staticAssetsURL', 'serverURL', 'packageContextPathMapping',
 		'locales', 'devMode', 'outputPathMap'
 	], prop => browserPropSet[prop] = 1);
-	_.each(api.config().browserSideConfigProp, prop => browserPropSet[prop] = 1);
+	_.each(api.config().browserSideConfigProp, prop => browserPropSet[prop] = true);
 	_.forOwn(browserPropSet, (nothing, propPath) => _.set(legoConfig, propPath, _.get(api.config(), propPath)));
 	legoConfig.buildLocale = api.getBuildLocale();
 	log.info('DefinePlugin LEGO_CONFIG: ', legoConfig);
