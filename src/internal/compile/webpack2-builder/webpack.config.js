@@ -118,7 +118,9 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 								options: cssAutoPrefixSetting
 							},
 							{loader: 'lib/css-url-assets-loader'},
-							{loader: 'lib/npmimport-css-loader'}
+							{loader: 'require-injector/css-loader', options: {
+								injector: api.browserInjector
+							}}
 						]
 					})
 				}, {
@@ -142,7 +144,9 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 								sourceMap: false,
 								//plugins: [new NpmImportPlugin()]
 							}},
-							{loader: 'lib/npmimport-css-loader'}
+							{loader: 'require-injector/css-loader', options: {
+								injector: api.browserInjector
+							}}
 						]
 					})
 				},
@@ -167,7 +171,9 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 								sourceMap: false,
 								//plugins: [new NpmImportPlugin()]
 							}},
-							{loader: 'lib/npmimport-css-loader'}
+							{loader: 'require-injector/css-loader', options: {
+								injector: api.browserInjector
+							}}
 						]
 					})
 				},
