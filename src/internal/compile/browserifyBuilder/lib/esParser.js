@@ -1,8 +1,10 @@
 var acorn = require('acorn');
+var acornjsx = require('acorn-jsx/inject')(acorn);
+var acornImpInject = require('acorn-dynamic-import/lib/inject').default;
 var _ = require('lodash');
 var estraverse = require('estraverse-fb');
 var acornjsx = require('acorn-jsx/inject')(acorn);
-
+acornjsx = acornImpInject(acornjsx);
 exports.parse = parse;
 
 /**
@@ -31,6 +33,12 @@ function parse(text, handler, ast) {
 			if (onIdentity('__api', node, parent)) {
 				handler.apiIndentity(node);
 			} else if (node.type === 'CallExpression') {
+				var calleeType = _.get(node, 'callee.type');
+				if (calleeType === 'Import') {
+					// Hack estraverse, estraverse does not recoganize "Import"
+					node.callee.type = 'Identifier';
+					node.callee.name = 'import';
+				}
 				if (handler.requireApi && node.callee && node.callee.type === 'Identifier' && node.callee.name === 'require' && _.get(node, 'arguments[0].value') === '__api') {
 					handler.requireApi();
 				} else if (node.callee && node.callee.type === 'MemberExpression' &&
@@ -54,6 +62,8 @@ function parse(text, handler, ast) {
 						handler.splitLoad(args[0].value);
 					}
 				}
+			} else if (node.type === 'ImportDeclaration' && node.source.value === '__api') {
+				handler.es6ImportApi(node);
 			}
 			//parser.handleAstEnter(node, parent);
 		},

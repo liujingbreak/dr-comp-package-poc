@@ -62,6 +62,10 @@ ${source}`;
 			requireApi: () => {
 				hasApi = true;
 				log.debug('require __api in %s', file);
+			},
+			es6ImportApi: () => {
+				hasApi = true;
+				log.debug('ES6 import __api in %s', file);
 			}
 		}, ast);
 	} catch (e) {
