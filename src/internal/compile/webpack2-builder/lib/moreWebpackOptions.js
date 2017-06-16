@@ -209,8 +209,11 @@ function createEntryHtmlOutputPathPlugin(entryViewSet) {
 
 				var stag = htmlAssets.$('<script>');
 				stag.attr('type', 'text/javascript');
-				stag.text('\nvar __drcpEntryPage = \'' + relative.replace(/\\/g, '/') + '\';\n' +
-					'_reqLego("' + component.longName + '");\n');
+				stag.text(`
+				var __drcpEntryPage = '${relative.replace(/\\/g, '/')}';
+					__drcpEntryPackage = '${component.longName}';
+					_reqLego('${component.longName}');
+					`);
 				htmlAssets.$('body').append(stag);
 				callback(null, htmlAssets);
 			});

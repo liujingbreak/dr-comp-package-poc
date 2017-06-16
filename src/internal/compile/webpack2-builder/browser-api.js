@@ -1,4 +1,4 @@
-/* globals LEGO_CONFIG:true */
+/* globals LEGO_CONFIG:true, __drcpEntryPackage */
 // if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
 // 	// To avoid lodash conflict with some AMD build optimizers
 // 	var oldDefine = define;
@@ -9,9 +9,6 @@
 
 var _ = require('lodash');
 window._ = _;
-//var resolveUrl = require('@dr-core/browserify-builder-api/resolveUrl');
-// var bundleLoader = require('@dr-core/bundle-loader');
-// var loadCssBundles = bundleLoader.loadCssBundles;
 module.exports = BrowserApi;
 
 var packageNameReg = /(?:@([^\/]+)\/)?(\S+)/;
@@ -47,6 +44,7 @@ BrowserApi.prototype = {
 	buildLocale: LEGO_CONFIG.buildLocale,
 
 	entryPage: __drcpEntryPage,
+	entryPackage: __drcpEntryPackage,
 
 	config: function() {
 		return BrowserApi.prototype._config;
