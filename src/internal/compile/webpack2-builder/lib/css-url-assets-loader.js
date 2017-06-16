@@ -1,7 +1,7 @@
 const api = require('__api');
 const log = require('log4js').getLogger('wfh.' + __filename.substring(0, __filename.length - 3));
 //const _ = require('lodash');
-const npmimportCssLoader = require('./npmimport-css-loader');
+const npmimportCssLoader = require('require-injector/css-loader');
 
 module.exports = function(content) {
 	var callback = this.async();
