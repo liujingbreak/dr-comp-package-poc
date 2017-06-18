@@ -302,8 +302,12 @@ InstallManager.prototype = {
 			if (_.has(newDepJson, name))
 				continue;
 			if (_.has(this.compNameSet, name)) {
-				log.debug('skip peerDependency "%s" as an existing component', name);
+				log.debug('Skip peerDependency "%s" as an linked project component', name);
 				// TODO: warn if version range does not match for this.compNameSet[name]
+				continue;
+			}
+			if (_.has(mainPkjson.dependencies, name)) {
+				log.info(`Skip peerDependency "${name}" since it has been set as ${name}@${mainPkjson.dependencies[name]} in package.json `);
 				continue;
 			}
 			let item = versionList[0];
