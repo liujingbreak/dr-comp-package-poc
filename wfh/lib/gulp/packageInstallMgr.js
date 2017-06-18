@@ -20,6 +20,7 @@ var recipeManager = require('./recipeManager');
 var log = require('log4js').getLogger('wfh.' + Path.basename(__filename, '.js'));
 var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
 var semver = require('semver');
+var packageUtils = require('../packageMgr/packageUtils');
 
 module.exports = InstallManager;
 
@@ -29,6 +30,7 @@ function InstallManager(projectDir) {
 	}
 	this.projectDir = projectDir;
 	this.srcDeps = {}; // src packages needed dependencies
+	this.peerDeps = {}; // all packages needed peer dependencies
 	this.installedDeps = {}; // installed node_modules packages needed dependencies
 }
 
@@ -74,15 +76,35 @@ var packageNameReg = /^.*?\/((?:@[^\/]+\/)?[^\/]+)$/;
 InstallManager.prototype = {
 	scanSrcDeps: function(jsonFiles) {
 		var self = this;
-		jsonFiles.forEach(packageJson => {
+		this.compNameSet = {};
+		for (let packageJson of jsonFiles) {
 			log.debug('scanSrcDepsAsync() ' + Path.relative(config().rootPath, packageJson));
 			var json = JSON.parse(fs.readFileSync(packageJson, 'utf8'));
+			this.compNameSet[json.name] = json.version;
 			var deps = json.dependencies;
-			_.forOwn(deps, function(version, name) {
-				log.debug('scanSrcDepsAsync() dep ' + name);
-				self.trackSrcDep(name, version, json.name, packageJson);
+			if (deps) {
+				for (let name of Object.keys(deps)) {
+					let version = deps[name];
+					log.debug('scanSrcDepsAsync() dep ' + name);
+					self._trackSrcDep(name, version, json.name, packageJson);
+				}
+			}
+			if (json.peerDependencies) {
+				for (let name of Object.keys(json.peerDependencies)) {
+					let version = json.peerDependencies[name];
+					self._trackPeerDep(name, version, json.name, packageJson);
+				}
+			}
+		}
+	},
+
+	scanInstalledPeerDeps: function() {
+		packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
+			this.compNameSet[name] = json.version;
+			_.each(json.peerDependencies, (version, name) => {
+				this._trackPeerDep(name, version, json.name, Path.join(packagePath, 'package.josn'));
 			});
-		});
+		}, 'installed');
 	},
 
 	flattenInstalledRecipes: function() {
@@ -139,11 +161,22 @@ InstallManager.prototype = {
 		moveFile(path, target, true);
 	},
 
-	trackSrcDep: function(name, version, byWhom, path) {
+	_trackSrcDep: function(name, version, byWhom, path) {
 		if (!_.has(this.srcDeps, name)) {
 			this.srcDeps[name] = [];
 		}
 		this.srcDeps[name].push({
+			ver: version,
+			by: byWhom,
+			path: path
+		});
+	},
+
+	_trackPeerDep: function(name, version, byWhom, path) {
+		if (!_.has(this.peerDeps, name)) {
+			this.peerDeps[name] = [];
+		}
+		this.peerDeps[name].push({
 			ver: version,
 			by: byWhom,
 			path: path
@@ -163,11 +196,11 @@ InstallManager.prototype = {
 		});
 	},
 
-	versionReg: /(?:\^|~|>=|>|<|<=)?(.*)/,
+	versionReg: /^[^0-9]*(.*)$/,
 
 	/**
 	 * @Deprecated
-	 * install dependencies which are tracked by trackSrcDep()
+	 * install dependencies which are tracked by _trackSrcDep()
 	 * @return {[type]} [description]
 	 */
 	installDependsAsync: function() {
@@ -208,17 +241,19 @@ InstallManager.prototype = {
 		this.printComponentDep(false);
 	},
 
-	containsDiffVersion: function(versionList) {
-		var leftItem;
+
+	_containsDiffVersion: function(versionList, peerVerList) {
+		var leftVer;
+		var self = this;
 		for (var i = 0, l = versionList.length - 1; i < l; i++) {
-			leftItem = versionList[i];
+			leftVer = this.versionReg.exec(versionList[i].ver)[1];
 			var toCompare = versionList.slice(i + 1);
-			if (!_.find(toCompare, isSame)) {
+			if (!_.find(toCompare, isSame) && !_.find(peerVerList, isSame)) {
 				return true;
 			}
 		}
 		function isSame(item) {
-			return leftItem.ver === item.ver;
+			return leftVer === self.versionReg.exec(item.ver)[1];
 		}
 		return false;
 	},
@@ -237,24 +272,52 @@ InstallManager.prototype = {
 		if (fs.existsSync(mainPkFile)) {
 			mainPkjson = fs.readFileSync(mainPkFile);
 			mainPkjson = JSON.parse(mainPkjson);
-			mainDeps = _.assign({}, mainPkjson.dependencies, mainPkjson.devDependencies);
+			mainDeps = _.assign({}, mainPkjson.dependencies, mainPkjson.dependencies);
 		}
 		var depNames = _.keys(this.srcDeps);
 		if (depNames.length === 0)
 			return false;
 		var nameWidth = _.maxBy(depNames, name => name.length).length;
 
-		_.forOwn(this.srcDeps, (versionList, name) => {
-			var item = versionList[0];
-			var hasDiffVersion = self.containsDiffVersion(versionList);
+		let countDep = 0;
+		for (let name of Object.keys(this.srcDeps)) {
+			let versionList = this.srcDeps[name];
+			let item = versionList[0];
+			let hasDiffVersion = self._containsDiffVersion(versionList, this.peerDeps[name]);
 			log.info(`${(hasDiffVersion ? chalk.red : chalk.cyan)(_.padStart(name, nameWidth, ' '))} <- ${_.padEnd(item.ver, 9)} ${item.by}`);
-			for (var rest of versionList.slice(1)) {
+			for (let rest of versionList.slice(1)) {
 				log.info(`${_.repeat(' ', nameWidth)}    ${_.padEnd(rest.ver, 9)} ${rest.by}`);
 			}
 			if (!_.has(mainDeps, name) || mainDeps[name] !== versionList[0].ver) {
 				newDepJson[name] = versionList[0].ver;
 			}
-		});
+			countDep++;
+		}
+		log.info(_.pad(` total ${countDep}`, 60, '-'));
+
+		countDep = 0;
+		log.info(_.pad(' Components Peer Dependency only ', 60, '-'));
+		for (let name of Object.keys(this.peerDeps)) {
+			let versionList = this.peerDeps[name];
+			if (_.has(newDepJson, name))
+				continue;
+			if (_.has(this.compNameSet, name)) {
+				log.debug('skip peerDependency "%s" as an existing component', name);
+				// TODO: warn if version range does not match for this.compNameSet[name]
+				continue;
+			}
+			let item = versionList[0];
+			let hasDiffVersion = self._containsDiffVersion(versionList);
+			log.info(`${(hasDiffVersion ? chalk.red : chalk.cyan)(_.padStart(name, nameWidth, ' '))} <- ${_.padEnd(item.ver, 9)} ${item.by}`);
+			for (let rest of versionList.slice(1)) {
+				log.info(`${_.repeat(' ', nameWidth)}    ${_.padEnd(rest.ver, 9)} ${rest.by}`);
+			}
+			if (!_.has(mainDeps, name) || mainDeps[name] !== versionList[0].ver) {
+				newDepJson[name] = versionList[0].ver;
+			}
+			countDep++;
+		}
+		log.info(_.pad(` total ${countDep}`, 60, '-'));
 		var needInstall = _.size(newDepJson) > 0;
 		if (needInstall) {
 			log.warn(chalk.blue('New component\'s dependencies are found:'));
@@ -265,9 +328,9 @@ InstallManager.prototype = {
 		//var file = Path.join(config().destDir, 'component-dependencies.json');
 
 		if (write) {
-			if (!mainPkjson.devDependencies)
-				mainPkjson.devDependencies = {};
-			_.assign(mainPkjson.devDependencies, newDepJson);
+			if (!mainPkjson.dependencies)
+				mainPkjson.dependencies = {};
+			_.assign(mainPkjson.dependencies, newDepJson);
 			fs.writeFileSync(mainPkFile, JSON.stringify(mainPkjson, null, '  '));
 			log.info('%s is written.', mainPkFile);
 			return needInstall;

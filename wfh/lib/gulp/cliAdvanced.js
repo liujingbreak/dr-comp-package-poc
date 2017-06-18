@@ -43,6 +43,7 @@ exports.bumpProjectsAsync = bumpProjectsAsync;
 function listCompDependency(pkJsonFiles, write) {
 	var installer = new PackageInstall();
 	installer.scanSrcDeps(pkJsonFiles);
+	installer.scanInstalledPeerDeps();
 	return installer.printComponentDep(write);
 }
 

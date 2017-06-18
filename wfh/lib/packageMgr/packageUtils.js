@@ -5,6 +5,7 @@ var resolve = require('resolve').sync;
 var config = require('../config');
 var log = require('log4js').getLogger('wfh.packageUtils');
 var chalk = require('chalk');
+var recipeMgr = require('../gulp/recipeManager');
 module.exports = {
 	parseName: parseName,
 	is3rdParty: is3rdParty,
@@ -86,7 +87,7 @@ function findNodePackagePath(moduleName) {
  * @return {number}  number of found pacakges
  */
 function findBrowserPackageByType(types, callback, recipeType) {
-	return _findPackageByType(types, callback, findBrowserEntryFiles, recipeType);
+	return _findPackageByType(types, callback, browserResolve, recipeType);
 }
 /**
  * list linked node side packages
@@ -97,7 +98,7 @@ function findBrowserPackageByType(types, callback, recipeType) {
  * @return {number}  number of found pacakges
  */
 function findNodePackageByType(types, callback, recipeType) {
-	return _findPackageByType(types, callback, findNodeEntryFiles, recipeType);
+	return _findPackageByType(types, callback, nodeResolve, recipeType);
 }
 
 /**
@@ -117,9 +118,7 @@ function findAllPackages(packageList, callback, recipeType, projectDir) {
 		callback = packageList;
 	}
 
-	return _findPackageByType('*', callback, function(recipePackageJson, eachCallback) {
-		return _findEntryFiles(recipePackageJson, eachCallback, resolveAny);
-	}, recipeType, projectDir);
+	return _findPackageByType('*', callback, resolveAny, recipeType, projectDir);
 }
 
 function lookForPackages(packageList, callback) {
@@ -154,42 +153,6 @@ function lookForPackages(packageList, callback) {
 		var parsedName = parseName(fullName);
 		callback(fullName, entryPath, parsedName, json, packagePath);
 	});
-}
-
-function _findEntryFiles(recipePackageJson, eachCallback, resolveFn) {
-	var pj = JSON.parse(fs.readFileSync(recipePackageJson, 'utf-8'));
-	if (!pj.dependencies) {
-		return;
-	}
-	_.forOwn(pj.dependencies, function(version, name) {
-		var parsedName = parseName(name);
-		var entryPath = resolveFn(name);
-
-		var packagePath = resolveFn.findPackagePath(name);
-		if (!packagePath) {
-			log.info('Package %s does not exist, you may need to install it', chalk.red(name));
-			return;
-		}
-		var packageJson = Path.join(packagePath, 'package.json');
-		var json = JSON.parse(fs.readFileSync(packageJson, 'utf-8'));
-		// if (!resolveFn.checkPackagJson(json)) {
-		// 	return;
-		// }
-		eachCallback(name, entryPath, parsedName, json, packagePath);
-	});
-}
-/**
- * [findBrowserEntryFiles description]
- * @param  {[type]} recipePackageJson [description]
- * @param  {[type]} eachCallback    [description]
- * @return {[type]}                 [description]
- */
-function findBrowserEntryFiles(recipePackageJson, eachCallback) {
-	return _findEntryFiles(recipePackageJson, eachCallback, browserResolve);
-}
-
-function findNodeEntryFiles(recipePackageJson, eachCallback) {
-	return _findEntryFiles(recipePackageJson, eachCallback, nodeResolve);
 }
 
 function nodeResolve(name) {
@@ -261,16 +224,60 @@ resolveAny.checkPackagJson = function(json) {
  * @return {[type]}            [description]
  */
 function eachRecipe(callback) {
-	require('../gulp/recipeManager').eachRecipe(callback);
+	recipeMgr.eachRecipe(callback);
 }
 
-function _findPackageByType(types, callback, findEntryFilesFunc, recipeType, projectDir) {
+class EntryFileFinder {
+	constructor(resolve) {
+		this.packageRecipeMap = {};
+		this.resolveFn = resolve;
+	}
+
+	findByRecipeJson(recipePackageJson, eachCallback) {
+		return this._findEntryFiles(recipePackageJson, eachCallback, this.resolveFn);
+	}
+
+	_findEntryFiles(recipePackageJson, eachCallback, resolveFn) {
+		var self = this;
+		var pj = JSON.parse(fs.readFileSync(recipePackageJson, 'utf-8'));
+		if (!pj.dependencies) {
+			return;
+		}
+		_.forOwn(pj.dependencies, function(version, name) {
+			if (_.has(self.packageRecipeMap, name)) {
+				log.info('Duplicate component dependency "%s" found in "%s" and "%s"',
+					name, self.packageRecipeMap[name], recipePackageJson.name);
+				return;
+			}
+			self.packageRecipeMap[name] = recipePackageJson.name;
+			var parsedName = parseName(name);
+			var entryPath = resolveFn(name);
+
+			var packagePath = resolveFn.findPackagePath(name);
+			if (!packagePath) {
+				log.info('Package %s does not exist, you may need to install it', chalk.red(name));
+				return;
+			}
+			var packageJson = Path.join(packagePath, 'package.json');
+			var json = JSON.parse(fs.readFileSync(packageJson, 'utf-8'));
+			// if (!resolveFn.checkPackagJson(json)) {
+			// 	return;
+			// }
+			eachCallback(name, entryPath, parsedName, json, packagePath);
+		});
+	}
+}
+
+function _findPackageByType(types, callback, resolve, recipeType, projectDir) {
 	//var callBackList = [];
-	var packageSet = {};
+	//var packageSet = {};
+	var entryFileFindler = new EntryFileFinder(resolve);
 	types = [].concat(types);
 
 	if (recipeType === 'src') {
-		require('../gulp/recipeManager').eachRecipeSrc(projectDir, onEachSrcRecipe);
+		recipeMgr.eachRecipeSrc(projectDir, onEachSrcRecipe);
+	} else if (recipeType === 'installed') {
+		recipeMgr.eachInstalledRecipe(dir => findEntryFiles(Path.resolve(dir, 'package.json')));
 	} else {
 		eachRecipe((recipeDir) => {
 			findEntryFiles(Path.resolve(recipeDir, 'package.json'));
@@ -283,30 +290,17 @@ function _findPackageByType(types, callback, findEntryFilesFunc, recipeType, pro
 	}
 
 	function findEntryFiles(recipe) {
-		findEntryFilesFunc(recipe, function(name, entryPath, parsedName, pkJson, packagePath) {
+		entryFileFindler.findByRecipeJson(recipe, function(name, entryPath, parsedName, pkJson, packagePath) {
 			if (!_.has(pkJson, 'dr') && !_.includes(config().packageScopes, parsedName.scope))
 				return;
 			var packageType = _.get(pkJson, 'dr.type');
 			packageType = packageType ? [].concat(packageType) : [];
 
 			if (_.includes(types, '*') || _.intersection(types, packageType).length > 0) {
-				_checkDuplicate(packageSet, name, parsedName, pkJson, packagePath);
+				//_checkDuplicate(packageSet, name, parsedName, pkJson, packagePath);
 				callback(name, entryPath, parsedName, pkJson, packagePath);
 			}
 		});
 	}
 }
 
-function _checkDuplicate(packageSet, name, parsedName, pkJson, packagePath) {
-	if (_.has(packageSet, parsedName.name) && packageSet[parsedName.name].packagePath !== packagePath) {
-		var existing = packageSet[parsedName.name];
-		throw new Error('Duplicate package short name found: ' + name +
-			' (' + packagePath + ')' +
-			' and ' + existing.longName + '(' + existing.packagePath + ').\n' +
-			'Short name means the part of package name without scope name');
-	}
-	packageSet[parsedName.name] = {
-		longName: name,
-		packagePath: packagePath
-	};
-}
