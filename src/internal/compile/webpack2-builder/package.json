@@ -1,6 +1,6 @@
 {
   "name": "@dr-core/webpack2-builder",
-  "version": "0.3.32",
+  "version": "0.3.33",
   "description": "Browser side stuff builder module based on Webpack2",
   "main": "main.js",
   "browser": "browser-api.js",
