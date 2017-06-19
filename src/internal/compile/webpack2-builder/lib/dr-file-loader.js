@@ -2,7 +2,7 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra
 */
-var path = require('path');
+var path = require('path').posix;
 var loaderUtils = require('loader-utils');
 var api = require('__api');
 var _ = require('lodash');
@@ -38,16 +38,14 @@ module.exports = function(content) {
 		regExp: config.regExp
 	});
 
-	var outputPath = '';
 	var filePath = this.resourcePath;
 	var browserPackage = api.findPackageByFile(filePath);
 	if (browserPackage) {
-		outputPath = _.trimStart(api.config.get(['outputPathMap', browserPackage.longName]), '/') +
-			'/' + path.dirname(path.relative(browserPackage.realPackagePath, filePath)).split(path.sep).join('/');
-		url = url.split('/').pop();
+		let outputPath = _.trimStart(api.config.get(['outputPathMap', browserPackage.longName]), '/');
+		outputPath = path.join(outputPath, path.dirname(path.relative(browserPackage.realPackagePath, filePath)));
+		url = path.join(outputPath, url.split('/').pop()); // only file name part
 	} else
 		url = url.replace(/(^|\/)node_modules(\/|$)/g, '$1n-m$2').replace(/@/g, 'a');
-	url = outputPath + '/' + url;
 	// var outputPath = '';
 	// if (config.useRelativePath) {
 	// 	var issuerContext = this._module && this._module.issuer && this._module.issuer.context || context;

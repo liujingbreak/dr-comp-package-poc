@@ -1,7 +1,7 @@
 const api = require('__api');
 const log = require('log4js').getLogger('wfh.html-loader');
 const loaderUtils = require('loader-utils');
-const Path = require('path');
+const Path = require('path').posix;
 const pify = require('pify');
 const _ = require('lodash');
 const cheerio = require('cheerio');
@@ -104,25 +104,23 @@ function loaderUrl(src, loader) {
 		});
 	})
 	.then(content => {
-		var url = loaderUtils.interpolateName(_.assign({}, loader, {resourcePath: linkedFile}),
+		var hashedPath = loaderUtils.interpolateName(_.assign({}, loader, {resourcePath: linkedFile}),
 			'[path][name].[md5:hash:hex:8].[ext]',
 			{context: loader.options.context, content: content}
 		);
-		var outputPath = '';
-		var filePath = loader.context + '/' + src;
+		var filePath = Path.resolve(loader.context, src);
 		var browserPackage = api.findPackageByFile(filePath);
 		if (browserPackage) {
 			let packageOutpath = _.trimStart(api.config.get(['outputPathMap', browserPackage.longName]), '/');
-			if (packageOutpath.length > 0)
-				packageOutpath += '/';
-			outputPath = packageOutpath + Path.dirname(Path.relative(browserPackage.realPackagePath, filePath)).split(Path.sep).join('/');
-			url = url.split('/').pop();
+			let dir = Path.join(packageOutpath, Path.dirname(Path.relative(browserPackage.realPackagePath, filePath)));
+			hashedPath = Path.join(dir, hashedPath.split('/').pop());
 		} else
-			url = url.replace(/(^|\/)node_modules(\/|$)/g, '$1n-m$2').replace(/@/g, 'a');
-		//console.log('%s , %s', url, outputPath);
-		url = outputPath + url;
-		loader.emitFile(url, content);
-		return url;
+			hashedPath = hashedPath.replace(/(^|\/)node_modules(\/|$)/g, '$1n-m$2').replace(/@/g, 'a');
+		//hashedPath = hashedPath.replace(/(^|\/)node_modules(\/|$)/g, '$1n-m$2').replace(/@/g, 'a');
+		//console.log('%s , %s', hashedPath, outputPath);
+		//hashedPath = Url.resolve(outputPath, hashedPath);
+		loader.emitFile(hashedPath, content);
+		return hashedPath;
 	})
 	.catch(e => {
 		loader.emitError(e);
