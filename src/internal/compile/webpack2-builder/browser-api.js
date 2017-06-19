@@ -1,4 +1,4 @@
-/* globals LEGO_CONFIG:true, __drcpEntryPackage */
+/* globals LEGO_CONFIG:true */
 // if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
 // 	// To avoid lodash conflict with some AMD build optimizers
 // 	var oldDefine = define;

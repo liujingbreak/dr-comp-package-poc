@@ -128,7 +128,10 @@ function _initProjects(isDrcpSymlink) {
 		if (needRunInstall) {
 			//console.log(chalk.cyan('Executing "npm install" for newly found dependencies'));
 			//yield install();
-			console.log(chalk.red('There are new dependencies need to be installed. Please execute "npm install"!'));
+			console.log(chalk.red(`There are new dependencies need to be installed!
+	1. Please execute "npm install" again.
+	2. Then run "drcp init" again, see if there are new more depended component packages need to be installed.
+Repeat above steps until this message gone.`));
 		}
 	})()
 	.catch(err => {
