@@ -246,10 +246,10 @@ class EntryFileFinder {
 		_.forOwn(pj.dependencies, function(version, name) {
 			if (_.has(self.packageRecipeMap, name)) {
 				log.info('Duplicate component dependency "%s" found in "%s" and "%s"',
-					name, self.packageRecipeMap[name], recipePackageJson.name);
+					name, self.packageRecipeMap[name], recipePackageJson);
 				return;
 			}
-			self.packageRecipeMap[name] = recipePackageJson.name;
+			self.packageRecipeMap[name] = recipePackageJson;
 			var parsedName = parseName(name);
 			var entryPath = resolveFn(name);
 
