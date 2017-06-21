@@ -126,7 +126,6 @@ function _initProjects(isDrcpSymlink) {
 	2. Then run "drcp init" again, see if there are new more depended component packages need to be installed.
 Repeat above steps until this message gone.`;
 			console.log(chalk.red(msg));
-			process.exit(1);
 		}
 	})()
 	.catch(err => {
