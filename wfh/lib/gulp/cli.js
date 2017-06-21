@@ -8,7 +8,7 @@ var Promise = require('bluebird');
 var buildUtils = require('./buildUtils');
 var argv = require('./showHelp');
 
-const INTERNAL_RECIPE_VER = '~0.3.40';
+const INTERNAL_RECIPE_VER = '^0.3.41';
 
 module.exports = {
 	init: init,
@@ -65,13 +65,6 @@ drcp lint --pj "${project}"
 	});
 	var initProm = Promise.resolve(_initWorkspace());
 	return initProm.then(() => _drawPuppy());
-	// if (fs.existsSync(Path.resolve('.git/hooks'))) {
-	// 	cp('-f', Path.resolve(__dirname, 'git-hooks', '*'), rootPath + '/.git/hooks/');
-	// 	console.info('git hooks are copied');
-	// 	if (os.platform().indexOf('win32') <= 0) {
-	// 		shell.chmod('-R', '+x', rootPath + '/.git/hooks/*');
-	// 	}
-	// }
 }
 
 function _initWorkspace() {
@@ -128,10 +121,12 @@ function _initProjects(isDrcpSymlink) {
 		if (needRunInstall) {
 			//console.log(chalk.cyan('Executing "npm install" for newly found dependencies'));
 			//yield install();
-			console.log(chalk.red(`There are new dependencies need to be installed!
+			let msg = `There are new dependencies need to be installed!
 	1. Please execute "npm install" again.
 	2. Then run "drcp init" again, see if there are new more depended component packages need to be installed.
-Repeat above steps until this message gone.`));
+Repeat above steps until this message gone.`;
+			console.log(chalk.red(msg));
+			process.exit(1);
 		}
 	})()
 	.catch(err => {

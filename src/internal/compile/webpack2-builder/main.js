@@ -22,10 +22,10 @@ exports.compile = () => {
 	.then(webpackConfig => {
 		if (_.size(webpackConfig.entry) === 0)
 			return null;
-		return Promise.promisify(webpack)(webpackConfig)
-		.then(onSuccess)
-		.catch(onFail);
-	});
+		return Promise.promisify(webpack)(webpackConfig);
+	})
+	.then(onSuccess);
+	//.catch(onFail);
 };
 
 exports.activate = function() {
@@ -67,20 +67,23 @@ function initWebpackConfig() {
 }
 
 function onSuccess(stats) {
-	const info = stats.toJson();
+	//const info = stats.toJson();
 
-	if (stats.hasErrors()) {
-		_.each([].concat(info.errors), err => log.error('webpack error', err));
-	}
+	// if (stats.hasErrors()) {
+	// 	_.each([].concat(info.errors), err => log.error('webpack error', err));
+	// }
 
-	if (stats.hasWarnings()) {
-		_.each([].concat(info.warnings), err => log.warn('webpack warning', err));
-	}
+	// if (stats.hasWarnings()) {
+	// 	_.each([].concat(info.warnings), err => log.warn('webpack warning', err));
+	// }
 	log.info(_.repeat('=', 30));
 	log.info(stats.toString({
 		chunks: false,  // Makes the build much quieter
 		colors: true    // Shows colors in the console
 	}));
+	if (stats.hasErrors()) {
+		throw new Error('Webpack build contains errors');
+	}
 	return stats;
 }
 

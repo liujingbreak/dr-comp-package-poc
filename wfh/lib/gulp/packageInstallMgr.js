@@ -264,64 +264,41 @@ InstallManager.prototype = {
 	printComponentDep: function(write) {
 		var newDepJson = {};
 		var self = this;
-		log.info(_.pad(' Components Dependency ', 60, '-'));
 		var mainPkFile = this.projectDir ? Path.resolve(this.projectDir, 'package.json') :
 			Path.resolve(config().rootPath, 'package.json');
 
 		var mainPkjson, mainDeps;
 		if (fs.existsSync(mainPkFile)) {
-			mainPkjson = fs.readFileSync(mainPkFile);
+			mainPkjson = fs.readFileSync(mainPkFile, 'utf8');
 			mainPkjson = JSON.parse(mainPkjson);
-			mainDeps = _.assign({}, mainPkjson.dependencies, mainPkjson.dependencies);
+			mainDeps = _.assign({}, mainPkjson.dependencies, mainPkjson.devDependencies);
 		}
-		var depNames = _.keys(this.srcDeps);
-		if (depNames.length === 0)
-			return false;
-		var nameWidth = _.maxBy(depNames, name => name.length).length;
+		var depNames = Object.keys(this.srcDeps);
+		var peerDepNames = Object.keys(this.peerDeps);
+		if (depNames.length === 0 && peerDepNames.length === 0)
+			return;
+		var nameWidth = _.maxBy([...depNames, ...peerDepNames], name => name.length).length;
+		if (depNames.length > 0) {
+			log.info(_.pad(' Components Dependency ', 60, '-'));
+			let countDep = 0;
+			for (let name of Object.keys(this.srcDeps)) {
+				let versionList = this.srcDeps[name];
+				let item = versionList[0];
+				let hasDiffVersion = self._containsDiffVersion(versionList, this.peerDeps[name]);
+				log.info(`${(hasDiffVersion ? chalk.red : chalk.cyan)(_.padStart(name, nameWidth, ' '))} <- ${_.padEnd(item.ver, 9)} ${item.by}`);
+				for (let rest of versionList.slice(1)) {
+					log.info(`${_.repeat(' ', nameWidth)}    ${_.padEnd(rest.ver, 9)} ${rest.by}`);
+				}
+				if (!_.has(mainDeps, name) || mainDeps[name] !== versionList[0].ver) {
+					newDepJson[name] = versionList[0].ver;
+				}
+				countDep++;
+			}
+			log.info(_.pad(` total ${countDep}`, 60, '-'));
+		}
 
-		let countDep = 0;
-		for (let name of Object.keys(this.srcDeps)) {
-			let versionList = this.srcDeps[name];
-			let item = versionList[0];
-			let hasDiffVersion = self._containsDiffVersion(versionList, this.peerDeps[name]);
-			log.info(`${(hasDiffVersion ? chalk.red : chalk.cyan)(_.padStart(name, nameWidth, ' '))} <- ${_.padEnd(item.ver, 9)} ${item.by}`);
-			for (let rest of versionList.slice(1)) {
-				log.info(`${_.repeat(' ', nameWidth)}    ${_.padEnd(rest.ver, 9)} ${rest.by}`);
-			}
-			if (!_.has(mainDeps, name) || mainDeps[name] !== versionList[0].ver) {
-				newDepJson[name] = versionList[0].ver;
-			}
-			countDep++;
-		}
-		log.info(_.pad(` total ${countDep}`, 60, '-'));
+		this._printPeerDep(nameWidth, peerDepNames, newDepJson, mainDeps);
 
-		countDep = 0;
-		log.info(_.pad(' Components Peer Dependency only ', 60, '-'));
-		for (let name of Object.keys(this.peerDeps)) {
-			let versionList = this.peerDeps[name];
-			if (_.has(newDepJson, name))
-				continue;
-			if (_.has(this.compNameSet, name)) {
-				log.debug('Skip peerDependency "%s" as an linked project component', name);
-				// TODO: warn if version range does not match for this.compNameSet[name]
-				continue;
-			}
-			if (_.has(mainPkjson.dependencies, name)) {
-				log.info(`Skip peerDependency "${name}" since it has been set as ${name}@${mainPkjson.dependencies[name]} in package.json `);
-				continue;
-			}
-			let item = versionList[0];
-			let hasDiffVersion = self._containsDiffVersion(versionList);
-			log.info(`${(hasDiffVersion ? chalk.red : chalk.cyan)(_.padStart(name, nameWidth, ' '))} <- ${_.padEnd(item.ver, 9)} ${item.by}`);
-			for (let rest of versionList.slice(1)) {
-				log.info(`${_.repeat(' ', nameWidth)}    ${_.padEnd(rest.ver, 9)} ${rest.by}`);
-			}
-			if (!_.has(mainDeps, name) || mainDeps[name] !== versionList[0].ver) {
-				newDepJson[name] = versionList[0].ver;
-			}
-			countDep++;
-		}
-		log.info(_.pad(` total ${countDep}`, 60, '-'));
 		var needInstall = _.size(newDepJson) > 0;
 		if (needInstall) {
 			log.warn(chalk.blue('New component\'s dependencies are found:'));
@@ -340,5 +317,38 @@ InstallManager.prototype = {
 			return needInstall;
 		}
 		return false;
+	},
+
+	_printPeerDep: function(nameWidth, peerDepNames, newDepJson, mainDeps) {
+		var self = this;
+		if (!peerDepNames || peerDepNames.length === 0)
+			return;
+		let countDep = 0;
+		log.info(_.pad(' Components Peer Dependency only ', 60, '-'));
+		for (let name of peerDepNames) {
+			let versionList = this.peerDeps[name];
+			if (_.has(newDepJson, name) || name === '@dr/internal-recipe')
+				continue;
+			if (_.has(this.compNameSet, name)) {
+				log.debug('Skip peerDependency "%s" as an linked project component', name);
+				// TODO: warn if version range does not match for this.compNameSet[name]
+				continue;
+			}
+			if (_.has(mainDeps, name)) {
+				log.info(`Skip peerDependency "${name}" since it has been set as ${name}@${mainDeps[name]} in package.json `);
+				continue;
+			}
+			let item = versionList[0];
+			let hasDiffVersion = self._containsDiffVersion(versionList);
+			log.info(`${(hasDiffVersion ? chalk.red : chalk.cyan)(_.padStart(name, nameWidth, ' '))} <- ${_.padEnd(item.ver, 9)} ${item.by}`);
+			for (let rest of versionList.slice(1)) {
+				log.info(`${_.repeat(' ', nameWidth)}    ${_.padEnd(rest.ver, 9)} ${rest.by}`);
+			}
+			if (!_.has(mainDeps, name) || mainDeps[name] !== versionList[0].ver) {
+				newDepJson[name] = versionList[0].ver;
+			}
+			countDep++;
+		}
+		log.info(_.pad(` total ${countDep}`, 60, '-'));
 	}
 };
