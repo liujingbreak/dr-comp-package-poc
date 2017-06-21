@@ -2,9 +2,11 @@ language: node_js
 node_js:
     - "6.10.3"
 install:
+    - npm install -g yarn
     - npm install wfh
-    - npm run-script project
+    - npm run project
+    - npm install wfh
 before_script:
 script:
-    - npm run-script lint
-    - npm run-script test
+    - npm run lint
+    - npm run test
