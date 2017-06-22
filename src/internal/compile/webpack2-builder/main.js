@@ -76,6 +76,8 @@ function onSuccess(stats) {
 	// if (stats.hasWarnings()) {
 	// 	_.each([].concat(info.warnings), err => log.warn('webpack warning', err));
 	// }
+	if (!stats)
+		return null;
 	log.info(_.repeat('=', 30));
 	log.info(stats.toString({
 		chunks: false,  // Makes the build much quieter

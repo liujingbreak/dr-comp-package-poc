@@ -8,7 +8,7 @@ var Promise = require('bluebird');
 var buildUtils = require('./buildUtils');
 var argv = require('./showHelp');
 
-const INTERNAL_RECIPE_VER = '^0.3.41';
+const INTERNAL_RECIPE_VER = '^0.3.42';
 
 module.exports = {
 	init: init,
@@ -87,18 +87,27 @@ function _initWorkspace() {
 	}
 
 	let parsedPkj = JSON.parse(jsonStr);
+	let installInternalRec = false;
 	//let testInternalComp = Path.resolve(rootPath, 'node_modules', '@dr-core', 'webpack2-builder');
 	if (isDrcpSymlink || process.env.NO_INTERNAL_RECIPE || process.env.npm_package_config_internalRecipe === 'no') {
 		delete parsedPkj.dependencies['@dr/internal-recipe'];
 	} else if (_.get(parsedPkj, ['dependencies', '@dr/internal-recipe']) == null) {
 		_.set(parsedPkj, ['dependencies', '@dr/internal-recipe'], INTERNAL_RECIPE_VER);
+		installInternalRec = true;
 		console.log(chalk.blue('+ @dr/internal-recipe: %s'), parsedPkj.dependencies['@dr/internal-recipe']);
 	}
 	writeFile(Path.join(rootPath, 'package.json'), JSON.stringify(parsedPkj, null, '  '));
 
 	// logs
 	shell.mkdir('-p', Path.join(rootPath, 'logs'));
-	return _initProjects(isDrcpSymlink);
+	return _initProjects(isDrcpSymlink)
+	.then(needRunInstall => {
+		if (needRunInstall || installInternalRec) {
+			installInternalRec = false;
+			return install().then(() => _initWorkspace());
+		}
+		return null;
+	});
 }
 
 function _initProjects(isDrcpSymlink) {
@@ -118,15 +127,16 @@ function _initProjects(isDrcpSymlink) {
 		_.each(configFileContents, (configContent, file) => {
 			writeFile(file, '\n# DO NOT MODIFIY THIS FILE!\n' + configContent);
 		});
-		if (needRunInstall) {
-			//console.log(chalk.cyan('Executing "npm install" for newly found dependencies'));
-			//yield install();
+
+		return needRunInstall;
+		/* if (needRunInstall) {
+			yield install();
 			let msg = `There are new dependencies need to be installed!
 	1. Please execute "npm install" again.
 	2. Then run "drcp init" again, see if there are new more depended component packages need to be installed.
 Repeat above steps until this message gone.`;
-			console.log(chalk.red(msg));
-		}
+			//console.log(chalk.red(msg));
+		 }*/
 	})()
 	.catch(err => {
 		console.error(chalk.red(err), err.stack);
@@ -197,7 +207,7 @@ function returnProject() {
 
 function install() {
 	//console.log(fs.readFileSync(Path.join(rootPath, 'package.json'), 'utf8'));
-	return buildUtils.promisifyExe('npm', 'install', {cwd: rootPath});
+	return buildUtils.promisifyExe('yarn', 'install', {cwd: rootPath});
 }
 
 function clean() {

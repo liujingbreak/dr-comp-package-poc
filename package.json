@@ -8,19 +8,19 @@
   },
   "scripts": {
     "start": "node app.js",
-    "init": "node_modules/.bin/drcp init",
-    "project": "node_modules/.bin/drcp project -a .",
-    "lint": "node_modules/.bin/drcp lint",
-    "test": "node_modules/.bin/drcp test",
-    "e2e": "node_modules/.bin/drcp e2e --browser chrome"
+    "init": "node wfh/bin/drcp.js init",
+    "project": "node wfh/bin/drcp.js project -a .",
+    "lint": "node wfh/bin/drcp.js lint",
+    "test": "node wfh/bin/drcp.js test",
+    "e2e": "node wfh/bin/drcp.js e2e --browser chrome"
   },
   "author": "noone@dianrong.com",
   "license": "MIT",
   "engines": {
     "node": ">=6.7.0"
   },
-  "dependencies": {},
-  "devDependencies": {
-    "jasmine": "^2.5.3"
+  "dependencies": {
+    "jasmine": "^2.5.3",
+    "dr-comp-package": ""
   }
 }

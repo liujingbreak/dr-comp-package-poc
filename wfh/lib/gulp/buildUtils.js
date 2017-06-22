@@ -123,10 +123,9 @@ exports.promisifyExe = function(command, commandArgs) {
 	if (isWindows) {
 		switch (args[0]) {
 			case 'npm':
-				args[0] = 'npm.cmd';
-				break;
+			case 'yarn':
 			case 'gulp':
-				args[0] = 'gulp.cmd';
+				args[0] += '.cmd';
 				break;
 		}
 	}

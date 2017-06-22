@@ -255,7 +255,7 @@ class EntryFileFinder {
 
 			var packagePath = resolveFn.findPackagePath(name);
 			if (!packagePath) {
-				log.info('Package %s does not exist, you may need to install it', chalk.red(name));
+				log.info('Package %s does not exist', chalk.cyan(name));
 				return;
 			}
 			var packageJson = Path.join(packagePath, 'package.json');

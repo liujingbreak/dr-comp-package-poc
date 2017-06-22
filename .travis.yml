@@ -2,10 +2,14 @@ language: node_js
 node_js:
     - "6.10.3"
 install:
-    - npm install wfh
-    - npm run-script project
-    - npm install
+    - npm install -g yarn
+    - mkdir node_modules
+    - cd node_modules
+    - ln -s ../wfh dr-comp-package
+    - cd ..
+    - yarn install
+    - npm run project
 before_script:
 script:
-    - npm run-script lint
-    - npm run-script test
+    - npm run lint
+    - npm run test
