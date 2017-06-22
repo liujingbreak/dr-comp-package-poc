@@ -3,9 +3,12 @@ node_js:
     - "6.10.3"
 install:
     - npm install -g yarn
-    - npm install wfh
+    - mkdir node_modules
+    - cd node_modules
+    - ln -s ../wfh dr-comp-package
+    - cd ..
+    - yarn install
     - npm run project
-    - npm install wfh
 before_script:
 script:
     - npm run lint

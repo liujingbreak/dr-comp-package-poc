@@ -8,7 +8,7 @@ var Promise = require('bluebird');
 var buildUtils = require('./buildUtils');
 var argv = require('./showHelp');
 
-const INTERNAL_RECIPE_VER = '^0.3.41';
+const INTERNAL_RECIPE_VER = '^0.3.42';
 
 module.exports = {
 	init: init,
@@ -102,8 +102,10 @@ function _initWorkspace() {
 	shell.mkdir('-p', Path.join(rootPath, 'logs'));
 	return _initProjects(isDrcpSymlink)
 	.then(needRunInstall => {
-		if (needRunInstall || installInternalRec)
-			return install();
+		if (needRunInstall || installInternalRec) {
+			installInternalRec = false;
+			return install().then(() => _initWorkspace());
+		}
 		return null;
 	});
 }
