@@ -65,7 +65,11 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 						loader: 'babel-loader',
 						options: {
 							cacheDirectory: api.config.resolve('destDir', 'babel-cache' + (api.isDefaultLocale() ? '' : '/' + api.getBuildLocale())),
-							presets: [['es2015', {modules: false}]],
+							presets: [
+								['es2015', {modules: false}],
+								'react',
+								'stage-0'
+							],
 							plugins: [
 								'transform-decorators-legacy',
 								'transform-object-assign',

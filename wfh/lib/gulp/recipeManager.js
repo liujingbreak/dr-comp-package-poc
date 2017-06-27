@@ -61,8 +61,13 @@ function _projectSrcRecipeMap(projectDir) {
 		var projectName = fs.existsSync(pkJsonFile) ? require(pkJsonFile).name : Path.basename(projectDir);
 		if (fs.existsSync(Path.join(projectDir, 'src')))
 			nameSrcSetting['recipes/' + projectName] = 'src';
-		else
-			nameSrcSetting['recipes/' + projectName] = '.';
+		else {
+			let testSrcDir = Path.join(projectDir, 'app');
+			if (fs.existsSync(testSrcDir) && fs.statSync(testSrcDir))
+					nameSrcSetting['recipes/' + projectName] = 'app';
+			else
+				nameSrcSetting['recipes/' + projectName] = '.';
+		}
 	}
 	_.each(nameSrcSetting, (srcDirs, recipeName) => {
 		if (!_.endsWith(recipeName, '-recipe'))
