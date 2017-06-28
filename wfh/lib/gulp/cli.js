@@ -1,14 +1,11 @@
 var fs = require('fs-extra');
 var Path = require('path');
-const mkdirp = require('mkdirp');
 var _ = require('lodash');
 var chalk = require('chalk');
 var shell = require('shelljs');
 var Promise = require('bluebird');
 var buildUtils = require('./buildUtils');
 var argv = require('./showHelp');
-
-const INTERNAL_RECIPE_VER = '^0.3.43';
 
 module.exports = {
 	init: init,
@@ -18,7 +15,8 @@ module.exports = {
 	listProject: listProject,
 	initGulpfile: initGulpfile,
 	bumpDirs: bumpDirs,
-	bumpProjects: bumpProjects
+	bumpProjects: bumpProjects,
+	writeProjectListFile: writeProjectListFile
 };
 
 var wfhHome = Path.resolve(__dirname, '../..');
@@ -68,42 +66,14 @@ drcp lint --pj "${project}"
 }
 
 function _initWorkspace() {
-	mkdirp(Path.join(rootPath, 'node_modules'));
+	// mkdirp(Path.join(rootPath, 'node_modules'));
 	var isDrcpSymlink = fs.lstatSync(Path.resolve('node_modules', 'dr-comp-package')).isSymbolicLink();
-	if (isDrcpSymlink) {
-		console.log(chalk.yellow('dr-comp-package is symbolink, consider as drcp development mode,\n@dr/internal-recipe will not be saved to package.json in this mode'));
-	}
-	// package.json
-	var jsonStr;
-	if (!fs.existsSync(Path.join(rootPath, 'package.json'))) {
-		var packageJsonTmp = getPackageJsonTemplate();
-		jsonStr = packageJsonTmp({
-			project: {name: Path.basename(rootPath), desc: 'Dianrong component workspace', author: 'noone@dianrong.com'},
-			version: getVersion(),
-			noDrcp: isDrcpSymlink
-		});
-	} else {
-		jsonStr = fs.readFileSync(Path.join(rootPath, 'package.json'), 'utf8');
-	}
-
-	let parsedPkj = JSON.parse(jsonStr);
-	let installInternalRec = false;
-	//let testInternalComp = Path.resolve(rootPath, 'node_modules', '@dr-core', 'webpack2-builder');
-	if (isDrcpSymlink || process.env.NO_INTERNAL_RECIPE || process.env.npm_package_config_internalRecipe === 'no') {
-		delete parsedPkj.dependencies['@dr/internal-recipe'];
-	} else if (_.get(parsedPkj, ['dependencies', '@dr/internal-recipe']) == null) {
-		_.set(parsedPkj, ['dependencies', '@dr/internal-recipe'], INTERNAL_RECIPE_VER);
-		installInternalRec = true;
-		console.log(chalk.blue('+ @dr/internal-recipe: %s'), parsedPkj.dependencies['@dr/internal-recipe']);
-	}
-	writeFile(Path.join(rootPath, 'package.json'), JSON.stringify(parsedPkj, null, '  '));
 
 	// logs
 	shell.mkdir('-p', Path.join(rootPath, 'logs'));
 	return _initProjects(isDrcpSymlink)
 	.then(needRunInstall => {
-		if (needRunInstall || installInternalRec) {
-			installInternalRec = false;
+		if (needRunInstall) {
 			return install().then(() => _initWorkspace());
 		}
 		return null;
@@ -129,42 +99,19 @@ function _initProjects(isDrcpSymlink) {
 		});
 
 		return needRunInstall;
-		/* if (needRunInstall) {
-			yield install();
-			let msg = `There are new dependencies need to be installed!
-	1. Please execute "npm install" again.
-	2. Then run "drcp init" again, see if there are new more depended component packages need to be installed.
-Repeat above steps until this message gone.`;
-			//console.log(chalk.red(msg));
-		 }*/
 	})()
 	.catch(err => {
 		console.error(chalk.red(err), err.stack);
 	});
 }
 
-// function _updateProjectFolder(dir) {
-// 	return Promise.resolve();
-// 	// Move all config.*.yaml to <project>/conf
-// 	var cfDir = Path.resolve(dir, 'conf');
-// 	mkdirp(cfDir);
-// 	var cf = Path.resolve(dir, 'config.yaml');
-// 	if (fs.existsSync(cf))
-// 		shell.mv(cf, cfDir);
-// 	return Promise.promisify(glob)(Path.resolve(dir, 'config.*.yaml'))
-// 	.then(files => {
-// 		_.each(files, cf => {
-// 			var file = Path.resolve(cfDir, Path.basename(cf));
-// 			shell.mv(cf, file);
-// 			console.log('move %s', file);
-// 		});
-// 	})
-// 	.catch(err => {
-// 		console.error(chalk.red(err).message, err);
-// 	});
-// }
-
 function addProject(dirs) {
+	writeProjectListFile(dirs);
+	require('../config').reload();
+	return init();
+}
+
+function writeProjectListFile(dirs) {
 	var projectListFile = Path.join(rootPath, 'dr.project.list.json');
 	var prj;
 	if (fs.existsSync(projectListFile)) {
@@ -174,9 +121,8 @@ function addProject(dirs) {
 		prj = [...dirs];
 	}
 	prj = _.uniqBy(prj, dir => Path.resolve(dir));
+	// TODO: Only write file when file is changed
 	writeFile(projectListFile, JSON.stringify(prj, null, '  '));
-	require('../config').reload();
-	return init();
 }
 
 function listProject() {
@@ -250,15 +196,6 @@ function maybeCopyTemplate(from, to) {
 	}
 }
 
-var packageJsonTmpl;
-function getPackageJsonTemplate() {
-	if (packageJsonTmpl)
-		return packageJsonTmpl;
-	else
-		packageJsonTmpl = _.template(fs.readFileSync(Path.resolve(__dirname, 'templates/package.json.template'), 'utf8'));
-	return packageJsonTmpl;
-}
-
 function _drawPuppy(slogon, message) {
 	if (!slogon)
 		slogon = 'Congrads! Time to publish your shit!';
@@ -271,6 +208,3 @@ function _drawPuppy(slogon, message) {
 		console.log(message);
 }
 
-function getVersion() {
-	return require(Path.join(wfhHome, 'package.json')).version;
-}

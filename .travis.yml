@@ -7,7 +7,6 @@ install:
     - cd node_modules
     - ln -s ../wfh dr-comp-package
     - cd ..
-    - yarn install
     - npm run project
 before_script:
 script:
