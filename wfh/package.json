@@ -1,6 +1,6 @@
 {
   "name": "dr-comp-package",
-  "version": "0.3.0-rc.1",
+  "version": "0.3.0",
   "description": "DR web component package developer toolkit",
   "main": "lib/main.js",
   "bin": {
@@ -24,9 +24,6 @@
   "homepage": "https://dr-web-house.github.io",
   "engines": {
     "node": ">=6.5.0"
-  },
-  "peerDependencies":{
-    "@dr/internal-recipe": ">=0.3.42"
   },
   "dependencies": {
     "bluebird": "^3.3.1",
