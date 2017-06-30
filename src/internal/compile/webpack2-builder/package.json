@@ -1,6 +1,6 @@
 {
   "name": "@dr-core/webpack2-builder",
-  "version": "0.3.40",
+  "version": "0.3.41",
   "description": "Browser side stuff builder module based on Webpack2",
   "main": "main.js",
   "browser": "browser-api.js",
@@ -51,7 +51,7 @@
     "jade": "^1.11.0",
     "promise-polyfill": "^6.0.2",
     "manual-chunk-plugin": "^1.0.0",
-    "require-injector": "^3.0.0-rc.5"
+    "require-injector": "^3.0.0"
   },
   "author": "LJ",
   "license": "MIT",

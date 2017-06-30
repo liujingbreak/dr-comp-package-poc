@@ -1,6 +1,6 @@
 {
   "name": "dr-comp-package",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "DR web component package developer toolkit",
   "main": "lib/main.js",
   "bin": {
@@ -54,7 +54,7 @@
     "log4js": "^1.0.1",
     "main-bower-files": "^2.11.0",
     "mkdirp": "^0.5.1",
-    "require-injector": "^3.0.0-rc.5",
+    "require-injector": "^3.0.0",
     "resolve": "^1.1.7",
     "run-sequence": "^1.1.5",
     "semver": "^5.3.0",
