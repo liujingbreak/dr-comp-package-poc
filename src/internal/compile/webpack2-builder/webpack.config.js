@@ -237,13 +237,6 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 			new MultiEntryHtmlPlugin({
 				inlineChunk: 'runtime',
 				entryHtml: entryChunkHtmlAndView, // key: chunkName, value: string[]
-				//liveReloadJs: api.config().devMode ? `//${api.config().localIP}:${api.config.get('livereload.port')}/livereload.js` : false,
-				// onCompile: (file, $) => {
-				// 	var pk = api.findPackageByFile(file);
-				// 	// For adding css scope classname, this will force prerender css before JS file starts
-				// 	if (pk && pk.dr && pk.shortName)
-				// 		$('html').addClass(pk.shortName);
-				// }
 			}),
 
 			entryHtmlOutputPathPlugin,
