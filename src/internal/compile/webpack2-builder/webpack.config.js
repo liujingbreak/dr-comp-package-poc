@@ -210,6 +210,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 		},
 		devtool: api.config().enableSourceMaps ? 'source-map' : false, //'hidden-source-map',
 		plugins: [
+			new webpack.optimize.ModuleConcatenationPlugin(),
 			api.config().devMode ? new webpack.NamedModulesPlugin() : new webpack.HashedModuleIdsPlugin(),
 
 			new webpack.WatchIgnorePlugin([api.config.resolve('destDir', 'webpack-temp')]),
@@ -272,10 +273,10 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 		// https://webpack.js.org/plugins/uglifyjs-webpack-plugin
 		webpackConfig.plugins.push(new webpack.optimize.UglifyJsPlugin({
 			sourceMap: api.config().enableSourceMaps,
+			mangle: {
+				except: ['exports', 'require'] // Hack, don't know why it fixes a weird issue under production
+			},
 			compress: {
-				hoist_vars: false,
-				unsafe: false,
-				warnings: false,
 				drop_debugger: true,
 				drop_console: true
 			}

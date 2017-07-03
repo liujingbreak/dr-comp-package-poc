@@ -129,7 +129,7 @@ function addDependency(recipeAbsDir) {
 	if (recipeAbsDir) {
 		var recipeFile = Path.resolve(recipeAbsDir, 'package.json');
 		if (fs.existsSync(recipeFile)) {
-			log.info('Existing recipeFile %s', recipeFile);
+			log.debug('Existing recipeFile %s', recipeFile);
 			var content = fs.readFileSync(recipeFile, 'utf8');
 			try {
 				destJson = JSON.parse(content);

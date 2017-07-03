@@ -39,7 +39,7 @@ module.exports = function(sourceFilePath, regexpExecResult) {
 				code += `  load: function() { return Promise.resolve(require('${m.longName}')); }}`;
 			else
 				code += `  load: function() {
-	return new Promise( resolve => {
+	return new Promise(function(resolve) {
 		require.ensure([], function(require) {
 			resolve(require('${m.longName}'));
 		});
