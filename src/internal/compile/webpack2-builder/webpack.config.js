@@ -210,7 +210,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 		},
 		devtool: api.config().enableSourceMaps ? 'source-map' : false, //'hidden-source-map',
 		plugins: [
-			new webpack.optimize.ModuleConcatenationPlugin(),
+			//new webpack.optimize.ModuleConcatenationPlugin(),
 			api.config().devMode ? new webpack.NamedModulesPlugin() : new webpack.HashedModuleIdsPlugin(),
 
 			new webpack.WatchIgnorePlugin([api.config.resolve('destDir', 'webpack-temp')]),
