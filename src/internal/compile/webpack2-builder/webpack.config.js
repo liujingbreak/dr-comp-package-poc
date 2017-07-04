@@ -7,7 +7,7 @@ const log = require('log4js').getLogger(api.packageName);
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const ManualChunkPlugin = require('./lib/manual-chunk-plugin');
 const MultiEntryHtmlPlugin = require('./lib/multi-entry-html-plugin');
-
+const DrModuleResolvePlugin = require('./lib/dr-module-resolve-plugin');
 
 module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entryChunkHtmlAndView,
 	legoConfig, chunk4package, sendlivereload, entryHtmlOutputPathPlugin, entryHtmlCompilePlugin) {
@@ -202,13 +202,15 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 			]
 		},
 		resolve: {
-			modules: [api.config().nodePath, 'node_modules']
+			modules: [api.config().nodePath, 'node_modules'],
+			plugins: [new DrModuleResolvePlugin()]
 		},
 		resolveLoader: {
 			modules: [__dirname, api.config().nodePath, 'node_modules']
 		},
 		devtool: api.config().enableSourceMaps ? 'source-map' : false, //'hidden-source-map',
 		plugins: [
+			//new webpack.optimize.ModuleConcatenationPlugin(),
 			api.config().devMode ? new webpack.NamedModulesPlugin() : new webpack.HashedModuleIdsPlugin(),
 
 			new webpack.WatchIgnorePlugin([api.config.resolve('destDir', 'webpack-temp')]),
@@ -236,13 +238,6 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 			new MultiEntryHtmlPlugin({
 				inlineChunk: 'runtime',
 				entryHtml: entryChunkHtmlAndView, // key: chunkName, value: string[]
-				//liveReloadJs: api.config().devMode ? `//${api.config().localIP}:${api.config.get('livereload.port')}/livereload.js` : false,
-				// onCompile: (file, $) => {
-				// 	var pk = api.findPackageByFile(file);
-				// 	// For adding css scope classname, this will force prerender css before JS file starts
-				// 	if (pk && pk.dr && pk.shortName)
-				// 		$('html').addClass(pk.shortName);
-				// }
 			}),
 
 			entryHtmlOutputPathPlugin,
@@ -278,10 +273,10 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 		// https://webpack.js.org/plugins/uglifyjs-webpack-plugin
 		webpackConfig.plugins.push(new webpack.optimize.UglifyJsPlugin({
 			sourceMap: api.config().enableSourceMaps,
+			mangle: {
+				except: ['exports', 'require'] // Hack, don't know why it fixes a weird issue under production
+			},
 			compress: {
-				hoist_vars: false,
-				unsafe: false,
-				warnings: false,
 				drop_debugger: true,
 				drop_console: true
 			}

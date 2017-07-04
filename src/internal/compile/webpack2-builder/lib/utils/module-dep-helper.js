@@ -19,7 +19,10 @@ DependencyHelper.prototype = {
 	listCommonJsDepMap: function(compilation) {
 		var entryPackage2Module = new Map();
 		compilation.modules.forEach(m => {
-			var comp = this.file2comp[getModuleFile(m)];
+			var file = getModuleFile(m);
+			if (!file)
+				return;
+			var comp = this.file2comp[file];
 			if (comp) {
 				var packages = new Set();
 				entryPackage2Module.set(comp.longName, packages);
@@ -54,6 +57,6 @@ DependencyHelper.prototype = {
 
 
 function getModuleFile(m) {
-	return _.get(m, ['fileDependencies', 0]);
+	return m.resource || (m.rootModule && m.rootModule.resource) || null;
 	//return (m.identifier() || m.name).split('!').slice().pop();
 }

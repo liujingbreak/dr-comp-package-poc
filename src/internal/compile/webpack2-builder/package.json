@@ -1,6 +1,6 @@
 {
   "name": "@dr-core/webpack2-builder",
-  "version": "0.3.40",
+  "version": "0.3.44",
   "description": "Browser side stuff builder module based on Webpack2",
   "main": "main.js",
   "browser": "browser-api.js",
@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "webpack": "2.5.1",
+    "webpack": "3.0.0",
     "html-loader": "^0.4.4",
     "raw-loader": "^0.5.1",
     "yaml-loader": "^0.4.0",
@@ -50,8 +50,8 @@
     "sass-loader": "^6.0.3",
     "jade": "^1.11.0",
     "promise-polyfill": "^6.0.2",
-    "manual-chunk-plugin": "^1.0.0",
-    "require-injector": "^3.0.0-rc.5"
+    "manual-chunk-plugin": "^1.1.0",
+    "require-injector": "^3.0.0"
   },
   "author": "LJ",
   "license": "MIT",

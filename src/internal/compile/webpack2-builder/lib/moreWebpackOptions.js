@@ -42,7 +42,7 @@ exports.createParams = function(contextPath) {
 				browserSideConfigProp = [browserSideConfigProp];
 			}
 			if (browserSideConfigProp)
-				log.info('Found "dr.browserSideConfigProp" in %s, %s', component.longName, browserSideConfigProp);
+				log.debug('Found "dr.browserSideConfigProp" in %s, %s', component.longName, browserSideConfigProp);
 			_.each(browserSideConfigProp, prop => browserPropSet[prop] = true);
 		},
 		function onEntryComp(entryComp) {

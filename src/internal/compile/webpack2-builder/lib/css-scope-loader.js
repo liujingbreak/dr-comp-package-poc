@@ -60,7 +60,7 @@ function traverseRuleNodes(nodes, currPackage, file) {
 	function forEachSelectorNode(selectorNode) {
 		var i = indexOfSelAstNodeBeforeOperator(selectorNode.nodes, 'element', 'name', 'html', true);
 		if (i >= 0) {
-			log.info('Found HTML css selector: %s in %s', selector, file);
+			log.debug('Found HTML level css selector: %s in %s', selector, file);
 			selectorNode.nodes.splice(i + 1, 0, {
 				type: 'class', name: cls
 			});
