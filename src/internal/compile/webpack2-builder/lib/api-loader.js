@@ -35,15 +35,20 @@ function parse(source, loader) {
 	var file = loader.resourcePath;
 	var currPackage = api.findPackageByFile(file);
 	var hasApi = false;
-	if (currPackage && currPackage.longName !== api.packageName /*@dr-core/webpack2-builder*/ &&
-		currPackage.dr.cssScope !== false && file === currPackage.file) {
-		hasApi = true;
-		var cls = currPackage.dr.cssScope;
-		if (typeof cls !== 'string')
-			cls = currPackage.parsedName.name;
-		log.debug('Insert CSS scope classname to:\n %s', file);
-		source = `__api._addCssScopeClassname([\'${cls}\']);
-${source}`;
+	if (currPackage && !currPackage.dr) {
+		log.error('Component has no "dr" property: ', currPackage.longName);
+	}
+	if (currPackage && currPackage.longName !== api.packageName /*@dr-core/webpack2-builder*/) {
+		let cssScope = _.get(currPackage, 'dr.cssScope');
+		if (cssScope !== false && file === currPackage.file) {
+			hasApi = true;
+			var cls = cssScope;
+			if (typeof cls !== 'string')
+				cls = currPackage.parsedName.name;
+			log.debug('Insert CSS scope classname to:\n %s', file);
+			source = `__api._addCssScopeClassname([\'${cls}\']);
+	${source}`;
+		}
 	}
 	var astFromCache = false;
 	//log.info('js file: %s, %s', file, _.get(currPackage, 'file'));

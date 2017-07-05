@@ -55,6 +55,8 @@ function doAttrAssetsUrl(idx, attrName, file, loader, $, proms) {
 	if (src.startsWith('assets://')) {
 		log.debug('Found tag %s, %s: %s', el.prop('tagName'), attrName, el.attr(attrName));
 		el.attr(attrName, replaceAssetsUrl(file, src, loader.options.output.publicPath));
+	} else if (/^\s*\w+:/.test(src)) {
+		return; // Skip http:, file:, data: protocal
 	} else if (attrName === 'srcset') {
 		proms.push(doSrcSet(el.attr('srcset'), loader).then(value => el.attr(attrName, value)));
 	} else if (attrName === 'src' && el.prop('tagName') === 'IMG' && !/^(https?:|\/)/.test(src)) {
