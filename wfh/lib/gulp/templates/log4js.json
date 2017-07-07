@@ -31,7 +31,7 @@
 		"require-injector.node-inject": "info",
 		"@dr/translate-generator": "info",
 		"@dr-core/webpack2-builder": "info",
-		"wfh.api-loader": "debug",
-		"@dr/template-builder": "debug"
+		"wfh.api-loader": "info",
+		"@dr/template-builder": "info"
 	}
 }

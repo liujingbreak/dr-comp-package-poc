@@ -278,7 +278,8 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 			},
 			compress: {
 				drop_debugger: true,
-				drop_console: true
+				drop_console: true,
+				warnings: false
 			}
 		}));
 	}

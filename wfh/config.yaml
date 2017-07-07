@@ -82,18 +82,36 @@ vendorBundleMap:
     - base64-js
     - ieee754
     - isarray
-
+    - history
+    - value-equal
+    - resolve-pathname
   ui-lib: # bundle name
     - angular-ui-router
     - fontfaceobserver/fontfaceobserver
     - gsap
     - swiper
+  react-lib:
+    - react
+    - react-dom
+    - react-router
+    - react-router-dom
+    - mobx-react
+    - mobx
+    - classnames # react-extra
+    - create-react-class
+    - prop-types
+    - dom-scroll-into-view
+    - fbjs
+    - path-to-regexp
+    - hoist-non-react-statics
+    - invariant
   vendor-gsap:
     - gsap
   babel:
     - core-js
     - babel-polyfill
     - regenerator-runtime
+    - object-assign
 
 # You may use external JS/CSS resource like CDN service instead of a local hosted bundle file,
 # `gulp compile` replaces those bundles with the URLs you set here in each eatry files.

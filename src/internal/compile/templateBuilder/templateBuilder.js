@@ -114,7 +114,7 @@ exports.runPackage = runPackage;
 function runPackage(browserPackage) {
 	if (!_.has(packageCache, browserPackage.longName)) {
 		try {
-			var exports = require(browserPackage.longName);
+			var exports = browserPackage.main ? require(browserPackage.longName) : null;
 			packageCache[browserPackage.longName] = exports;
 		} catch (err) {
 			// MODULE_NOT_FOUND meaning the package has no `main` entry module, skip it
