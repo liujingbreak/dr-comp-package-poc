@@ -124,7 +124,8 @@ function _walkPackages(compileNodePath) {
 		} catch (err) {}
 		instance.init({
 			isVendor: false,
-			file: mainFile ? fs.realpathSync(mainFile) : null,
+			file: mainFile ? fs.realpathSync(mainFile) : null, // package.json "browser"
+			main: pkJson.main, // package.json "main"
 			style: pkJson.style ? resolveStyle(name) : null,
 			parsedName: parsedName,
 			entryPages: entryPages,

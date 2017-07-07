@@ -46,7 +46,7 @@ function replaceAssetsUrl(file, url) {
 		if (!packageName || packageName === '')
 			packageName = api.findPackageByFile(file).longName;
 		try {
-			var injectedPackageName = npmimportCssLoader.getInjectedPackage(packageName, file);
+			var injectedPackageName = npmimportCssLoader.getInjectedPackage(packageName, file, api.browserInjector);
 			if (injectedPackageName)
 				return api.assetsUrl(injectedPackageName, path);
 			if (injectedPackageName === '')
