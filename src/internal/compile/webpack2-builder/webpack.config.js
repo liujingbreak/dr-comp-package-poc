@@ -191,13 +191,35 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 						{loader: 'yaml-loader'}
 					]
 				}, {
-					test: /\.(jpg|png|gif|svg|jpeg|eot|woff2|woff|ttf)$/,
+					test: /\.(eot|woff2|woff|ttf)$/,
 					use: [{loader: 'lib/dr-file-loader', options: {
 						// name: '[path][name].[md5:hash:hex:8].[ext]',
 						// outputPath: url => {
 						// 	return url.replace(/(^|\/)node_modules(\/|$)/g, '$1n-m$2').replace(/@/g, 'a'); // github.io does not support special character like "_" and "@"
 						// }
-					}}]
+					}}
+          ]
+				}, {
+					test: /\.(jpg|png|gif|svg|jpeg)$/,
+					loader: [
+					{
+						loader: 'url-loader',
+						options: {
+							limit: !api.config().devMode ? 10000 : 1, // <10k ,use base64 format, dev mode only use url for speed
+						}
+					}, 
+					{
+						loader: 'image-webpack-loader',
+						query: {
+						bypassOnDebug: true,
+						progressive: true,
+						pngquant: {
+							quality: '65-90',
+							speed: 4
+						}
+						}
+					}
+					]
 				}
 			]
 		},
