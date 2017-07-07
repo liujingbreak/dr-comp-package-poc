@@ -10,7 +10,7 @@ const MultiEntryHtmlPlugin = require('./lib/multi-entry-html-plugin');
 const DrModuleResolvePlugin = require('./lib/dr-module-resolve-plugin');
 
 module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entryChunkHtmlAndView,
-	legoConfig, chunk4package, sendlivereload, entryHtmlOutputPathPlugin, entryHtmlCompilePlugin) {
+	legoConfig, chunk4package, sendlivereload, entryHtmlOutputPathPlugin, entryHtmlCssScopePlugin) {
 	log.info('nodePath: %s', api.config().nodePath);
 
 	var astCache = {};
@@ -257,8 +257,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 			}),
 
 			entryHtmlOutputPathPlugin,
-
-			entryHtmlCompilePlugin,
+			entryHtmlCssScopePlugin,
 
 			new webpack.DefinePlugin({
 				LEGO_CONFIG: JSON.stringify(legoConfig),
