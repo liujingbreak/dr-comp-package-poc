@@ -5,11 +5,11 @@ var _ = require('lodash');
 var glob = require('glob');
 var log = require('log4js').getLogger(api.packageName + '.' + Path.basename(__filename));
 var noParseHelper = require('./noParseHelper');
-var Promise = require('bluebird');
+var pify = require('pify');
 const http = require('http');
 const DependencyHelper = require('./utils/module-dep-helper');
 
-var writeFileAsync = Promise.promisify(fs.writeFile.bind(fs));
+var writeFileAsync = pify(fs.writeFile.bind(fs));
 //const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TEMP_DIR = 'webpack-temp';
 
@@ -93,7 +93,7 @@ exports.createParams = function(contextPath) {
 		params: [webpackConfigEntry, noParse, file2EntryChunkName, entryChunkHtmlAndView, legoConfig, chunk4package,
 			sendlivereload, createEntryHtmlOutputPathPlugin(entryViewSet),
 			function() {
-				return entryHtmlCompilePlugin.call(this, new DependencyHelper(entryComponents));
+				return entryHtmlCssScopePlugin.call(this, new DependencyHelper(entryComponents));
 			}],
 
 		writeEntryFileAync: function(moduleRules) {
@@ -202,9 +202,9 @@ function createEntryHtmlOutputPathPlugin(entryViewSet) {
 					dir = component.shortName;
 
 				var relative = Path.relative(component.realPackagePath, htmlAssets.path);
-				if (!isView)
+				if (!isView) {
 					htmlAssets.path = Path.join(_.trimStart(dir, '/'), relative);
-				else
+				} else
 					htmlAssets.path = Path.join('../server', _.trimStart(dir, '/'), relative);
 
 				var stag = htmlAssets.$('<script>');
@@ -224,7 +224,7 @@ function createEntryHtmlOutputPathPlugin(entryViewSet) {
 /**
  * For CSS scope, add pacakge short name as class name to HTML element during server rendering
  */
-function entryHtmlCompilePlugin(moduleDep) {
+function entryHtmlCssScopePlugin(moduleDep) {
 	var map;
 	this.plugin('after-emit', function(compilation, callback) {
 		map = null;
@@ -232,9 +232,9 @@ function entryHtmlCompilePlugin(moduleDep) {
 		callback();
 	});
 	this.plugin('compilation', function(compilation) {
-		compilation.plugin('multi-entry-html-compile-html', (file, $, cb) => {
-			var html = $('html');
-			var comp = api.findPackageByFile(file);
+		compilation.plugin('multi-entry-html-emit-assets', (assets, cb) => {
+			var html = assets.$('html');
+			var comp = api.findPackageByFile(assets.absPath);
 			if (comp && _.get(comp, 'dr.cssScope') !== false) {
 				var cls = _.get(comp, 'dr.cssScope');
 				html.addClass(_.isString(cls) ? cls : comp.shortName);
@@ -247,7 +247,7 @@ function entryHtmlCompilePlugin(moduleDep) {
 					}
 				}
 			}
-			cb();
+			cb(null, assets);
 		});
 	});
 }

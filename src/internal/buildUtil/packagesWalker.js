@@ -134,6 +134,7 @@ function _walkPackages(compileNodePath) {
 			isEntryServerTemplate: isEntryServerTemplate,
 			translatable: !_.has(pkJson, 'dr.translatable') || _.get(pkJson, 'dr.translatable'),
 			dr: pkJson.dr,
+			json: pkJson,
 			compiler: pkJson.dr.compiler,
 			browser: pkJson.browser,
 			i18n: pkJson.dr ? (pkJson.dr.i18n ? pkJson.dr.i18n : null) : null

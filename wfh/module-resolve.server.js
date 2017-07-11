@@ -20,6 +20,8 @@ module.exports = function(injector) {
 	var config = require('./lib/config');
 	var nodePaths = [config().nodePath];
 
+	injector.fromPackage('url-loader').alias('file-loader', '@dr-core/webpack2-builder/lib/dr-file-loader');
+
 	injector.fromPackage(['parcelify', 'less-plugin-npm-import', '@dr/parcelify-module-resolver'])
 	.factory('resolve', function(sourceFilePath) {
 		_resolve.sync = function(id, opts) {

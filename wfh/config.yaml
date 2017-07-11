@@ -90,6 +90,8 @@ vendorBundleMap:
     - fontfaceobserver/fontfaceobserver
     - gsap
     - swiper
+    - angular-highlightjs
+    - highlight
   react-lib:
     - react
     - react-dom

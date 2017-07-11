@@ -1,4 +1,3 @@
-//const Promise = require('bluebird');
 const api = require('__api');
 const log = require('log4js').getLogger(api.packageName + '.entry-html-loader');
 //const _ = require('lodash');
