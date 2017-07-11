@@ -8,3 +8,4 @@ dist
 /logs
 /certificate
 .vscode
+*.log

@@ -1,6 +1,6 @@
 {
   "name": "dr-comp-package",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "DR web component package developer toolkit",
   "main": "lib/main.js",
   "bin": {
