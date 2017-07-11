@@ -1,4 +1,3 @@
-//const Promise = require('bluebird');
 const api = require('__api');
 const log = require('log4js').getLogger(api.packageName + '.debug-loader');
 const lu = require('loader-utils');

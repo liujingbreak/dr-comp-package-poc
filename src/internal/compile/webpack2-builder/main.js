@@ -17,14 +17,15 @@ exports.tapable = tapable;
 
 exports.compile = () => {
 	mkdirp.sync(api.config.resolve('destDir', 'webpack-temp'));
-
 	return initWebpackConfig()
 	.then(webpackConfig => {
 		if (_.size(webpackConfig.entry) === 0)
 			return null;
 		return Promise.promisify(webpack)(webpackConfig);
 	})
-	.then(onSuccess);
+	.then(stats => {
+		onSuccess(stats);
+	});
 	//.catch(onFail);
 };
 
@@ -69,15 +70,6 @@ function initWebpackConfig() {
 }
 
 function onSuccess(stats) {
-	//const info = stats.toJson();
-
-	// if (stats.hasErrors()) {
-	// 	_.each([].concat(info.errors), err => log.error('webpack error', err));
-	// }
-
-	// if (stats.hasWarnings()) {
-	// 	_.each([].concat(info.warnings), err => log.warn('webpack warning', err));
-	// }
 	if (!stats)
 		return null;
 	log.info(_.repeat('=', 30));

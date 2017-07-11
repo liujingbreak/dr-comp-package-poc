@@ -13,11 +13,9 @@ var realpathAsync = Promise.promisify(fs.realpath);
 /**
  * @param opts.inlineChunk: array | string
  * @param opts.entryHtml: {[chunName: string]: array|string}, key is Chunk name, value is file path
- * All plugins registerd on compilation "multi-entry-html-emit-assets", will be invoked with parameter: `{path: string, html: string}`,
- * plugin must return altered object `{path: string, html: string}`
- * All plugins registerd on compilation "multi-entry-html-compile-html", will be invoked with parameter: `(path: string, $: cheerio)`,
+ * All plugins registerd on compilation "multi-entry-html-emit-assets", will be invoked with parameter: `{path: string, $: cheerio}`,
+ * plugin must return altered object `{path: string|Array<path:string>}` or `{path: string|Array<path:string>, html: string}`
  *
- * @param opts.onEmitAssets: function(filePath, html) same as registering plugin on "multi-entry-html-emit-assets"
  * @param opts.onCompile: function(filePath, cheerio)
  */
 function MultiEntryHtmlPlugin(opts) {
@@ -86,7 +84,7 @@ MultiEntryHtmlPlugin.prototype.apply = function(compiler) {
 			if (plugin.opts.onCompile) {
 				plugin.opts.onCompile(file, $);
 			}
-			yield applyPluginsAsync('multi-entry-html-compile-html', file, $);
+			//yield applyPluginsAsync('multi-entry-html-compile-html', file, $);
 			var scriptIdx = 0;
 			_.each(compilation.entrypoints[entrypointName].chunks, chunk => {
 				var s;
@@ -109,14 +107,16 @@ MultiEntryHtmlPlugin.prototype.apply = function(compiler) {
 				}
 			});
 			var data = yield applyPluginsAsyncWaterfall('multi-entry-html-emit-assets', {
+				absPath: file,
 				path: relativePath,
 				$: $
 			});
-			data.path = data.path.replace(/\.([^.]+)$/, '.html');
-
-			compilation.assets[data.path] = new wps.CachedSource(new wps.RawSource(
-				data.html || $.html()));
-			return data.path;
+			var paths = [].concat(data.path);
+			for (let path of paths) {
+				path = path.replace(/\.([^.]+)$/, '.html');
+				compilation.assets[path] = new wps.CachedSource(new wps.RawSource(
+					data.html || $.html()));
+			}
 		})();
 	}
 
