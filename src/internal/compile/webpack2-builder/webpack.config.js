@@ -9,7 +9,7 @@ const ManualChunkPlugin = require('./lib/manual-chunk-plugin');
 const MultiEntryHtmlPlugin = require('./lib/multi-entry-html-plugin');
 const DrModuleResolvePlugin = require('./lib/dr-module-resolve-plugin');
 
-module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entryChunkHtmlAndView,
+module.exports = function(webpackConfigEntry, noParse, file2ChunkName, entryChunkHtmlAndView,
 	legoConfig, chunk4package, sendlivereload, entryHtmlOutputPathPlugin, entryHtmlCssScopePlugin) {
 	log.info('nodePath: %s', api.config().nodePath);
 
@@ -21,6 +21,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 		entry: webpackConfigEntry,
 		output: {
 			filename: api.config().devMode ? '[name].js' : '[name].[chunkhash:10].js',
+			chunkFilename: api.config().devMode ? '[id].[name].js' : '[id].[name].[chunkhash:10].js',
 			// https://webpack.js.org/loaders/style-loader/
 			// We must provide complete protocal:hostname:port, because of blob URL issue of style-loader
 			//
@@ -42,7 +43,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 				// 		console.log(arguments);
 				// 		return false;
 				// 	},
-				// 	use: [{loader: '@dr-core/webpack2-builder/lib/debug-loader'}]
+				// 	use: [{loader: 'lib/debug-loader'}]
 				// },
 				{
 					// test if it is our component
@@ -54,7 +55,10 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 				},
 				{
 					test: /\.js$/,
-					use: [{loader: 'require-injector', options: {injector: api.browserInjector, astCache: astCache}}],
+					use: [
+						//{loader: 'lib/debug-loader', options: {id: 'debug-load-js'}},
+						{loader: 'require-injector', options: {injector: api.browserInjector, astCache: astCache}}
+					],
 					parser: {
 						amd: false // Do not parse some 3rd-party library as AMD module, like GSAP will fail in AMD module mode
 					}
@@ -91,6 +95,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 					test: /\.html$/,
 					use: [
 						{loader: 'html-loader', options: {attrs: 'img:src'}},
+						//{loader: 'html-minify-loader'},
 						{loader: 'lib/html-loader'}, // Replace keyward assets:// in *[src|href|srcset|ng-src]
 						{loader: '@dr/translate-generator'},
 						{loader: '@dr/template-builder'}
@@ -233,14 +238,16 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 
 			new ManualChunkPlugin({
 				manifest: 'runtime',
-				defaultChunkName: api.config.get([api.packageName, 'defaultChunkName'], 'default-chunk'),
+				defaultChunkName: 'extra-chunk',
 				getChunkName: (file) => {
-					var bundle = file2EntryChunkName[file];
-					if (bundle)
+					var bundle = file2ChunkName[file];
+					if (bundle) {
+						log.debug('chunk %s, for file %s', bundle, file);
 						return bundle;
+					}
 					var pk = api.findPackageByFile(file);
 					if (!pk) {
-						log.warn('No chunk(bundle) name for: %s', chalk.red(Path.relative(webpackConfig.context, file)));
+						log.warn('No chunk(bundle) name for: %s', chalk.yellow(Path.relative(webpackConfig.context, file)));
 						return null;
 					}
 					return chunk4package(pk);
@@ -303,7 +310,7 @@ module.exports = function(webpackConfigEntry, noParse, file2EntryChunkName, entr
 		return function(file) {
 			if (!file.endsWith('.js'))
 				return false;
-			if (_.has(file2EntryChunkName, file))
+			if (_.has(file2ChunkName, file))
 				return true;
 			var component = api.findPackageByFile(file);
 			var isOurs = !!(component && (_.includes(componentScopes, component.parsedName.scope) ||

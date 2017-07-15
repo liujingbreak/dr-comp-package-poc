@@ -58,8 +58,6 @@ exports.activate = function() {
 
 function initWebpackConfig() {
 	return Promise.coroutine(function*() {
-		api.browserInjector.fromAllPackages()
-			.replaceCode(/^__autoImport\?(.*)$/, require('./lib/utils/auto-import.js'));
 		var pluginParams = moreWebpackOptions.createParams(api.config().rootPath);
 		var webpackConfig = createWebpackConfig(...pluginParams.params);
 		// Allow other LEGO component extends this webpack configure object

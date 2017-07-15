@@ -150,4 +150,4 @@ BrowserApi.prototype.config.get = function(propPath, defaultValue) {
 	return _.get(BrowserApi.prototype._config, propPath, defaultValue);
 };
 
-_.assign(BrowserApi.prototype, require('@dr-core/browserify-builder-api/i18n-api'));
+_.assign(BrowserApi.prototype, require('./api-i18n'));

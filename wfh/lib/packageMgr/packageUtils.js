@@ -176,7 +176,7 @@ function browserResolve(file) {
 	try {
 		return resolve(file, {
 			basedir: config().rootPath,
-			extensions: ['.js', '.less', '.css'],
+			extensions: ['.js', '.less', '.css', '.scss'],
 			packageFilter: function packageFilter(info, pkgdir) {
 				if (info.browser) {
 					info.main = info.browser;

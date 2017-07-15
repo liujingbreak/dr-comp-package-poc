@@ -91,7 +91,7 @@ vendorBundleMap:
     - gsap
     - swiper
     - angular-highlightjs
-    - highlight
+    - highlight.js
   react-lib:
     - react
     - react-dom
