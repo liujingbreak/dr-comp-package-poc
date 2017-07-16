@@ -10,6 +10,7 @@ module.exports = function(resolve, noNode) {
 		basedir: config().rootPath,
 		resolve: resolve,
 		debug: config.devMode,
+		enableFactoryParamFile: false,
 		noNode: noNode
 	});
 
@@ -58,6 +59,7 @@ function monkeyPatchRequireInjector(superInjector, proto) {
 		if (!_.isArray(name) && _.has(packageNamePathMap, name)) {
 			return superInjector.fromDir(packageNamePathMap[name]);
 		} else {
+			log.info('from vendor package', name);
 			return superProto.fromPackage.call(superInjector, name);
 			//log.warn('Injection for %s is skipped', name);
 			//return emptyFactoryMap;
@@ -91,9 +93,7 @@ function monkeyPatchRequireInjector(superInjector, proto) {
 			fileName = 'module-resolve.server.js';
 		}
 		log.debug('execute internal ' + fileName);
-		if (fs.existsSync(Path.resolve(__dirname, '..', fileName) )) {
-			require('../' + fileName)(this);
-		}
+		require('../' + fileName)(this);
 		var file = Path.resolve(config().rootPath, fileName);
 		if (fs.existsSync(file)) {
 			log.info('execute ' + file);

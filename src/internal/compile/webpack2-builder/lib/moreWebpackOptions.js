@@ -30,7 +30,7 @@ exports.createParams = function(contextPath) {
 	var entryViewSet = {};
 	var entryChunkHtmlAndView = {};
 	var browserPropSet = {};
-	var file2EntryChunkName = {};
+	var file2EntryChunk = {};
 	var webpackConfigEntry = {};
 	var entryComponents = [];
 
@@ -86,11 +86,12 @@ exports.createParams = function(contextPath) {
 	_.each(bundleEntryCompsMap, (moduleInfos, bundle) => {
 		var file = Path.resolve(api.config().destDir, TEMP_DIR, 'entry_' + bundle + '.js');
 		webpackConfigEntry[bundle] = file;
-		file2EntryChunkName[file] = bundle;
+		file2EntryChunk[file] = bundle;
 	});
 
+	var autoImportFile2Chunk = require('./utils/auto-import.js');
 	return {
-		params: [webpackConfigEntry, noParse, file2EntryChunkName, entryChunkHtmlAndView, legoConfig, chunk4package,
+		params: [webpackConfigEntry, noParse, _.assign(autoImportFile2Chunk, file2EntryChunk), entryChunkHtmlAndView, legoConfig, chunk4package,
 			sendlivereload, createEntryHtmlOutputPathPlugin(entryViewSet),
 			function() {
 				return entryHtmlCssScopePlugin.call(this, new DependencyHelper(entryComponents));

@@ -103,37 +103,4 @@ function loaderUrl(src, loader) {
 			resolve(sandbox.module.exports);
 		});
 	});
-	// return pify(loader.resolve.bind(loader))(loader.context, /^[~.\/]/.test(src) ? src : './' + src)
-	// .then(f => {
-	// 	linkedFile = f;
-	// 	return new Promise((resolve, rej) => {
-	// 		try {
-	// 			loader.fs.readFile(f, (err, content) => {
-	// 				if (err)
-	// 					return rej(err);
-	// 				resolve(content);
-	// 			});
-	// 			loader.addDependency(f);
-	// 		} catch (e) {
-	// 			rej(`Failed to read file ${f}: ` + e);
-	// 		}
-	// 	});
-	// })
-	// .then(content => {
-	// 	var hashedPath = loaderUtils.interpolateName(_.assign({}, loader, {resourcePath: linkedFile}),
-	// 		'[path][name].[md5:hash:hex:8].[ext]',
-	// 		{context: loader.options.context, content: content}
-	// 	);
-	// 	var filePath = Path.resolve(loader.context, src);
-	// 	var browserPackage = api.findPackageByFile(filePath);
-	// 	if (browserPackage) {
-	// 		let packageOutpath = _.trimStart(api.config.get(['outputPathMap', browserPackage.longName]), '/');
-	// 		let dir = Path.join(packageOutpath, Path.dirname(Path.relative(browserPackage.realPackagePath, filePath)));
-	// 		hashedPath = Path.join(dir, hashedPath.split('/').pop());
-	// 	} else
-	// 		hashedPath = hashedPath.replace(/(^|\/)node_modules(\/|$)/g, '$1n-m$2').replace(/@/g, 'a');
-
-	// 	loader.emitFile(hashedPath, content);
-	// 	return hashedPath;
-	// })
 }

@@ -28,11 +28,9 @@ module.exports = function(injector) {
 	 */
 	// Use light-lodash instead of lodash will only reduce around 7kb of gzipped bundle size
 	//injector.notFromPackages('lodash').substitute('lodash', '@dr/lodash3');
-	if (process.cwd() === __dirname) {
-		injector.fromPackage('@dr/example-browserify').substitute('__self', '@dr/example-browserify');
-		injector.fromPackage('@dr/fabricjs')
-			.value('canvas', null)
-			.value('jsdom', null);
-		injector.fromPackage('@dr/dr-ng-widgets').replaceCode('@dr/dr-css-components', 'null');
-	}
+	injector.fromPackage('@dr/example-browserify').substitute('__self', '@dr/example-browserify');
+	injector.fromPackage('@dr/fabricjs')
+		.value('canvas', null)
+		.value('jsdom', null);
+	injector.fromPackage('angular-highlightjs').substitute('angular', '@dr/angularjs');
 };
