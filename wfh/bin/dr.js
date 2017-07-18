@@ -4,7 +4,7 @@ var fs = require('fs');
 var os = require('os');
 var processUtils = require('../lib/gulp/processUtils');
 
-const INTERNAL_RECIPE_VER = '0.3.54';
+const INTERNAL_RECIPE_VER = '0.3.55';
 var drcpPkJson = require('../package.json');
 const DRCP_NAME = drcpPkJson.name;
 

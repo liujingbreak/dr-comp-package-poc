@@ -5,11 +5,7 @@ var gulp = require('gulp');
 var Promise = require('bluebird');
 var Path = require('path');
 var gutil = require('gulp-util');
-var jshint = require('gulp-jshint');
-var jscs = require('gulp-jscs');
-var through = require('through2');
 //var del = require('del');
-var jscs = require('gulp-jscs');
 var _ = require('lodash');
 var chalk = require('chalk');
 var fs = require('fs');
@@ -89,12 +85,11 @@ gulp.task('compile-prod', (cb)=> {
 // 	}
 // }
 
-gulp.task('flatten-recipe', function() {
-	//packageInstaller.flattenInstalledRecipes();
-	gutil.log('flatten-recipe is obsolete');
-});
-
 gulp.task('lint', function() {
+	var jshint = require('gulp-jshint');
+	var jscs = require('gulp-jscs');
+	var through = require('through2');
+
 	var i = 0;
 	return gulp.src(['lib/**/*.js', 'e2etest/**/*.js']
 	.concat(packageLintableSrc(argv.p, argv.project)))
