@@ -66,7 +66,7 @@ function findNodePackagePath(moduleName) {
 		resolvedPath = require.resolve(moduleName + '/package.json');
 		return Path.dirname(resolvedPath);
 	} catch (er) {
-		log.error(er);
+		log.trace(er);
 		return null;
 	}
 }
@@ -251,13 +251,12 @@ class EntryFileFinder {
 			}
 			self.packageRecipeMap[name] = recipePackageJson;
 			var parsedName = parseName(name);
-			var entryPath = resolveFn(name);
-
 			var packagePath = resolveFn.findPackagePath(name);
 			if (!packagePath) {
 				log.info('Package %s does not exist', chalk.cyan(name));
 				return;
 			}
+			var entryPath = resolveFn(name);
 			var packageJson = Path.join(packagePath, 'package.json');
 			var json = JSON.parse(fs.readFileSync(packageJson, 'utf-8'));
 			// if (!resolveFn.checkPackagJson(json)) {

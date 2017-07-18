@@ -1,3 +1,5 @@
+var fs = require('fs');
+
 module.exports = function(injector) {
 	/**
 	 *  IoC configuration here.
@@ -27,10 +29,9 @@ module.exports = function(injector) {
 	 * 		function() {return window.angular;});
 	 */
 	// Use light-lodash instead of lodash will only reduce around 7kb of gzipped bundle size
-	//injector.notFromPackages('lodash').substitute('lodash', '@dr/lodash3');
-	injector.fromPackage('@dr/example-browserify').substitute('__self', '@dr/example-browserify');
-	injector.fromPackage('@dr/fabricjs')
-		.value('canvas', null)
-		.value('jsdom', null);
-	injector.fromPackage('angular-highlightjs').substitute('angular', '@dr/angularjs');
+	// injector.fromPackage('@dr/fabricjs')
+	// 	.value('canvas', null)
+	// 	.value('jsdom', null);
+	if (fs.existsSync('node_modules/@dr/angularjs'))
+		injector.fromDir('node_modules').substitute('angular', '@dr/angularjs');
 };

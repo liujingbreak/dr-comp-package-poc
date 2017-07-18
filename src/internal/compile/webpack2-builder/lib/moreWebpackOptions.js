@@ -317,8 +317,8 @@ function noparse4Package(component, noParse) {
 	}
 	var setting = _.get(component, 'dr.noParse');
 	if (setting) {
-		[].concat(setting).forEach(function(noParse) {
-			var item = Path.resolve(component.realPackagePath, noParse);
+		[].concat(setting).forEach(function(noParseFile) {
+			var item = Path.resolve(component.realPackagePath, noParseFile);
 			log.debug('noParse: %s', item);
 			noParse.push(new RegExp(noParseHelper.glob2regexp(item)));
 		});
