@@ -7,7 +7,7 @@ var argv = require('yargs').argv;
 require('yamlify/register');
 var publicPath = require('./publicPath');
 
-var rootPath = argv.root;
+var rootPath = argv.root || process.cwd();
 var setting;
 var localDisabled = false;
 var localConfigPath = argv.c || process.env.DR_CONFIG_FILE || Path.join(rootPath, 'config.local.yaml');

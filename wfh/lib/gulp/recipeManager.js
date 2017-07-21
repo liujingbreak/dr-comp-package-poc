@@ -108,7 +108,7 @@ function eachInstalledRecipe(callback) {
 
 function link(onPkJsonFile) {
 	var streams = [];
-	var linkFiles = [];
+	var linkFiles = fs.existsSync(linkListFile) ? JSON.parse(fs.readFileSync(linkListFile, 'utf8')) : [];
 	eachRecipeSrc(function(src, recipeDir) {
 		streams.push(linkToRecipeFile(src, recipeDir, onPkJsonFile));
 	});
@@ -122,6 +122,7 @@ function link(onPkJsonFile) {
 		}
 		next();
 	}, function flush(next) {
+		linkFiles = _.uniq(linkFiles);
 		var linkFileTrack = new File({
 			base: Path.resolve(config().rootPath),
 			path: Path.relative(config().rootPath, linkListFile),

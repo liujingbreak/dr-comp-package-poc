@@ -7,6 +7,7 @@ var processUtils = require('../lib/gulp/processUtils');
 const INTERNAL_RECIPE_VER = '0.3.55';
 var drcpPkJson = require('../package.json');
 const DRCP_NAME = drcpPkJson.name;
+process.env.SASS_BINARY_SITE = 'https://npm.taobao.org/mirrors/node-sass/';
 
 var versionsFromCache = false;
 var cacheFile = Path.resolve(os.tmpdir(), 'drcpLatestVersion.json');
@@ -88,6 +89,7 @@ function getRecipeVersion() {
 function getLatestRecipeVer() {
 	if (cachedVersionsInfo)
 		return Promise.resolve(cachedVersionsInfo.recipeVersion);
+	console.log('Check versions');
 	return processUtils.promisifyExe('npm', 'view', '@dr/internal-recipe', {cwd: process.cwd(), silent: true})
 	.then(output => {
 		var m = npmViewReg.exec(output);
