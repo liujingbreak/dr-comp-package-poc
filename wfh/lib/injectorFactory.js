@@ -26,7 +26,8 @@ var packageNamePathMap = {};
 var emptyFactoryMap = {
 	factory: emptryChainableFunction,
 	substitute: emptryChainableFunction,
-	value:  emptryChainableFunction
+	value:  emptryChainableFunction,
+	alias: emptryChainableFunction
 };
 
 function monkeyPatchRequireInjector(superInjector, proto) {

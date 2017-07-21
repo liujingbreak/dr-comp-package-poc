@@ -6,7 +6,6 @@ const config = require('../config');
 const gulp = require('gulp');
 const findPackageJson = require('./findPackageJson');
 const rwPackageJson = require('./rwPackageJson');
-const glob = require('glob');
 const log = require('log4js').getLogger('wfh.' + Path.basename(__filename, '.js'));
 const fs = require('fs-extra');
 const File = require('vinyl');
@@ -82,8 +81,19 @@ function _projectSrcRecipeMap(projectDir) {
 
 function eachDownloadedRecipe(callback) {
 	if (config().installedRecipes) {
-		_.each(config().installedRecipes, function(pattern) {
-			glob.sync(Path.join(config().rootPath, pattern).replace(/\\/g, '/')).forEach(callback);
+		var regexList = config().installedRecipes.map(s => new RegExp(s));
+		var deps = require(Path.resolve(config().rootPath, 'package.json')).dependencies;
+		_.each(deps, function(ver, depName) {
+			if (_.some(regexList, regex => regex.test(depName))) {
+				log.warn('looking for installed recipe: %s', depName);
+				let p;
+				try {
+					p = require.resolve(depName + '/package.json');
+				} catch (e) {
+					log.error(`${depName} has not been installed, please run command "yarn install"`);
+				}
+				callback(Path.dirname(p));
+			}
 		});
 	}
 }

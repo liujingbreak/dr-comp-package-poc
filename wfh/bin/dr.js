@@ -4,29 +4,34 @@ var fs = require('fs');
 var os = require('os');
 var processUtils = require('../lib/gulp/processUtils');
 
-const INTERNAL_RECIPE_VER = '0.3.55';
+const INTERNAL_RECIPE_VER = '0.3.56';
 var drcpPkJson = require('../package.json');
 const DRCP_NAME = drcpPkJson.name;
-process.env.SASS_BINARY_SITE = 'https://npm.taobao.org/mirrors/node-sass/';
+process.env.SASS_BINARY_SITE = 'https://npm.taobao.org/mirrors/node-sass';
 
 var versionsFromCache = false;
 var cacheFile = Path.resolve(os.tmpdir(), 'drcpLatestVersion.json');
 var cachedVersionsInfo = readCachedVersionInfo();
 
-
+var cmdPromise;
 if (fs.lstatSync(Path.resolve('node_modules', DRCP_NAME)).isSymbolicLink()) {
 	console.log(`dr-comp-packag is a symlink, checking ${DRCP_NAME}'s dependencies`);
-	installDeps(true)
+	cmdPromise = installDeps(true)
 	.then(latestRecipe => checkVersions(latestRecipe))
 	.then(()=> {
 		require('../lib/gulp/cli').writeProjectListFile([Path.resolve(__dirname, '..', '..')]);
 	})
 	.then(() => processCmd());
 } else {
-	installDeps(false)
+	cmdPromise = installDeps(false)
 	.then(latestRecipe => checkVersions(latestRecipe))
-	.then(() => processCmd());
+	.then(() => processCmd())
+	.catch(e => console.error(e));
 }
+cmdPromise.catch(e => {
+	console.error(e);
+	process.exit(1);
+});
 
 function installDeps(isDrcpDevMode) {
 	return getLatestRecipeVer()
@@ -59,12 +64,12 @@ function checkVersions(latestRecipe) {
 
 		if (latestDrcp && semver.gt(latestDrcp, drcpVer)) {
 			console.log(_.padStart('Latest dr-comp-package: %s', PAD_SPACE), chalk.red(latestDrcp));
-			let msg = outputs[2].startsWith('zh') ? '\n当前目录下的drcp有点旧了, 请执行升级命令:\n\t' : '\nCurrent drcp is old, please upgrade it by execute:\n\t';
+			let msg = outputs[2].startsWith('zh') ? '\n当前Workspace下的drcp不是最新的, 如果升级执行命令:\n\t' : '\nCurrent drcp is not latest, you can upgrade it by execute:\n\t';
 			console.log(`${msg} ${chalk.red('yarn add dr-comp-package@' + latestDrcp)}`);
 		}
 		if (recipeVer && latestRecipe && semver.lt(recipeVer, latestRecipe)) {
 			console.log(_.padStart('Latest @dr/internal-recipe: %s', PAD_SPACE), chalk.red(latestRecipe));
-			let msg = outputs[2].startsWith('zh') ? '\n当前目录下的@dr/internal-recipe有点旧了, 请执行升级命令:\n\t' : '\nCurrent @dr/internal-recipe is old, please upgrade it by execute:\n\t';
+			let msg = outputs[2].startsWith('zh') ? '\n当前Workspace下的@dr/internal-recipe不是最新的, 如果升级执行命令:\n\t' : '\nCurrent @dr/internal-recipe is not latest, you can upgrade it by execute:\n\t';
 			console.log(`${msg} ${chalk.red('yarn add @dr/internal-recipe@' + latestRecipe)}`);
 		}
 		console.log(_.repeat('-', 50));
@@ -138,11 +143,12 @@ function ensurePackageJsonFile(isDrcpDevMode, latestRecipe) {
 		}
 		var drcpDeps = drcpPkJson.dependencies;
 		for (let name in drcpDeps) {
-			if (Object.prototype.hasOwnProperty.call(drcpDeps, name) &&
-			workspaceJson.dependencies[name] == null) {
-				needInstall = true;
-				workspaceJson.dependencies[name] = drcpDeps[name];
-				console.log(` + ${name} ${drcpDeps[name]}`);
+			if (Object.prototype.hasOwnProperty.call(drcpDeps, name)) {
+				if (workspaceJson.dependencies[name] == null) {
+					needInstall = true;
+					workspaceJson.dependencies[name] = drcpDeps[name];
+					console.log(` + ${name} ${drcpDeps[name]}`);
+				}
 			}
 		}
 	} else {
