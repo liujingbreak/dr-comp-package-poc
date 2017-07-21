@@ -1,5 +1,5 @@
 var isWindows = process.platform === 'win32';
-var Promise = require('bluebird');
+//var Promise = require('bluebird');
 /**
  * Spawn process
  * @param  {string} command
@@ -56,7 +56,7 @@ exports.promisifySpawn = function(command, args) {
 			resolve(output);
 		});
 	})
-	.timeout(7000, `"${command} ${args.join(' ')}" timeout`)
+	//.timeout(10 * 60000, `"${command} ${args.join(' ')}" timeout`)
 	.catch(Promise.TimeoutError, e => {
 		console.log(e);
 		if (res) {

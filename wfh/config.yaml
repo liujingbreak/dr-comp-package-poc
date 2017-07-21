@@ -174,11 +174,11 @@ outputPathMap:
     # It doesn't matter whether the "value" part startsWith or endsWith slash "/",
     # but if the value is only a slash "/", it means the root folder "dist/static"
 
-# Recipes which are installed from registry server, they are owned by other contributors,
-# add to this list to make them a part of you server.
+# If there are any dependencies from workspace's package.json file and their match following patterns,
+# then they are recipe packages, their dependencies are considered as our components for being loaded and compiled.
 installedRecipes:
-    - node_modules/@dr/*-recipe
-    - node_modules/@dr/recipe-*
+    - ^@dr/.*?-recipe$
+    - ^@dr/recipe-.*?$
 
 gulp:
     watchTimeout: 12000 # gulp watch on change which triggers `gulp compile` with a timeout check
