@@ -25,7 +25,7 @@ module.exports = {
 /**
  * Iterate src folder for component items
  * @param {string} projectDir optional, if not present or null, includes all project src folders
- * @param  {Function} callback function(srcDir, recipeDir)
+ * @param  {Function} callback (srcDir, recipeDir, recipeName) => void
  */
 function eachRecipeSrc(projectDir, callback) {
 	if (arguments.length === 1) {
@@ -40,11 +40,21 @@ function eachRecipeSrc(projectDir, callback) {
 
 	function forProject(prjDirs) {
 		[].concat(prjDirs).forEach(prjDir => {
-			_.each(_projectSrcRecipeMap(prjDir), callback);
+			_.each(_projectSrcRecipeMap(prjDir), onEachSrcRecipePair);
 			var e2eDir = Path.join(prjDir, 'e2etest');
 			if (fs.existsSync(e2eDir))
 				callback(e2eDir, null);
 		});
+	}
+
+	function onEachSrcRecipePair(srcDir, recipeDir) {
+		var recipeName;
+		try {
+			recipeName = require(Path.resolve(recipeDir, 'package.json')).name;
+		} catch (e) {
+			log.error(`Can't read ${Path.resolve(recipeDir, 'package.json')}`);
+		}
+		callback(srcDir, recipeDir, recipeName);
 	}
 }
 
@@ -85,14 +95,14 @@ function eachDownloadedRecipe(callback) {
 		var deps = require(Path.resolve(config().rootPath, 'package.json')).dependencies;
 		_.each(deps, function(ver, depName) {
 			if (_.some(regexList, regex => regex.test(depName))) {
-				log.warn('looking for installed recipe: %s', depName);
+				log.debug('looking for installed recipe: %s', depName);
 				let p;
 				try {
 					p = require.resolve(depName + '/package.json');
 				} catch (e) {
 					log.error(`${depName} has not been installed, please run command "yarn install"`);
 				}
-				callback(Path.dirname(p));
+				callback(Path.dirname(p), true);
 			}
 		});
 	}
@@ -100,12 +110,12 @@ function eachDownloadedRecipe(callback) {
 
 /**
  * @name eachRecipe
- * @param  {Function} callback function(recipeDir)
+ * @param  {Function} callback function(recipeDir, isFromInstallation)
  */
 function eachRecipe(callback) {
-	eachRecipeSrc((srcDir, recipeDir) => {
+	eachRecipeSrc((srcDir, recipeDir, recipeName) => {
 		if (recipeDir)
-			callback(recipeDir);
+			callback(recipeDir, false);
 	});
 	eachDownloadedRecipe(callback);
 	callback(config().rootPath);

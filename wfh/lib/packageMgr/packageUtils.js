@@ -233,23 +233,25 @@ class EntryFileFinder {
 		this.resolveFn = resolve;
 	}
 
-	findByRecipeJson(recipePackageJson, eachCallback) {
-		return this._findEntryFiles(recipePackageJson, eachCallback, this.resolveFn);
+	findByRecipeJson(recipePackageJson, isInstalled, eachCallback) {
+		return this._findEntryFiles(recipePackageJson, isInstalled, eachCallback, this.resolveFn);
 	}
 
-	_findEntryFiles(recipePackageJson, eachCallback, resolveFn) {
+	_findEntryFiles(recipePackageJson, isInstalled, eachCallback, resolveFn) {
 		var self = this;
 		var pj = JSON.parse(fs.readFileSync(recipePackageJson, 'utf-8'));
 		if (!pj.dependencies) {
 			return;
 		}
 		_.forOwn(pj.dependencies, function(version, name) {
-			if (_.has(self.packageRecipeMap, name)) {
-				log.info('Duplicate component dependency "%s" found in "%s" and "%s"',
-					name, self.packageRecipeMap[name], recipePackageJson);
-				return;
+			if (isInstalled) {
+				if (_.has(self.packageRecipeMap, name)) {
+					log.info('Duplicate component dependency "%s" found in "%s" and "%s"',
+						name, self.packageRecipeMap[name], recipePackageJson);
+					return;
+				}
+				self.packageRecipeMap[name] = recipePackageJson;
 			}
-			self.packageRecipeMap[name] = recipePackageJson;
 			var parsedName = parseName(name);
 			var packagePath = resolveFn.findPackagePath(name);
 			if (!packagePath) {
@@ -276,20 +278,20 @@ function _findPackageByType(types, callback, resolve, recipeType, projectDir) {
 	if (recipeType === 'src') {
 		recipeMgr.eachRecipeSrc(projectDir, onEachSrcRecipe);
 	} else if (recipeType === 'installed') {
-		recipeMgr.eachInstalledRecipe(dir => findEntryFiles(Path.resolve(dir, 'package.json')));
+		recipeMgr.eachInstalledRecipe(dir => findEntryFiles(Path.resolve(dir, 'package.json'), true));
 	} else {
-		eachRecipe((recipeDir) => {
-			findEntryFiles(Path.resolve(recipeDir, 'package.json'));
+		eachRecipe((recipeDir, isInstalled) => {
+			findEntryFiles(Path.resolve(recipeDir, 'package.json'), isInstalled);
 		});
 	}
 
 	function onEachSrcRecipe(src, recipeDir) {
 		if (recipeDir)
-			findEntryFiles(Path.resolve(recipeDir, 'package.json'));
+			findEntryFiles(Path.resolve(recipeDir, 'package.json'), false);
 	}
 
-	function findEntryFiles(recipe) {
-		entryFileFindler.findByRecipeJson(recipe, function(name, entryPath, parsedName, pkJson, packagePath) {
+	function findEntryFiles(recipe, isInstalled) {
+		entryFileFindler.findByRecipeJson(recipe, isInstalled, function(name, entryPath, parsedName, pkJson, packagePath) {
 			if (!_.has(pkJson, 'dr') && !_.includes(config().packageScopes, parsedName.scope))
 				return;
 			var packageType = _.get(pkJson, 'dr.type');
