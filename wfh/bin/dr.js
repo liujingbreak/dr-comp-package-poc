@@ -9,7 +9,7 @@ var drcpPkJson = require('../package.json');
 const DRCP_NAME = drcpPkJson.name;
 const _has = Object.prototype.hasOwnProperty;
 
-process.env.SASS_BINARY_SITE = 'https://npm.taobao.org/mirrors/node-sass';
+//process.env.SASS_BINARY_SITE = 'https://npm.taobao.org/mirrors/node-sass';
 
 var versionsFromCache = false;
 var cacheFile = Path.resolve(os.tmpdir(), 'drcpLatestVersion.json');

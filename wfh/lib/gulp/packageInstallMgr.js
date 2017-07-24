@@ -219,9 +219,11 @@ InstallManager.prototype = {
 				let versionList = this.srcDeps[name];
 				let item = self.sortByVersion(versionList)[0];
 				let hasDiffVersion = self._containsDiffVersion(versionList, self.sortByVersion(this.peerDeps[name]));
-				log.info(`${(hasDiffVersion ? chalk.red : chalk.cyan)(_.padStart(name, nameWidth, ' '))} <- ${_.padEnd(item.ver, 9)} ${item.by}`);
+				log.info(`${(hasDiffVersion ? chalk.red : chalk.cyan)(_.padStart(name, nameWidth, ' '))} ${versionList.length > 1 ? '┬─' : '──'} ${_.padEnd(item.ver, 9)} ${item.by}`);
+				var i = versionList.length - 1;
 				for (let rest of versionList.slice(1)) {
-					log.info(`${_.repeat(' ', nameWidth)}    ${_.padEnd(rest.ver, 9)} ${rest.by}`);
+					log.info(`${_.repeat(' ', nameWidth)} ${i === 1 ? '└─' : '├─'} ${_.padEnd(rest.ver, 9)} ${rest.by}`);
+					i--;
 				}
 				if (!_.has(mainDeps, name) || mainDeps[name] !== versionList[0].ver) {
 					newDepJson[name] = versionList[0].ver;
@@ -301,9 +303,11 @@ InstallManager.prototype = {
 				skipReason = `Installed:`;
 				skip = true;
 			}
-			log.info(`${skipReason} ${(hasDiffVersion ? chalk.red : chalk.cyan)(_.padStart(name, nameWidth, ' '))} <- ${_.padEnd(item.ver, 9)} ${item.by}`);
+			log.info(`${skipReason} ${(hasDiffVersion ? chalk.red : chalk.cyan)(_.padStart(name, nameWidth, ' '))} ${versionList.length > 1 ? '┬─' : '──'} ${_.padEnd(item.ver, 9)} ${item.by}`);
+			var i = versionList.length - 1;
 			for (let rest of versionList.slice(1)) {
-				log.info(`${_.repeat(' ', nameWidth + 'Installed:'.length)}     ${_.padEnd(rest.ver, 9)} ${rest.by}`);
+				log.info(`${_.repeat(' ', nameWidth + 'Installed:'.length)}  ${i === 1 ? '└─' : '├─'} ${_.padEnd(rest.ver, 9)} ${rest.by}`);
+				i--;
 			}
 			if (skip)
 				continue;
