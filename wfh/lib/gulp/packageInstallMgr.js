@@ -231,7 +231,7 @@ InstallManager.prototype = {
 			log.info(_.pad(` total ${chalk.green(countDep)} `, 60, '-'));
 		}
 
-		this._printPeerDep(_.maxBy(peerDepNames, name => name.length).length, peerDepNames, newDepJson, mainDeps);
+		this._printPeerDep(peerDepNames, newDepJson, mainDeps);
 
 		var needInstall = _.size(newDepJson) > 0;
 		if (needInstall) {
@@ -277,10 +277,11 @@ InstallManager.prototype = {
 		return verInfoList;
 	},
 
-	_printPeerDep: function(nameWidth, peerDepNames, newDepJson, mainDeps) {
+	_printPeerDep: function(peerDepNames, newDepJson, mainDeps) {
 		var self = this;
 		if (!peerDepNames || peerDepNames.length === 0)
 			return;
+		var nameWidth = _.maxBy(peerDepNames, name => name.length).length;
 		let countDep = 0;
 		log.info(_.pad(' Components Peer Dependency ', 60, '-'));
 		for (let name of peerDepNames) {
