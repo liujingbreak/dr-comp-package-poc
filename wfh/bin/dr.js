@@ -7,7 +7,9 @@ var processUtils = require('../lib/gulp/processUtils');
 const INTERNAL_RECIPE_VER = '0.3.56';
 var drcpPkJson = require('../package.json');
 const DRCP_NAME = drcpPkJson.name;
-process.env.SASS_BINARY_SITE = 'https://npm.taobao.org/mirrors/node-sass';
+const _has = Object.prototype.hasOwnProperty;
+
+//process.env.SASS_BINARY_SITE = 'https://npm.taobao.org/mirrors/node-sass';
 
 var versionsFromCache = false;
 var cacheFile = Path.resolve(os.tmpdir(), 'drcpLatestVersion.json');
@@ -50,9 +52,10 @@ function checkVersions(latestRecipe) {
 	var osLocale = require('os-locale');
 	var semver = require('semver');
 	const PAD_SPACE = 35;
-	console.log(_.repeat('-', 50));
+
 	return Promise.all([buildUtils.getNpmVersion(), getLatestDrcpVer(), osLocale()])
 	.then(outputs => {
+		console.log(_.repeat('-', 50));
 		var drcpVer = getVersion();
 		var recipeVer = getRecipeVersion();
 		console.log(_.padStart('Node version: %s', PAD_SPACE), chalk.green(process.version));
@@ -73,7 +76,8 @@ function checkVersions(latestRecipe) {
 			console.log(`${msg} ${chalk.red('yarn add @dr/internal-recipe@' + latestRecipe)}`);
 		}
 		console.log(_.repeat('-', 50));
-		cacheVersionInfo(latestDrcp, latestRecipe);
+		if (latestDrcp)
+			cacheVersionInfo(latestDrcp, latestRecipe);
 	});
 }
 
@@ -95,23 +99,41 @@ function getLatestRecipeVer() {
 	if (cachedVersionsInfo)
 		return Promise.resolve(cachedVersionsInfo.recipeVersion);
 	console.log('Check versions');
-	return processUtils.promisifyExe('npm', 'view', '@dr/internal-recipe', {cwd: process.cwd(), silent: true})
+	return checkTimeout(processUtils.promisifyExe('npm', 'view', '@dr/internal-recipe', {cwd: process.cwd(), silent: true}))
 	.then(output => {
 		var m = npmViewReg.exec(output);
 		return (m && m[1]) ? m[1] : INTERNAL_RECIPE_VER;
 	})
-	.catch(e => INTERNAL_RECIPE_VER);
+	.catch(e => {
+		console.error('[WARN] Command "' + ['npm', 'view', '@dr/internal-recipe'].join(' ') + '" timeout');
+		return INTERNAL_RECIPE_VER;
+	});
 }
 
 function getLatestDrcpVer() {
 	if (cachedVersionsInfo)
 		return Promise.resolve(cachedVersionsInfo.drcpVersion);
-	return processUtils.promisifyExe('npm', 'view', 'dr-comp-package', {cwd: process.cwd(), silent: true})
+	return checkTimeout(processUtils.promisifyExe('npm', 'view', 'dr-comp-package', {cwd: process.cwd(), silent: true}))
 	.then(output => {
 		var m = npmViewReg.exec(output);
 		return (m && m[1]) ? m[1] : null;
 	})
-	.catch(e => null);
+	.catch(e => {
+		console.error('[WARN] Command "' + ['npm', 'view', 'dr-comp-package'].join(' ') + '" timeout');
+		return null;
+	});
+}
+
+function checkTimeout(origPromise) {
+	var timeout;
+	return new Promise((resolve, reject) => {
+		origPromise.then(res => {
+			clearTimeout(timeout);
+			resolve(res);
+		})
+		.catch(reject);
+		timeout = setTimeout(() => reject('Timeout'), 7000);
+	});
 }
 
 /**
@@ -134,26 +156,28 @@ function ensurePackageJsonFile(isDrcpDevMode, latestRecipe) {
 	}
 	if (!workspaceJson.dependencies)
 		workspaceJson.dependencies = {};
+	var workspaceDeps = workspaceJson.dependencies;
 	if (isDrcpDevMode) {
-		delete workspaceJson.dependencies[DRCP_NAME];
-		delete workspaceJson.dependencies['@dr/internal-recipe'];
+		delete workspaceDeps[DRCP_NAME];
+		delete workspaceDeps['@dr/internal-recipe'];
 		if (workspaceJson.devDependencies) {
 			delete workspaceJson.devDependencies[DRCP_NAME];
 			delete workspaceJson.devDependencies['@dr/internal-recipe'];
 		}
 		var drcpDeps = drcpPkJson.dependencies;
+
 		for (let name in drcpDeps) {
-			if (Object.prototype.hasOwnProperty.call(drcpDeps, name)) {
-				if (workspaceJson.dependencies[name] == null) {
+			if (_has.call(drcpDeps, name)) {
+				if (workspaceDeps[name] == null) {
 					needInstall = true;
-					workspaceJson.dependencies[name] = drcpDeps[name];
+					workspaceDeps[name] = drcpDeps[name];
 					console.log(` + ${name} ${drcpDeps[name]}`);
 				}
 			}
 		}
 	} else {
-		if (workspaceJson.dependencies['@dr/internal-recipe'] == null) {
-			workspaceJson.dependencies['@dr/internal-recipe'] = '^' + latestRecipe;
+		if (workspaceDeps['@dr/internal-recipe'] == null) {
+			workspaceDeps['@dr/internal-recipe'] = '^' + latestRecipe;
 			needInstall = true;
 		}
 	}

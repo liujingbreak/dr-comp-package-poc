@@ -15,10 +15,8 @@ var Path = require('path');
 var config = require('../config');
 var buildUtils = require('./buildUtils');
 var glob = require('glob');
-var Promise = require('bluebird');
 var recipeManager = require('./recipeManager');
 var log = require('log4js').getLogger('wfh.' + Path.basename(__filename, '.js'));
-var readFileAsync = Promise.promisify(fs.readFile, {context: fs});
 var semver = require('semver');
 var packageUtils = require('../packageMgr/packageUtils');
 
@@ -31,7 +29,6 @@ function InstallManager(projectDir) {
 	this.projectDir = projectDir;
 	this.srcDeps = {}; // src packages needed dependencies
 	this.peerDeps = {}; // all packages needed peer dependencies
-	this.installedDeps = {}; // installed node_modules packages needed dependencies
 }
 
 InstallManager.fileExists = fileExists;
@@ -74,6 +71,8 @@ function moveFile(src, target) {
 
 var packageNameReg = /^.*?\/((?:@[^\/]+\/)?[^\/]+)$/;
 InstallManager.prototype = {
+	versionReg: /^\D*(.+)$/,
+
 	scanSrcDeps: function(jsonFiles) {
 		var self = this;
 		this.compNameSet = {};
@@ -86,13 +85,13 @@ InstallManager.prototype = {
 				for (let name of Object.keys(deps)) {
 					let version = deps[name];
 					log.debug('scanSrcDepsAsync() dep ' + name);
-					self._trackSrcDep(name, version, json.name, packageJson);
+					self._trackDependency(this.srcDeps, name, version, json.name, packageJson);
 				}
 			}
 			if (json.peerDependencies) {
 				for (let name of Object.keys(json.peerDependencies)) {
 					let version = json.peerDependencies[name];
-					self._trackPeerDep(name, version, json.name, packageJson);
+					self._trackDependency(this.peerDeps, name, version, json.name, packageJson);
 				}
 			}
 		}
@@ -102,7 +101,7 @@ InstallManager.prototype = {
 		packageUtils.findAllPackages((name, entryPath, parsedName, json, packagePath) => {
 			this.compNameSet[name] = json.version;
 			_.each(json.peerDependencies, (version, name) => {
-				this._trackPeerDep(name, version, json.name, Path.join(packagePath, 'package.josn'));
+				this._trackDependency(this.peerDeps, name, version, json.name, Path.join(packagePath, 'package.josn'));
 			});
 		}, 'installed');
 	},
@@ -161,99 +160,34 @@ InstallManager.prototype = {
 		moveFile(path, target, true);
 	},
 
-	_trackSrcDep: function(name, version, byWhom, path) {
-		if (!_.has(this.srcDeps, name)) {
-			this.srcDeps[name] = [];
+	_trackDependency: function(trackTo, name, version, byWhom, path) {
+		if (!_.has(trackTo, name)) {
+			trackTo[name] = [];
 		}
-		this.srcDeps[name].push({
+		var m = this.versionReg.exec(version);
+		trackTo[name].push({
 			ver: version,
+			verNum: m ? m[1] : null,
 			by: byWhom,
 			path: path
 		});
-	},
-
-	_trackPeerDep: function(name, version, byWhom, path) {
-		if (!_.has(this.peerDeps, name)) {
-			this.peerDeps[name] = [];
-		}
-		this.peerDeps[name].push({
-			ver: version,
-			by: byWhom,
-			path: path
-		});
-	},
-
-	trackInstalledDepAsync: function(packageJsonPath) {
-		return readFileAsync(packageJsonPath, 'utf8')
-		.then(data => {
-			var pkjson = JSON.parse(data);
-			if (!{}.hasOwnProperty.call(this.installedDeps, pkjson.name)) {
-				this.installedDeps[pkjson.name] = [];
-			}
-			this.installedDeps[pkjson.name].push({
-				ver: pkjson.version
-			});
-		});
-	},
-
-	versionReg: /^[^0-9]*(.*)$/,
-
-	/**
-	 * @Deprecated
-	 * install dependencies which are tracked by _trackSrcDep()
-	 * @return {[type]} [description]
-	 */
-	installDependsAsync: function() {
-		log.info('installDependsAsync()');
-		var prom = Promise.resolve();
-		_.forOwn(this.srcDeps, (versionList, name) => {
-			var lastVer;
-			if (versionList.some(item => {
-				if (lastVer !== undefined && item.ver !== lastVer) {
-					return true;
-				}
-				lastVer = item.ver;
-			})) {
-				log.warn('Different dependency version found: ' + name  +
-					_.map(versionList, item => item.ver + ' ' + item.by).join(', '));
-			}
-			var pkj = Path.join('node_modules', name, 'package.json');
-			if (fileExists(pkj)) {
-				var currVer = JSON.parse(fs.readFileSync(pkj, 'utf8')).version;
-				if (semver.satisfies(currVer, versionList[0].ver)) {
-					log.debug('dependency ' + name + '@%s exists', currVer);
-					return;
-				} else
-					log.debug('Existing %s does not satisfy expected %s', currVer, versionList[0].ver);
-			}
-			prom = prom.then(() => {
-				return buildUtils.promisifyExe('npm', 'install', name + '@' + versionList[0].ver)
-				.catch(err => {
-					log.error('Failed in "npm i %s"', name + '@' + versionList[0].ver);
-					return Promise.reject(err);
-				});
-			});
-		});
-		return prom;
 	},
 
 	printDep: function() {
 		this.printComponentDep(false);
 	},
 
-
-	_containsDiffVersion: function(versionList, peerVerList) {
-		var leftVer;
-		var self = this;
-		for (var i = 0, l = versionList.length - 1; i < l; i++) {
-			leftVer = this.versionReg.exec(versionList[i].ver)[1];
-			var toCompare = versionList.slice(i + 1);
-			if (!_.find(toCompare, isSame) && !_.find(peerVerList, isSame)) {
+	_containsDiffVersion: function(sortedVersions, peerVerList) {
+		//var self = this;
+		for (let i = 0, l = sortedVersions.length - 1; i < l; i++) {
+			if (sortedVersions[i].ver !== sortedVersions[i + 1].ver)
 				return true;
-			}
 		}
-		function isSame(item) {
-			return leftVer === self.versionReg.exec(item.ver)[1];
+		if (!peerVerList)
+			return false;
+		for (let i = 0, l = peerVerList.length - 1; i < l; i++) {
+			if (peerVerList[i].ver !== peerVerList[i + 1].ver)
+				return true;
 		}
 		return false;
 	},
@@ -283,21 +217,23 @@ InstallManager.prototype = {
 			let countDep = 0;
 			for (let name of Object.keys(this.srcDeps)) {
 				let versionList = this.srcDeps[name];
-				let item = versionList[0];
-				let hasDiffVersion = self._containsDiffVersion(versionList, this.peerDeps[name]);
-				log.info(`${(hasDiffVersion ? chalk.red : chalk.cyan)(_.padStart(name, nameWidth, ' '))} <- ${_.padEnd(item.ver, 9)} ${item.by}`);
+				let item = self.sortByVersion(versionList)[0];
+				let hasDiffVersion = self._containsDiffVersion(versionList, self.sortByVersion(this.peerDeps[name]));
+				log.info(`${(hasDiffVersion ? chalk.red : chalk.cyan)(_.padStart(name, nameWidth, ' '))} ${versionList.length > 1 ? '┬─' : '──'} ${_.padEnd(item.ver, 9)} ${item.by}`);
+				var i = versionList.length - 1;
 				for (let rest of versionList.slice(1)) {
-					log.info(`${_.repeat(' ', nameWidth)}    ${_.padEnd(rest.ver, 9)} ${rest.by}`);
+					log.info(`${_.repeat(' ', nameWidth)} ${i === 1 ? '└─' : '├─'} ${_.padEnd(rest.ver, 9)} ${rest.by}`);
+					i--;
 				}
 				if (!_.has(mainDeps, name) || mainDeps[name] !== versionList[0].ver) {
 					newDepJson[name] = versionList[0].ver;
 				}
 				countDep++;
 			}
-			log.info(_.pad(` total ${countDep}`, 60, '-'));
+			log.info(_.pad(` total ${chalk.green(countDep)} `, 60, '-'));
 		}
 
-		this._printPeerDep(nameWidth, peerDepNames, newDepJson, mainDeps);
+		this._printPeerDep(peerDepNames, newDepJson, mainDeps);
 
 		var needInstall = _.size(newDepJson) > 0;
 		if (needInstall) {
@@ -319,36 +255,67 @@ InstallManager.prototype = {
 		return false;
 	},
 
-	_printPeerDep: function(nameWidth, peerDepNames, newDepJson, mainDeps) {
+	/**
+	 * Sort by descending
+	 * @param verInfoList {ver: string, by: string, name: string}
+	 */
+	sortByVersion: function(verInfoList) {
+		if (verInfoList == null)
+			return verInfoList;
+		verInfoList.sort((info1, info2) => {
+			if (info1.verNum != null && info2.verNum != null)
+				return semver.rcompare(info1.verNum, info2.verNum);
+			else if (info1.verNum != null && info2 == null)
+				return -1;
+			else if (info2.verNum != null && info1 == null)
+				return 1;
+			else if (info1.ver > info2.ver)
+				return -1;
+			else if (info1.ver < info2.ver)
+				return 1;
+			else
+				return 0;
+		});
+		return verInfoList;
+	},
+
+	_printPeerDep: function(peerDepNames, newDepJson, mainDeps) {
 		var self = this;
 		if (!peerDepNames || peerDepNames.length === 0)
 			return;
+		var nameWidth = _.maxBy(peerDepNames, name => name.length).length;
 		let countDep = 0;
-		log.info(_.pad(' Components Peer Dependency only ', 60, '-'));
+		log.info(_.pad(' Components Peer Dependency ', 60, '-'));
 		for (let name of peerDepNames) {
 			let versionList = this.peerDeps[name];
+			let item = this.sortByVersion(versionList)[0];
+			let hasDiffVersion = self._containsDiffVersion(versionList);
+			var skip = false;
+			var skipReason;
 			if (_.has(newDepJson, name) || name === '@dr/internal-recipe')
-				continue;
+				skip = true;
 			if (_.has(this.compNameSet, name)) {
-				log.debug('Skip peerDependency "%s" as an linked project component', name);
+				skipReason = _.padEnd(`Linked:`, 'Installed:'.length);
 				// TODO: warn if version range does not match for this.compNameSet[name]
-				continue;
+				skip = true;
 			}
 			if (_.has(mainDeps, name)) {
-				log.info(`Skip peerDependency "${name}" since it has been set as ${name}@${mainDeps[name]} in package.json `);
-				continue;
+				skipReason = `Installed:`;
+				skip = true;
 			}
-			let item = versionList[0];
-			let hasDiffVersion = self._containsDiffVersion(versionList);
-			log.info(`${(hasDiffVersion ? chalk.red : chalk.cyan)(_.padStart(name, nameWidth, ' '))} <- ${_.padEnd(item.ver, 9)} ${item.by}`);
+			log.info(`${skipReason} ${(hasDiffVersion ? chalk.red : chalk.cyan)(_.padStart(name, nameWidth, ' '))} ${versionList.length > 1 ? '┬─' : '──'} ${_.padEnd(item.ver, 9)} ${item.by}`);
+			var i = versionList.length - 1;
 			for (let rest of versionList.slice(1)) {
-				log.info(`${_.repeat(' ', nameWidth)}    ${_.padEnd(rest.ver, 9)} ${rest.by}`);
+				log.info(`${_.repeat(' ', nameWidth + 'Installed:'.length)}  ${i === 1 ? '└─' : '├─'} ${_.padEnd(rest.ver, 9)} ${rest.by}`);
+				i--;
 			}
+			if (skip)
+				continue;
 			if (!_.has(mainDeps, name) || mainDeps[name] !== versionList[0].ver) {
 				newDepJson[name] = versionList[0].ver;
 			}
 			countDep++;
 		}
-		log.info(_.pad(` total ${countDep}`, 60, '-'));
+		log.info(_.pad(` total ${chalk.green(countDep)} added `, 60, '-'));
 	}
 };
