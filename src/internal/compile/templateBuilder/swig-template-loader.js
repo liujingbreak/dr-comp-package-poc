@@ -18,14 +18,22 @@ module.exports = function(content) {
 	// 		this.addDependency(file);
 	// 	}
 	// };
-	return loadAsync(content, this)
-	.then(function(result) {
-		return callback(null, result);
-	})
-	.catch(function(err) {
-		log.error(err);
-		return callback(err);
-	});
+	var self = this;
+	try {
+		return loadAsync(content, this)
+		.then(function(result) {
+			return callback(null, result);
+		})
+		.catch(function(err) {
+			log.error(err);
+			self.emitError(err);
+			return callback(err);
+		});
+	} catch (e) {
+		log.error(e);
+		self.emitError(e);
+		callback(e);
+	}
 };
 
 function loadAsync(content, loader) {

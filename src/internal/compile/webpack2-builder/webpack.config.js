@@ -78,7 +78,9 @@ module.exports = function(webpackConfigEntry, noParse, file2ChunkName, entryChun
 								'transform-decorators-legacy',
 								'transform-object-assign',
 								'syntax-dynamic-import'
-							]
+							],
+							// Workaround enhanced-resolve, put an nonexisting file here
+							babelrc: Path.resolve(api.config().rootPath, '.babelrc')
 						}
 					}]
 				},
