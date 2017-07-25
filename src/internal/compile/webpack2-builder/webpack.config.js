@@ -64,7 +64,7 @@ module.exports = function(webpackConfigEntry, noParse, file2ChunkName, entryChun
 					}
 				},
 				{
-					test: testPackageDrProperty('.js', 'jsLoader', 'babel'),
+					test: testPackageDrProperty(['.js', '.jsx', '.ts', '.tsx'], 'jsLoader', 'babel'),
 					use: [{
 						loader: 'babel-loader',
 						options: {
@@ -328,7 +328,7 @@ module.exports = function(webpackConfigEntry, noParse, file2ChunkName, entryChun
 
 function testPackageDrProperty(fileSuffix, propertyKey, propertyValue) {
 	return function(file) {
-		if (!file.endsWith(fileSuffix))
+		if (!_.some([].concat(fileSuffix), suffix => file.endsWith(suffix)))
 			return;
 		var component = api.findPackageByFile(file);
 		if (component) {

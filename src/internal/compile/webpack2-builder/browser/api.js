@@ -1,9 +1,10 @@
 /* globals LEGO_CONFIG:true */
+// var _;
 // if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
 // 	// To avoid lodash conflict with some AMD build optimizers
 // 	var oldDefine = define;
 // 	define = null;
-// 	require('lodash');
+// 	_ = require('lodash');
 // 	define = oldDefine;
 // }
 
