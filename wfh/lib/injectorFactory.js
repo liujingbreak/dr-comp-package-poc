@@ -42,7 +42,7 @@ function monkeyPatchRequireInjector(superInjector, proto) {
 			this.addPackage(name, dir);
 		}
 		if (_.isArray(name)) {
-			throw new Error('Sorry, you can use Array as fromComponent()\'s argument, we have this limitation which is not like require-injector does');
+			throw new Error('Sorry, you can\'t use Array value as fromComponent()\'s argument, we have this limitation which is not like require-injector does');
 		}
 		if (_.has(packageNamePathMap, name)) {
 			return superInjector.fromDir(packageNamePathMap[name]);

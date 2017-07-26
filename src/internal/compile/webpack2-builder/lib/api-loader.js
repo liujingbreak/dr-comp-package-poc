@@ -40,12 +40,11 @@ function parse(source, loader) {
 	if (currPackage && currPackage.longName !== api.packageName /*@dr-core/webpack2-builder*/) {
 		let cssScope = _.get(currPackage, 'dr.cssScope');
 		if (cssScope !== false && file === currPackage.file) {
-			hasApi = true;
 			var cls = cssScope;
 			if (typeof cls !== 'string')
 				cls = currPackage.parsedName.name;
 			log.debug('Insert CSS scope classname to:\n %s', file);
-			source = `__api._addCssScopeClassname([\'${cls}\']);
+			source = `require('@dr-core/webpack2-builder/browser/css-scope').writeCssClassToHtml([\'${cls}\']);
 	${source}`;
 		}
 	}
