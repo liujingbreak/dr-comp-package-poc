@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var Url = require('url');
 
 module.exports = {
 	getPrefLanguage: function() {
@@ -38,13 +39,22 @@ module.exports = {
 		return pref;
 	},
 
-	getLocaleUrl: function(lang) {
+	_getOtherLocaleUrl: function(lang) {
 		lang = _.trim(lang, '/');
 		var url;
-		if (lang === this.config.get('locales[0]', 'zh'))
-			url = this.config().staticAssetsURL + location.pathname;
+		var publicUrl = this.config().staticAssetsURL;
+		var publicUrlObj = Url.parse(_.startsWith(publicUrl, '//') ? 'http:' + publicUrl : publicUrl);
+		var publicPath = publicUrlObj.path;
+		var currUrlObj = Url.parse(location.href);
+		var currPath = currUrlObj.path + (currUrlObj.hash ? currUrlObj.hash : '');
+		if (currPath.indexOf(publicPath) !== 0) {
+			console.log('DRCP does not support different CDN yet.');
+			return url;
+		}
+		if (lang === this.config.get('locales[0]', 'zh')) // default locale
+			url = this.assetsUrl(this.entryPage); // should not need to handle default locale
 		else
-			url = this.config().staticAssetsURL + '/' + lang + location.pathname;
+			url = publicUrl + '/' + lang + currPath.substring(publicPath.length);
 		return url;
 	},
 
@@ -53,7 +63,7 @@ module.exports = {
 			return false;
 		lang = _.trim(lang, '/');
 		if (this.buildLocale !== lang) {
-			window.location = this.getLocaleUrl(lang);
+			window.location = this._getOtherLocaleUrl(lang);
 			return true;
 		}
 		return false;
