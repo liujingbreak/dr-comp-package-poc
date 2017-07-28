@@ -85,6 +85,9 @@ vendorBundleMap:
     - history
     - value-equal
     - resolve-pathname
+    - querystring-es3
+    - url
+    - punycode
   ui-lib: # bundle name
     - angular-ui-router
     - fontfaceobserver/fontfaceobserver
