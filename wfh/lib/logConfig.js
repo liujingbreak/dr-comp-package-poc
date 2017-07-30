@@ -1,13 +1,14 @@
 var mkdirp = require('mkdirp');
 var Path = require('path');
-var fs = require('fs');
+// var fs = require('fs');
 
 module.exports = function(rootPath, reloadSec) {
-	var log4jsConfig = Path.join(rootPath, 'log4js.json');
-	if (!fs.existsSync(log4jsConfig)) {
-		console.log('Logging configuration is not found %s', log4jsConfig);
-		return;
-	}
+	var log4jsConfig = Path.resolve(__dirname, 'gulp/templates/log4js.json');
+	// var log4jsConfig = Path.join(rootPath, 'log4js.json');
+	// if (!fs.existsSync(log4jsConfig)) {
+	// 	console.log('Logging configuration is not found %s', log4jsConfig);
+	// 	return;
+	// }
 	mkdirp.sync(Path.resolve(rootPath, 'logs'));
 
 	var opt = {

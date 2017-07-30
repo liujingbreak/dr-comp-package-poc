@@ -180,13 +180,22 @@ InstallManager.prototype = {
 	_containsDiffVersion: function(sortedVersions, peerVerList) {
 		//var self = this;
 		for (let i = 0, l = sortedVersions.length - 1; i < l; i++) {
-			if (sortedVersions[i].ver !== sortedVersions[i + 1].ver)
+			let a = sortedVersions[i].ver;
+			let b = sortedVersions[i + 1].ver;
+
+			if ((a === '*' || a === '') && (b === '*' || b === ''))
+				continue;
+			if (a !== b)
 				return true;
 		}
 		if (!peerVerList)
 			return false;
 		for (let i = 0, l = peerVerList.length - 1; i < l; i++) {
-			if (peerVerList[i].ver !== peerVerList[i + 1].ver)
+			let a = peerVerList[i].ver;
+			let b = peerVerList[i + 1].ver;
+			if ((a === '*' || a === '') && (b === '*' || b === ''))
+				continue;
+			if (a !== b)
 				return true;
 		}
 		return false;

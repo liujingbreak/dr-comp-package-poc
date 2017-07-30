@@ -1,6 +1,6 @@
 {
   "name": "@dr-core/browserify-builder",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "description": "The default browser side stuff builder module based on browserify",
   "main": "lib/main.js",
   "scripts": {

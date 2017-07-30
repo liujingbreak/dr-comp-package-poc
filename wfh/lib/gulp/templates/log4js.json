@@ -4,7 +4,7 @@
 			"type": "console",
 			"layout": {
 				"type": "pattern",
-				"pattern": "%[%r %c -%] %m"
+				"pattern": "%[%c -%] %m"
 			}
 		}
 	],

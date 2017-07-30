@@ -4,25 +4,24 @@ const esParser = require('@dr-core/browserify-builder/lib/esParser');
 const _ = require('lodash');
 const fs = require('fs');
 const Path = require('path');
+const pify = require('pify');
 var apiTmpl = _.template(fs.readFileSync(
 	Path.join(__dirname, 'apiVariable.js.tmpl'), 'utf8'));
+
+api.compsHaveCssScope = [];
 
 module.exports = function(content) {
 	var callback = this.async();
 	if (!callback)
-		return load(content, this);
+		throw new Error('api-loader is Not a sync loader!');
 	loadAsync(content, this)
 	.then(result => callback(null, result))
 	.catch(err => callback(err));
 };
 
-function load(content, loader) {
-	return parse(content, loader);
-}
-
 function loadAsync(content, loader) {
 	try {
-		return Promise.resolve(load(content, loader));
+		return parse(content, loader);
 	} catch (e) {
 		log.error(e);
 		loader.emitError(e);
@@ -37,20 +36,22 @@ function parse(source, loader) {
 	if (currPackage && !currPackage.dr) {
 		log.error('Component has no "dr" property: ', currPackage.longName);
 	}
-	if (currPackage && currPackage.longName !== api.packageName /*@dr-core/webpack2-builder*/) {
-		let cssScope = _.get(currPackage, 'dr.cssScope');
-		if (cssScope !== false && file === currPackage.file) {
-			var cls = cssScope;
-			if (typeof cls !== 'string')
-				cls = currPackage.parsedName.name;
-			log.debug('Insert CSS scope classname to:\n %s', file);
-			source = `require('@dr-core/webpack2-builder/browser/css-scope').writeCssClassToHtml([\'${cls}\']);
-	${source}`;
-		}
-	}
+	// if (currPackage && currPackage.longName !== api.packageName /*@dr-core/webpack2-builder*/) {
+	// 	let cssScope = _.get(currPackage, 'dr.cssScope');
+	// 	if (cssScope !== false && file === currPackage.file) {
+	// 		api.compsHaveCssScope.push(currPackage.longName);
+	// 		var cls = cssScope;
+	// 		if (typeof cls !== 'string')
+	// 			cls = currPackage.parsedName.name;
+	// 		log.debug('Insert CSS scope classname to:\n %s', file);
+	// 		source = `require('@dr-core/webpack2-builder/browser/css-scope').writeCssClassToHtml([\'${cls}\']);
+	// ${source}`;
+	// 	}
+	// }
 	var astFromCache = false;
 	//log.info('js file: %s, %s', file, _.get(currPackage, 'file'));
 
+	var resolvePromises = [];
 	var ast = _.get(loader.query, ['astFromCache', file]);
 	if (ast) {
 		astFromCache = true;
@@ -69,6 +70,10 @@ function parse(source, loader) {
 			es6ImportApi: () => {
 				hasApi = true;
 				log.debug('ES6 import __api in %s', file);
+			},
+			dependsStyle: (request) => {
+				var p = pify(loader.resolve)(Path.dirname(loader.resourcePath), request);
+				resolvePromises.push(p);
 			}
 		}, ast);
 	} catch (e) {
@@ -87,14 +92,42 @@ function parse(source, loader) {
 		});
 	}
 
+	var cssScopeCompSet = new Set();
 	if (currPackage && file === currPackage.file && currPackage.style) {
-		var requireCss = Path.relative(Path.dirname(file), currPackage.style).replace(/\\/g, '/');
-		if (!_.startsWith(requireCss, '../'))
-			requireCss = './' + requireCss;
-		log.debug('add pacelify style entry %s', requireCss);
-		source = 'require("' + requireCss + '");\n' + source;
+		var mainCss = Path.relative(Path.dirname(file), currPackage.style).replace(/\\/g, '/');
+		if (!_.startsWith(mainCss, '../'))
+			mainCss = './' + mainCss;
+		log.debug('add pacelify style entry %s', mainCss);
+		source = 'require("' + mainCss + '");\n' + source;
+		cssScopeCompSet.add(currPackage);
 	}
+	return Promise.all(resolvePromises).then((cssfiles)=> {
+		for (let cssfile of cssfiles) {
+			var comp = api.findPackageByFile(cssfile);
+			if (comp == null || comp.dr == null || comp.longName === api.packageName /*@dr-core/webpack2-builder*/)
+				continue;
+			cssScopeCompSet.add(comp);
+		}
+		var cls = buildCssScopeClassArray(cssScopeCompSet, file);
+		if (cls.length > 0)
+			source = `require('@dr-core/webpack2-builder/browser/css-scope').writeCssClassToHtml(${JSON.stringify(cls)});\n` + source;
+		return source;
+	});
+}
 
-	return source;
+function buildCssScopeClassArray(componentSet, file) {
+	var cls = [];
+	for (let comp of componentSet) {
+		let cssScope = _.get(comp, 'dr.cssScope');
+		if (cssScope === false)
+			log.warn(`${comp.longName} has css files, but its "dr.cssScope" is false which will be ignored.`);
+		api.compsHaveCssScope.push(comp.longName);
+		if (typeof cssScope !== 'string')
+			cls.push(comp.shortName.replace('.', '_'));
+		else
+			cls.push(cssScope);
+	}
+	log.debug('Insert CSS scope classname "%s" to:\n %s', cls.join(' '), file);
+	return cls;
 }
 

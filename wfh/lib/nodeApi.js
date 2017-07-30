@@ -1,7 +1,10 @@
 var EventEmitter = require('events');
+var chalk = require('chalk');
 var config = require('./config');
 var packageUitls = require('./packageMgr/packageUtils');
+const npmimportCssLoader = require('require-injector/css-loader');
 var _ = require('lodash');
+const log = require('log4js').getLogger('wfh.nodeApi');
 
 module.exports = NodeApi;
 
@@ -27,18 +30,48 @@ NodeApi.prototype = {
 		return true;
 	},
 
+	/**
+	 * @return {string} | {packageName: string, path: string, isTilde: boolean}, returns string if it is a relative path, or object if
+	 * it is in format of /^(?:assets:\/\/|~)((?:@[^\/]+\/)?[^\/]+)?\/(.*)$/
+	 */
+	normalizeAssetsUrl: function(url, sourceFile) {
+		var match = /^(?:assets:\/\/|~)((?:@[^\/]+\/)?[^\/]+)?\/(.*)$/.exec(url);
+		if (match) {
+			var packageName = match[1];
+			var relPath = match[2];
+			if (!packageName || packageName === '') {
+				var compPackage = this.findPackageByFile(sourceFile);
+				packageName = compPackage.longName;
+			}
+			var injectedPackageName = npmimportCssLoader.getInjectedPackage(packageName, sourceFile, this.browserInjector);
+			if (injectedPackageName)
+				packageName = injectedPackageName;
+
+			return {
+				packageName: packageName,
+				path: relPath,
+				isTilde: url.charAt(0) === '~'
+			};
+		} else if (url.length > 1 && url.charAt(0) === '/' && url.charAt(1) !== '/') {
+			var msg = `Problematic assets URL format "${chalk.yellow(url)}" used in\n ${chalk.blue(sourceFile)}\n`;
+			msg += `Valid path should be a "relative path" or in format as "assets://<package>/<path>" or "~<package>/<path>"`;
+			log.warn(msg);
+			//throw new Error(msg);
+			return url;
+		} else {
+			return url;
+		}
+	},
+
 	assetsUrl: function(packageName, path) {
 		if (arguments.length === 1) {
 			path = packageName;
 			packageName = this.packageName;
-			var m = /assets:\/\/((?:@[^\/]+\/)?[^\/]+)?(\/.*)/.exec(path);
+			var m = /(?:assets:\/\/|~)((?:@[^\/]+\/)?[^\/]+)?\/(.*)/.exec(path);
 			if (m) {
 				packageName = m[1];
 				path = m[2];
 			}
-		}
-		if (_.startsWith(path, '/')) {
-			path = path.substring(1);
 		}
 		var staticAssetsURL = this.config().staticAssetsURL;
 		staticAssetsURL = _.trimEnd(staticAssetsURL, '/');

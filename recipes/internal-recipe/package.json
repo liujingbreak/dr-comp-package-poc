@@ -1,20 +1,20 @@
 {
   "name": "@dr/internal-recipe",
-  "version": "0.3.59",
+  "version": "0.3.60",
   "description": "Component group: internal-recipe",
   "dependencies": {
     "@dr-core/labjs": "0.2.0",
-    "@dr-core/build-util": "0.3.7",
+    "@dr-core/build-util": "0.3.8",
     "@dr-core/assets-processer": "0.6.1",
-    "@dr-core/browserify-builder": "0.7.3",
+    "@dr-core/browserify-builder": "0.7.4",
     "@dr-core/browserify-builder-api": "0.5.2",
     "@dr-core/bundle-loader": "0.1.0",
     "@dr/parcelify-module-resolver": "0.1.1",
     "@dr/template-builder": "0.3.5",
-    "@dr-core/webpack2-builder": "0.3.53",
+    "@dr-core/webpack2-builder": "0.3.54",
     "@dr-core/express-app": "0.3.2",
     "@dr/http-server": "0.2.0",
-    "@dr/logger": "0.1.0",
+    "@dr/logger": "0.1.1",
     "@dr/translate-generator": "0.5.1"
   }
 }

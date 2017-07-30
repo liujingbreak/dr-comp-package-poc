@@ -131,13 +131,21 @@ BrowserApi.prototype = {
 	}
 };
 
-BrowserApi.prototype.config.set = function(path, value) {
-	_.set(BrowserApi.prototype._config, path, value);
-	return BrowserApi.prototype._config;
+var apiProt = BrowserApi.prototype;
+
+apiProt.config.set = function(path, value) {
+	_.set(apiProt._config, path, value);
+	return apiProt._config;
 };
 
-BrowserApi.prototype.config.get = function(propPath, defaultValue) {
-	return _.get(BrowserApi.prototype._config, propPath, defaultValue);
+apiProt.config.get = function(propPath, defaultValue) {
+	return _.get(apiProt._config, propPath, defaultValue);
 };
 
-_.assign(BrowserApi.prototype, require('./api-i18n'));
+var outputPathMap = apiProt._config.outputPathMap;
+_.each(apiProt._config._outputAsNames, function(packageName) {
+	outputPathMap[packageName] = /(?:@([^\/]+)\/)?(\S+)/.exec(packageName)[2];
+});
+delete apiProt._config._outputAsNames;
+
+_.assign(apiProt, require('./api-i18n'));

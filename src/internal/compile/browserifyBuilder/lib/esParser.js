@@ -7,6 +7,8 @@ var acornjsx = require('acorn-jsx/inject')(acorn);
 acornjsx = acornImpInject(acornjsx);
 exports.parse = parse;
 
+var EMTPY_FUNC = function() {};
+var STYLE_FILE_REG = /^.*?\.(less|scss|css)$/i;
 /**
  * [parse description]
  * @param  {string} text    [description]
@@ -27,6 +29,8 @@ function parse(text, handler, ast) {
 				sourceType: 'module'});
 		}
 	}
+	if (!handler.dependsStyle)
+		handler.dependsStyle = EMTPY_FUNC;
 	//console.log('\n---------\n%s', JSON.stringify(ast, null, '  '));
 	estraverse.traverse(ast, {
 		enter: function(node, parent) {
@@ -39,8 +43,13 @@ function parse(text, handler, ast) {
 					node.callee.type = 'Identifier';
 					node.callee.name = 'import';
 				}
-				if (handler.requireApi && node.callee && node.callee.type === 'Identifier' && node.callee.name === 'require' && _.get(node, 'arguments[0].value') === '__api') {
-					handler.requireApi();
+				if (handler.requireApi && node.callee && node.callee.type === 'Identifier' && node.callee.name === 'require') {
+					let callee = _.get(node, 'arguments[0].value');
+					if (callee === '__api') {
+						handler.requireApi();
+					} else if (STYLE_FILE_REG.test(callee)) {
+						handler.dependsStyle(callee);
+					}
 				} else if (node.callee && node.callee.type === 'MemberExpression' &&
 				node.callee.object.name === 'require' &&
 				node.callee.object.type === 'Identifier' &&
@@ -62,8 +71,12 @@ function parse(text, handler, ast) {
 						handler.splitLoad(args[0].value);
 					}
 				}
-			} else if (node.type === 'ImportDeclaration' && node.source.value === '__api') {
-				handler.es6ImportApi(node);
+			} else if (node.type === 'ImportDeclaration') {
+				let callee = node.source.value;
+				if (callee === '__api')
+					handler.es6ImportApi(node);
+				else if (STYLE_FILE_REG.test(callee))
+					handler.dependsStyle(callee);
 			}
 			//parser.handleAstEnter(node, parent);
 		},

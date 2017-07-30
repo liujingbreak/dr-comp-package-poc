@@ -1,12 +1,12 @@
 const api = require('__api');
 const log = require('log4js').getLogger('wfh.html-loader');
+// const Path = require('path');
 // const loaderUtils = require('loader-utils');
 // const Path = require('path').posix;
 // const pify = require('pify');
 const _ = require('lodash');
 const cheerio = require('cheerio');
 const vm = require('vm');
-var replaceAssetsUrl = require('./css-url-assets-loader').replaceAssetsUrl;
 
 module.exports = function(content) {
 	var callback = this.async();
@@ -15,6 +15,10 @@ module.exports = function(content) {
 		throw new Error('loader does not support sync mode');
 	}
 	load(content, this)
+	// .then(result => {
+	// 	log.info(result);
+	// 	return result;
+	// })
 	.then(result => this.callback(null, result))
 	.catch(err => {
 		this.callback(err);
@@ -46,47 +50,42 @@ function doAttrAssetsUrl(idx, attrName, file, loader, $, proms) {
 	var src = el.attr(attrName);
 	if (!src)
 		return;
-	if (src.startsWith('assets://')) {
-		log.debug('Found tag %s, %s: %s', el.prop('tagName'), attrName, el.attr(attrName));
-		el.attr(attrName, replaceAssetsUrl(file, src, loader.options.output.publicPath));
-	} else if (/^\s*\w+:/.test(src)) {
-		return; // Skip http:, file:, data: protocal
-	} else if (attrName === 'srcset') {
+	if (attrName === 'srcset') {
 		proms.push(doSrcSet(el.attr('srcset'), loader)
-		.then(value => el.attr(attrName, value)));
-	} else if (attrName === 'src' && el.prop('tagName') === 'IMG' && !/^(?:https?:|\/|data:)/.test(src)) {
+			.then(value => el.attr(attrName, value)));
+	} else if (attrName === 'src' && el.prop('tagName') === 'IMG' && !/^(?:https?:|\/\/|data:)/.test(src)) {
 		let p = loaderUrl(src, loader)
-		.then(url => {
-			el.attr('src', url);
-		});
+			.then(url => {
+				el.attr('src', url);
+			});
 		proms.push(p);
 	}
 }
 
 function doSrcSet(value, loader) {
-	var prom = [];
-
-	for (let urlSet of value.split(/\s*,\s*/)) {
+	var prom = value.split(/\s*,\s*/).map(urlSet => {
 		urlSet = _.trim(urlSet);
 		let factors = urlSet.split(/\s+/);
 		let image = factors[0];
-		if (!/^(?:https?:|\/|data:)/.test(image)) {
-			image = loaderUrl(image, loader)
-			.then(url => {
-				//url = loader.options.output.publicPath + url;
-				return url + ' ' + factors[1];
-			});
-		}
-		prom.push(image);
-	}
+		return loaderUrl(image, loader)
+		.then(url => {
+			return url + ' ' + factors[1];
+		});
+	});
 	return Promise.all(prom)
 	.then(urlSets => urlSets.join(', '));
 }
 
 function loaderUrl(src, loader) {
-	if (src.startsWith('~'))
-		src = src.substring(1);
-	else if (!src.startsWith('.'))
+	var res = api.normalizeAssetsUrl(src, loader.resourcePath);
+	if (_.isObject(res)) {
+		return Promise.resolve(api.assetsUrl(res.packageName, res.path));
+	}
+	if (/^(?:https?:|\/\/|data:)/.test(src))
+		return Promise.resolve(src);
+	if (src.charAt(0) === '/')
+		return Promise.resolve(src);
+	if (src.charAt(0) !== '.')
 		src = './' + src;
 	return new Promise((resolve, reject) => {
 		loader.loadModule(src, (err, source, sourceMap, module) => {

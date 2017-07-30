@@ -18,6 +18,7 @@ DependencyHelper.prototype = {
 	 */
 	listCommonJsDepMap: function(compilation) {
 		var entryPackage2Module = new Map();
+		var entryPackage2css = new Map();
 		compilation.modules.forEach(m => {
 			var file = getModuleFile(m);
 			if (!file)
@@ -25,34 +26,44 @@ DependencyHelper.prototype = {
 			var comp = this.file2comp[file];
 			if (comp) {
 				var packages = new Set();
+				var cssPackages = new Set();
 				entryPackage2Module.set(comp.longName, packages);
+				entryPackage2css.set(comp.longName, cssPackages);
 				log.info('%s depends on:', chalk.cyan(comp.longName));
-				this._traverseDep(m, packages, {}, 0);
-				packages.forEach(c => log.info(chalk.cyan('├─ %s'), c.longName));
+				this._traverseDep(m, packages, cssPackages, new Set(), 0);
+				packages.forEach(c => log.info(chalk.cyan('├─ %s %s'), c.longName,
+					cssPackages.has(c) ? '' : '(no CSS)'));
 			}
 		});
-		return entryPackage2Module;
+		return {
+			packageMap: entryPackage2Module,
+			cssPackageMap: entryPackage2css
+		};
 	},
-	_traverseDep: function(m, packages, traveled, level) {
+	_traverseDep: function(m, packages, cssPackages, traveled, level) {
 		_.each(m.dependencies, dep => {
 			if (!dep.module || !dep.request)
 				return;
-			log.debug('%s├─ %s', _.repeat('| ', level + 1), dep.request);
-			if (!dep.request.split('!').slice().pop().startsWith('.')) {
-				var file = getModuleFile(dep.module);
-				if (file) {
-					var comp = api.findPackageByFile(file);
-					if (comp && comp.dr) {
-						packages.add(comp);
-					}
-				}
-			}
-			if (_.has(traveled, dep.module.id))
+			if (traveled.has(dep.module))
 				return;
-			traveled[dep.module.id] = 1;
-			this._traverseDep(dep.module, packages, traveled, level + 1);
+			traveled.add(dep.module);
+			var shortRequest = dep.request.split('!').slice().pop();
+			log.debug('%s├─ %s', _.repeat('| ', level + 1), shortRequest);
+			//if (!dep.request.split('!').slice().pop().startsWith('.')) {
+			var file = getModuleFile(dep.module);
+			if (file) {
+				var comp = api.findPackageByFile(file);
+				if (comp && comp.dr) {
+					packages.add(comp);
+				}
+				if (file.endsWith('.less') || file.endsWith('.scss') || file.endsWith('.css'))
+					cssPackages.add(comp);
+			}
+			//}
+			this._traverseDep(dep.module, packages, cssPackages, traveled, level + 1);
 		});
-	}
+	},
+
 };
 
 

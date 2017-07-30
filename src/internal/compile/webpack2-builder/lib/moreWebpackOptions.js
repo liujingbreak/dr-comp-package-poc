@@ -3,9 +3,10 @@ var fs = require('fs');
 var Path = require('path');
 var _ = require('lodash');
 var glob = require('glob');
-var log = require('log4js').getLogger(api.packageName + '.' + Path.basename(__filename));
+var log = require('log4js').getLogger('wfh.' + Path.basename(__filename));
 var noParseHelper = require('./noParseHelper');
 var pify = require('pify');
+//var chalk = require('chalk');
 const http = require('http');
 const DependencyHelper = require('./utils/module-dep-helper');
 
@@ -79,6 +80,9 @@ exports.createParams = function(contextPath) {
 	], prop => browserPropSet[prop] = 1);
 	_.each(api.config().browserSideConfigProp, prop => browserPropSet[prop] = true);
 	_.forOwn(browserPropSet, (nothing, propPath) => _.set(legoConfig, propPath, _.get(api.config(), propPath)));
+	var compressedInfo = compressOutputPathMap(legoConfig.outputPathMap);
+	legoConfig.outputPathMap = compressedInfo.diffMap;
+	legoConfig._outputAsNames = compressedInfo.sames;
 	legoConfig.buildLocale = api.getBuildLocale();
 	log.info('DefinePlugin LEGO_CONFIG: ', legoConfig);
 
@@ -226,26 +230,38 @@ function createEntryHtmlOutputPathPlugin(entryViewSet) {
  * For CSS scope, add pacakge short name as class name to HTML element during server rendering
  */
 function entryHtmlCssScopePlugin(moduleDep) {
-	var map;
+	var depInfo;
 	this.plugin('after-emit', function(compilation, callback) {
-		map = null;
-		log.info('clean listCommonJsDepMap');
+		depInfo = null;
+		// log.debug('clean listCommonJsDepMap');
+		// log.debug('Components have css scope %s', api.compsHaveCssScope);
+		// log.debug('Components have css %s', Object.keys(api.compsHaveCssSet));
 		callback();
 	});
 	this.plugin('compilation', function(compilation) {
+		if (compilation.compiler.parentCompilation)
+			return;
+		compilation.plugin('optimize', function() {
+			if (!depInfo)
+				depInfo = moduleDep.listCommonJsDepMap(compilation);
+		});
+		// var needUnseal = true;
+		// compilation.plugin('need-additional-seal', function() {
+		// 	var n = needUnseal;
+		// 	needUnseal = false;
+		// 	return n;
+		// });
 		compilation.plugin('multi-entry-html-emit-assets', (assets, cb) => {
 			var html = assets.$('html');
 			var comp = api.findPackageByFile(assets.absPath);
 			if (comp && _.get(comp, 'dr.cssScope') !== false) {
 				var cls = _.get(comp, 'dr.cssScope');
 				html.addClass(_.isString(cls) ? cls : comp.shortName);
-				if (!map)
-					map = moduleDep.listCommonJsDepMap(compilation);
-				for (let depComp of map.get(comp.longName)) {
-					if (_.get(depComp, 'dr.cssScope') !== false) {
-						let cls = _.get(depComp, 'dr.cssScope');
-						html.addClass(_.isString(cls) ? cls : depComp.shortName);
-					}
+				if (!depInfo)
+					depInfo = moduleDep.listCommonJsDepMap(compilation);
+				for (let depComp of depInfo.cssPackageMap.get(comp.longName)) {
+					let cls = _.get(depComp.longName, 'dr.cssScope');
+					html.addClass(_.isString(cls) ? cls : depComp.shortName.replace('.', '_'));
 				}
 			}
 			cb(null, assets);
@@ -329,4 +345,21 @@ function noparse4Package(component, noParse) {
 function chunk4package(component) {
 	//log.debug('%s chunk: %s', component.longName, chunk);
 	return component.bundle;
+}
+
+function compressOutputPathMap(pathMap) {
+	var newMap = {};
+	var sameAsNames = [];
+	_.each(pathMap, (value, key) => {
+		var parsed = api.packageUtils.parseName(key);
+		if (parsed.name !== value) {
+			newMap[key] = value;
+		} else {
+			sameAsNames.push(key);
+		}
+	});
+	return {
+		sames: sameAsNames,
+		diffMap: newMap
+	};
 }

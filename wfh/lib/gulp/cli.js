@@ -37,7 +37,7 @@ function initGulpfile() {
 
 function init() {
 	maybeCopyTemplate(Path.resolve(__dirname, 'templates/config.local-template.yaml'), rootPath + '/config.local.yaml');
-	maybeCopyTemplate(Path.resolve(__dirname, 'templates/log4js.json'), rootPath + '/log4js.json');
+	//fs.copySync(Path.resolve(__dirname, 'templates/log4js.json'), rootPath + '/log4js.json');
 	maybeCopyTemplate(Path.resolve(__dirname, 'templates/app-template.js'), rootPath + '/app.js');
 	/* It seems that JSCS needs its rc file to be present in Current working directory */
 	maybeCopyTemplate(Path.resolve(__dirname, '../../.jscsrc'), rootPath + '/.jscsrc');

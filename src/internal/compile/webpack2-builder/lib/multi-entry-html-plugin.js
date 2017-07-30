@@ -48,7 +48,7 @@ MultiEntryHtmlPlugin.prototype.apply = function(compiler) {
 		applyPluginsAsync = Promise.promisify(compilation.applyPluginsAsync.bind(compilation));
 		assetsByEntry(compilation, inlineAssests)
 		.then(() => callback())
-		.catch(err => callback(err));
+		.catch(err => callback());
 	});
 
 	function assetsByEntry(compilation, inlineAssests) {
@@ -78,7 +78,14 @@ MultiEntryHtmlPlugin.prototype.apply = function(compiler) {
 			// .then(content => {
 			if (!compiler._lego_entry)
 				return Promise.resolve(`Entry page ${relativePath} is failed to compiled by loader`);
-			var $ = cheerio.load(compiler._lego_entry[relativePath], {decodeEntities: false});
+			var content = compiler._lego_entry[relativePath];
+			var $;
+			try {
+				$ = cheerio.load(content, {decodeEntities: false});
+			} catch (e) {
+				log.error(`File: ${file}\n` + content);
+				throw e;
+			}
 			var body = $('body');
 			var head = $('head');
 			if (plugin.opts.onCompile) {

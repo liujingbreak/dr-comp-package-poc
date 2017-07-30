@@ -1,7 +1,7 @@
 const api = require('__api');
 const log = require('log4js').getLogger('wfh.' + __filename.substring(0, __filename.length - 3));
+// const Path = require('path');
 //const _ = require('lodash');
-const npmimportCssLoader = require('require-injector/css-loader');
 
 module.exports = function(content) {
 	var callback = this.async();
@@ -9,7 +9,11 @@ module.exports = function(content) {
 		return load(content, this);
 	loadAsync(content, this)
 	.then(result => callback(null, result))
-	.catch(err => callback(err));
+	.catch(e => {
+		this.emitError(e);
+		log.error(e);
+		callback(e);
+	});
 };
 module.exports.replaceAssetsUrl = replaceAssetsUrl;
 
@@ -22,12 +26,9 @@ function loadAsync(content, loader) {
 	try {
 		return Promise.resolve(load(content, loader));
 	} catch (e) {
-		loader.emitError(e);
 		return Promise.reject(e);
 	}
 }
-
-var packagePathPat = /assets:\/\/((?:@[^\/]+\/)?[^\/]+)?(\/.*)/;
 
 function replaceUrl(css, file) {
 	return css.replace(/(\W)url\(\s*['"]?\s*([^'"\)]*)['"]?\s*\)/g,
@@ -39,25 +40,13 @@ function replaceUrl(css, file) {
 }
 
 function replaceAssetsUrl(file, url) {
-	var assetsUrlMatch = packagePathPat.exec(url);
-	if (assetsUrlMatch) {
-		var packageName = assetsUrlMatch[1];
-		var path = assetsUrlMatch[2];
-		if (!packageName || packageName === '')
-			packageName = api.findPackageByFile(file).longName;
-		try {
-			var injectedPackageName = npmimportCssLoader.getInjectedPackage(packageName, file, api.browserInjector);
-			if (injectedPackageName)
-				return api.assetsUrl(injectedPackageName, path);
-			if (injectedPackageName === '')
-				log.error('%s has been replaced with `null` by require-injector, it should not be used as `assets://%s` anymore in file %s:', packageName, packageName, file);
-			return api.assetsUrl(packageName, path);
-		} catch (e) {
-			log.error(e);
-			return url;
-		}
-	}  else
-		return url;
+	var res = api.normalizeAssetsUrl(url, file);
+	if (typeof res === 'string')
+		return res;
+	else if (res.isTilde)
+		return `~${res.packageName}/${res.path}`;
+	else
+		return api.assetsUrl(res.packageName, res.path);
 }
 
 // function resolveUrl(packageName, path) {

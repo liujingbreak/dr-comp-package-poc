@@ -50,7 +50,7 @@ function loadAsync(content, loader) {
 					return;
 				includedFileSet[includedFile] = 1;
 				loader.addDependency(includedFile);
-				log.info('Swig includes file %s', includedFile);
+				log.debug('Swig includes file %s as dependency', Path.relative(api.config().rootPath, includedFile));
 			};
 			return Promise.resolve(packageExports.onCompileTemplate(
 				Path.relative(browserPackage.realPackagePath, file).replace(/\\/g, '/'),

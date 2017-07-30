@@ -47,7 +47,7 @@ module.exports = function(webpackConfigEntry, noParse, file2ChunkName, entryChun
 				// },
 				{
 					// test if it is our component
-					test: testDrComponentJsFile(componentScopes),
+					test: testDrComponentFile(['.js', '.jsx', '.ts', '.tsx'], componentScopes),
 					use: [
 						{loader: '@dr/translate-generator'},
 						{loader: 'lib/api-loader', options: {injector: api.browserInjector, astFromCache: astCache}}
@@ -308,9 +308,9 @@ module.exports = function(webpackConfigEntry, noParse, file2ChunkName, entryChun
 		}));
 	}
 
-	function testDrComponentJsFile(componentScopes) {
+	function testDrComponentFile(fileSuffix, componentScopes) {
 		return function(file) {
-			if (!file.endsWith('.js'))
+			if (!_.some([].concat(fileSuffix), suffix => file.endsWith(suffix)))
 				return false;
 			if (_.has(file2ChunkName, file))
 				return true;

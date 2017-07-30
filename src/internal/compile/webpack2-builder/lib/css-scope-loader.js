@@ -6,6 +6,8 @@ const _ = require('lodash');
 const postcss = require('postcss'); // read http://api.postcss.org/postcss.html
 const selectorToken = require('css-selector-tokenizer');
 
+api.compsHaveCssSet = {};
+
 module.exports = function(content) {
 	var callback = this.async();
 	if (!callback)
@@ -32,8 +34,12 @@ function loadAsync(content, loader) {
 function parse(content, loader) {
 	var file = loader.resourcePath;
 	var currPackage = api.findPackageByFile(file);
-	if (!currPackage || !currPackage.dr || currPackage.dr.cssScope === false)
+
+	if (!currPackage || !currPackage.dr)
 		return content;
+	// api.compsHaveCssSet[currPackage.longName] = true;
+	// if (currPackage.dr.cssScope === false)
+	// 	return content;
 	var cssAst = postcss.parse(content);
 	traverseRuleNodes(cssAst.nodes, currPackage, file);
 	return cssAst.toResult().css;
@@ -44,6 +50,7 @@ function traverseRuleNodes(nodes, currPackage, file) {
 	var cls = currPackage.dr.cssScope;
 	if (!_.isString(cls))
 		cls = currPackage.shortName;
+	cls = cls.replace('.', '_');
 	_.each(nodes, node => {
 		if (node.type === 'atrule' && node.name === 'media') {
 			traverseRuleNodes(node.nodes, currPackage, file);
